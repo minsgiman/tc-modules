@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites errors="0"
+            failures="1"
+            tests="1">
+
+  <testsuite name="test"
+    errors="0" failures="1" hostname="" id="" package="test" skipped="0"
+    tests="1" time="2.371" timestamp="Wed, 19 Dec 2018 05:58:12 GMT">
+  
+    <testcase name="default e2e tests" classname="test" time="2.371" assertions="2">
+
+      <failure message="Testing if element &lt;.hello&gt; is present.">    at Object.default e2e tests (/Users/nhnent/Documents/GitHub/toastcam_api_test/test/e2e/specs/test.js:14:15)
+    at _combinedTickCallback (internal/process/next_tick.js:131:7)</failure>
+
+    
+    </testcase>
+  
+
+  
+
+  
+  </testsuite>
+</testsuites>
