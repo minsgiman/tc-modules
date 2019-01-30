@@ -4,6 +4,12 @@ const webrtcClient = {
     },
 
     streamPlay: () => {
+    },
+
+    stop: () => {
+    },
+
+    onWebRTCStatusChanged: (status) => {
     }
 };
 

@@ -4,6 +4,39 @@ const flashBridge = {
     },
 
     play: () => {
+    },
+
+    pause: () => {
+    },
+
+    stop: () => {
+    },
+
+    mute: () => {
+    },
+
+    getCurrentTime: () => {
+    },
+
+    startAudioChat: () => {
+    },
+
+    stopAudioChat: () => {
+    },
+
+    zoomVideo: () => {
+    },
+
+    zoomZone: () => {
+    },
+
+    setPath: () => {
+    },
+
+    close: () => {
+    },
+
+    destroy: () => {
     }
 };
 
