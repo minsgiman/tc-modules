@@ -1,6 +1,4 @@
-import player from './components/player';
-import timeline from './components/timeline';
-import playManager from './comp_manager/play_manager';
+import player from './components/player/player_main';
 
-export { player, timeline, playManager };
-export default { player, timeline, playManager };
+export { player };
+export default { player };

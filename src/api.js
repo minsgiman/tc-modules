@@ -1,10 +1,7 @@
-import player from './components/player';
-import timeline from './components/timeline';
-import playManager from './comp_manager/play_manager';
+import player from './components/player/player_main';
 
 (function (window) {
-    const tCam = { player, timeline, playManager };
-
+    const tCam = { player };
     if ( typeof window === "object" ) {
         window.tCam = tCam;
     }

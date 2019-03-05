@@ -18,13 +18,34 @@ module.exports = {
       : config.dev.assetsPublicPath
   },
   resolve: {
-    extensions: ['.js', '.json'],
+    extensions: ['.js', '.vue', '.json'],
     alias: {
       '@': resolve('src')
     }
   },
   module: {
     rules: [
+      {
+          test: /\.less$/,
+          loader: 'style-loader!css-loader!less-loader'
+      },
+      {
+          test: /\.css$/,
+          use: [
+              'vue-style-loader',
+              'css-loader'
+          ]
+      },
+      {
+          test: /\.vue$/,
+          loader: 'vue-loader',
+          options: {
+              loaders: {
+                  js: 'babel-loader?presets[]=es2015',
+                  less: 'vue-style-loader!css-loader!less-loader'
+              }
+          }
+      },
       {
         test: /\.js$/,
         loader: 'babel-loader?presets[]=es2015',

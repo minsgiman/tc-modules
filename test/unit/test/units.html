@@ -10,19 +10,13 @@
     <h2>A sample project description</h2>
     <table cellspacing="0" cellpadding="0" border="0">
       <tr class="overview">
-        <td colspan="3" title="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36">Browser: Chrome 71.0.3578 (Mac OS X 10.12.6)</td>
+        <td colspan="3" title="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36">Browser: Chrome 72.0.3626 (Mac OS X 10.12.6)</td>
       </tr>
       <tr class="overview">
-        <td colspan="3">Timestamp: 2019-1-30 14:19:41</td>
+        <td colspan="3">Timestamp: 2019-2-25 19:32:40</td>
       </tr>
       <tr>
-        <td colspan="3">
-          5 tests / 
-          0 errors / 
-          0 failures / 
-          0 skipped / 
-          runtime: 0.003s
-        </td>
+        <td colspan="3"/>
       </tr>
       <tr class="header">
         <td>Status</td>
@@ -30,37 +24,54 @@
         <td>Suite / Results</td>
       </tr>
       <tr class="pass">
-        <td>Passed in 0.003s</td>
-        <td>Timeline Create</td>
-        <td>Play Init</td>
-      </tr>
-      <tr class="pass">
         <td>Passed in 0s</td>
         <td>Play Start Check</td>
         <td>Play Init</td>
       </tr>
-      <tr class="pass">
-        <td>Passed in 0s</td>
-        <td>PlayManager Load Data</td>
-        <td>Play Init</td>
-      </tr>
-      <tr class="pass">
-        <td>Passed in 0s</td>
+      <tr class="fail">
+        <td>Failed</td>
         <td>Player Create</td>
-        <td>Play Init</td>
+        <td>
+          Play Init
+          <br />Error: Expected undefined to be defined.
+    at &lt;Jasmine&gt;
+    at UserContext.&lt;anonymous&gt; (webpack:///test/unit/specs/player_init.spec.js:26:26 &lt;- index.js:517:27)
+    at &lt;Jasmine&gt;
+
+          <br />TypeError: Cannot read property 'play' of undefined
+    at &lt;Jasmine&gt;
+    at UserContext.&lt;anonymous&gt; (webpack:///test/unit/specs/player_init.spec.js:27:32 &lt;- index.js:518:33)
+    at &lt;Jasmine&gt;
+
+        </td>
       </tr>
-      <tr class="pass">
-        <td>Passed in 0s</td>
-        <td>PlayManager Create</td>
-        <td>Play Init</td>
+    </table>
+    <hr/>
+    <table cellspacing="0" cellpadding="0" border="0">
+      <tr class="overview">
+        <td colspan="3" title="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36">Browser: Chrome 72.0.3626 (Mac OS X 10.12.6)</td>
       </tr>
-      <tr class="system-out">
-        <td colspan="3"><strong>System output:</strong><br />Chrome 71.0.3578 (Mac OS X 10.12.6) LOG: 'loadCameraData'
-<br />Chrome 71.0.3578 (Mac OS X 10.12.6) LOG: 'loadTimelineData'
-<br />Chrome 71.0.3578 (Mac OS X 10.12.6) LOG: 'Timeline draw'
-<br />Chrome 71.0.3578 (Mac OS X 10.12.6) LOG: 'flashBridge init'
-<br />Chrome 71.0.3578 (Mac OS X 10.12.6) LOG: 'GET flashBridge'
-<br />Chrome 71.0.3578 (Mac OS X 10.12.6) LOG: 'currentPlayTime : 1548825581464'
+      <tr class="overview">
+        <td colspan="3">Timestamp: 2019-2-25 19:32:45</td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          2 tests / 
+          1 errors / 
+          1 failures / 
+          0 skipped / 
+          runtime: 0.002s
+        </td>
+      </tr>
+      <tr class="header">
+        <td>Status</td>
+        <td>Spec</td>
+        <td>Suite / Results</td>
+      </tr>
+      <tr class="system-errors">
+        <td colspan="3"><strong>Errors:</strong><br />An error was thrown in afterAll
+Error: Timeout - Async callback was not invoked within 5000ms (set by jasmine.DEFAULT_TIMEOUT_INTERVAL)
+    at <Jasmine>
 </td>
       </tr>
     </table>
