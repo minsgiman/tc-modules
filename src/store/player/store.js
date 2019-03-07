@@ -4,16 +4,16 @@ import Vuex from 'vuex';
 Vue.use(Vuex);
 const store = new Vuex.Store({
     state: {
-        cameraId: '',
-        shopId: '',
+        cameraId: null,
+        shopId: null,
         cameraData: null,
         cameraConfig: null,
         timelineData: null,
         isPlaying: false,
         isLive: true,
         clickedCvrTime: null,
-        currentTime: new Date(),
-        alarmZones: {},
+        currentTime: null,
+        alarmZones: null,
         showNoPlayLayer: false,
         showCameraOffLayer: false,
         showCameraStreamLayer: false,
@@ -23,7 +23,9 @@ const store = new Vuex.Store({
         isFullscreen: false,
         isShared: false,
         cloudOut: false,
-        serviceDay: 0
+        serviceDay: 0,
+        serviceCalendarDay: null,
+        serviceCalendarDate: null
     },
     getters: {
         isExpiredCloud: state => {
@@ -94,6 +96,12 @@ const store = new Vuex.Store({
         SET_SERVICE_DAY: function(context, state) {
             context.commit('UPDATE_SERVICE_DAY', state);
         },
+        SET_SERVICE_CALENDAR_DAY: function(context, state) {
+            context.commit('UPDATE_SERVICE_CALENDAR_DAY', state);
+        },
+        SET_SERVICE_CALENDAR_DATE: function(context, state) {
+            context.commit('UPDATE_SERVICE_CALENDAR_DATE', state);
+        },
         CAMERA_REC_DELAY: function(context, state) {
             context.commit('UPDATE_SHOW_NO_PLAY_LAYER', true);
             context.commit('UPDATE_SHOW_CAMERA_OFF_LAYER', false);
@@ -128,6 +136,30 @@ const store = new Vuex.Store({
             context.commit('UPDATE_SHOW_NEXT_PLAY_LAYER', false);
             context.commit('UPDATE_IS_CAMERA_OFF_LAST_REC', false);
             context.commit('UPDATE_IS_CAMERA_OFF_LAST_EVENT', false);
+        },
+        INIT_ALL_DATA: function(context, state) {
+            context.commit('UPDATE_CAMERA_ID', null);
+            context.commit('UPDATE_SHOP_ID', null);
+            context.commit('UPDATE_CAMERA_DATA', null);
+            context.commit('UPDATE_CAMERA_CONFIG', null);
+            context.commit('UPDATE_TIMELINE_DATA', null);
+            context.commit('UPDATE_IS_PLAYING', false);
+            context.commit('UPDATE_IS_LIVE', true);
+            context.commit('UPDATE_CLICKED_CVR_TIME', null);
+            context.commit('UPDATE_CURRENT_TIME', null);
+            context.commit('UPDATE_ALARM_ZONES', null);
+            context.commit('UPDATE_SHOW_NO_PLAY_LAYER', false);
+            context.commit('UPDATE_SHOW_CAMERA_OFF_LAYER', false);
+            context.commit('UPDATE_SHOW_CAMERA_STREAM_LAYER', false);
+            context.commit('UPDATE_SHOW_NEXT_PLAY_LAYER', false);
+            context.commit('UPDATE_IS_CAMERA_OFF_LAST_REC', false);
+            context.commit('UPDATE_IS_CAMERA_OFF_LAST_EVENT', false);
+            context.commit('UPDATE_IS_FULLSCREEN', false);
+            context.commit('UPDATE_IS_SHARED', false);
+            context.commit('UPDATE_CLOUD_OUT', false);
+            context.commit('UPDATE_SERVICE_DAY', 0);
+            context.commit('UPDATE_SERVICE_CALENDAR_DAY', null);
+            context.commit('UPDATE_SERVICE_CALENDAR_DATE', null);
         }
     },
     mutations: {
@@ -190,6 +222,12 @@ const store = new Vuex.Store({
         },
         UPDATE_SERVICE_DAY: function(state, day) {
             state.serviceDay = day
+        },
+        UPDATE_SERVICE_CALENDAR_DAY: function(state, day) {
+            state.serviceCalendarDay = day;
+        },
+        UPDATE_SERVICE_CALENDAR_DATE: function(state, date) {
+            state.serviceCalendarDate = date;
         }
     }
 });

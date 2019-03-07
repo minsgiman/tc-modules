@@ -7,7 +7,7 @@
 <script>
     import $ from 'jquery';
     import store from '../../store/player/store';
-    import toastcamAPIs from "../../store/toastcamAPIs";
+    import toastcamAPIs from "toastcam-apis";
     import gEventBus from '../../store/gEventBus';
 
     const zoomZoneBottom = 149;
@@ -424,9 +424,11 @@
 
         // state 변경시 IE에서 메모리 반환 안되는 문제로 직접 node 삭제
         _public.destroy = function () {
-            if (this.properties.objId) {
+            if (playerId) {
                 var playerNode = document.getElementById(playerId);
-                playerNode.removeChild(playerNode.firstChild);
+                if (playerNode) {
+                    playerNode.removeChild(playerNode.firstChild);
+                }
             }
         }
 
@@ -743,10 +745,15 @@
             //flashBridge.statusListener = param.statusListener;
         },
         beforeDestroy : function() {
+            if (this.control) {
+                this.control.destroy();
+                this.control = null;
+            }
+            window.onPlayerStatusChangeFlash = null;
         },
         methods: {
             play: function (time) {
-                toastcamAPIs.getToken(this.cameraId).then((token) => {
+                toastcamAPIs.call(toastcamAPIs.camera.GET_TOKEN, {cameraId: this.cameraId}, (token) => {
                     if (!token) {
                         return;
                     }
@@ -763,6 +770,8 @@
                         mediaUrl = getLiveServerUrl(this.currentCamera.mediaStreamURL);
                         this.control.setPath(mediaUrl, this.cameraId + '?token=' + token.token);
                     }
+                }, (err) => {
+                    console.log(err);
                 });
             },
 

@@ -32,11 +32,11 @@
     "lodash": "^4.17.11",
     "moment": "^2.24.0",
     "pikaday": "^1.8.0",
-    "socket.io-client": "^2.2.0"
+    "socket.io-client": "^2.2.0",
+    "toastcam-apis": "^1.0.9"
   },
   "devDependencies": {
     "autoprefixer": "^6.7.2",
-    "avoriaz": "^1.13.1",
     "axios-mock-adapter": "^1.8.1",
     "babel-core": "^6.22.1",
     "babel-loader": "^7.1.4",

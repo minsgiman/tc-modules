@@ -5,7 +5,7 @@ import playContainer from './play_container';
 import flashPlayer from "./flash_player";
 import webRTCPlayer from "./webrtc_player";
 import timeline from "./timeline";
-import toastAPIs from '../../store/toastcamAPIs';
+import toastAPIs from 'toastcam-apis';
 
 class player {
     constructor(param) {
@@ -14,51 +14,68 @@ class player {
         this.shopId = param.shopId ? param.shopId : '';
         this.groupId = param.groupId ? param.groupId : '';
         this.isShared = param.isShared;
+        this.containerComp = null;
         store.dispatch('SET_CAMERA_ID', this.cameraId);
         store.dispatch('SET_SHOP_ID', this.shopId);
         store.dispatch('SET_IS_SHARED', this.isShared);
+        if (param.category === 'b2b') {
+            toastAPIs.setConfig({
+                prefix: '/json/biz/'
+            });
+        }
     }
 
     initialize (callback) {
-        Promise.all([toastAPIs.loadCameraData(this.cameraId), toastAPIs.loadCameraConfig(this.cameraId),
-            toastAPIs.loadTimelineData({id: this.cameraId, scale: '10m', start: 1548727100000, end: 1548729000000}), toastAPIs.getAlarmZones(this.cameraId)]).then((values) => {
-            const cameraData = values[0],
-                  cameraConfig = values[1],
-                  timelineData = values[2],
-                  alarmZones = values[3];
+        toastAPIs.call(toastAPIs.camera.GET_CAMERA_DETAIL, {cameraId: this.cameraId}, (cameraData) => {
+            toastAPIs.call(toastAPIs.camera.GET_CAMERA_CONFIG, {cameraId: this.cameraId}, (cameraConfig) => {
+                toastAPIs.call(toastAPIs.camera.GET_EVENT_ZONES, {cameraId: this.cameraId}, (alarmZones) => {
+                    store.dispatch('SET_CURRENT_TIME', new Date());
+                    store.dispatch('SET_CAMERA_DATA', cameraData);
+                    store.dispatch('SET_CAMERA_CONFIG', cameraConfig);
+                    store.dispatch('SET_ALARM_ZONES', alarmZones);
 
-            store.dispatch('SET_CAMERA_DATA', cameraData);
-            store.dispatch('SET_CAMERA_CONFIG', cameraConfig);
-            store.dispatch('SET_TIMELINE_DATA', timelineData);
-            store.dispatch('SET_ALARM_ZONES', alarmZones);
+                    let vExtendConstructor = Vue.extend(playContainer);
+                    this.containerComp = new vExtendConstructor().$mount('#' + this.elementId);
 
-            let vExtendConstructor = Vue.extend(playContainer);
-            this.containerComp = new vExtendConstructor().$mount('#' + this.elementId);
+                    if (cameraData.recorderType === 'recorder') {
+                        vExtendConstructor = Vue.extend(webRTCPlayer);
+                        this.containerComp.player = new vExtendConstructor().$mount('#play_area');
+                        console.log('GET webrtcClient');
+                    } else {
+                        vExtendConstructor = Vue.extend(flashPlayer);
+                        this.containerComp.player = new vExtendConstructor().$mount('#play_area');
+                        console.log('GET flashBridge');
+                    }
 
-            if (cameraData.recorderType === 'recorder') {
-                vExtendConstructor = Vue.extend(webRTCPlayer);
-                this.containerComp.player = new vExtendConstructor().$mount('#play_area');
-                console.log('GET webrtcClient');
-            } else {
-                vExtendConstructor = Vue.extend(flashPlayer);
-                this.containerComp.player = new vExtendConstructor().$mount('#play_area');
-                console.log('GET flashBridge');
-            }
-
-            vExtendConstructor = Vue.extend(timeline);
-            this.containerComp.timeline = new vExtendConstructor().$mount('#timeline_area');
-            this.containerComp.drawTimeline(timelineData);
-            this.containerComp.currentCameraDataSet();
-            if (callback) {
-                callback();
-            }
-        });
+                    vExtendConstructor = Vue.extend(timeline);
+                    this.containerComp.timeline = new vExtendConstructor().$mount('#timeline_area');
+                    this.containerComp.drawTimeline();
+                    this.containerComp.currentCameraDataSet();
+                    if (callback) {
+                        callback();
+                    }
+                }, err => console.log(err));
+            }, err => console.log(err));
+        }, err => console.log(err));
     }
 
     play(time) {
         if (this.containerComp) {
             this.containerComp.player.play(time);
         }
+    }
+
+    destroy() {
+        store.dispatch('INIT_ALL_DATA');
+        if (this.containerComp) {
+            this.containerComp.$destroy();
+        }
+        this.elementId = null;
+        this.cameraId = null;
+        this.shopId = null;
+        this.groupId = null;
+        this.isShared = null;
+        this.containerComp = null;
     }
 }
 

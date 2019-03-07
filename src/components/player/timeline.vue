@@ -54,10 +54,10 @@
                 </li>
             </ul>
             <div class="time_btn" v-if="currentCamera.recorderType !== 'nvr'">
-                <button type="button" class="btn" :class="{security: config.secureMode == 'on', security_open: config.secureMode == 'off'}" v-show="shareStatus == false && countryDomain=='ko'" @click="pressedShowSecureModeButton();">
+                <button type="button" class="btn" :class="{security: config.secureMode == 'on', security_open: config.secureMode == 'off'}" v-show="!isShared && countryDomain=='ko'" @click="pressedShowSecureModeButton();">
                     <span class="ic" :class="{on: config.secureMode == 'on'}">CAMERA_RECORD_PASSWORD</span>
                 </button>
-                <button type="button" class="btn" :class="{security: config.secureMode == 'on', security_open: config.secureMode == 'off'}" v-show="shareStatus == true && countryDomain=='ko'" @click="showCVRSecureModeInfoLayer();">
+                <button type="button" class="btn" :class="{security: config.secureMode == 'on', security_open: config.secureMode == 'off'}" v-show="isShared && countryDomain=='ko'" @click="showCVRSecureModeInfoLayer();">
                     <span class="ic" :class="{on: config.secureMode == 'on'}">CAMERA_RECORD_PASSWORD</span>
                 </button>
                 <!--button type="button" class="btn clip" ng-click="pressedShowClipButton()">
@@ -88,7 +88,7 @@
                 <li v-show="fristIndex != 0">
                     <button @click="moveServiceDate('prev')" ><b> < </b></button>
                 </li>
-                <li :id="'timeline_date_' + d.date" v-show="$index <= lastIndex && fristIndex < $index" v-repeat="d in serviceCalendarDate" class="action" :class="{ 'on': d.date===formattedCalendarDate() }" @click="pressedCalendarDateButton(d.date)">
+                <li v-if="d" :id="'timeline_date_' + d.date" v-show="$index <= lastIndex && fristIndex < $index" v-repeat="d in serviceCalendarDate" class="action" :class="{ 'on': d.date===formattedCalendarDate() }" @click="pressedCalendarDateButton(d.date)">
                     <button type="button">
                         <span>{{d.day}}</span>
                     </button>
@@ -98,52 +98,16 @@
                 </li>
             </ul>
             <ul v-if="!isExpiredCloud && serviceDay > 7 && serviceDay <60 && (currentCamera.recorderType != 'nvr' && currentCamera.recorderType != 'recorder')">
-                <li :id="'timeline_date_' + d.date" v-repeat="d in serviceCalendarDate" class="action" :class="{ 'on': d.date===formattedCalendarDate() }" @click="pressedCalendarDateButton(d.date)">
+                <li v-if="d" :id="'timeline_date_' + d.date" v-repeat="d in serviceCalendarDate" class="action" :class="{ 'on': d.date===formattedCalendarDate() }" @click="pressedCalendarDateButton(d.date)">
                     <button type="button">
                         <span>{{d.day}}</span>
                     </button>
                 </li>
             </ul>
             <ul v-if="!isExpiredCloud && serviceDay <= 7 && serviceDay >0 && (currentCamera.recorderType != 'nvr' && currentCamera.recorderType != 'recorder')">
-                <li :id="'timeline_date_' + d.date" v-repeat="d in serviceCalendarDay" class="action" :class="{ 'on': d.date===formattedCalendarDate() }" @click="pressedCalendarDateButton(d.date)">
+                <li v-if="d" :id="'timeline_date_' + d.date" v-repeat="d in serviceCalendarDay" class="action" :class="{ 'on': d.date===formattedCalendarDate() }" @click="pressedCalendarDateButton(d.date)">
                     <button type="button">
                         <span>{{d.day}}</span>
-                    </button>
-                </li>
-            </ul>
-            <ul v-if="serviceDay == 0">
-                <li class="action" @click="pressedCalendarDateButton(d.date)">
-                    <button type="button">
-                        <span>19</span>
-                    </button>
-                    <button type="button">
-                        <span>20</span>
-                    </button>
-                    <button type="button">
-                        <span>21</span>
-                    </button>
-                    <button type="button">
-                        <span>22</span>
-                    </button>
-                    <button type="button">
-                        <span>23</span>
-                    </button>
-                    <button type="button">
-                        <span>24</span>
-                    </button>
-                    <button type="button">
-                        <span>25</span>
-                    </button>
-                    <button type="button">
-                        <span>26</span>
-                    </button>
-                    <button type="button">
-                        <span>27</span>
-                    </button>
-                </li>
-                <li class="action on" @click="pressedCalendarDateButton(d.date)">
-                    <button type="button">
-                        <span>EVENT_LIST_DATE_TODAY</span>
                     </button>
                 </li>
             </ul>
@@ -159,8 +123,9 @@
     import store from '../../store/player/store';
     import HashMap from '../../store/hashMap';
     import moment from 'moment';
-    import toastAPIs from '../../store/toastcamAPIs';
+    import toastAPIs from 'toastcam-apis';
     import gEventBus from '../../store/gEventBus';
+    import pikaday from 'pikaday';
 
     d3.selection.prototype.moveToFront = function() {
         return this.each(function(){
@@ -291,8 +256,8 @@
             isFullScreen: function () {
                 return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
             },
-            shareStatus: function () {
-                return store.state.cameraData.isShared;
+            isShared: function () {
+                return store.state.isShared;
             },
             isExpiredCloud: function () {
                 return store.getters.isExpiredCloud;
@@ -311,15 +276,21 @@
             },
             alarmZones: function () {
                 return store.state.alarmZones;
+            },
+            serviceCalendarDate: function () {
+                return store.state.serviceCalendarDate;
+            },
+            serviceCalendarDay: function () {
+                return store.state.serviceCalendarDay;
             }
         },
         data : function() {
             return {
-                timeline : null,
                 timeRange : 60,
                 isCursorLeft : false,
                 isCursorRight : false,
-                isShowTimelineCalendar : false
+                isShowTimelineCalendar : false,
+                timelineDatePicker : null
             }
         },
         created : function() {
@@ -528,12 +499,16 @@
             });
         },
         beforeDestroy : function() {
+            if (this.timelineDatePicker) {
+                this.timelineDatePicker.destroy();
+                this.timelineDatePicker = null;
+            }
         },
         methods: {
             // draw: function(d) {
             //     var check = 0;
             //     var eventTime = d.recTimes;
-            //     /*if(eventTime == undefined && scope.shareStatus == false){
+            //     /*if(eventTime == undefined && !this.isShared){
             //         $scope.shareEnd();
             //         return;
             //     }*/
@@ -617,7 +592,7 @@
             drawTimelineData: function(d){
                 var check = 0;
                 var eventTime = d.recTimes;
-                /*if(eventTime == undefined && scope.shareStatus == false){
+                /*if(eventTime == undefined && !this.isShared){
                     $scope.shareEnd();
                     return;
                 }*/
@@ -679,6 +654,23 @@
 
                 //changedSelectedZone();
             },
+
+            setupCalendar: function (serviceType) {
+                var minDate = moment().subtract(parseInt(serviceType), 'd');
+                var regDate = moment(this.currentCamera.regDate);
+
+                this.timelineDatePicker = new pikaday({
+                    field: document.getElementById('timelineDate'),
+                    container: document.getElementById('calendarContainer'),
+                    format: 'YYYY년 MM월 DD일',  //$translate.instant('CLIP_CREATE_CLIP_DATE_FORMAT'),
+                    minDate: minDate.toDate(),
+                    maxDate: new Date(),
+                    defaultDate: this.currentTime,
+                    position: 'bottom right'
+                });
+                //$scope.isShowingTimelineTimePicker = false;
+            },
+
             showThum: function (check) {
             },
             prevLine: function () {
@@ -1050,7 +1042,7 @@
             clickedCVRArea: function (time, status) {
                 newTimelineDragCnt=0;
                 gEventBus.$emit('stop-timer');
-                if(this.shareStatus == true){
+                if(this.isShared){
                     this.shareEnd();
                 }
                 this.setupDomain([this.currentDomain[0],this.currentDomain[1]]);
@@ -1349,7 +1341,7 @@
             },
 
             setupDomain: function (domain) {
-                if(this.shareStatus == true){
+                if(this.isShared){
                     this.shareEnd();
                 }
                 this.dataCallStatus = false;
@@ -1358,7 +1350,7 @@
                 }
 
                 var params = {
-                    id: this.cameraId,
+                    cameraId: this.cameraId,
                     shopId: this.shopId,
                     start: domain[0],
                     end: domain[1]
@@ -1421,35 +1413,45 @@
                     params.start = serviceDateTime;
                 }
 
-                toastAPIs.loadTimelineData(params).then((timelineData) => {
-                    store.dispatch('SET_TIMELINE_DATA', timelineData);
-                    if (timelineData) {
-                        if (this.shareStatus === false) {
-                            this.drawTimelineData(timelineData);
+                if (!this.isShared) {
+                    toastAPIs.call(toastAPIs.camera.GET_TIMELINE, params, (res) => {
+                        store.dispatch('SET_TIMELINE_DATA', res);
+                        if (res) {
+                            this.drawTimelineData(res);
                         } else {
-                            //TODO: Share API Call
-                            //this.drawTimelineData(timelineData);
+                            this.isLoading = false;
                         }
-                    } else {
+                    }, (err) => {
                         this.isLoading = false;
-                    }
-
-                    var removedBufferDomain = this.removeBufferCursorCheckDomain(domain , this.timeRange);
-
-                    if (removedBufferDomain[0] > this.currentTime.valueOf()) {
-                        this.isCursorLeft = true;
-                        this.isCursorRight = false;
-                    } else if (removedBufferDomain[1] < this.currentTime.valueOf()) {
-                        this.isCursorLeft = false;
-                        this.isCursorRight = true;
-                    } else {
-                        this.isCursorLeft = false;
-                        this.isCursorRight = false;
-                        if(this.isPlaying == false){
-                            this.updateCursor(this.currentTime);
+                    });
+                } else {
+                    toastAPIs.call(toastAPIs.camera.GET_SHARE_CAM_TIMELINE, params, (res) => {
+                        store.dispatch('SET_TIMELINE_DATA', res);
+                        if (res) {
+                            this.drawTimelineData(res);
+                        } else {
+                            this.isLoading = false;
                         }
+                    }, (err) => {
+                        this.isLoading = false;
+                    });
+                }
+
+                var removedBufferDomain = this.removeBufferCursorCheckDomain(domain , this.timeRange);
+
+                if (removedBufferDomain[0] > this.currentTime.valueOf()) {
+                    this.isCursorLeft = true;
+                    this.isCursorRight = false;
+                } else if (removedBufferDomain[1] < this.currentTime.valueOf()) {
+                    this.isCursorLeft = false;
+                    this.isCursorRight = true;
+                } else {
+                    this.isCursorLeft = false;
+                    this.isCursorRight = false;
+                    if(this.isPlaying == false){
+                        this.updateCursor(this.currentTime);
                     }
-                });
+                }
             },
             changeDomain: function (domain, duration, time) {
                 var that = this;

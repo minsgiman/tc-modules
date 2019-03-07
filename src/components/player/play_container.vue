@@ -79,7 +79,6 @@
     import store from '../../store/player/store';
     import moment from 'moment';
     import $ from 'jquery';
-    import pikaday from 'pikaday';
 
     export default {
         name: 'play_container',
@@ -138,14 +137,23 @@
         mounted : function() {
         },
         beforeDestroy : function() {
+            this.onStopTimer();
+            $(this.$el).detach();
+            if (this.player) {
+                this.player.$destroy();
+                this.player = null;
+            }
+            if (this.timeline) {
+                this.timeline.$destroy();
+                this.timeline = null;
+            }
         },
         methods: {
             play: function(time) {
                 this.player.play(time);
             },
-            drawTimeline: function(timelineData) {
-                this.timeline.draw(timelineData);
-                this.timeline.drawTimelineData(timelineData);
+            drawTimeline: function() {
+                this.timeline.draw();
             },
 
             startLiveTimer: function () {
@@ -291,15 +299,6 @@
                     }else{
                         this.onGoLive();
                     }
-                    if(this.currentCamera.needUpgrade == "YES" && this.currentCamera.controlStatus == "on"){
-                        if(this.isShared == false){
-                            //TODO:
-                            //$scope.cameraUpagradeAlert = true;
-                        }
-                    }
-                }else{
-                    //TODO:
-                    //$scope.isNetwork = true;
                 }
 
                 if(this.currentCamera.saveEndDate < (new Date).valueOf()){
@@ -312,7 +311,7 @@
                     if(betweenDay<=7){
                         //TODO:
                         // $scope.cloudEnd = betweenDay;
-                        // $scope.showServiceEnd = true;f
+                        // $scope.showServiceEnd = true;
                     }
                 }
 
@@ -356,16 +355,14 @@
                             $("#view_timeline_date").find("button").css("padding","0 12px");
                         },500);
                         //TODO:
-                        // $scope.serviceCalendarDay = serviceCalendarDay($scope.serviceDay + 1);
-                        // $scope.todayDate = $scope.serviceCalendarDay[$scope.serviceCalendarDay.length-1].date;
+                        store.dispatch('SET_SERVICE_CALENDAR_DAY', this.getServiceCalendarDay(this.serviceDay + 1));
                     }else if(this.serviceDay >= 8){
                         if(this.serviceDay <= 10){
                             setTimeout(function(){
                                 $("#view_timeline_date").find("button").css("padding","0 12px");
                             },500);
                         }
-                        //TODO:
-                        //$scope.serviceCalendarDate = serviceCalendarDate($scope.serviceDay);
+                        store.dispatch('SET_SERVICE_CALENDAR_DATE', this.getServiceCalendarDate(this.serviceDay));
 
                         var year = (new Date(this.currentCamera.regDate)).getFullYear();
                         var month = parseInt((new Date(this.currentCamera.regDate)).getMonth()+1);
@@ -374,20 +371,15 @@
                         if(month < 10){
                             month = "0"+month;
                         }
-                        //TODO:
-                        // var regDateString  = year+"-"+month+"-"+day;
-                        // $scope.todayDate = $scope.serviceCalendarDate[$scope.serviceCalendarDate.length-1].date;
                     }else{
                         store.dispatch('SET_CLOUD_OUT', true);
                         $("#timelinedesc").remove();
                     }
 
                     if (this.currentCamera.recorderType === 'nvr') {
-                        //TODO:
-                        //setupClipCalendar($scope.serviceDay.toString());
+                        this.timeline.setupCalendar(this.serviceDay.toString());
                     } else {
-                        //TODO:
-                        //setupClipCalendar($scope.currentCamera.serviceType);
+                        this.timeline.setupCalendar(this.currentCamera.serviceType);
                     }
                 } else {
                     store.dispatch('SET_CLOUD_OUT', true);
@@ -443,6 +435,61 @@
                 // }else{
                 //     $scope.cloudServiceEnd = true;
                 // }
+            },
+
+            formattedInternalDate: function (date) {
+                var md;
+                if (this.timeline.tz !== undefined) {
+                    md = moment(new Date(date)).tz(this.timeline.tz);
+                } else {
+                    md = moment(new Date(date));
+                }
+
+                return md.format("YYYYMMDD");
+            },
+
+            getServiceCalendarDay: function (num) {
+                var days = [];
+                var now = Date.now();
+                for (var i = num-1 ; i >= 0 ; i--) {
+                    var past = now - (i * 24 * 60 * 60 * 1000);
+                    var day = { date: this.formattedInternalDate(new Date(past))};
+                    if (i === 0) {
+                        day.day = '오늘';  //$translate.instant("TIMELINE_TODAY");
+                    } else {
+                        day.day = moment(new Date(past)).locale('ko').format("dddd");
+                    }
+                    days.push(day);
+                }
+                return days;
+            },
+
+            getServiceCalendarDate: function (num) {
+                var dates = [];
+                var now = Date.now();
+                for (var i = num ; i >= 0 ; i--) {
+                    var past = now - (i * 24 * 60 * 60 * 1000);
+                    var date = { date: this.formattedInternalDate(new Date(past))};
+                    if (i === 0) {
+                        date.day = '오늘'; //$translate.instant("TIMELINE_TODAY");
+                    } else {
+                        date.day = moment(new Date(past)).locale('ko').format("dddd");
+                        var md;
+                        if (this.timeline.tz !== undefined) {
+                            md = moment(new Date(past)).tz(this.timeline.tz);
+                        } else {
+                            md = moment(new Date(past));
+                        }
+
+                        if (i === 29 || md.format("D") === "1") {
+                            date.day = md.format("M/D");
+                        } else {
+                            date.day = md.format("D");
+                        }
+                    }
+                    dates.push(date);
+                }
+                return dates;
             },
 
             pressedFullScreenButton: function () {
@@ -577,6 +624,7 @@
             onStopTimer: function() {
                 if (this.playTimer) {
                     clearInterval(this.playTimer);
+                    this.playTimer = null;
                 }
             },
             onStartTimer: function(time) {
