@@ -19,7 +19,9 @@ const store = new Vuex.Store({
         showCameraStreamLayer: false,
         showNextPlayLayer: false,
         isCameraOffLastRec: false,
+        isCameraOffLastShowRec: false,
         isCameraOffLastEvent: false,
+        isCameraOffLastShowEvent: false,
         isFullscreen: false,
         isShared: false,
         cloudOut: false,
@@ -81,8 +83,14 @@ const store = new Vuex.Store({
         SET_IS_CAMERA_OFF_LAST_REC: function(context, state) {
             context.commit('UPDATE_IS_CAMERA_OFF_LAST_REC', state);
         },
+        SET_IS_CAMERA_OFF_LAST_SHOW_REC: function(context, state) {
+            context.commit('UPDATE_IS_CAMERA_OFF_LAST_SHOW_REC', state);
+        },
         SET_IS_CAMERA_OFF_LAST_EVENT: function(context, state) {
             context.commit('UPDATE_IS_CAMERA_OFF_LAST_EVENT', state);
+        },
+        SET_IS_CAMERA_OFF_LAST_SHOW_EVENT: function(context, state) {
+            context.commit('UPDATE_IS_CAMERA_OFF_LAST_SHOW_EVENT', state);
         },
         SET_IS_FULLSCREEN: function(context, state) {
             context.commit('UPDATE_IS_FULLSCREEN', state);
@@ -153,7 +161,9 @@ const store = new Vuex.Store({
             context.commit('UPDATE_SHOW_CAMERA_STREAM_LAYER', false);
             context.commit('UPDATE_SHOW_NEXT_PLAY_LAYER', false);
             context.commit('UPDATE_IS_CAMERA_OFF_LAST_REC', false);
+            context.commit('UPDATE_IS_CAMERA_OFF_LAST_SHOW_REC', false);
             context.commit('UPDATE_IS_CAMERA_OFF_LAST_EVENT', false);
+            context.commit('UPDATE_IS_CAMERA_OFF_LAST_SHOW_EVENT', false);
             context.commit('UPDATE_IS_FULLSCREEN', false);
             context.commit('UPDATE_IS_SHARED', false);
             context.commit('UPDATE_CLOUD_OUT', false);
@@ -208,8 +218,14 @@ const store = new Vuex.Store({
         UPDATE_IS_CAMERA_OFF_LAST_REC: function(state, status) {
             state.isCameraOffLastRec = status;
         },
+        UPDATE_IS_CAMERA_OFF_LAST_SHOW_REC: function(state, status) {
+            state.isCameraOffLastShowRec = status;
+        },
         UPDATE_IS_CAMERA_OFF_LAST_EVENT: function(state, status) {
             state.isCameraOffLastEvent = status;
+        },
+        UPDATE_IS_CAMERA_OFF_LAST_SHOW_EVENT: function(state, status) {
+            state.isCameraOffLastShowEvent = status;
         },
         UPDATE_IS_FULLSCREEN: function(state, status) {
             state.isFullscreen = status;

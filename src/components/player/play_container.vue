@@ -65,6 +65,76 @@
                                     </div>
                                     <div id="timeline_area"></div>
                                 </div>
+                                <div id="play_back"></div>
+                                <div class="player_cam player_off_black" :class="{player_cam_full: isFullScreen}" v-show="showCameraOffLayer" id="cameraOffLayer">
+                                    <div class="n_area movieoff">
+                                        <p>
+                                            <span class="sp"></span><br>
+                                            <span v-show="currentCamera.recorderType != 'recorder'">카메라의 접속이 끊겼습니다.</span>
+                                            <span v-show="currentCamera.recorderType == 'recorder' && currentCamera.controlStatus == 'RDE'">DVR을 연결해주세요.</span>
+                                            <span v-show="currentCamera.recorderType == 'recorder' && currentCamera.controlStatus == 'off'">DVR에 카메라를 연결해주세요.</span>
+                                            <!--span v-show="currentCamera.recorderType == 'recorder' && (currentCamera.controlStatus != 'RDE' && currentCamera.controlStatus != 'off') && dvrConnectFail">영상을 불러올 수 없습니다.</span-->
+                                        </p>
+                                        <ul class="off_area" v-if="!isExpiredCloud">
+                                            <li>
+                                                <p class="txt"> {{currentCamera.lastRecDateString}} <em class="red">{{currentCamera.lastRecTimeString}}</em>
+                                                </p>
+                                                <button v-if="currentCamera.recordType != 'event'" type="button" class="btn" v-show="isCameraOffLastShowRec" @click="goCvr(currentCamera.lastRecDate,'f')"><img src="/resources/im/ic_video_error_arrow_L.png">마지막 서버 저장</button>
+                                                <button v-if="currentCamera.recordType == 'event'" type="button" class="btn" v-show="isCameraOffLastShowRec" @click="goCvr(currentCamera.lastRecDate,'f')"><img src="/resources/im/ic_video_error_arrow_L.png">마지막 이벤트</button>
+                                                <p class="txt" v-show="isCameraOffLastRec">저장된 마지막 녹화가 없습니다.</p>
+                                            </li>
+                                            <li v-if="currentCamera.recordType != 'event'">
+                                                <p class="txt"> {{currentCamera.lastEventDateString}} <em class="red">{{currentCamera.lastEventTimeString}}</em>
+                                                </p>
+                                                <button type="button" class="btn" v-show="isCameraOffLastShowEvent" @click="goCvr(currentCamera.lastEventDate,'f')"><img src="/resources/im/ic_video_error_arrow_L.png">마지막 이벤트</button>
+                                                <p class="txt" v-show="isCameraOffLastEvent">저장된 마지막 이벤트가 없습니다.</p>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="player_cam player_off_black" :class="{player_cam_full: isFullScreen}" v-show="showNoPlayLayer">
+                                    <div class="n_area movieoff">
+                                        <p>
+                                            <span class="sp"></span> <br>녹화가 지연되고 있습니다.
+                                        </p>
+                                        <ul class="off_area" ng-if="!isExpiredCloud">
+                                            <li>
+                                                <p class="txt"> {{currentCamera.lastRecDateString}} <em class="red">{{currentCamera.lastRecTimeString}}</em>
+                                                </p>
+                                                <button type="button" class="btn" v-show="isCameraOffLastShowRec" @click="goCvr(currentCamera.lastRecDate,'f')"><img src="/resources/im/ic_video_error_arrow_L.png">마지막 서버 저장</button>
+                                                <p class="txt" v-show="isCameraOffLastRec">저장된 마지막 녹화가 없습니다.</p>
+                                            </li>
+                                            <li>
+                                                <p class="txt"> {{currentCamera.lastEventDateString}} <em class="red">{{currentCamera.lastEventTimeString}}</em>
+                                                </p>
+                                                <button type="button" class="btn" v-show="isCameraOffLastShowEvent" @click="goCvr(currentCamera.lastEventDate,'f')"><img src="/resources/im/ic_video_error_arrow_L.png">마지막 이벤트</button>
+                                                <p class="txt" v-show="isCameraOffLastEvent">저장된 마지막 이벤트가 없습니다.</p>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="player_cam player_off_black" :class="{player_cam_full: isFullScreen}" v-show="(currentCamera.recordType != 'event') && showNextPlayLayer">
+                                    <div class="n_area movieoff">
+                                        <p>
+                                            <span class="sp"></span> <br>저장된 영상이 없는 구간입니다.
+                                        </p>
+                                        <ul class="off_area" v-if="!isExpiredCloud">
+                                            <li>
+                                                <p class="txt"> {{currentCamera.lastRecDateString}} <em class="red">{{currentCamera.lastRecTimeString}}</em>
+                                                </p> <a class="btn" @click="goCvr(currentCamera.lastRecDate,'f')"><img src="/resources/im/ic_video_error_arrow_L.png">다음 서버 저장</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="player_cam off player_off_black" :class="{player_cam_full: isFullScreen}" v-show="showCameraStreamLayer" id="cameraStreamOffLayer"></div>
+                                <div class="player_cam off player_off_black" :class="{player_cam_full: isFullScreen}" v-show="showCameraStreamLayer" id="cameraStreamOffLayerIn">
+                                    <!-- <p style="top: 31%;position: relative;"><span class="sp"></span> <br>카메라 녹화가 꺼져있습니다</p>-->
+                                    <div class="n_area movieoff">
+                                        <p>
+                                            <span class="sp"></span> <br>카메라가 꺼져 있습니다.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -79,12 +149,16 @@
     import store from '../../store/player/store';
     import moment from 'moment';
     import $ from 'jquery';
+    import toastcamAPIs from "../../store/toastcamAPIs";
 
     export default {
         name: 'play_container',
         computed : {
             isLive: function () {
                 return store.state.isLive;
+            },
+            cameraId: function () {
+                return store.state.cameraId;
             },
             config: function () {
                 return store.state.cameraConfig;
@@ -116,6 +190,30 @@
             serviceDay: function () {
                 return store.state.serviceDay;
             },
+            showNoPlayLayer: function () {
+                return store.state.showNoPlayLayer;
+            },
+            showCameraOffLayer: function () {
+                return store.state.showCameraOffLayer;
+            },
+            showCameraStreamLayer: function () {
+                return store.state.showCameraStreamLayer;
+            },
+            showNextPlayLayer: function () {
+                return store.state.showNextPlayLayer;
+            },
+            isCameraOffLastRec: function () {
+                return store.state.isCameraOffLastRec;
+            },
+            isCameraOffLastShowRec: function () {
+                return store.state.isCameraOffLastShowRec;
+            },
+            isCameraOffLastEvent: function () {
+                return store.state.isCameraOffLastEvent;
+            },
+            isCameraOffLastShowEvent: function () {
+                return store.state.isCameraOffLastShowEvent;
+            }
         },
         data : function() {
             return {
@@ -284,6 +382,38 @@
 
             },
 
+            currentCameraIsLastRecordDataSet: function(data){
+                this.currentCamera.lastEventDate = data.lastEventStartTime;
+                this.currentCamera.lastRecDate = data.lastRectStartTime;
+
+                var videoDateFormat = 'M월 D일 dddd';
+                var videoTimeFormat = 'HH:mm:ss';
+
+                if(this.currentCamera.lastEventDate != 0){
+                    var lastEventMoment = moment(this.currentCamera.lastEventDate);
+                    this.currentCamera.lastEventDateString = lastEventMoment.locale('ko').format(videoDateFormat);
+                    this.currentCamera.lastEventTimeString = lastEventMoment.locale('ko').format(videoTimeFormat);
+                    $("#camera_off_lastevnt").show();
+                    this.lastEvent = lastEventMoment._i;
+                    store.dispatch('SET_IS_CAMERA_OFF_LAST_SHOW_EVENT', true);
+                }else{
+                    store.dispatch('SET_IS_CAMERA_OFF_LAST_SHOW_EVENT', false);
+                    store.dispatch('SET_IS_CAMERA_OFF_LAST_EVENT', true);
+                }
+
+                if(this.currentCamera.lastRecDate != 0){
+                    var lastRecMoment = moment(this.currentCamera.lastRecDate);
+                    this.currentCamera.lastRecDateString = lastRecMoment.locale('ko').format(videoDateFormat);
+                    this.currentCamera.lastRecTimeString = lastRecMoment.locale('ko').format(videoTimeFormat);
+                    $("#camera_off_lastrec").show();
+                    this.lastRec = lastRecMoment._i;
+                    store.dispatch('SET_IS_CAMERA_OFF_LAST_SHOW_REC', true);
+                }else{
+                    store.dispatch('SET_IS_CAMERA_OFF_LAST_SHOW_REC', false);
+                    store.dispatch('SET_IS_CAMERA_OFF_LAST_REC', true);
+                }
+            },
+
             currentCameraDataSet: function() {
                 $("#timebar_area").children("svg").width()/2 - 75;
                 setTimeout(function(){
@@ -317,10 +447,9 @@
 
                 if (this.currentCamera.controlStatus !== 'on') {
                     if(this.currentCamera.streamStatus !== 'off'){
-                        //TODO:
-                        // Camera.isLastRecord({ id: $stateParams.cameraId }, function (data) {
-                        //     $scope.currentCameraIsLastRecordDataSet(data);
-                        // });
+                        toastcamAPIs.call(toastcamAPIs.camera.CHECK_IS_LAST_RECORD, {cameraId: this.cameraId}, function(res) {
+                            this.currentCameraIsLastRecordDataSet(res);
+                        });
                     }
                     store.dispatch('SET_IS_PLAYING', false);
                     //TODO:
@@ -331,12 +460,10 @@
                 }
 
                 if(this.currentCamera.streamStatus =="off" || this.currentCamera.controlStatus === 'CE'){
-                    setTimeout(function(){
-                        //TODO:
-                        // Camera.isLastRecord({ id: $stateParams.cameraId }, function (data) {
-                        //     $scope.currentCameraIsLastRecordDataSet(data);
-                        //
-                        // });
+                    setTimeout(() => {
+                        toastcamAPIs.call(toastcamAPIs.camera.CHECK_IS_LAST_RECORD, {cameraId: this.cameraId}, function(res) {
+                            this.currentCameraIsLastRecordDataSet(res);
+                        });
                     },1050);
                 }
 
@@ -651,6 +778,9 @@
             },
             onGoCvr: function() {
                 this.timeline.clickedCVRArea(this.clickedCvrTime);
+            },
+            goCvr: function(time, status) {
+                this.timeline.goCvr(time, status);
             },
             onPlayStatusChange: function(status) {
                 switch(status) {

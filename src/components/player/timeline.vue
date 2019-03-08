@@ -1016,11 +1016,11 @@
                 }
 
                 if(cvrCheck == false){
-                    if(this.lineMoveFlag == false && this.plyBtnStatus == true){
+                    //if(this.lineMoveFlag == false && this.plyBtnStatus == true){
                         this.lineMoveFlag = false;
                         this.liveLinFlag = false;
                         this.isPlaying = false;
-                        //this.cameraNoSave();
+                        store.dispatch('CAMERA_NO_CVR');
                         gEventBus.$emit('stop-timer');
                         var videoDateFormat = "M월 D일 dddd";
                         var videoTimeFormat = "HH:mm:ss";
@@ -1029,13 +1029,13 @@
                             this.currentCamera.lastRecDateString = lastRecMoment.locale('ko').format(videoDateFormat);
                             this.currentCamera.lastRecTimeString = lastRecMoment.locale('ko').format(videoTimeFormat);
                             $("#camera_off_lastrec").show();
-                            this.isCameraOffLastShowRec = true;
+                            store.dispatch('SET_IS_CAMERA_OFF_LAST_SHOW_REC', true);
                             this.currentCamera.lastRecDate = nextTime;
                         }else{
-                            this.isCameraOffLastRec = true;
+                            store.dispatch('SET_IS_CAMERA_OFF_LAST_REC', true);
                         }
                         return;
-                    }
+                    //}
                 }
             },
 
@@ -1061,7 +1061,7 @@
                     time = new Date(serviceDateTime + 3000);
                 }
                 store.dispatch('SET_CLICKED_CVR_TIME', time);
-                //$scope.cameraStatusAllOff();
+                store.dispatch('CAMERA_STATUS_NORMAL');
 
                 //cursorIdx = 0;
                 if(status != 'f'){
