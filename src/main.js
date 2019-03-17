@@ -11,8 +11,8 @@ playerObj.initialize(() => {
     playerObj.play();
 });
 
-setTimeout(function() {
-    playerObj.destroy();
-    playerObj = null;
-}, 10 * 1000);
+// setTimeout(function() {
+//     playerObj.destroy();
+//     playerObj = null;
+// }, 10 * 1000);
 

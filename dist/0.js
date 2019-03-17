@@ -1,0 +1,2 @@
+webpackJsonp([0],{3:function(m,e){throw new Error('Module build failed: Duplicate declaration "socket"\n\n[0m [90m  6 | [39m    channelId[33m,[39m\n [90m  7 | [39m    peer[33m,[39m\n[31m[1m>[22m[39m[90m  8 | [39m    socket[33m,[39m\n [90m    | [39m    [31m[1m^[22m[39m\n [90m  9 | [39m    webRTCStatus[33m,[39m\n [90m 10 | [39m    peerDatabase [33m=[39m {}[33m,[39m\n [90m 11 | [39m    localStream[33m,[39m[0m\n')}});
+//# sourceMappingURL=0.js.map

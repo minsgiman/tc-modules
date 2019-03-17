@@ -1,13 +1,11 @@
 <template>
-    <div id="flashview">
-        <div class="player_cam" id="player" style="width:100%;height:100%;"></div>
-    </div>
+    <div class="player_cam" id="player"></div>
 </template>
 
 <script>
     import $ from 'jquery';
     import store from '../../store/player/store';
-    import toastcamAPIs from "toastcam-apis";
+    import toastcamAPIs from '../../store/toastcamAPIs';
     import gEventBus from '../../store/gEventBus';
 
     const zoomZoneBottom = 149;
@@ -917,9 +915,6 @@
                 //flashBridge.statusListener(status);
             },
             changeTimeRange: function(timeRange) {
-
-            },
-            pressedShowTimelineCalendarButton: function() {
 
             }
         }

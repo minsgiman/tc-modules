@@ -22,12 +22,14 @@ const store = new Vuex.Store({
         isCameraOffLastShowRec: false,
         isCameraOffLastEvent: false,
         isCameraOffLastShowEvent: false,
-        isFullscreen: false,
+        isFullScreen: false,
         isShared: false,
         cloudOut: false,
         serviceDay: 0,
         serviceCalendarDay: null,
-        serviceCalendarDate: null
+        serviceCalendarDate: null,
+        timelineDate: {},
+        isShowTimelineCalendar: false
     },
     getters: {
         isExpiredCloud: state => {
@@ -66,7 +68,20 @@ const store = new Vuex.Store({
             context.commit('UPDATE_CLICKED_CVR_TIME', state);
         },
         SET_ALARM_ZONES: function(context, state) {
-            context.commit('UPDATE_ALARM_ZONES', state);
+            if (!state) {
+                return;
+            }
+            let eventZones = state.eventZones,
+                motionZones = state.zones,
+                soundZone = eventZones.filter((value) => {
+                    return value.id == "0"
+                })[0],
+                accessZone = eventZones.filter((value) => {
+                    return value.id == "10000";
+                })[0];
+            context.commit('UPDATE_ALARM_ZONES', {
+                eventZones, motionZones, soundZone, accessZone
+            });
         },
         SET_SHOW_NO_PLAY_LAYER: function(context, state) {
             context.commit('UPDATE_SHOW_NO_PLAY_LAYER', state);
@@ -109,6 +124,12 @@ const store = new Vuex.Store({
         },
         SET_SERVICE_CALENDAR_DATE: function(context, state) {
             context.commit('UPDATE_SERVICE_CALENDAR_DATE', state);
+        },
+        SET_TIMELINE_DATE: function(context, state) {
+            context.commit('UPDATE_TIMELINE_DATE', state);
+        },
+        SET_SHOW_TIMELINE_CALENDAR: function(context, state) {
+            context.commit('UPDATE_SHOW_TIMELINE_CALENDAR', state);
         },
         CAMERA_REC_DELAY: function(context, state) {
             context.commit('UPDATE_SHOW_NO_PLAY_LAYER', true);
@@ -228,7 +249,7 @@ const store = new Vuex.Store({
             state.isCameraOffLastShowEvent = status;
         },
         UPDATE_IS_FULLSCREEN: function(state, status) {
-            state.isFullscreen = status;
+            state.isFullScreen = status;
         },
         UPDATE_IS_SHARED: function(state, status) {
             state.isShared = status;
@@ -244,6 +265,14 @@ const store = new Vuex.Store({
         },
         UPDATE_SERVICE_CALENDAR_DATE: function(state, date) {
             state.serviceCalendarDate = date;
+        },
+        UPDATE_TIMELINE_DATE: function(state, date) {
+            if (date && date.key) {
+                state.timelineData[date.key] = date.value;
+            }
+        },
+        UPDATE_SHOW_TIMELINE_CALENDAR: function(state, status) {
+            state.isShowTimelineCalendar = status;
         }
     }
 });

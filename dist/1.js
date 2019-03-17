@@ -1,0 +1,2 @@
+webpackJsonp([1],{2:function(n,t,o){"use strict";Object.defineProperty(t,"__esModule",{value:!0});var i={initialize:function(){console.log("flashBridge init")},play:function(){},pause:function(){},stop:function(){},mute:function(){},getCurrentTime:function(){},startAudioChat:function(){},stopAudioChat:function(){},zoomVideo:function(){},zoomZone:function(){},setPath:function(){},close:function(){},destroy:function(){}};t.default=i}});
+//# sourceMappingURL=1.js.map

@@ -32,45 +32,42 @@
             <ul class="time_unit" id="time_units">
                 <li :class="{on: timeRange === 10}">
                     <button type="button" @click="changeTimeRange(10)">
-                        <span>TIMELINE_10MIN</span>
+                        <span>10분</span>
                     </button></li>
                 <li :class="{on: timeRange === 60}">
                     <button type="button" @click="changeTimeRange(60)">
-                        <span>TIMELINE_1HOUR</span>
+                        <span>1시간</span>
                     </button></li>
                 <li :class="{on: timeRange === 360}">
                     <button type="button" @click="changeTimeRange(360)">
-                        <span>TIMELINE_6HOUR</span>
+                        <span>6시간</span>
                     </button></li>
                 <li :class="{on: timeRange === 1440}">
                     <button type="button" @click="changeTimeRange(1440)">
-                        <span>TIMELINE_24HOUR</span>
+                        <span>24시간</span>
                     </button>
                 </li>
                 <li class="calendar">
                     <button type="button" :class="{on: isShowTimelineCalendar}" @click="pressedShowTimelineCalendarButton()">
-                        <span>CAMERA_DAY_TIME</span>
+                        <span>날짜/시간</span>
                     </button>
                 </li>
             </ul>
-            <div class="time_btn" v-if="currentCamera.recorderType !== 'nvr'">
-                <button type="button" class="btn" :class="{security: config.secureMode == 'on', security_open: config.secureMode == 'off'}" v-show="!isShared && countryDomain=='ko'" @click="pressedShowSecureModeButton();">
+            <!--div class="time_btn" v-if="currentCamera.recorderType !== 'nvr'">
+                <button type="button" class="btn" :class="{security: config.secureMode == 'on', security_open: config.secureMode == 'off'}" v-show="!isShared" @click="pressedShowSecureModeButton();">
                     <span class="ic" :class="{on: config.secureMode == 'on'}">CAMERA_RECORD_PASSWORD</span>
                 </button>
-                <button type="button" class="btn" :class="{security: config.secureMode == 'on', security_open: config.secureMode == 'off'}" v-show="isShared && countryDomain=='ko'" @click="showCVRSecureModeInfoLayer();">
+                <button type="button" class="btn" :class="{security: config.secureMode == 'on', security_open: config.secureMode == 'off'}" v-show="isShared" @click="showCVRSecureModeInfoLayer();">
                     <span class="ic" :class="{on: config.secureMode == 'on'}">CAMERA_RECORD_PASSWORD</span>
                 </button>
-                <!--button type="button" class="btn clip" ng-click="pressedShowClipButton()">
-                    <span class="ic">{{ 'CLIP_CREATE_CLIP_TITLE' | translate }}</span>
-                </button-->
                 <button type="button" v-if="currentCamera.recorderType !== 'recorder' && currentCamera.hasClipPermission" class="btn clip_plus" @click="pressedShowTimelapseButton()">
                     <span class="ic">CAMERA_CLIP_MAKE</span>
                 </button>
-            </div>
+            </div-->
             <div class="event_move" v-if="currentCamera.recorderType !== 'nvr'">
                 <div class="event_move_box">
                     <li class="ar_L" @click="goPrevEvent()"><button></button></li>
-                    <li class="txt">CAMERA_EVENT_MOVE</li>
+                    <li class="txt">이벤트 이동</li>
                     <li class="ar_R" @click="goNextEvent()"><button></button></li>
                 </div>
             </div>
@@ -123,9 +120,8 @@
     import store from '../../store/player/store';
     import HashMap from '../../store/hashMap';
     import moment from 'moment';
-    import toastAPIs from 'toastcam-apis';
+    import toastAPIs from '../../store/toastcamAPIs';
     import gEventBus from '../../store/gEventBus';
-    import pikaday from 'pikaday';
 
     d3.selection.prototype.moveToFront = function() {
         return this.each(function(){
@@ -244,6 +240,9 @@
             clickedCvrTime: function () {
                 return store.state.clickedCvrTime;
             },
+            timelineData: function () {
+                return store.state.timelineData;
+            },
             config: function () {
                 return store.state.cameraConfig;
             },
@@ -289,8 +288,7 @@
                 timeRange : 60,
                 isCursorLeft : false,
                 isCursorRight : false,
-                isShowTimelineCalendar : false,
-                timelineDatePicker : null
+                isShowTimelineCalendar : false
             }
         },
         created : function() {
@@ -499,10 +497,6 @@
             });
         },
         beforeDestroy : function() {
-            if (this.timelineDatePicker) {
-                this.timelineDatePicker.destroy();
-                this.timelineDatePicker = null;
-            }
         },
         methods: {
             // draw: function(d) {
@@ -541,6 +535,11 @@
             //     firstDataLoadingFlag = true;
             //     $scope.timelineDataSet(d);
             // },
+
+            pressedShowTimelineCalendarButton: function() {
+                gEventBus.$emit('show-calendar');
+                this.isShowTimelineCalendar = !this.isShowTimelineCalendar;
+            },
             resizeTimeline: function () {
                 if(this.isFullScreen === false){
                     this.redrawWithWidth(parseInt($("#view_timeline_ctrl").width()));
@@ -653,22 +652,6 @@
                 // },200);
 
                 //changedSelectedZone();
-            },
-
-            setupCalendar: function (serviceType) {
-                var minDate = moment().subtract(parseInt(serviceType), 'd');
-                var regDate = moment(this.currentCamera.regDate);
-
-                this.timelineDatePicker = new pikaday({
-                    field: document.getElementById('timelineDate'),
-                    container: document.getElementById('calendarContainer'),
-                    format: 'YYYY년 MM월 DD일',  //$translate.instant('CLIP_CREATE_CLIP_DATE_FORMAT'),
-                    minDate: minDate.toDate(),
-                    maxDate: new Date(),
-                    defaultDate: this.currentTime,
-                    position: 'bottom right'
-                });
-                //$scope.isShowingTimelineTimePicker = false;
             },
 
             showThum: function (check) {
@@ -1019,7 +1002,7 @@
                     //if(this.lineMoveFlag == false && this.plyBtnStatus == true){
                         this.lineMoveFlag = false;
                         this.liveLinFlag = false;
-                        this.isPlaying = false;
+                        store.dispatch('SET_IS_PLAYING', false);
                         store.dispatch('CAMERA_NO_CVR');
                         gEventBus.$emit('stop-timer');
                         var videoDateFormat = "M월 D일 dddd";
@@ -1805,11 +1788,10 @@
                 }
 
                 this.removedBufferDomain = this.removeBufferDomain(this.currentDomain , this.timeRange);
-                this.setupDomain(this.currentDomain);
-
                 this.x = d3.time.scale()
                     .domain(this.currentDomain)
                     .range([-this.width, this.width*2]);
+                this.setupDomain(this.currentDomain);
 
                 if (this.axisContainer === undefined) {
                     this.axisContainer = this.mainContainer.append("g")
@@ -2110,10 +2092,6 @@
                         .append('rect').attr({
                             class: 'record-bar',
                             x: function(d) {
-                                if(that.x(d.startTime).toString == "NaN"){
-
-                                }
-
                                 if(parseInt(d.startTime) < serviceDateTime){
                                     d.startTime = serviceDateTime;
                                 }

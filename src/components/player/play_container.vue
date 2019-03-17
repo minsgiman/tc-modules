@@ -6,7 +6,8 @@
                 @go-live="onGoLive"
                 @go-cvr="onGoCvr"
                 @play-start="play"
-                @play-status-change="onPlayStatusChange">
+                @play-status-change="onPlayStatusChange"
+                @show-calendar="showCalendar">
         </event_bus_comp>
         <div class="camdtl_wrap nvr_hidden_right_none">
             <div>
@@ -14,8 +15,80 @@
                     <div class="player_area" id="player_area">
                         <div>
                             <div id="fullscreen">
-                                <div class="player_cam" id="play_area" style="width:100%;height:100%;"></div>
+                                <div class="player_cam" id="player"></div>
                                 <div id="controlNdTimeLine">
+
+
+                                    <div class="calendar_select" :class="{calendar_select_full: isFullScreen}" v-show="isShowTimelineCalendar">
+                                        <button type="button" class="sp btn_close" @click="toggleCalendar"></button>
+                                        <h3>날짜/시간 바로가기</h3>
+                                        <ul>
+                                            <li>
+                                                <span class="inp_box calendar" @click="toggleTimelineCalendar()" style="width: 140px;">
+                                                    <input type="text" :value="timelineDate.date" id="timelineDate" title="날짜" disabled="disabled">
+                                                    <button type="button" style="right:4px;">달력</button>
+                                                </span>
+                                                <div id="calendarContainer" class="calendar_open_area"></div>
+                                            </li>
+                                            <li>
+                                                <span class="inp_box clock" @click="toggleTimelineTimePicker()" style="width: 140px; margin:0;">
+                                                    <input class="input_box" :value="timelineDate.time" type="text" disabled="disabled" />
+                                                    <button type="button" style="right:4px;">시간</button>
+                                                </span>
+                                                <div style="position:absolute; width: 200px;">
+                                                    <div class="time_icker" v-show="isShowingTimelineTimePicker">
+                                                        <div class="layer_time">
+                                                            <div class="time_select_tit">시간 선택</div>
+                                                            <button type="button" class="sp btn_close" @click="toggleTimelineTimePicker()"></button>
+                                                            <div class="time_select_area" style="padding: 10px;">
+                                                                <div class="time_select">
+                                                                    <button type="button" class="action" @click="pressedTimelineHourUpButton()">
+                                                                        <span class="sp up">숫자증가</span>
+                                                                    </button>
+                                                                    <span class="ipt_txt"><input type="text" :value="timelineDate.hour" maxlength="2" max-number="23"></span>
+                                                                    <button type="button" class="action" @click="pressedTimelineHourDownButton()">
+                                                                        <span class="sp down">숫자감소</span>
+                                                                    </button>
+                                                                </div>
+                                                                <span class="sp point"></span>
+                                                                <div class="time_select">
+                                                                    <button type="button" class="action" @click="pressedTimelineMinuteUpButton()">
+                                                                        <span class="sp up">숫자증가</span>
+                                                                    </button>
+                                                                    <span class="ipt_txt"><input type="text" :value="timelineDate.minute" maxlength="2" max-number="59"></span>
+                                                                    <button type="button" class="action" @click="pressedTimelineMinuteDownButton()">
+                                                                        <span class="sp down">숫자감소</span>
+                                                                    </button>
+                                                                </div>
+                                                                <span class="sp point"></span>
+                                                                <div class="time_select">
+                                                                    <button type="button" class="action" @click="pressedTimelineSecondUpButton()">
+                                                                        <span class="sp up">숫자증가</span>
+                                                                    </button>
+                                                                    <span class="ipt_txt"><input type="text" :value="timelineDate.second" maxlength="2" max-number="59"></span>
+                                                                    <button type="button" class="action" @click="pressedTimelineSecondDownButton()">
+                                                                        <span class="sp down">숫자감소</span>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <div class="layer_btn" style="margin-bottom: 10px;">
+                                                                <button type="button" class="btn_s btn_sb" @click="pressedTimelineTimeSelect()">선택</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                        <ul>
+                                            <li class="cal_s_btn">
+                                                <button class="btn_on" @click="moveTimeline();">확인</button>
+                                            </li>
+                                        </ul>
+                                        <div class="calendar_ar"></div>
+                                    </div>
+
+
+
                                     <div class="cam_ctrl" id="view_cam_ctrl">
                                         <div v-show="isShowControlButton">
                                             <div class="zoom">
@@ -148,8 +221,14 @@
     import event_bus_comp from '../eventBus';
     import store from '../../store/player/store';
     import moment from 'moment';
+    import * as d3 from "d3";
     import $ from 'jquery';
-    import toastcamAPIs from "../../store/toastcamAPIs";
+    import toastcamAPIs from '../../store/toastcamAPIs';
+    import pikaday from 'pikaday';
+
+    function checkFullScreen () {
+        return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+    }
 
     export default {
         name: 'play_container',
@@ -175,8 +254,8 @@
             isPlaying: function () {
                 return store.state.isPlaying;
             },
-            isFullscreen: function () {
-                return store.state.isFullscreen;
+            isFullScreen: function () {
+                return store.state.isFullScreen;
             },
             isShared: function () {
                 return store.state.isShared;
@@ -213,6 +292,12 @@
             },
             isCameraOffLastShowEvent: function () {
                 return store.state.isCameraOffLastShowEvent;
+            },
+            timelineDate: function () {
+                return store.state.timelineDate;
+            },
+            isShowTimelineCalendar: function () {
+                return store.state.isShowTimelineCalendar;
             }
         },
         data : function() {
@@ -227,16 +312,32 @@
                 lineMoveFlag: false,
                 isShowControlButton: true,
                 isShowTimelineToggleArea: false,
-                isFullScreen: false
+                isShowingTimelineTimePicker: false,
+                timelineDatePicker: null
             }
         },
         created : function() {
         },
         mounted : function() {
+
+            d3.select('#fullscreen').on('fullscreenchange', this.fullscreenChangeEvent);
+            d3.select('#fullscreen').on('webkitfullscreenchange', this.fullscreenChangeEvent);
+            d3.select('#fullscreen').on('mozfullscreenchange', this.fullscreenChangeEvent);
+            d3.select(document).on('MSFullscreenChange', this.fullscreenChangeEvent);
+            // if (document.addEventListener) {
+            //     document.addEventListener('webkitfullscreenchange', this.fullscreenHandler, false);
+            //     document.addEventListener('mozfullscreenchange', this.fullscreenHandler, false);
+            //     document.addEventListener('fullscreenchange', this.fullscreenHandler, false);
+            //     document.addEventListener('MSFullscreenChange', this.fullscreenHandler, false);
+            // }
         },
         beforeDestroy : function() {
             this.onStopTimer();
             $(this.$el).detach();
+            if (this.timelineDatePicker) {
+                this.timelineDatePicker.destroy();
+                this.timelineDatePicker = null;
+            }
             if (this.player) {
                 this.player.$destroy();
                 this.player = null;
@@ -245,8 +346,304 @@
                 this.timeline.$destroy();
                 this.timeline = null;
             }
+            // document.removeEventListener('webkitfullscreenchange', this.fullscreenHandler, false);
+            // document.removeEventListener('mozfullscreenchange', this.fullscreenHandler, false);
+            // document.removeEventListener('fullscreenchange', this.fullscreenHandler, false);
+            // document.removeEventListener('MSFullscreenChange', this.fullscreenHandler, false);
         },
         methods: {
+            showCalendar: function () {
+                store.dispatch('SET_SHOW_TIMELINE_CALENDAR', !this.isShowTimelineCalendar);
+                // $scope.timelineDatePicker._d = new Date();
+                this.timelineDatePicker._d = this.currentTime;
+                store.dispatch('SET_TIMELINE_DATE', {key: 'date', value: moment(parseInt(this.timelineDatePicker._d.getTime())).locale('ko').format('YYYY년 MM월 DD일')});
+                this.setTimelineTimeMoment(moment(parseInt(this.timelineDatePicker._d.getTime())));
+            },
+            toggleCalendar: function () {
+                store.dispatch('SET_SHOW_TIMELINE_CALENDAR', !this.isShowTimelineCalendar);
+            },
+            toggleTimelineCalendar: function () {
+                if (this.timelineDatePicker.isVisible()) {
+                    this.timelineDatePicker.hide();
+                } else {
+                    this.timelineDatePicker.show();
+                }
+            },
+
+            toggleTimelineTimePicker: function () {
+                if (this.isShowingTimelineTimePicker) {
+                    var timelineMoment = moment(this.timelineDate.time, 'HH : mm : ss');
+                    this.setTimelineTimeMoment(timelineMoment);
+                }
+
+                this.isShowingTimelineTimePicker = !this.isShowingTimelineTimePicker;
+            },
+
+            moveTimeline: function(){
+                //$scope.checkCVRSeucre(function(isSecureMode){
+                    if(false){ //isSecureMode
+                        // $scope.play.securePassword = '';
+                        // $scope.isShowCVRPlayPasswordConfirm = !$scope.isShowCVRPlayPasswordConfirm;
+                        // $scope.cvrPasswordSuccess = function () {
+                        //     $scope.goCvr(getTimelineMoment().toDate());
+                        //     $scope.isShowTimelineCalendar = false;
+                        // }
+                    }else{
+                        this.goCvr(this.getTimelineMoment().toDate());
+                        store.dispatch('SET_SHOW_TIMELINE_CALENDAR', false);
+                    }
+                //});
+            },
+
+            getTimelineMoment: function () {
+                var dateMoment = this.timelineDatePicker.getMoment();
+
+                if(this.timelineDate.time == "Invalid date"){
+                    store.dispatch('SET_TIMELINE_DATE', {key: 'time', value: "00 : 00 : 00"});
+                }
+
+                var timeString = this.timelineDate.time;
+
+                return moment(dateMoment.format("YYYYMMDD") + " " + timeString, "YYYYMMDD HH : mm : ss");
+            },
+
+            pressedTimelineTimeSelect: function () {
+                if (this.timelineDate.hour.length < 1) {
+                    alert('CAMERA_ENTER_TIME');
+                    //showAlert($translate.instant('CAMERA_INPUT_ERROR'), $translate.instant('CAMERA_ENTER_TIME'));
+                    return;
+                }
+
+                if (this.timelineDate.minute.length < 1) {
+                    alert('CAMERA_ENTER_MINUTE');
+                    //showAlert($translate.instant('CAMERA_INPUT_ERROR'), $translate.instant('CAMERA_ENTER_MINUTE'));
+                    return;
+                }
+
+                if (this.timelineDate.second.length < 1) {
+                    alert('CAMERA_ENTER_SECOND');
+                    //showAlert($translate.instant('CAMERA_INPUT_ERROR'), $translate.instant('CAMERA_ENTER_SECOND'));
+                    return;
+                }
+
+                const timeValue = (parseInt(this.timelineDate.hour) < 10 && this.timelineDate.hour.length < 2 ? "0" + this.timelineDate.hour : this.timelineDate.hour) + " : "
+                    + (parseInt(this.timelineDate.minute) < 10 && this.timelineDate.minute.length < 2 ? "0" + this.timelineDate.minute : this.timelineDate.minute) + " : "
+                    + (parseInt(this.timelineDate.second) < 10 && this.timelineDate.second.length < 2 ? "0" + this.timelineDate.second : this.timelineDate.second);
+                store.dispatch('SET_TIMELINE_DATE', {key: 'time', value: timeValue});
+
+                this.isShowingTimelineTimePicker = false;
+            },
+
+            pressedTimelineHourUpButton: function () {
+                store.dispatch('SET_TIMELINE_DATE', {key: 'hour', value: this.pressedTimeUpButton(this.timelineDate.hour, 23)});
+            },
+
+            pressedTimelineMinuteUpButton: function () {
+                store.dispatch('SET_TIMELINE_DATE', {key: 'minute', value: this.pressedTimeUpButton(this.timelineDate.minute, 59)});
+            },
+
+            pressedTimelineSecondUpButton: function () {
+                store.dispatch('SET_TIMELINE_DATE', {key: 'second', value: this.pressedTimeUpButton(this.timelineDate.second, 59)});
+            },
+
+            pressedTimelineHourDownButton: function () {
+                store.dispatch('SET_TIMELINE_DATE', {key: 'hour', value: this.pressedTimeDownButton(this.timelineDate.hour, 23)});
+            },
+
+            pressedTimelineMinuteDownButton: function () {
+                store.dispatch('SET_TIMELINE_DATE', {key: 'minute', value: this.pressedTimeDownButton(this.timelineDate.minute, 59)});
+            },
+
+            pressedTimelineSecondDownButton: function () {
+                store.dispatch('SET_TIMELINE_DATE', {key: 'second', value: this.pressedTimeDownButton(this.timelineDate.second, 59)});
+            },
+
+            pressedTimeUpButton: function (val, max) {
+                val = val.length < 1 ? 0 : val;
+                var time = parseInt(val);
+                time += 1;
+                if (time > max) {
+                    time = 0;
+                }
+
+                if (time.toString().length == 1) {
+                    return "0" + time.toString();
+                } else {
+                    return time.toString();
+                }
+            },
+
+            pressedTimeDownButton: function (val, max) {
+                val = val.length < 1 ? 0 : val;
+                var time = parseInt(val);
+                time -= 1;
+                if (time < 0) {
+                    time = max;
+                }
+
+                if (time.toString().length == 1) {
+                    return "0" + time.toString();
+                } else {
+                    return time.toString();
+                }
+            },
+
+            setupCalendar: function (serviceType) {
+                var minDate = moment().subtract(parseInt(serviceType), 'd');
+                var regDate = moment(this.currentCamera.regDate);
+
+                this.timelineDatePicker = new pikaday({
+                    field: document.getElementById('timelineDate'),
+                    container: document.getElementById('calendarContainer'),
+                    format: 'YYYY년 MM월 DD일',  //$translate.instant('CLIP_CREATE_CLIP_DATE_FORMAT'),
+                    minDate: minDate.toDate(),
+                    maxDate: new Date(),
+                    defaultDate: this.currentTime,
+                    position: 'bottom right'
+                });
+                //$scope.isShowingTimelineTimePicker = false;
+            },
+
+            setTimelineTimeMoment: function (m) {
+                const timeValue = m.format('HH : mm : ss');
+                store.dispatch('SET_TIMELINE_DATE', {key: 'time', value: timeValue});
+                var token = timeValue.split(' : ');
+                if(token[0] == "Invalid date"){
+                    token[0] = "00";
+                    token[1] = "00";
+                    token[2] = "00";
+                }
+                store.dispatch('SET_TIMELINE_DATE', {key: 'hour', value: token[0]});
+                store.dispatch('SET_TIMELINE_DATE', {key: 'minute', value: token[1]});
+                store.dispatch('SET_TIMELINE_DATE', {key: 'second', value: token[2]});
+            },
+
+            fullscreenChangeEvent: function () {
+                var leftDefault = 166;
+                var topDefault = 96;
+                var isFullScreen = checkFullScreen();
+                store.dispatch('SET_IS_FULLSCREEN', isFullScreen);
+                //newTimelineDragCnt = 0;
+
+                if (isFullScreen) {
+                    $("#cloud_out_small").hide();
+                    $("#cloud_out_full").show();
+                    //fullscreenFlag = true;
+
+                    //$scope.isPromotionCheck = false;
+
+                    if (this.isExpiredCloud) {
+                        if (this.player) {
+                            this.player.control.zoomZone(topDefault, parseInt($("#player").css("width"))-20);
+                        }
+                    } else {
+                        if (this.player) {
+                            this.player.control.zoomZone(topDefault + 110, parseInt($("#player").css("width"))-20);
+                        }
+                    }
+                    //$scope.isShowFullscreenButton = false;
+                } else {
+
+                    $("#cloud_out_small").children("img").css("margin-left","20px");
+
+                    $("#cloud_out_small").show();
+                    $("#cloud_out_full").hide();
+                    //$scope.fullScreenAlert = false;
+                    //fullscreenFlag = false;
+                    $("#view_timeline_area").removeAttr( 'style' );
+
+                    //$timeout.cancel($scope.fullscreenTimer);
+                    if (this.player) {
+                        this.player.control.zoomZone(350, parseInt($("#player").css("width"))-20);
+                    }
+                    // $scope.zoomVisible = true;
+                    // $scope.controlVisible = true;
+                    // $scope.timelineVisible = true;
+
+                    // if ($scope.currentZoom > 1) {
+                    //     $scope.currentZoom = 1;	// 줌 상태일 경우 줌해제 처리
+                    //     $scope.zoomUp(0);
+                    // }
+
+                    // $scope.isShowFullscreenButton = true;
+                    // $scope.isShowTimelineToggleArea = false;
+                    // $scope.isToggleOn = false;
+                    // isClickTimelineShow = false;
+
+                    $("#time_area_bar").css("top","")
+                    $("#view_timeline_ctrl").show();
+                    $("#view_timeline_date").show();
+                    $("#view_btn_area").show();
+                    $("#view_camdtl_tab").show();
+                    $("#footer").show();
+                    $("#header").show();
+                    $("#play_back").css("position","");
+                    $("#play_back").css("width","");
+
+                    $("#view_timeline_area").css("position","");
+                    $("#view_timeline_area").css("bottom","");
+
+                    //clearTimeout(fullScreenMakeView);
+
+                    this.timeline.redrawWithWidth(parseInt($("#view_timeline_ctrl").width()));
+                    $(".axis-bottom-line").show();
+
+                    $(".cam_ctrl").css("position","relative");
+                    $(".cam_ctrl").css("top",0);
+
+                    $("#controlFullTimeLine").hide();
+                    $("#controlNdTimeLine").show();
+
+                    //$timeout.cancel(timelineHideTimer);
+                    $("#showControl").hide();
+                    $("#timebar_area").children("svg").children("g").attr("transform", 'translate(0, -19)');
+                    $("#timebar_area").children("svg").height("85");
+                    $("#controlNdTimeLine").css("position","");
+                    $("#controlNdTimeLine").css("top", "");
+                    $("#timelinedesc").css("top","51px");
+                    $("#prevLineBtn").css("top","");
+                    $("#nextLineBtn").css("top","");
+                    $("#cursorLeftBtn").css("top","");
+                    $("#cursorRightBtn").css("top","");
+                    $(".fs_time").hide();
+                    $(".cam_info_area").css("top","");
+                    $("#cloud_out_small").children("img").css("margin-left","20px");
+                    // if($scope.currentCamera.isPromotion == 1){
+                    //     if($scope.currentCamera.saveEndDate > (new Date()).valueOf()){
+                    //         $scope.isPromotionCheck = true;
+                    //     }else{
+                    //         $scope.isPromotionCheck = false;
+                    //         $scope.cloud_out = true;
+                    //         $("#timelinedesc").remove();
+                    //     }
+                    // }else{
+                    //     $scope.isPromotionCheck = false;
+                    // }
+                }
+            },
+
+            fullscreenHandler: function(event) {
+                if (checkFullScreen()) {
+                    if (this.currentCamera.recorderType === "recorder") {
+                        $('#player').show();
+                        $('#player').css('opacity', 0);
+                        timeout(function() {
+                            if ($('#remoteVideosContainer').children('video').length) {
+                                $('#remoteVideosContainer').children('video').css('height', $('#remoteVideosContainer').height() - 100);
+                            }
+                        }, 500);
+                    }
+                } else {
+                    setTimeout(function () {
+                        if (this.currentCamera.recorderType === "recorder") {
+                            $('#player').hide();
+                        }
+                        if ($('#remoteVideosContainer').children('video').length) {
+                            $('#remoteVideosContainer').children('video').css('height', $('#remoteVideosContainer').height() - $('#timeline_table').height());
+                        }
+                    }, 100);
+                }
+            },
             play: function(time) {
                 this.player.play(time);
             },
@@ -276,6 +673,10 @@
                             range = 600000 * 6 * 6 * 4;
                             fixRange = 3650000;
                             break;
+                    }
+
+                    if (!this.isPlaying) {
+                        clearInterval(this.playTimer);
                     }
 
                     store.dispatch('SET_CURRENT_TIME', new Date());
@@ -310,6 +711,10 @@
 
                 this.playTimer = setInterval(() => {
                     this.timeline.cvrDrawCheck(this.currentTime);
+
+                    if (!this.isPlaying) {
+                        clearInterval(this.playTimer);
+                    }
 
                     if (this.currentCamera.recordType == "event") {
                         //$scope.jumpToNextRecord();
@@ -370,10 +775,11 @@
             },
             pauseBtn: function() {
                 this.player.control.pause();
+                this.store.dispatch('SET_IS_PLAYING', false);
             },
             playBtn: function() {
                 if(this.isLive == false){
-                    //$scope.clickedCVRArea(new Date($scope.timeline.x.invert($(".cursor").children("line").attr("x1")).getTime()));
+                    this.timeline.clickedCVRArea(new Date(this.timeline.x.invert($(".cursor").children("line").attr("x1")).getTime()));
                 }else{
                     this.player.play();
                 }
@@ -504,9 +910,9 @@
                     }
 
                     if (this.currentCamera.recorderType === 'nvr') {
-                        this.timeline.setupCalendar(this.serviceDay.toString());
+                        this.setupCalendar(this.serviceDay.toString());
                     } else {
-                        this.timeline.setupCalendar(this.currentCamera.serviceType);
+                        this.setupCalendar(this.currentCamera.serviceType);
                     }
                 } else {
                     store.dispatch('SET_CLOUD_OUT', true);
@@ -1001,7 +1407,7 @@
         }
 
         .timebar .prev {
-            background: url(./resources/img/icon_timebar_left.png) no-repeat;
+            background: url(/resources/img/icon_timebar_left.png) no-repeat;
             left: 14px;
             width: 17px;
             height: 28px;
@@ -1010,7 +1416,7 @@
         .timebar .find_cursor.left {
             width: 60px;
             height: 32px;
-            background: url(./resources/img/bg_time_cursor_ptL.png);
+            background: url(/resources/img/bg_time_cursor_ptL.png);
             top: -2px;
             left: 19px;
         }
@@ -1022,7 +1428,7 @@
         }
 
         .timebar .next {
-            background: url(./resources/img/icon_timebar_right.png) no-repeat;
+            background: url(/resources/img/icon_timebar_right.png) no-repeat;
             left: -35px;
             width: 17px;
             height: 28px;
@@ -1031,14 +1437,14 @@
         .timebar .find_cursor.right {
             width: 60px;
             height: 32px;
-            background: url(./resources/img/bg_time_cursor_pt.png);
+            background: url(/resources/img/bg_time_cursor_pt.png);
             top: -2px;
             left: -78px;
         }
 
         .timebar .thumbnail-container {
 
-            background-image: url("./resources/img/bg_thum_view_line.png");
+            background-image: url("/resources/img/bg_thum_view_line.png");
             position: absolute;
         }
 
@@ -1180,10 +1586,10 @@
         :-moz-full-screen .timebar_area { margin-left: 0 !important; margin-right: 0 !important; }
         :-moz-full-screen .timebar .wrap_control_prev { top: 44px; }
         :-moz-full-screen .timebar .wrap_control_next { top: 44px; }
-        :-moz-full-screen .timebar .prev { left: 10px; background: url(./resources/img/icon_fs_timebar_left.png) no-repeat; }
-        :-moz-full-screen .timebar .next { left: -25px; background: url(./resources/img/icon_fs_timebar_right.png) no-repeat; }
-        :-moz-full-screen .timebar .find_cursor.left { background: url(./resources/img/bg_fs_time_cursor_ptL.png); width:60px; }
-        :-moz-full-screen .timebar .find_cursor.right { background: url(./resources/img/bg_fs_time_cursor_ptR.png);  width:60px;}
+        :-moz-full-screen .timebar .prev { left: 10px; background: url(/resources/img/icon_fs_timebar_left.png) no-repeat; }
+        :-moz-full-screen .timebar .next { left: -25px; background: url(/resources/img/icon_fs_timebar_right.png) no-repeat; }
+        :-moz-full-screen .timebar .find_cursor.left { background: url(/resources/img/bg_fs_time_cursor_ptL.png); width:60px; }
+        :-moz-full-screen .timebar .find_cursor.right { background: url(/resources/img/bg_fs_time_cursor_ptR.png);  width:60px;}
 
         :-ms-fullscreen { width: 100% !important; height: 100%; padding: 0; }
         :-ms-fullscreen #player { width: 100%; height: 100%; border: none; position: relative;}
@@ -1199,10 +1605,10 @@
         :-ms-fullscreen .timebar_area { margin-left: 0 !important; margin-right: 0 !important; }
         :-ms-fullscreen .timebar .wrap_control_prev { top: 44px; }
         :-ms-fullscreen .timebar .wrap_control_next { top: 44px; }
-        :-ms-fullscreen .timebar .prev { left: 10px; background: url(./resources/img/icon_fs_timebar_left.png) no-repeat; }
-        :-ms-fullscreen .timebar .next { left: -25px; background: url(./resources/img/icon_fs_timebar_right.png) no-repeat; }
-        :-ms-fullscreen .timebar .find_cursor.left { background: url(./resources/img/bg_fs_time_cursor_ptL.png);  width:60px;}
-        :-ms-fullscreen .timebar .find_cursor.right { background: url(./resources/img/bg_fs_time_cursor_ptR.png);  }
+        :-ms-fullscreen .timebar .prev { left: 10px; background: url(/resources/img/icon_fs_timebar_left.png) no-repeat; }
+        :-ms-fullscreen .timebar .next { left: -25px; background: url(/resources/img/icon_fs_timebar_right.png) no-repeat; }
+        :-ms-fullscreen .timebar .find_cursor.left { background: url(/resources/img/bg_fs_time_cursor_ptL.png);  width:60px;}
+        :-ms-fullscreen .timebar .find_cursor.right { background: url(/resources/img/bg_fs_time_cursor_ptR.png);  }
 
         /* event list */
 
@@ -1364,7 +1770,7 @@
         }
 
         /* images */
-        .sp,.sns_area a,.video_area.add:after,.btn .ic:before,.btn_w .ic:before,.evt_lst_wrap .evt_lst li button:after,.filter_bx.bd .chk input:checked+label,.filter_bx:first-child .chk input:checked+label:before,.ck_bx label:before,.ck_bx2 label:before,.rdo label:before,.rdo2 label:before,.zone,.time_info:after,.inp_box.calendar button,.inp_box.clock button,.evt_lst_wrap.v2 .open .set_modi .zone:after,.evt_lst_wrap.v2 .open .chk input:checked+label,.s_tit_area li:before {display:inline-block;overflow:hidden;background:url(./resources/img/sp.png) no-repeat;line-height:999px;vertical-align:top;}
+        .sp,.sns_area a,.video_area.add:after,.btn .ic:before,.btn_w .ic:before,.evt_lst_wrap .evt_lst li button:after,.filter_bx.bd .chk input:checked+label,.filter_bx:first-child .chk input:checked+label:before,.ck_bx label:before,.ck_bx2 label:before,.rdo label:before,.rdo2 label:before,.zone,.time_info:after,.inp_box.calendar button,.inp_box.clock button,.evt_lst_wrap.v2 .open .set_modi .zone:after,.evt_lst_wrap.v2 .open .chk input:checked+label,.s_tit_area li:before {display:inline-block;overflow:hidden;background:url(/resources/img/sp.png) no-repeat;line-height:999px;vertical-align:top;}
 
         .camdtl_wrap{position:relative;margin:12px 0 70px;padding-right:282px}
         .camdtl_view .player_area{position:relative;height:100%;padding-top:56%;font-size:0;vertical-align:top;z-index:0}
@@ -1440,6 +1846,17 @@
         :root .cam_info .time_area .sp.play_disabled{margin-left: -2px;}
         :root .cam_info .time_area .sp.pause_disabled{margin-left: -2px;}
 
+        .inp_box{display:block;position:relative;height:30px;padding:0 5px;background:#fff;border:1px solid #ddd;vertical-align:top;box-sizing:border-box}
+        .inp_box_w{width:452px; top: 16px;}
+        .inp_box_w:lang(ja){width: 390px;}
+        .inp_box input{width:100%;height:100%}
+        .inp_box.calendar,.inp_box.clock{height:28px;padding-right:25px;width: 240px;}
+        .inp_box.clock{position: relative;margin-left: 250px; margin-top: -28px;}
+        .inp_box.calendar button,.inp_box.clock button{position:absolute;top:50%;right:10px;width:16px}
+        .inp_box.calendar button{height:18px;margin-top:-10px;background-position:-196px -411px;}
+        .inp_box.clock button{height:16px;margin-top:-8px;background-position:-210px -356px}
+        .inp_box input.setup_input_box{width: 478px;}
+
         .cam_ctrl .zoom{position:absolute;left:19px;top:0px;padding:0 38px;line-height:34px; background: rgba(0,0,0,.8); border-radius: 20px; z-index: 10;}
         .cam_ctrl .zoom .sp{position:absolute;}
         .cam_ctrl .zoom .zoomout{left:0;background-position:-182px -626px}
@@ -1453,7 +1870,7 @@
         .cam_ctrl .fs_time button:lang(ja) {margin-right:18px;}
         .cam_ctrl .fs_time button.last{position: relative; font-size: 14px; color: #fff; line-height: 26px; margin-right: 0px; margin-left: 22px;}
         .cam_ctrl .fs_time button span.on{color: #4b96e6;}
-        .cam_ctrl .fs_time button .calendar{background:url(./resources/img/sp.png) no-repeat; width: 16px; height: 18px; background-position:-227px -438px; position: absolute; top:1px; left: -22px;}
+        .cam_ctrl .fs_time button .calendar{background:url(/resources/img/sp.png) no-repeat; width: 16px; height: 18px; background-position:-227px -438px; position: absolute; top:1px; left: -22px;}
         .cam_ctrl .menu{position:absolute;top:-8px;right:19px;text-align:right;line-height:50px}
         .cam_ctrl .menu .sp{margin-left:10px}
         .cam_ctrl .menu .sp.mic_off{background-position:-20px -664px}
@@ -1481,10 +1898,10 @@
         .cam_ctrl .event_move .event_move_box li{float: left; display: block; height: 34px;}
         .cam_ctrl .event_move .event_move_box li.ar_L{width: 32px; height: 34px; cursor: pointer;}
         .cam_ctrl .event_move .event_move_box li.ar_L:active{background: #333;}
-        .cam_ctrl .event_move .event_move_box li.ar_L button{background:url(./resources/img/sp.png) no-repeat; width: 7px; height: 17px; background-position:0px -494px; margin-left: 3px; margin-top: 9px;}
+        .cam_ctrl .event_move .event_move_box li.ar_L button{background:url(/resources/img/sp.png) no-repeat; width: 7px; height: 17px; background-position:0px -494px; margin-left: 3px; margin-top: 9px;}
         .cam_ctrl .event_move .event_move_box li.ar_R{width: 32px; height: 34px; cursor: pointer;}
         .cam_ctrl .event_move .event_move_box li.ar_R:active{background: #333;}
-        .cam_ctrl .event_move .event_move_box li.ar_R button{background:url(./resources/img/sp.png) no-repeat; width: 7px; height: 17px; background-position:-11px -494px; margin-left: 0px; margin-top: 9px;}
+        .cam_ctrl .event_move .event_move_box li.ar_R button{background:url(/resources/img/sp.png) no-repeat; width: 7px; height: 17px; background-position:-11px -494px; margin-left: 0px; margin-top: 9px;}
         .cam_ctrl .event_move .event_move_box li.txt{font-size: 14px; color: #fff; line-height: 34px; text-align: center; width: 94px; position: relative; background: rgba(0,0,0,.7);}
 
         .timeline_ctrl{height:40px;padding:0 10px; border-bottom: 1px solid #f4f4f4; background: #fff; overflow: hidden;}
@@ -1497,9 +1914,9 @@
         .timeline_ctrl .time_unit li button.pos{padding: 0 15px; color: #777;}
         .timeline_ctrl .time_unit li.on button{color:#5cacff}
         .timeline_ctrl .time_unit li.calendar{width: 92px; line-height: 16px;}
-        .timeline_ctrl .time_unit li.calendar button{display:inline-block; background:url(./resources/img/sp.png) no-repeat; width: 16px; height: 18px; background-position:-196px -411px; margin-top: 10px; margin-left: 10px;}
+        .timeline_ctrl .time_unit li.calendar button{display:inline-block; background:url(/resources/img/sp.png) no-repeat; width: 16px; height: 18px; background-position:-196px -411px; margin-top: 10px; margin-left: 10px;}
         .timeline_ctrl .time_unit li.calendar button span{position: absolute; margin-top: 1px; margin-left: 10px;}
-        .timeline_ctrl .time_unit li.calendar button.on{display:inline-block; background:url(./resources/img/sp.png) no-repeat; width: 16px; height: 18px; background-position:-226px -411px; margin-top: 10px; margin-left: 10px;}
+        .timeline_ctrl .time_unit li.calendar button.on{display:inline-block; background:url(/resources/img/sp.png) no-repeat; width: 16px; height: 18px; background-position:-226px -411px; margin-top: 10px; margin-left: 10px;}
         .timeline_ctrl .time_unit li.calendar button.on span{position: absolute; margin-top: 1px; margin-left: 10px; color: #4b96e6;}
         .timeline_ctrl .time_btn{float:left;line-height:39px;margin-left: -2px;}
         .timeline_ctrl .time_btn .btn{display:inline-block;height:39px;padding:0 9px;color:#7c7c7c;line-height:39px; background: none;}
@@ -1518,10 +1935,10 @@
         .timeline_ctrl .event_move .event_move_box li{float: left; display: block; height: 27px;}
         .timeline_ctrl .event_move .event_move_box li.ar_L{width: 22px; height: 27px; cursor: pointer;}
         .timeline_ctrl .event_move .event_move_box li.ar_L:active{background: #ddd}
-        .timeline_ctrl .event_move .event_move_box li.ar_L button{background:url(./resources/img/sp.png) no-repeat; width: 7px; height: 16px; background-position:0px -512px; margin-left: 8px; vertical-align: top; margin-top: 6px;}
+        .timeline_ctrl .event_move .event_move_box li.ar_L button{background:url(/resources/img/sp.png) no-repeat; width: 7px; height: 16px; background-position:0px -512px; margin-left: 8px; vertical-align: top; margin-top: 6px;}
         .timeline_ctrl .event_move .event_move_box li.ar_R{width: 22px; height: 27px; cursor: pointer;}
         .timeline_ctrl .event_move .event_move_box li.ar_R:active{background: #ddd}
-        .timeline_ctrl .event_move .event_move_box li.ar_R button{background:url(./resources/img/sp.png) no-repeat; width: 7px; height: 16px; background-position:-11px -512px; margin-left: 7px; vertical-align: top; margin-top: 6px;}
+        .timeline_ctrl .event_move .event_move_box li.ar_R button{background:url(/resources/img/sp.png) no-repeat; width: 7px; height: 16px; background-position:-11px -512px; margin-left: 7px; vertical-align: top; margin-top: 6px;}
         .timeline_ctrl .event_move .event_move_box li.txt{font-size: 13px; color: #666; line-height: 27px; text-align: center; width: 95px; background: #f8f8f8;}
         .timeline_ctrl .event_move:lang(ja){margin-left: -64px;}
         .timeline_ctrl .event_move .event_move_box:lang(ja){width: 130px;}
@@ -1530,7 +1947,7 @@
         .calendar_select{position: absolute; right: 4px; width: 140px; height: 125px; border: 1px solid #d5d5d5; background: #fff; margin-top: -10px; z-index: 9800; padding:10px;}
         .calendar_select_full{right: 214px; margin-top: -160px;}
         .calendar_select button.btn_close{overflow:hidden;position:absolute;top:13px;right:9px;width:12px;height:12px;background-position:-535px -289px;line-height:999px}
-        .calendar_select .calendar_ar{position: absolute; bottom:-12px; left:76px;  display:inline-block; background:url(./resources/img/sp.png) no-repeat; width: 18px; height: 12px; background-position:-529px -204px; }
+        .calendar_select .calendar_ar{position: absolute; bottom:-12px; left:76px;  display:inline-block; background:url(/resources/img/sp.png) no-repeat; width: 18px; height: 12px; background-position:-529px -204px; }
         .calendar_select h3{font-size: 14px; color: #4b96e6; padding-bottom: 5px; font-weight: 400;}
         .calendar_select h3:lang(ja){padding-bottom: 0;}
         .calendar_select li{margin-top: 7px;}
@@ -1542,18 +1959,24 @@
         .calendar_open_area{position: absolute; right: 245px;}
         .calendar_open_area .pika-button{margin: 0;}
         .calendar_open_area .pika-single .pika-lendar .pika-title button.btn_close{top: 10px;}
-        .calendar_pos_select{position: absolute; right: 4px; width: 140px; height: 125px; border: 1px solid #d5d5d5; background: #fff; margin-top: 5px; z-index: 9800; padding:10px;}
-        .calendar_pos_select_full{right: 50px; margin-top: -160px;}
-        .calendar_pos_select_pos{margin-top: 5px;}
-        .calendar_pos_select_pos_full{right: 50px; margin-top: -160px;}
-        .calendar_pos_select button.btn_close{overflow:hidden;position:absolute;top:13px;right:9px;width:12px;height:12px;background-position:-535px -289px;line-height:999px}
-        .calendar_pos_select .calendar_ar{position: absolute; bottom:-12px; left:76px;  display:inline-block; background:url(./resources/img/sp.png) no-repeat; width: 18px; height: 12px; background-position:-529px -204px; }
-        .calendar_pos_select h3{font-size: 14px; color: #4b96e6; padding-bottom: 5px; font-weight: 400;}
-        .calendar_pos_select li{margin-top: 7px;}
-        .calendar_pos_select li input{font-size: 12px; color: #333333;}
-        .calendar_pos_select li button{margin: 0 2px;}
-        .calendar_pos_select li.cal_s_btn{text-align: center;}
-        .calendar_pos_select li.cal_s_btn button.btn_on{background: #4b96e6; width: 140px; text-align: center; line-height: 28px; color: #fff; border-radius: 2px; margin: 0px;}
+
+        /* 시계 */
+        .layer_time{display:block;position:relative;z-index:100;background:#fff;}
+        .layer_time button.btn_close{overflow:hidden;position:absolute;top:15px;right:15px;width:12px;height:12px;background-position:-535px -274px;line-height:999px}
+        .layer_time.ng_hide{display:none}
+        .time_icker{margin-top:-1px;border:1px solid #aaa;background:#fff; right: 60px; width: 238px; z-index: 1; position: absolute;}
+        .time_select_tit{height:46px;font-size:14px;text-align:center;line-height:46px;margin-top: 5px; font-weight: 400;}
+        .time_select_area{padding:5px 20px 20px;text-align:center;}
+        .time_select{display:inline-block;width:43px;border:1px solid #e4e4e4;vertical-align:middle}
+        .time_select .action{padding:7px 16px}
+        .time_select .sp{width:14px;height:7px}
+        .time_select .sp.up{background-position:-519px -312px}
+        .time_select .sp.up:hover{background-position:-534px -312px}
+        .time_select .sp.down{background-position:-519px -325px}
+        .time_select .sp.down:hover{background-position:-534px -325px}
+        .time_select .ipt_txt input{display:block;width:100%;height:50px;border:1px solid #e4e4e4;border-width:1px 0;background:#f9f9f9;color:#333;text-align:center}
+        .point{display:inline-block;width:1px;height:8px;margin:0 6px;background-position:-546px -84px;vertical-align:middle}
+        .layer_btn{margin-bottom:20px;text-align:center;}
 
         .timeline_guide{position: absolute; left: 50%; margin-left: -75px; color: black; z-index: 1500; margin-top:1px;}
         .timeline_area{border-bottom:1px solid #f4f4f4;}
@@ -1565,7 +1988,7 @@
         .timeline_area .time_bar:hover .time_info{display:block;z-index:999;}
         .timeline_area .time_info{display:none;border:1px solid #bbb;background:#FFFFFF;text-align:center;}
         /*.timeline_area .time_info:after{position:absolute;bottom:-12px;left:50%;width:18px;height:12px;margin-left:-9px;background-position:-529px -204px;content:''}*/
-        .timeline_area .time_info_tri{position:absolute;bottom:62px;width:18px;height:12px;background:url(./resources/img/thum_arrow.png) no-repeat;background-position:0px 0px;content:'';border:0px;}
+        .timeline_area .time_info_tri{position:absolute;bottom:62px;width:18px;height:12px;background:url(/resources/img/thum_arrow.png) no-repeat;background-position:0px 0px;content:'';border:0px;}
         .timeline_area .time_detail{position:relative;width:100%;height:90px;margin-bottom:11px;background:#000}
         .timeline_area .time_detail:after{position:absolute;top:0;left:0;right:0;bottom:0;border:1px solid rgba(0,0,0,.5);content:''}
         .timeline_area .sp{position:absolute;top:36px;width:18px;height:28px}
@@ -1574,8 +1997,8 @@
         .timeline_area .sp.next{right:7px;background-position:-165px -410px;margin-top: -13px;}
         .timeline_area .sp_cursor{position:absolute;top:31px;width:48px;height:32px}
         /*.timeline_area .sp_cursor{position:absolute;top:15px;width:54px;height:32px}*/
-        .timeline_area .sp_cursor.prev{left:30px;background:url(./resources/img/bg_time_cursor_ptL.png) no-repeat; margin-top: -8px;}
-        .timeline_area .sp_cursor.next{right:-7px;background:url(./resources/img/bg_time_cursor_pt.png) no-repeat; margin-top: -8px;}
+        .timeline_area .sp_cursor.prev{left:30px;background:url(/resources/img/bg_time_cursor_ptL.png) no-repeat; margin-top: -8px;}
+        .timeline_area .sp_cursor.next{right:-7px;background:url(/resources/img/bg_time_cursor_pt.png) no-repeat; margin-top: -8px;}
         .timeline_area .time_idx{font-size:13px;color:#7c7c7c;text-align:center}
         .timeline_area .time_idx dl,.timeline_area .time_idx dd{display:inline-block}
         .timeline_area .time_idx dd{margin-left:25px}

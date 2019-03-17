@@ -5,7 +5,7 @@ import playContainer from './play_container';
 import flashPlayer from "./flash_player";
 import webRTCPlayer from "./webrtc_player";
 import timeline from "./timeline";
-import toastAPIs from 'toastcam-apis';
+import toastAPIs from '../../store/toastcamAPIs';
 
 class player {
     constructor(param) {
@@ -39,11 +39,11 @@ class player {
 
                     if (cameraData.recorderType === 'recorder') {
                         vExtendConstructor = Vue.extend(webRTCPlayer);
-                        this.containerComp.player = new vExtendConstructor().$mount('#play_area');
+                        this.containerComp.player = new vExtendConstructor().$mount('#player');
                         console.log('GET webrtcClient');
                     } else {
                         vExtendConstructor = Vue.extend(flashPlayer);
-                        this.containerComp.player = new vExtendConstructor().$mount('#play_area');
+                        this.containerComp.player = new vExtendConstructor().$mount('#player');
                         console.log('GET flashBridge');
                     }
 
