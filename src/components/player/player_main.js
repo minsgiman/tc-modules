@@ -1,11 +1,11 @@
 import Vue from 'vue';
 import 'es6-promise/auto';
-import store from '../../store/player/store';
+import store from '../../service/player/store';
 import playContainer from './play_container';
 import flashPlayer from "./flash_player";
 import webRTCPlayer from "./webrtc_player";
 import timeline from "./timeline";
-import toastAPIs from '../../store/toastcamAPIs';
+import toastAPIs from '../../service/toastcamAPIs';
 
 class player {
     constructor(param) {
@@ -18,11 +18,11 @@ class player {
         store.dispatch('SET_CAMERA_ID', this.cameraId);
         store.dispatch('SET_SHOP_ID', this.shopId);
         store.dispatch('SET_IS_SHARED', this.isShared);
-        if (param.category === 'b2b') {
-            toastAPIs.setConfig({
-                prefix: '/json/biz/'
-            });
-        }
+        // if (param.category === 'b2b') {
+        //     toastAPIs.setConfig({
+        //         prefix: '/json/biz/'
+        //     });
+        // }
     }
 
     initialize (callback) {

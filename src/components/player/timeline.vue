@@ -117,11 +117,11 @@
     import {event as currentEvent} from 'd3';
     import $ from 'jquery';
     import _ from 'lodash';
-    import store from '../../store/player/store';
-    import HashMap from '../../store/hashMap';
+    import store from '../../service/player/store';
+    import HashMap from '../../service/hashMap';
     import moment from 'moment';
-    import toastAPIs from '../../store/toastcamAPIs';
-    import gEventBus from '../../store/gEventBus';
+    import toastAPIs from '../../service/toastcamAPIs';
+    import gEventBus from '../../service/gEventBus';
 
     d3.selection.prototype.moveToFront = function() {
         return this.each(function(){

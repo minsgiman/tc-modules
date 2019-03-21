@@ -5,7 +5,7 @@
                 @start-timer="onStartTimer"
                 @go-live="onGoLive"
                 @go-cvr="onGoCvr"
-                @play-start="play"
+                @play-start="onPlayStart"
                 @play-status-change="onPlayStatusChange"
                 @show-calendar="showCalendar">
         </event_bus_comp>
@@ -18,7 +18,7 @@
                                 <div class="player_cam" id="player"></div>
                                 <div id="controlNdTimeLine">
 
-
+                                    <!--
                                     <div class="calendar_select" :class="{calendar_select_full: isFullScreen}" v-show="isShowTimelineCalendar">
                                         <button type="button" class="sp btn_close" @click="toggleCalendar"></button>
                                         <h3>날짜/시간 바로가기</h3>
@@ -86,7 +86,7 @@
                                         </ul>
                                         <div class="calendar_ar"></div>
                                     </div>
-
+                                    -->
 
 
                                     <div class="cam_ctrl" id="view_cam_ctrl">
@@ -219,11 +219,11 @@
 
 <script>
     import event_bus_comp from '../eventBus';
-    import store from '../../store/player/store';
+    import store from '../../service/player/store';
     import moment from 'moment';
     import * as d3 from "d3";
     import $ from 'jquery';
-    import toastcamAPIs from '../../store/toastcamAPIs';
+    import toastcamAPIs from '../../service/toastcamAPIs';
     import pikaday from 'pikaday';
 
     function checkFullScreen () {
@@ -645,6 +645,9 @@
                 }
             },
             play: function(time) {
+                this.player.play(time);
+            },
+            onPlayStart: function() {
                 this.player.play(time);
             },
             drawTimeline: function() {

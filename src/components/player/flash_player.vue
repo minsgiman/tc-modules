@@ -4,9 +4,9 @@
 
 <script>
     import $ from 'jquery';
-    import store from '../../store/player/store';
-    import toastcamAPIs from '../../store/toastcamAPIs';
-    import gEventBus from '../../store/gEventBus';
+    import store from '../../service/player/store';
+    import toastcamAPIs from '../../service/toastcamAPIs';
+    import gEventBus from '../../service/gEventBus';
 
     const zoomZoneBottom = 149;
     const zoomZoneRight = 580;

@@ -1,7 +1,7 @@
 <template></template>
 <script>
     import _ from "lodash";
-    import gEventBus from '../store/gEventBus';
+    import gEventBus from '../service/gEventBus';
 
     export default {
         data() {
