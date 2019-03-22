@@ -1,5 +1,8 @@
 import * as d3 from "d3";
-
+import {event as currentEvent} from 'd3';
+import $ from "jquery";
+import moment from 'moment';
+import 'moment-timezone';
 
 d3.selection.prototype.moveToFront = function() {
     return this.each(function(){
@@ -27,15 +30,13 @@ var dragEndStatus = false;
 
 var dblClicklive = false;
 
-var changeTimeRangeClick = false;
-
 var startTimeline = 0;
 
 var serivceDayOver = false;
 
 var thatEnd, thatStart;
 
-var timelineColor = ['#18b57b','#ff7900','#3ea1d4','#a4c800','#efd600','#767dff','#ca7af0','#ff76bd','#929292', '#ff1e00']; //초록,주황,파랑,연두,노랑,진한보라,보라,핑크,회색
+var browserLang = $("html").attr("lang");
 
 var getMaxDragX = function(){
     return parseInt($(".cvrBG").attr("width"));
@@ -56,10 +57,6 @@ var adjustDateLocation = function(d, index) {
     return 'translate(' + adjustedTranslateX + ', 0)';
 };
 
-var removeWidth0 = true;
-
-var removeWidth = 0;
-
 var removeWidthStop = true;
 
 var zoneId = 0;
@@ -67,22 +64,19 @@ var timelineSgidMap = new HashMap();
 
 class timeline {
     constructor(param) {
-        /** param : {elementId, width, height, timeRange, currentCamera, serviceDay, isLive, eventZones, motionZones, inoutFilter, sensorZones, eventCb}  **/
-        var that = this;
+        /** param : {elementId, width, height, timeRange, currentCamera, eventCb}  **/
         this.width = param.width;
         this.height = param.height;
         this.timeRange = param.timeRange;
         this.currentCamera = param.currentCamera;
         this.timelineEventCb = param.eventCb;
-        this.serviceDay = param.serviceDay;
-        this.isLive = param.isLive;
-        this.eventZones = param.eventZones;
-        this.motionZones = param.motionZones;
-        this.inoutFilter = param.inoutFilter;
-        this.sensorZones = param.sensorZones;
-
+        this.serviceDay = 0;
+        this.inoutFilter = false;
+        this.sensorZones = [];
+        this.eventZones = [];
+        this.motionZones = [];
+        this.isLive = true;
         this.serviceDateTime = 0;
-        this.cursorDragStatus = false;
         this.firstDataLoadingFlag = false;
         this.clickDateChange = false;
         this.isPlaying = false;
@@ -109,8 +103,8 @@ class timeline {
             currentSvg.remove();
         }
         this.svg = d3.select("#" + param.elementId).append('svg')
-            .attr('width', width)
-            .attr('height', height)
+            .attr('width', this.width)
+            .attr('height', this.height)
             .attr('class', 'no-select');
 
         this.mainContainer = this.svg.append('g').attr({
@@ -137,40 +131,39 @@ class timeline {
         this.inoutEvents = this.mainContainer.append('g').attr('class', 'inouts');
         this.isDblZooming = false;
         this.previousDblClickTime = 0;
-        this.currentDomain = timeRange.currentDomain;
+        this.currentDomain = this.timeRange.currentDomain;
 
-        this.svg.on('dblclick', function (){
-            that.timelineEventCb('newTimelineDragCntUpdate', 0);
-            that.timelineEventCb('dblClickFlagUpdate', true);
+        this.svg.on('dblclick', () => {
+            this.timelineEventCb('doubleClick');
             var now = new Date();
             $("#showThumbnailListNew").hide();
             $("#time_info_tri").hide();
-            if (now.getTime() - that.previousDblClickTime < 500) return;
-            that.previousDblClickTime = now.getTime();
-            if (that.isLoading) return;
+            if (now.getTime() - this.previousDblClickTime < 500) return;
+            this.previousDblClickTime = now.getTime();
+            if (this.isLoading) return;
 
-            var cursorTime = that.currentTime.getTime();
+            var cursorTime = this.currentTime.getTime();
 
-            if (cursorTime <= that.currentDomain[0] || cursorTime >= that.currentDomain[1]) {
+            if (cursorTime <= this.currentDomain[0] || cursorTime >= this.currentDomain[1]) {
                 return
             }
 
             var timeRanges = [10, 60, 360, 1440];
 
-            var current = timeRanges.indexOf(that.timeRange);
+            var current = timeRanges.indexOf(this.timeRange);
             if (current === 0) {
-                that.isDblZooming = true;
+                this.isDblZooming = true;
             } else if (current === 3) {
-                that.isDblZooming = false;
+                this.isDblZooming = false;
             }
             var newTimeRange;
-            if (that.isDblZooming) {
+            if (this.isDblZooming) {
                 newTimeRange = timeRanges[current + 1];
             } else {
                 newTimeRange = timeRanges[current - 1];
             }
 
-            that.dblZoomDomain(cursorTime, newTimeRange);
+            this.dblZoomDomain(cursorTime, newTimeRange);
         });
     }
 
@@ -178,16 +171,14 @@ class timeline {
         var that = this;
 
         return d3.behavior.drag()
-            .on('dragstart', function () {
-                that.timelineEventCb('changeTimeRangeFlagUpdate', true);
-                that.timelineEventCb('dragThumCancleUpdate', true);
-                that.timelineEventCb('thumnailDrawUpdate', false);
+            .on('dragstart', () => {
+                that.timelineEventCb('dragStart');
             })
-            .on('drag', function () {
+            .on('drag', () => {
                 if(timelineDrawFlag == false){
                     return;
                 }
-                that.timelineEventCb('beforeSgidUpdate', "");
+                that.timelineEventCb('dragging');
                 $("#time_info_tri").hide();
                 $("#showThumbnailListNew").hide();
                 removeWidthStop = true;
@@ -195,10 +186,8 @@ class timeline {
 
                 dragFlag = true;
                 var x = 0;
-                if (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0) {
-                    x = d3.event.dx;// *2.22;
-                }else{
-                    x = d3.event.dx;// *1.91;
+                if (currentEvent) {
+                    x = currentEvent.dx;
                 }
 
                 serivceDayOver = true;
@@ -263,20 +252,18 @@ class timeline {
                 $(".cvrBG").attr("x",dragX*-1);
                 $(".cvrBG2").attr("x",dragX*-1);
             })
-            .on('dragend', function () {
-                that.timelineEventCb('newTimelineDragCntUpdate', 0);
-                that.timelineEventCb('beforeSgidUpdate', "");
+            .on('dragend', () => {
+                that.timelineEventCb('dragEnd');
                 if(dragX < -10){
                 }else if(dragX > 10){
                 }else{
                     dragFlag = false;
                 }
 
-                setTimeout(function(){
+                setTimeout(() => {
                     dragFlag = false;
                     if(timelineClick == false){
-                        that.timelineEventCb('lineMoveFlagChanged', true);
-                        that.timelineEventCb('dragTimeLineUpdate', true);
+                        that.timelineEventCb('updateByDrag');
                         dragEndStatus = true;
                         that.dragDomain();
                         $(".axis").attr("transform","translate(0, 75)");
@@ -291,12 +278,10 @@ class timeline {
                     timelineClick = false;
                 },150);
 
-                setTimeout(function(){
+                setTimeout(() => {
                     that.timelineEventCb('changeTimeRangeFlagUpdate', false);
                     timelineDrawFlag = true;
                 },1410);
-
-                that.timelineEventCb('dragThumCancleUpdate', false);
             });
     }
 
@@ -334,7 +319,7 @@ class timeline {
     }
 
     removeBufferDomain (domain, timeRange) {
-        var buffer = NewTimeline.bufferDomain(timeRange);
+        var buffer = this.bufferDomain(timeRange);
         var originStart = domain[0] + buffer;
         var originEnd = domain[1] - buffer;
 
@@ -367,7 +352,7 @@ class timeline {
     }
 
     removeBufferCursorCheckDomain (domain, timeRange) {
-        var buffer = NewTimeline.bufferCursorCheckDomain(timeRange);
+        var buffer = this.bufferCursorCheckDomain(timeRange);
         var originStart = domain[0] + buffer;
         var originEnd = domain[1] - buffer;
 
@@ -385,7 +370,7 @@ class timeline {
         var start = now - parseInt(ms * (ratio));
         var end = now + parseInt(ms * (1- ratio));
 
-        return NewTimeline.bufferedDomain([start, end], minutes);
+        return this.bufferedDomain([start, end], minutes);
     }
 
     bufferedDomain (domain, minutes) {
@@ -399,7 +384,7 @@ class timeline {
         }
 
         var ms = ticks[minutes] * 60 * 1000;
-        var buffer = NewTimeline.bufferDomain(minutes);
+        var buffer = this.bufferDomain(minutes);
         var newStart = Math.ceil(domain[0] / ms) * ms - buffer;
         var newEnd = (Math.ceil(domain[1] / ms)) * ms + buffer;
         startTimeline = newStart;
@@ -409,7 +394,6 @@ class timeline {
     zoomDomain (time, timeRange) {
         thumnailViewFlag = false;
         this.timeRange = timeRange;
-        this.timelineEventCb('timeRangeChanged', this.timeRange);
 
         var range = 1000*60 * timeRange;
         var diff = timeRange / 2 * 60 * 1000;
@@ -417,12 +401,11 @@ class timeline {
         var start = time - diff - diff  *0.8;
         var end = time + diff- diff * 0.8;
 
-        return this.changeDomain(NewTimeline.bufferedDomain([start-range, end+range], timeRange), 500, time);
+        return this.changeDomain(this.bufferedDomain([start-range, end+range], timeRange), 500, time);
     }
 
     dblZoomDomain (time, timeRange) {
         this.timeRange = timeRange;
-        this.timelineEventCb('timeRangeChanged', this.timeRange);
 
         var range = 1000*60 * timeRange;
         var diff = timeRange / 2 * 60 * 1000;
@@ -430,7 +413,7 @@ class timeline {
         var start = time - diff - diff  *0.8;
         var end = time + diff- diff * 0.8;
 
-        var newDomain = NewTimeline.bufferedDomain([start-range, end+range], timeRange);
+        var newDomain = this.bufferedDomain([start-range, end+range], timeRange);
         while (time < newDomain[0] || time > newDomain[1]) {
             var ms = timeRange * 60 * 1000;
             if (time < newDomain[0]) {
@@ -449,34 +432,16 @@ class timeline {
 
         return this.changeDomain(newDomain);
     }
-//사용안함
-    moveDomain (ratio) {
-        var diff = parseInt((this.currentDomain[1] - this.currentDomain[0]) * ratio);
-        var start = this.currentDomain[0] + diff;
-        var end = this.currentDomain[1] + diff;
-
-        return this.changeDomain([start, end]);
-    }
-
-//사용안함
-    dragDrawDomain (value) {
-        this.timelineEventCb('dragThumCancleUpdate', false);
-        var diff = 10000 * value;
-        var newDomain = [this.currentDomain[0] - diff, this.currentDomain[1] - diff];
-        return this.changeDomain(newDomain);
-    }
 
     prevDomain () {
-        this.timelineEventCb('newTimelineDragCntUpdate', 0);
-        this.timelineEventCb('dragThumCancleUpdate', false);
+        this.timelineEventCb('moveDomain');
         var diff = this.timeRange * 60 * 1000;
         var newDomain = [this.currentDomain[0] - diff, this.currentDomain[1] - diff];
         return this.changeDomain(newDomain);
     }
 
     nextDomain () {
-        this.timelineEventCb('newTimelineDragCntUpdate', 0);
-        this.timelineEventCb('dragThumCancleUpdate', false);
+        this.timelineEventCb('moveDomain');
         var diff = this.timeRange * 60 * 1000;
         var newDomain = [this.currentDomain[0] + diff, this.currentDomain[1] + diff];
         return this.changeDomain(newDomain);
@@ -516,14 +481,13 @@ class timeline {
 
     setTimeRange (minutes, callback) {
         this.timeRange = parseInt(minutes);
-        this.timelineEventCb('timeRangeChanged', this.timeRange);
 
         var x = this.svg.select('.cursor').select("line").attr('x1');
         var cursorTime = this.x.invert(x).getTime();
 
         return this.zoomDomain(cursorTime, minutes);
     }
-//사용안함
+
     domainCenterTime () {
         if (this.currentDomain !== undefined) {
             return (this.currentDomain[0] + this.currentDomain[1])/2 + (this.currentDomain[1] - this.currentDomain[0])/8;
@@ -534,7 +498,6 @@ class timeline {
 
     setTimeRangeAtDateString (dateString, timeRange) {
         this.timeRange = 1440;
-        this.timelineEventCb('timeRangeChanged', this.timeRange);
 
         var format = d3.time.format("%Y%m%d%H%M%S");
 
@@ -545,22 +508,20 @@ class timeline {
 
         var startTime = startDate.getTime();
         var endTime = endDate.getTime();
-        var newDomain = NewTimeline.bufferedDomain([startTime-range, endTime+range], this.timeRange);
+        var newDomain = this.bufferedDomain([startTime-range, endTime+range], this.timeRange);
 
         return this.changeDomain(newDomain);
     }
 
     changeDomain (domain, duration, time) {
-        var $q = this.$q;
-        var that = this;
-        var deferred = $q.defer();
+        var range, fixRange;
 
         this.svg.select('.cursor').classed('hide', true);
 
         this.currentDomain = domain;
-        this.removedBufferDomain = NewTimeline.removeBufferDomain(this.currentDomain , this.timeRange);
-        setTimeout(function(){
-            that.timelineEventCb('setupDomain', that.currentDomain);
+        this.removedBufferDomain = this.removeBufferDomain(this.currentDomain , this.timeRange);
+        setTimeout(() => {
+            this.timelineEventCb('setupDomain', this.currentDomain);
         },1000);
 
         var extent;
@@ -589,13 +550,7 @@ class timeline {
         this.updateBar(duration)
         this.updateEvents(duration);
         this.updateAccessIcons(duration);
-        setTimeout(function(){
-
-        },500);
         this.nowAnimating = false;
-
-        deferred.resolve();
-
         switch(this.timeRange){
             case 10:
                 range = 600000;
@@ -633,19 +588,13 @@ class timeline {
                 $(".motions").fadeIn(200);
             },280);
         }
-
-        return deferred.promise;
     }
 
     changeDragDomain (domain, duration, time) {
-        var $q = this.$q;
-        var that = this;
-        var deferred = $q.defer();
-
         this.svg.select('.cursor').classed('hide', true);
 
         this.currentDomain = domain;
-        this.removedBufferDomain = NewTimeline.removeBufferDomain(this.currentDomain , this.timeRange);
+        this.removedBufferDomain = this.removeBufferDomain(this.currentDomain , this.timeRange);
         this.timelineEventCb('setupDomain', this.currentDomain);
 
         var extent;
@@ -675,70 +624,9 @@ class timeline {
         this.nowAnimating = false;
 
         if($(".cursor").attr("class").indexOf("hide") != -1){
-            that.updateCursor(that.currentTime);
+            this.updateCursor(this.currentTime);
             this.svg.select('.cursor').classed('hide', false);
         }
-
-        return deferred.promise;
-    }
-//사용안함
-    realAddTimeLine (duration,events,time) {
-
-        this.updateBar(duration);
-
-        if(events != undefined){
-            var that = this;
-            var $q = this.$q;
-            var deferred = $q.defer();
-
-            if (duration === undefined) {
-                duration = 0;
-            }
-
-            var sortMap = new HashMap();
-
-            for(var i=events.length-1;i>=0;i--){
-
-                if(events[i].detectType == "audio"){
-                    return;
-                }
-
-                var drawX = 0;
-                var drawWidth = 0;
-                if(time.startTime >= events[i].startTime){
-                    drawX = that.x(time.startTime);
-                    drawWidth = that.x(events[i].endTime) - that.x(time.startTime);
-                }
-
-                if(time.startTime < events[i].startTime){
-                    drawX = that.x(events[i].startTime);
-                    drawWidth = that.x(events[i].endTime) - that.x(events[i].startTime);
-                }
-
-                d3.select(".motions").append("rect").transition().duration(duration).attr("class", "tempClass")
-                    .attr("width", drawWidth)
-                    .attr("x", drawX)
-                    .attr("i", events[i].index)
-                    .attr("y", 27)
-                    .attr("height", 36)
-                    .style("fill", events[i].color);
-
-                sortMap.put(i,drawWidth);
-            }
-
-        }
-    }
-//사용안함
-    addEventData (message) {
-        this.eventData.push(message);
-
-        return this.drawEvents();
-    }
-//사용안함
-    addCvrData (message) {
-        this.cvrData.push(message);
-
-        return this.drawRecordBar();
     }
 
     draw () {
@@ -766,26 +654,25 @@ class timeline {
     }
 
     getDateTicks () {
-        var todayWord = this.$translate.instant("EVENT_LIST_DATE_TODAY");
-        var yesterdayWord = this.$translate.instant("EVENT_LIST_DATE_YESTERDAY");
-        var that = this;
+        var todayWord = browserLang === 'ja' ? '今日' : '오늘';
+        var yesterdayWord = browserLang === 'ja' ? '昨日' : '어제';
         var tick = d3.svg.axis().scale(this.x).orient("bottom")
             .tickSize(11, 0)
             .tickPadding(3)
-            .tickFormat(function (d, i) {
+            .tickFormat((d, i) => {
                 var md;
 
-                if (that.tz !== undefined) {
-                    md = moment(d).tz(that.tz).locale(Util.getBrowserLanguage());
+                if (this.tz !== undefined) {
+                    md = moment(d).tz(this.tz).locale(browserLang);
                 } else {
-                    md = moment(d).locale(Util.getBrowserLanguage());
+                    md = moment(d).locale(browserLang);
                 }
 
                 var now = new Date();
                 var todayCheck = new Date(md.year(), md.month(), md.date());
                 var todayFlag = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-                var dateFormat = that.boundDateFormat;
+                var dateFormat = this.boundDateFormat;
 
                 if(dateFormat === undefined) {
                     dateFormat = "HH:mm";
@@ -794,29 +681,29 @@ class timeline {
                 } else if ((todayFlag - todayCheck)/(1000 * 60 * 60 * 24) == 1) {
                     dateFormat = yesterdayWord + "(ddd)";
                 } else {
-                    dateFormat = that.boundDateFormat;
+                    dateFormat = this.boundDateFormat;
                 }
 
-                if(that.timeRange == 10){
+                if(this.timeRange == 10){
                     if (parseInt(md.minutes()) % 10 == 0) {
                         return md.format(dateFormat);
                     }else{
                         return "";
                     }
-                }else if(that.timeRange == 60){
+                }else if(this.timeRange == 60){
                     if (md.minutes() == "00") {
                         return md.format(dateFormat);
                     }else{
                         return "";
                     }
-                }else if(that.timeRange == 360){
+                }else if(this.timeRange == 360){
                     var formatArr = [2,6,10,14,18,22];
                     if (formatArr.indexOf(md.hours()) > -1)  {
                         return md.format(dateFormat);
                     }else{
                         return "";
                     }
-                }else if(that.timeRange == 1440){
+                }else if(this.timeRange == 1440){
                     var formatArr = [4,16];
                     if (formatArr.indexOf(md.hours()) > -1)  {
                         return md.format(dateFormat);
@@ -848,8 +735,8 @@ class timeline {
     }
 
     getBigTicks () {
-        var dayWord = this.$translate.instant("EVENT_LIST_DATE_DAY");
-        var nightWord = this.$translate.instant("EVENT_LIST_DATE_NIGHT");
+        var dayWord = browserLang === 'ja' ? '昼' : '낮';
+        var nightWord = browserLang === 'ja' ? '夜' : '밤';
         var that = this;
         var tick = d3.svg.axis().scale(this.x).orient("bottom")
             .tickSize(11, 0)
@@ -858,9 +745,9 @@ class timeline {
                 var md;
 
                 if (that.tz !== undefined) {
-                    md = moment(d).tz(that.tz).locale(Util.getBrowserLanguage());
+                    md = moment(d).tz(that.tz).locale(browserLang);
                 } else {
-                    md = moment(d).locale(Util.getBrowserLanguage());
+                    md = moment(d).locale(browserLang);
                 }
 
                 var timeFormat = "HH:mm";
@@ -969,26 +856,17 @@ class timeline {
 
         return tick;
     }
-//사용안함
-    getNextDateTicks () {
-        var tick = d3.svg.axis().scale(this.x).orient('top')
-            .tickSize(10, 0)
-            .tickFormat(d3.time.format("%m월 %d일"));
-
-        tick.ticks(d3.time.hours, 24);
-
-        return tick;
-    }
 
     drawAxis (domain) {
         var that = this;
+
         if (domain === undefined) {
-            this.currentDomain = NewTimeline.dateDomain(this.timeRange);
+            this.currentDomain = this.dateDomain(this.timeRange);
             this.currentDomain[0] = this.currentDomain[0] - 1000*60*60;
             this.currentDomain[1] = this.currentDomain[1] + 1000*60*60;
         }
 
-        this.removedBufferDomain = NewTimeline.removeBufferDomain(this.currentDomain , this.timeRange);
+        this.removedBufferDomain = this.removeBufferDomain(this.currentDomain , this.timeRange);
         this.timelineEventCb('setupDomain', this.currentDomain);
 
         this.x = d3.time.scale()
@@ -1030,24 +908,23 @@ class timeline {
             });
 
         this.axisContainer.selectAll(".date-tick-axis .tick")
-            .attr('transform', adjustDateLocation.bind(this));
+            .attr('transform', adjustDateLocation.bind(that));
 
         var bigTickAxis = this.axisContainer.append("g")
             .attr('class', 'big-tick-axis')
-            .call(this.getBigTicks());
+            .call(that.getBigTicks());
 
         var tickAxis = this.axisContainer.append("g")
             .attr('class', 'tick-axis')
-            .call(this.getTicks());
+            .call(that.getTicks());
 
         var smallTickAxis = this.axisContainer.append("g")
             .attr('class', 'small-tick-axis')
-            .call(this.getSmallTicks());
+            .call(that.getSmallTicks());
         var cvrBG = this.svg.select('.cvrBG').attr('width', this.width).attr("height","50px");
         var cvrBG2 = this.svg.select('.cvrBG2').attr('width', this.width).attr("height","50px").attr("z-index","999");
-        var that = this;
 
-        cvrBG.on('click', function (){
+        cvrBG.on('click', function () {
             that.timelineEventCb('newTimelineDragCntUpdate', 0);
             if(that.firstDataLoadingFlag == false){
                 that.timelineEventCb('loadingDataAlert');
@@ -1062,11 +939,8 @@ class timeline {
                 }
                 dblClicklive = that.isLive;
                 dblClickTime = that.currentTime.valueOf();
-                that.timelineEventCb('thumnailDrawUpdate', true);
-                that.timelineEventCb('lineMoveFlagChanged', false);
-                that.timelineEventCb('dragThumCancleUpdate', false);
+                that.timelineEventCb('clickedCVRBg');
                 timelineClick = true;
-                that.timelineEventCb('plyBtnStatusChanged', true);
                 if ((new Date().getTime()) - that.previousDblClickTime < 500) return; // animating caused by dbl click.
 
 
@@ -1081,32 +955,24 @@ class timeline {
                     }
 
                 };
-                that.timelineEventCb('checkCVRSeucre', function(isSecureMode){
+                that.timelineEventCb('checkCVRSeucre', (isSecureMode) => {
                     if(isSecureMode){
                         if(document.msFullscreenElement) {
                             that.timelineEventCb('pressedExitFullScreenButton');
                         }
                         that.timelineEventCb('updateCVRSecureStatus', callbackFunc);
-                        /*  TODO: 사용하는 쪽에서 모두 처리
-                        that.delegate.play.securePassword = '';
-                        that.delegate.isShowCVRPlayPasswordConfirm = !that.delegate.isShowCVRPlayPasswordConfirm;
-                        that.delegate.cvrPasswordSuccess = callbackFunc;
-                        */
                     }else{
                         callbackFunc();
                     }
                 });
             }
-
-        })
-            .on('mousemove', function () {
-                var mouseLocation = d3.mouse(this);
-                var selectedTime = that.x.invert(mouseLocation[0]);
-                that.timelineEventCb('cvrMouseoverEventsNew', {position: mouseLocation[0], time: selectedTime});
-            })
-            .on('mouseout', function () {
-                that.timelineEventCb('mouseoutEvents');
-            });
+        }).on('mousemove', function () {
+            var mouseLocation = d3.mouse(this);
+            var selectedTime = that.x.invert(mouseLocation[0]);
+            that.timelineEventCb('cvrMouseoverEventsNew', {position: mouseLocation[0], time: selectedTime});
+        }).on('mouseout', function () {
+            that.timelineEventCb('mouseoutEvents');
+        });
 
         cvrBG2.on('mousemove', function () {
             $("#time_info_tri").hide();
@@ -1117,8 +983,8 @@ class timeline {
     drawCursor () {
         var that = this;
         var drag = d3.behavior.drag()
-            .on('dragstart', function () {
-                that.cursorDragStatus = true;
+            .on('dragstart', () => {
+                that.timelineEventCb('cursorDragStatusChanged', true);
                 if(that.firstDataLoadingFlag == false){
                     return;
                 }
@@ -1126,8 +992,8 @@ class timeline {
                 $("#time_info_tri").hide();
                 that.timelineEventCb('cursorDragStart');
             })
-            .on('drag', function () {
-                that.cursorDragStatus = true;
+            .on('drag', () => {
+                that.timelineEventCb('cursorDragStatusChanged', true);
                 if(that.firstDataLoadingFlag == false){
                     that.timelineEventCb('loadingDataAlert');
                     return;
@@ -1143,22 +1009,14 @@ class timeline {
                 that.cursor.selectAll('circle').attr({cx: x});
                 that.timelineEventCb('cursorDragging', time);
             })
-            .on('dragend', function () {
-                that.timelineEventCb('plyBtnStatusChanged', true);
-                that.cursorDragStatus = false;
-                that.timelineEventCb('liveReloadCntUpdate', 0);
-                that.timelineEventCb('dragThumCancleUpdate', false);
+            .on('dragend', () => {
+                that.timelineEventCb('cursorDragEnd');
                 that.timelineEventCb('checkCVRSeucre', function(isSecureMode){
                     if(isSecureMode){
                         if(document.msFullscreenElement) {
                             that.timelineEventCb('pressedExitFullScreenButton');
                         }
                         that.timelineEventCb('updateCVRSecureStatus');
-                        /* TODO: 사용하는 쪽에서 처리
-                        that.delegate.play.securePassword = '';
-                        that.delegate.isShowCVRPlayPasswordConfirm = !that.delegate.isShowCVRPlayPasswordConfirm;
-                        that.delegate.cvrPasswordSuccess = that.delegate.cursorDragEnd;
-                        */
                     }else{
                         that.timelineEventCb('cursorDragEnd');
                     }
@@ -1201,7 +1059,6 @@ class timeline {
     }
 
     updateCursor (time) {
-        var deferred = this.$q.defer();
         var now = Date.now()
         if (time !== undefined) {
             now = time.valueOf();
@@ -1232,7 +1089,6 @@ class timeline {
 
             var curosEmptyData = 0;
 
-            deferred.resolve();
             if(this.timeRange == 60){
                 curosEmptyData = 200000;
             }else if(this.timeRange == 360){
@@ -1255,37 +1111,14 @@ class timeline {
                 this.timelineEventCb('hideCursorNavigation');
             }
         }
-
-        return deferred.promise;
-    }
-
-//사용 안함
-    removeWidthZero () {
-        removeWidth = setInterval(function(){
-            if(removeWidth0 == true && removeWidthStop == false){
-                removeWidth0 = false;
-                for(var i=0;i<$(".cvr").children("rect").length;i++){
-                    if(parseInt($(".cvr").children("rect").eq(i).attr("width")) == 0){
-                        $(".cvr").children("rect").eq(i).remove();
-                    }
-                }
-                for(var i=0;i<$(".motions").children("rect").length;i++){
-                    if(parseInt($(".motions").children("rect").eq(i).attr("width")) == 0){
-                        $(".motions").children("rect").eq(i).remove();
-                    }
-                }
-                removeWidth0 = true;
-            }
-
-        },2000);
     }
 
     drawRecordBar () {
         var that = this;
-        if(changeTimeRangeClick == true){
+        if(this.changeTimeRangeClick == true){
             $(".cvr").empty();
         }
-        changeTimeRangeClick = false;
+        this.changeTimeRangeClick = false;
         if(this.cvrData != undefined){
             var bars = this.cvrs.selectAll('.record-bar').data(this.cvrData).enter()
                 .append('rect').attr({
@@ -1329,29 +1162,28 @@ class timeline {
     }
 
     getAllFilteredZonesIds (zoneData) {
-        var that = this;
-        // 현재 이벤트 data의 zoneIdxs중 check 된 zoneIndex 여부 확인
-        var filteredEventZoneIdsArr = _.map(_.filter(that.eventZones, ['filterMark', 'on']), 'id');
-        var filteredMotionZoneIdsArr = _.map(_.filter(that.motionZones, function (o) { return o.filterMark === 'on' && o.id !== '9'; }), 'uid');
-        var allFilteredZoneIdsArr = _.concat(filteredEventZoneIdsArr, filteredMotionZoneIdsArr);	// 체크 처리된 모든 zoneId
-        var isCheckedDeleteZoneId = _.get(_.find(that.motionZones, ['id', '9']), 'filterMark') === 'on' ? true : false;
+        var filteredEventZoneIdsArr = this.eventZones.filter(item => item.filterMark === 'on').map(item => item.id);
+        var filteredMotionZoneIdsArr = this.motionZones.filter(item => item.filterMark === 'on' && item.id !== '9').map(item => item.uid);
+        var allFilteredZoneIdsArr = filteredEventZoneIdsArr.concat(filteredMotionZoneIdsArr);	// 체크 처리된 모든 zoneId
+        var deleteZone = this.motionZones.find(item => item.id === 9);
+        var isCheckedDeleteZoneId = (deleteZone && deleteZone.filterMark === 'on') ? true : false;
 
         // 삭제된 이벤트가 체크된 경우 이벤트에서 alarmzone으로 설정된 zoneId가 아닌 zoneId 모두를 추출.
         if (isCheckedDeleteZoneId) {
-            var allZoneIdsArr = _.concat(_.map(that.eventZones, 'id'), _.map(_.filter(that.motionZones, function (o) { return o.id !== '9'; }), 'uid'));
-            var deletedZoneIdsArr = _.difference(zoneData, allZoneIdsArr);	// 0, 10000, 20000, motion zoneId를 제외한 존 데이터는 삭제된 이벤트 zone id
-            allFilteredZoneIdsArr = _.concat(allFilteredZoneIdsArr, _.map(_.filter(deletedZoneIdsArr, function (o) {
-                return (o !== "ACCESS_ENTER" && o !== "ACCESS_EXIT" && o !== "SENSOR_TEMP" && o !== "SENSOR_HUMID" && o !== "SENSOR_MOTION" && o !== "SENSOR_MAGNETIC" && o !== "SENSOR_SMOKE" && o !== "SENSOR_GAS" && o !== "SENSOR_PLUG" && o !== "DOORLOCK_EVENT");
-            })));
+            var allZoneIdsArr = this.eventZones.map(item => item.id).concat(this.motionZones.filter(item => item.id !== '9').map(item => item.uid));
+            var deletedZoneIdsArr = zoneData.filter(item => !allZoneIdsArr.includes(item));
+            allFilteredZoneIdsArr = allFilteredZoneIdsArr.concat(deletedZoneIdsArr.filter(item => (o !== "ACCESS_ENTER" && o !== "ACCESS_EXIT" && o !== "SENSOR_TEMP" && o !== "SENSOR_HUMID" && o !== "SENSOR_MOTION" && o !== "SENSOR_MAGNETIC" && o !== "SENSOR_SMOKE" && o !== "SENSOR_GAS" && o !== "SENSOR_PLUG" && o !== "DOORLOCK_EVENT")));
         }
 
         if (this.inoutFilter) {
-            allFilteredZoneIdsArr = _.concat(allFilteredZoneIdsArr, ["ACCESS_ENTER", "ACCESS_EXIT"]);
+            allFilteredZoneIdsArr = allFilteredZoneIdsArr.concat(["ACCESS_ENTER", "ACCESS_EXIT"]);
         }
-        var i, len = this.sensorZones.length;
-        for (i = 0; i < len; i+=1) {
-            if (this.sensorZones[i].filterMark === "on") {
-                allFilteredZoneIdsArr.push(this.sensorZones[i].id);
+        if (this.sensorZones) {
+            var i, len = this.sensorZones.length;
+            for (i = 0; i < len; i+=1) {
+                if (this.sensorZones[i].filterMark === "on") {
+                    allFilteredZoneIdsArr.push(this.sensorZones[i].id);
+                }
             }
         }
         return allFilteredZoneIdsArr;
@@ -1365,12 +1197,12 @@ class timeline {
         zoneId = 0;
         this.timelineEventCb('timelineMapChanged', new HashMap());
         timelineSgidMap = new HashMap();
-        timelineSgidWidthMap = new HashMap();
+        this.timelineEventCb('timelineSgidWidthMapChanged', new HashMap());
 
         if(this.eventData != undefined){
             this.eventData.forEach(function (d) {
                 var allFilteredZoneIds = that.getAllFilteredZonesIds(d.zoneIdxs.split(","));
-                var isCheckedEvent = _.intersection(d.zoneIdxs.split(","), allFilteredZoneIds);	// 필터 체크된 이벤트 데이터인지 확인
+                var isCheckedEvent = d.zoneIdxs.split(",").filter(item => allFilteredZoneIds.includes(item));
 
                 if (parseInt(d.endTime) <= parseInt(Date.now()) && isCheckedEvent.length > 0) {
                     // var zons = d.zoneIdxs.split(",");
@@ -1400,12 +1232,13 @@ class timeline {
                     // 	timelineZoneUid = 9;
                     // }
 
-                    if (_.map(that.eventZones, 'id').indexOf(isCheckedEvent[0]) > -1) {
+                    if (that.eventZones.map(item => item.id).indexOf(isCheckedEvent[0]) > -1) {
                         // 가족 출입, 소리 이벤트 인 경우 id 그대로
                         zoneIdx = isCheckedEvent[0];
                     } else {
                         // 모션존인 경우 uid로 id 찾기
-                        zoneIdx = _.get(_.find(that.motionZones, function (o) { return o.uid === isCheckedEvent[0] && o.id !== '9'; }), 'id');
+                        var findZone = that.motionZones.find(item => item.uid === isCheckedEvent[0] && item.id !== '9');
+                        zoneIdx = findZone && findZone.id ? findZone.id : 0;
                     }
 
                     if (isCheckedEvent[0] && isCheckedEvent[0].indexOf) {
@@ -1427,17 +1260,9 @@ class timeline {
                     // }
                     var thatXCheck = that.x(d.startTime);
                     var thatWidthCheck = that.x(d.endTime) - that.x(d.startTime);
-
-                    if(fullscreenFlag == true){
-                        if(thatWidthCheck >= 0 ){
-                            filteredData.push(obj);
-                        }
-                    }else{
-                        if(thatWidthCheck >= 0 ){
-                            filteredData.push(obj);
-                        }
+                    if(thatWidthCheck >= 0 ){
+                        filteredData.push(obj);
                     }
-                    // }
                     zoneId++;
                 }
             });
@@ -1481,8 +1306,7 @@ class timeline {
                 width: function(d) {
                     var thatX = that.x(d.startTime);
                     var thatWidth = that.x(d.endTime) - that.x(d.startTime);
-
-                    timelineSgidWidthMap.put([thatX,thatX + (thatWidth)],d.sgid);
+                    that.timelineEventCb('timelineSgidWidthMapPut', [thatX,thatX + (thatWidth)],d.sgid);
 
                     return thatWidth;
                 },
@@ -1533,7 +1357,7 @@ class timeline {
                 width: function(d) {
                     var thatX = that.x(d.startTime);
                     var thatWidth = that.x(d.endTime) - that.x(d.startTime);
-                    timelineSgidWidthMap.put([thatX,thatX + (thatWidth)],d.sgid);
+                    that.timelineEventCb('timelineSgidWidthMapPut', [thatX,thatX + (thatWidth)],d.sgid);
                     return thatWidth;
                 },
                 height: 36,
@@ -1618,7 +1442,7 @@ class timeline {
                         return that.x(d.startTime) + 3;
                     } else if (d.count < that.scaleAvg * 0.9) {
                         return that.x(d.startTime) + 2.5;
-                    } else if (d.count >= that.scaleAvg * 0.9 && d.count <= this.scaleAvg * 1.1) {
+                    } else if (d.count >= that.scaleAvg * 0.9 && d.count <= that.scaleAvg * 1.1) {
                         return that.x(d.startTime) + 2;
                     } else if (d.count > that.scaleAvg * 1.5) {
                         return that.x(d.startTime) + 1;
@@ -1633,7 +1457,7 @@ class timeline {
                         return that.x(d.endTime) - that.x(d.startTime) - 6;
                     } else if (d.count < that.scaleAvg * 0.9) {
                         return that.x(d.endTime) - that.x(d.startTime) - 5;
-                    } else if (d.count >= that.scaleAvg * 0.9 && d.count <= this.scaleAvg * 1.1) {
+                    } else if (d.count >= that.scaleAvg * 0.9 && d.count <= that.scaleAvg * 1.1) {
                         return that.x(d.endTime) - that.x(d.startTime) - 4;
                     } else if (d.count > that.scaleAvg * 1.5) {
                         return that.x(d.endTime) - that.x(d.startTime) - 2;
@@ -1647,8 +1471,6 @@ class timeline {
 
     updateAccessIcons (duration) {
         var that = this;
-        var $q = this.$q;
-        var deferred = $q.defer();
 
         if (duration === undefined) {
             duration = 500;
@@ -1667,16 +1489,11 @@ class timeline {
                 height: 18
             })
             .each('end', function () {
-                deferred.resolve();
             });
-
-        return deferred.promise;
     }
 
     updateEvents (duration) {
         var that = this;
-        var $q = this.$q;
-        var deferred = $q.defer();
 
         if (duration === undefined) {
             duration = 500;
@@ -1720,50 +1537,46 @@ class timeline {
                     var thatX = that.x(d.startTime);
                     var thatWidth = that.x(d.endTime) - that.x(d.startTime);
 
-                    timelineSgidWidthMap.put([thatX,thatX + (thatWidth)],d.sgid);
+                    that.timelineEventCb('timelineSgidWidthMapPut', [thatX,thatX + (thatWidth)],d.sgid);
 
                     return thatWidth;
                 },
                 height: 28,
             }).style({
-            'stroke' : function (d) {
-                if(d.color == null || d.color == "null"){
-                    return "#999999";
+                'stroke' : function (d) {
+                    if(d.color == null || d.color == "null"){
+                        return "#999999";
+                    }
+                },
+                'stroke-dasharray' : function (d) {
+                    if(d.color == null || d.color == "null"){
+                        return "1, 3";
+                    }
+                },
+                'stroke-width' : function (d) {
+                    if(d.color == null || d.color == "null"){
+                        return "1";
+                    }
                 }
-            },
-            'stroke-dasharray' : function (d) {
-                if(d.color == null || d.color == "null"){
-                    return "1, 3";
-                }
-            },
-            'stroke-width' : function (d) {
-                if(d.color == null || d.color == "null"){
-                    return "1";
-                }
-            }
-        })
+            })
             .each('end', function () {
-                deferred.resolve();
             });
-
-        return deferred.promise;
     }
 
     redrawEvents (events, avg) {
-        if(changeTimeRangeClick == true){
-            var that = this;
+        if(this.changeTimeRangeClick == true){
             this.scaleAvg = avg;
             this.eventData = events;
 
-            setTimeout(function(){
+            setTimeout(() => {
                 $(".accessIcons").empty();
                 $(".motions").empty();
                 $(".inouts").empty();
                 $(".sensors").empty();
                 $(".audios").empty();
                 $(".motions").fadeIn(200);
-                that.drawEvents();
-                changeTimeRangeClick = false;
+                this.drawEvents();
+                this.changeTimeRangeClick = false;
                 thumnailViewFlag = true;
                 removeWidthStop = false;
             },180);
@@ -1778,7 +1591,7 @@ class timeline {
             $(".audios").empty();
             this.drawEvents();
             removeWidthStop = false;
-            changeTimeRangeClick = false;
+            this.changeTimeRangeClick = false;
 
             setTimeout(function(){
                 $(".motions").fadeIn(200);
@@ -1797,71 +1610,55 @@ class timeline {
     }
 
     updateAxis (duration, flag) {
-        var $q = this.$q;
         var that = this;
-
-        var deferred = $q.defer();
 
         if (duration === undefined) {
             duration = 500;
         }
 
-        this.axisContainer.selectAll(".date-tick-axis .tick rect").remove()
+        this.axisContainer.selectAll(".date-tick-axis .tick rect").remove();
 
         if(flag == "drag"){
-            var dateTickPromise = $q(function (resolve, reject) {
-                that.svg.select(".date-tick-axis")
-                    .transition()
-                    .duration(duration)
-                    .call(that.getDateTicks())
-                    .call(function(){
-                        var ticks = this.selectAll(".tick")[0];
-                        ticks.forEach(function (tick) {
-                            var textNode = $(tick).find('text');
-                            var text = textNode.text();
-                            var textWidth, locationX;
-                            if (textNode && textNode[0]) {
-                                textWidth = textNode[0].getBoundingClientRect().width + 6;
-                            } else {
-                                textWidth = 0;
-                            }
-                            locationX = -(textWidth / 2);
-                            if(text.length > 0){
-                                d3.select(tick).insert('rect', 'text').attr({ x: locationX, y: 12, width: textWidth, height: 14, fill: "#555"});
-                            }
-                        });
-
-                        this.selectAll(".date-tick-axis .tick").attr('transform', adjustDateLocation.bind(that));
+            that.svg.select(".date-tick-axis")
+                .transition()
+                .duration(duration)
+                .call(that.getDateTicks())
+                .call(function(){
+                    var ticks = this.selectAll(".tick")[0];
+                    ticks.forEach(function (tick) {
+                        var textNode = $(tick).find('text');
+                        var text = textNode.text();
+                        var textWidth, locationX;
+                        if (textNode && textNode[0]) {
+                            textWidth = textNode[0].getBoundingClientRect().width + 6;
+                        } else {
+                            textWidth = 0;
+                        }
+                        locationX = -(textWidth / 2);
+                        if(text.length > 0){
+                            d3.select(tick).insert('rect', 'text').attr({ x: locationX, y: 12, width: textWidth, height: 14, fill: "#555"});
+                        }
                     });
-            });
 
-            var bigTickPromise = $q(function (resolve, reject) {
-                that.svg.select(".big-tick-axis")
-                    .transition()
-                    .duration(duration)
-                    .call(that.getBigTicks())
-            });
+                    this.selectAll(".date-tick-axis .tick").attr('transform', adjustDateLocation.bind(that));
+                });
 
-            var tickPromise = $q(function (resolve, reject) {
-                that.svg.select(".tick-axis")
-                    .transition()
-                    .duration(duration)
-                    .call(that.getTicks())
-                    .each('end', function () {
-                        resolve();
-                    });
-            });
+            that.svg.select(".big-tick-axis")
+                .transition()
+                .duration(duration)
+                .call(that.getBigTicks());
 
-            var smallTickPromise = $q(function (resolve, reject) {
-                that.svg.select(".small-tick-axis")
-                    .transition()
-                    .duration(duration)
-                    .call(that.getSmallTicks())
-            });
+            that.svg.select(".tick-axis")
+                .transition()
+                .duration(duration)
+                .call(that.getTicks())
+                .each('end', function () {
+                });
 
-            $q.all([dateTickPromise, bigTickPromise, tickPromise, smallTickPromise]).then(function () {
-                deferred.resolve();
-            });
+            that.svg.select(".small-tick-axis")
+                .transition()
+                .duration(duration)
+                .call(that.getSmallTicks());
 
             if(dragEndStatus == true){
                 setTimeout(function(){
@@ -1885,72 +1682,53 @@ class timeline {
                     $("#timebar_area").show();
                 },90);
             }
-
-            return deferred.promise;
         }else{
-            var dateTickPromise = $q(function (resolve, reject) {
-                that.svg.select(".date-tick-axis")
-                    .transition()
-                    .duration(duration)
-                    .call(that.getDateTicks())
-                    .call(function(){
-                        var ticks = this.selectAll(".tick")[0];
-                        ticks.forEach(function (tick) {
-                            var textNode = $(tick).find('text');
-                            var text = textNode.text();
-                            var textWidth, locationX;
-                            if (textNode && textNode[0]) {
-                                textWidth = textNode[0].getBoundingClientRect().width + 6;
-                            } else {
-                                textWidth = 0;
-                            }
-                            locationX = -(textWidth / 2);
-                            if(text.length > 0){
-                                d3.select(tick).insert('rect', 'text').attr({ x: locationX, y: 12, width: textWidth, height: 14, fill: "#555"});
-                            }
-                        });
-
-                        this.selectAll(".date-tick-axis .tick").attr('transform', adjustDateLocation.bind(that));
+            that.svg.select(".date-tick-axis")
+                .transition()
+                .duration(duration)
+                .call(that.getDateTicks())
+                .call(function(){
+                    var ticks = this.selectAll(".tick")[0];
+                    ticks.forEach(function (tick) {
+                        var textNode = $(tick).find('text');
+                        var text = textNode.text();
+                        var textWidth, locationX;
+                        if (textNode && textNode[0]) {
+                            textWidth = textNode[0].getBoundingClientRect().width + 6;
+                        } else {
+                            textWidth = 0;
+                        }
+                        locationX = -(textWidth / 2);
+                        if(text.length > 0){
+                            d3.select(tick).insert('rect', 'text').attr({ x: locationX, y: 12, width: textWidth, height: 14, fill: "#555"});
+                        }
                     });
-            });
+                    this.selectAll(".date-tick-axis .tick").attr('transform', adjustDateLocation.bind(that));
+                });
 
-            var bigTickPromise = $q(function (resolve, reject) {
-                that.svg.select(".big-tick-axis")
-                    .transition()
-                    .duration(duration)
-                    .call(that.getBigTicks())
-            });
+            that.svg.select(".big-tick-axis")
+                .transition()
+                .duration(duration)
+                .call(that.getBigTicks());
 
-            var tickPromise = $q(function (resolve, reject) {
-                that.svg.select(".tick-axis")
-                    .transition()
-                    .duration(duration)
-                    .call(that.getTicks())
-                    .each('end', function () {
-                        resolve();
-                    });
-            });
-            var smallTickPromise = $q(function (resolve, reject) {
-                that.svg.select(".small-tick-axis")
-                    .transition()
-                    .duration(duration)
-                    .call(that.getSmallTicks())
-                    .each('end', function () {
-                        resolve();
-                    });
-            });
-            $q.all([dateTickPromise, bigTickPromise, tickPromise, smallTickPromise]).then(function (a, b) {
-                deferred.resolve();
-            });
+            that.svg.select(".tick-axis")
+                .transition()
+                .duration(duration)
+                .call(that.getTicks())
+                .each('end', function () {
+                });
 
-            return deferred.promise;
+            that.svg.select(".small-tick-axis")
+                .transition()
+                .duration(duration)
+                .call(that.getSmallTicks())
+                .each('end', function () {
+                });
         }
     }
 
     updateBar (duration) {
         var that = this;
-        var $q = this.$q;
-        var deferred = $q.defer();
 
         if (duration === undefined) {
             duration = 0;
@@ -1977,7 +1755,7 @@ class timeline {
                     thatEnd = that.x(d.endTime);
                     thatStart = that.x(d.startTime);
 
-                    thatWidth = thatEnd - thatStart;
+                    var thatWidth = thatEnd - thatStart;
 
                     if(thatWidth < 0){
                         thatWidth = 0;
@@ -1987,37 +1765,7 @@ class timeline {
                 }
             })
             .each('end', function () {
-                deferred.resolve();
             });
-        return deferred.promise;
-    }
-//사용안함
-    resetAxis () {
-        this.svg.select('.axis').selectAll('g').remove();
-        this.drawAxis();
-    }
-//사용안함
-    startBrush () {
-        var that = this;
-
-        var brushed = function () {
-
-        }
-
-        var brushend = function () {
-
-        }
-
-        this.brush = d3.svg.brush()
-            .x(this.x)
-            .on("brush", brushed);
-        var now = Date.now();
-        this.brush.extent([now - 100000, now]);
-        this.mainContainer.append('g').attr('class', 'brush')
-            .call(this.brush)
-            .selectAll('rect')
-            .attr('y', 25)
-            .attr('height', 50);
     }
 
     hideCursor () {
@@ -2037,12 +1785,6 @@ class timeline {
     }
 }
 
-
-
-
-
-
-
-/*************** Legacy ******************/
+export default timeline;
 
 
