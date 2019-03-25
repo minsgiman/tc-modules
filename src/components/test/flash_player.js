@@ -307,10 +307,10 @@ class flashPlayer {
     }
 
     destroy  () {
-        if (this.flashConfig.objId) {
-            var playerNode = document.getElementById(playerId);
-            playerNode.removeChild(playerNode.firstChild);
-        }
+        // if (this.flashConfig.objId) {
+        //     var playerNode = document.getElementById(this.flashConfig.objId);
+        //     playerNode.removeChild(playerNode.firstChild);
+        // }
         window.onPlayerStatusChangeFlash = null;
     }
 
