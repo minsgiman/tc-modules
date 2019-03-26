@@ -36,6 +36,9 @@ class player {
             case 'isShared':
                 store.dispatch('IS_SHARED_CHANGE', value);
                 break;
+            case 'isPlaying':
+                store.dispatch('IS_PLAYING_CHANGE', value);
+                break;
             default:
                 break;
         }
@@ -46,12 +49,7 @@ class player {
         if (this.control) {
             this.control.$destroy();
         }
-        this.elementId = null;
-        this.cameraId = null;
-        this.shopId = null;
-        this.groupId = null;
-        this.isShared = null;
-        this.containerComp = null;
+        this.control = null;
     }
 }
 

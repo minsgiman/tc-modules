@@ -3,10 +3,13 @@
 
 <script>
     import Vue from 'vue';
+    import { i18n } from '../../i18n/player/i18n';
     import flashPlayer from './flash_player.vue';
     import timeline from './timeline.vue';
     import fullscreenBtn from './fullscreen_btn.vue';
     import zoomBtn from './zoom_btn.vue';
+    import playTimer from './play_timer.vue';
+    import errorStatusLayer from './error_status_layer.vue';
     import * as d3 from "d3";
     import toastcamAPIs from './../../service/toastcamAPIs';
     import store from '../../service/test/store';
@@ -78,6 +81,15 @@
             isFullScreen: function () {
                 return store.state.isFullScreen;
             },
+            isPlaying: function () {
+                return store.state.isPlaying;
+            },
+            isLive: function () {
+                return store.state.isLive;
+            },
+            currentTime: function () {
+                return store.state.currentTime;
+            },
             dataLoadingStatus: function () {
                 return store.state.dataLoadingStatus;
             }
@@ -86,11 +98,11 @@
             return {
                 timeline: null,
                 player : null,
+                zoomBtn : null,
+                errorStatusLayer : null,
                 fullscreenBtn : null,
                 zoomZoneBottom : 149,
-                isLive : true,
                 config : {},
-                isPlaying : false,
                 plyBtnStatus : false,
                 playerCheck : false,
                 cvrReplay : 0,
@@ -104,7 +116,6 @@
                 fullScreenMakeViewTimeout : null,
                 statusCheck : 0,
                 stopStatusCheck : 0,
-                currentTime : new Date(),
                 beforeServerTime : 0,
                 RecTime : null,
                 cvrCheck : false,
@@ -130,14 +141,7 @@
                 cvrArray : [],
                 lastRec : 0,
                 lastEvent : 0,
-                lineMoveFlag : false,
-                showNoPlayLayer : false,
-                showCameraOffLayer : false,
-                showCameraStreamLayer : false,
-                showNextPlayLayer : false,
-                isCameraOffLastRec : false,
-                isCameraOffLastEvent : false,
-                isCameraOffLastShowRec : false
+                lineMoveFlag : false
             }
         },
         created : function() {
@@ -148,6 +152,14 @@
             const vZoomBtnConstructor = Vue.extend(zoomBtn);
             this.zoomBtn = new vZoomBtnConstructor().$mount('#zoom_btn_wrap');
             this.zoomBtn.$on('zoomEvent', this.zoomEventHandler.bind(this));
+
+            const vErrorStatusLayerConstructor = Vue.extend(errorStatusLayer);
+            this.errorStatusLayer = new vErrorStatusLayerConstructor({i18n}).$mount('#error_status_wrap');
+            this.errorStatusLayer.$on('errorLayerEvent', this.errorLayerEventHandler.bind(this));
+
+            const vPlayTimerConstructor = Vue.extend(playTimer);
+            this.playTimer = new vPlayTimerConstructor().$mount('#cam_info');
+            this.playTimer.$on('playTimerEvent', this.playTimerEventHandler.bind(this));
 
             window.onresize = this.resizeTimline.bind(this);
         },
@@ -166,47 +178,22 @@
             if (this.zoomBtn) {
                 this.zoomBtn.$destroy();
             }
+            if (this.errorStatusLayer) {
+                this.errorStatusLayer.$destroy();
+            }
+            if (this.playTimer) {
+                this.playTimer.$destroy();
+            }
             this.stopTimer();
             this.stopFullscreenTimer();
             window.onresize = null;
         },
         methods : {
-            pauseBtn : function() {
-                if (this.cameraData.recorderType == "recorder") {
-                    if ($('#remoteVideosContainer').length) {
-                        if ($('#remoteVideosContainer').children('video').length) {
-                            $('#remoteVideosContainer').children('video')[0].pause();
-                        }
-                    }
+            play : function (time, status) {
+                if (time) {
+                    this.goCvr(time, status);
                 } else {
-                    if (this.player) {
-                        this.player.pause();
-                    }
-                }
-                this.isPlaying=false;
-                this.plyBtnStatus = false;
-            },
-
-            playBtn : function() {
-                if (this.cameraData.recorderType == "recorder") {
-                    if ($('#remoteVideosContainer').length) {
-                        if ($('#remoteVideosContainer').children('video').length) {
-                            $('#remoteVideosContainer').children('video')[0].play();
-                        }
-                    }
-                } else {
-                    if (this.player) {
-                        this.player.play();
-                    }
-                }
-                this.isPlaying=true;
-                this.plyBtnStatus = true;
-
-                this.cameraStatusAllOff();
-                if(this.isLive == false){
-                    this.clickedCVRArea(new Date(this.timeline.x.invert($(".cursor").children("line").attr("x1")).getTime()));
-                }else{
-                    this.playEventCb('livePlay');
+                    this.goLive();
                 }
             },
 
@@ -229,51 +216,6 @@
                         console.log(err);
                     });
                 }
-            },
-
-            //녹화 지연
-            cameraRecDelay : function() {
-                this.showNoPlayLayer = true;
-                this.showCameraOffLayer = false;
-                this.showCameraStreamLayer = false;
-                this.showNextPlayLayer = false;
-            },
-
-            //카메라 접속 끊김
-            cameraConnectOff : function() {
-                this.showNoPlayLayer = false;
-                this.showCameraOffLayer = true;
-                this.showCameraStreamLayer = false;
-                this.showNextPlayLayer = false;
-                toastcamAPIs.call(toastcamAPIs.camera.CHECK_IS_LAST_RECORD, {cameraId: this.cameraData.id}, (data) => {
-                    this.playEventCb('currentCameraIsLastRecordDataSet', data);
-                });
-            },
-
-            //저장된 영상 없음
-            cameraNoSave : function(){
-                this.showNoPlayLayer = false;
-                this.showCameraOffLayer = false;
-                this.showCameraStreamLayer = false;
-                this.showNextPlayLayer = true;
-            },
-
-            //녹화가 꺼져 있음
-            cameraRecOff : function() {
-                this.showNoPlayLayer = false;
-                this.showCameraOffLayer = false;
-                this.showCameraStreamLayer = true;
-                this.showNextPlayLayer = false;
-            },
-
-            //정상 플레이
-            cameraStatusAllOff : function() {
-                this.showNoPlayLayer = false;
-                this.showCameraOffLayer = false;
-                this.showCameraStreamLayer = false;
-                this.showNextPlayLayer = false;
-                this.isCameraOffLastRec = false;
-                this.isCameraOffLastEvent = false;
             },
 
             resizeTimline : function() {
@@ -332,22 +274,22 @@
                 this.lastCameraStatus = status;
                 switch(status){
                     case 0:
-                        this.cameraStatusAllOff();
+                        this.errorStatusLayer.cameraStatusAllOff();
                         break;
                     case 1:
-                        this.cameraRecOff();
+                        this.errorStatusLayer.cameraRecOff();
                         break;
                     case 2:
-                        this.cameraRecDelay();
+                        this.errorStatusLayer.cameraRecDelay();
                         break;
                     case 3:
-                        this.cameraConnectOff();
+                        this.errorStatusLayer.cameraConnectOff();
                         break;
                     case 4:
-                        this.cameraConnectOff();
+                        this.errorStatusLayer.cameraConnectOff();
                         break;
                     default:
-                        this.cameraStatusAllOff();
+                        this.errorStatusLayer.cameraStatusAllOff();
                         break;
                 }
             },
@@ -355,7 +297,7 @@
             flashEventCallback : function(status) {
                 this.playerCheck = true;
 
-                if(this.showNextPlayLayer == true){
+                if(this.errorStatusLayer.showNextPlayLayer == true){
                     return;
                 }
 
@@ -373,11 +315,10 @@
                     setTimeout(() => {
                         this.resizeTimline();
                     },100);
-                    this.isPlaying = true;
-                    this.timeline.setData('isPlaying', this.isPlaying);
+                    store.dispatch('IS_PLAYING_CHANGE', true);
                     this.playEventCb('isShowMikeChanged', true);
 
-                    this.cameraStatusAllOff();
+                    this.errorStatusLayer.cameraStatusAllOff();
 
                     if (this.isLive) {
                         this.startLiveTimer();
@@ -414,7 +355,7 @@
                         }
                     }else if(status == "NetConnection.Connect.Closed" || status === 'NetStream.Play.Stop'){
                         if (this.isLive){
-                            if (status === "NetConnection.Connect.Closed" && this.config.streamStatus !== "off" && this.showCameraOffLayer !== true) {
+                            if (status === "NetConnection.Connect.Closed" && this.config.streamStatus !== "off") {
                                 setTimeout(() => {
                                     if (this.plyBtnStatus) {
                                         this.playEventCb('livePlay', status);
@@ -494,7 +435,7 @@
                         this.clickedCVRArea(param.data);
                         break;
                     case 'goLive':
-                        this.goLive();
+                        this.play();
                         break;
                     case 'setupDomain':
                         this.setupDomain(param.data);
@@ -631,7 +572,6 @@
                 }).$mount('#timebar_area');
                 this.timeline.$on('timelineEvent', this.onTimelineEvent.bind(this));
                 this.timeline.setData('cursorInterval', 1000);
-                this.timeline.setData('currentTime', this.currentTime);
 
                 return this.timeline;
             },
@@ -645,10 +585,7 @@
             startRecTimer : function(time) {
                 this.beforeServerTime = 0;
                 this.startRecTime = time;
-                this.currentTime =  new Date(this.startRecTime.valueOf());
-                this.timeline.setData('currentTime', this.currentTime);
-                this.playEventCb('currentTimeChanged', this.currentTime);
-                var cntRecTimer = 0;
+                store.dispatch('CURRENT_TIME_CHANGE', new Date(this.startRecTime.valueOf()));
                 clearInterval(this.timer);
                 this.timer = setInterval(() => {
 
@@ -667,9 +604,8 @@
                             this.jumpToNextRecord();
                         } else {
                             if(this.lineMoveFlag == false){
-                                this.isPlaying = false;
-                                this.timeline.setData('isPlaying', this.isPlaying);
-                                this.cameraNoSave();
+                                store.dispatch('IS_PLAYING_CHANGE', false);
+                                this.errorStatusLayer.cameraNoSave();
                                 clearInterval(this.timer);
                                 if (this.player) {
                                     this.player.close();
@@ -678,10 +614,9 @@
                             }
                         }
                     }else{
-                        this.isPlaying = true;
-                        this.timeline.setData('isPlaying', this.isPlaying);
-                        if(this.showNextPlayLayer == true){
-                            this.goCvr(this.currentTime.valueOf());
+                        store.dispatch('IS_PLAYING_CHANGE', true);
+                        if(this.errorStatusLayer.showNextPlayLayer == true){
+                            this.play(this.currentTime.valueOf());
                         }
                     }
 
@@ -696,14 +631,12 @@
                             }
                             this.cursorNowTime = this.cursorNowTime + addSec;
                             this.beforeServerTime = (this.player.getCurrentTime()[0] || 0 ) * 1000;
-                            this.currentTime = new Date(this.cursorNowTime);
+                            store.dispatch('CURRENT_TIME_CHANGE', new Date(this.cursorNowTime));
                         } else {
                             addSec = 1000;
                             this.cursorNowTime = this.cursorNowTime + addSec;
-                            this.currentTime = new Date(this.cursorNowTime);
+                            store.dispatch('CURRENT_TIME_CHANGE', new Date(this.cursorNowTime));
                         }
-                        this.timeline.setData('currentTime', this.currentTime);
-                        this.playEventCb('currentTimeChanged', this.currentTime);
                     }
 
                     var currentDomain = this.timeline.getData('currentDomain');
@@ -763,7 +696,7 @@
                 var currentDomain = this.timeline.getData('currentDomain');
                 this.setupDomain([currentDomain[0], currentDomain[1]]);
                 if((new Date()).valueOf() < time.valueOf()){
-                    this.goLive();
+                    this.play();
                     return;
                 }
 
@@ -780,7 +713,7 @@
                     }
 
                     this.clickTime = time;
-                    this.cameraStatusAllOff();
+                    this.errorStatusLayer.cameraStatusAllOff();
 
                     this.cursorIdx = 0;
                     if(status != 'f'){
@@ -793,12 +726,10 @@
                     this.playerCheck = false;
                     this.startRecTimer(time);
                     if(this.cvrCheck == true || this.goCvrStatus == true){
-                        this.isLive = false;
-                        this.timeline.setData('isLive', this.isLive);
-                        this.playEventCb('isLiveChanged', this.isLive);
+                        store.dispatch('IS_LIVE_CHANGE', false);
                         this.camInfoBarChange();
                         this.goCvrStatus = false;
-                        this.cameraStatusAllOff();
+                        this.errorStatusLayer.cameraStatusAllOff();
                         toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAM_TOKEN : toastcamAPIs.camera.GET_TOKEN, {cameraId: this.cameraData.id}, (res) => {
                             if (this.cameraData.recorderType == "nvr") {
                                 if (this.player) {
@@ -878,12 +809,12 @@
             zoomUpWithZoom : function(zoom) {
                 if (zoom > 1.0) {
                     this.isShowZoomLocation = true;
-                    this.playEventCb('isShowTimelineToggleAreaChanged', false);
+                    this.playTimer.setData('isShowTimelineToggleArea', false);
                     this.isShowControlToggleArea = false;
                 } else {
                     this.isShowZoomLocation = false;
                     if(this.isFullScreen){
-                        this.playEventCb('isShowTimelineToggleAreaChanged', true);
+                        this.playTimer.setData('isShowTimelineToggleArea', true);
                     } else {
                         this.isShowControlToggleArea = true;
                     }
@@ -941,6 +872,26 @@
                 }
             },
 
+            playTimerEventHandler : function(param) {
+                if (param.event === 'pause') {
+                    this.pauseBtn();
+                } else if (param.event === 'play') {
+                    this.playBtn();
+                } else if (param.event === 'goLive') {
+                    this.play();
+                }
+            },
+
+            errorLayerEventHandler : function(param) {
+                if (param.event === 'lastEvent') {
+                    this.lastEvent = param.value;
+                } else if (param.event === 'lastRec') {
+                    this.lastRec = param.value;
+                } else if (param.event === 'playCvr') {
+                    this.play(param.value.time, param.value.status);
+                }
+            },
+
             zoomEventHandler : function(zoom) {
                 this.zoomUp(zoom);
             },
@@ -960,11 +911,11 @@
                     this.newTimelineDragCnt = 0;
 
                     if (this.currentZoom > 1) {
-                        this.playEventCb('isShowTimelineToggleAreaChanged', false);
+                        this.playTimer.setData('isShowTimelineToggleArea', false);
                     } else {
-                        this.playEventCb('isShowTimelineToggleAreaChanged', true);
+                        this.playTimer.setData('isShowTimelineToggleArea', true);
                     }
-                    this.playEventCb('isToggleOnChanged', true);
+                    this.playTimer.setData('isToggleOn', true);
                     $("#controlNdTimeLine").hide();
                     $("#view_timeline_ctrl").hide();
                     $("#view_timeline_date").hide();
@@ -990,8 +941,8 @@
                         this.timeline.redrawWithWidth(parseInt($("#fullscreen").width()));
                     },1050);
                 } else {
-                    this.playEventCb('isShowTimelineToggleAreaChanged', true);
-                    this.playEventCb('isToggleOnChanged', false);
+                    this.playTimer.setData('isShowTimelineToggleArea', true);
+                    this.playTimer.setData('isToggleOn', false);
                     $("#view_timeline_ctrl").show();
                     $("#view_timeline_date").show();
                     $("#view_btn_area").show();
@@ -1041,8 +992,8 @@
                     }
 
                     this.playEventCb('isClickTimelineShowChanged', false);
-                    this.playEventCb('isToggleOnChanged', false);
-                    this.playEventCb('isShowTimelineToggleAreaChanged', false);
+                    this.playTimer.setData('isToggleOn', false);
+                    this.playTimer.setData('isShowTimelineToggleArea', false);
 
                     $("#time_area_bar").css("top","");
                     $("#view_timeline_ctrl").show();
@@ -1255,9 +1206,7 @@
             },
 
             cvrDrawCheck : function(time) {
-                this.isLive = false;
-                this.timeline.setData('isLive', this.isLive);
-                this.playEventCb('isLiveChanged', this.isLive);
+                store.dispatch('IS_LIVE_CHANGE', false);
                 this.camInfoBarChange();
                 var trueCnt = 0;
                 this.startRecTime = time;
@@ -1302,7 +1251,7 @@
                 }
                 if(this.cvrCheck == false){
                     if((new Date).valueOf() - time.valueOf() < 8000){
-                        this.goLive();
+                        this.play();
                         this.newTimelineDragCnt = 0;
                         return;
                     }
@@ -1316,9 +1265,8 @@
                 if(this.cvrCheck == false){
                     if(this.lineMoveFlag == false && this.plyBtnStatus == true){
                         this.lineMoveFlag = false;
-                        this.isPlaying = false;
-                        this.timeline.setData('isPlaying', this.isPlaying);
-                        this.cameraNoSave();
+                        store.dispatch('IS_PLAYING_CHANGE', false);
+                        this.errorStatusLayer.cameraNoSave();
                         clearInterval(this.timer);
                         var videoDateFormat = 'M월 D일 dddd';  //TODO: $translate.instant('CAMERA_DETAIL_EVENT_DATE_FORMAT');
                         var videoTimeFormat = 'HH:mm:ss';  //TODO: $translate.instant('CAMERA_DETAIL_EVENT_TIME_FORMAT');
@@ -1327,11 +1275,11 @@
                             this.cameraData.lastRecDateString = lastRecMoment.locale($("html").attr("lang")).format(videoDateFormat);
                             this.cameraData.lastRecTimeString = lastRecMoment.locale($("html").attr("lang")).format(videoTimeFormat);
                             $("#camera_off_lastrec").show();
-                            this.isCameraOffLastShowRec = true;
+                            this.errorStatusLayer.setData('isCameraOffLastShowRec', true);
 
                             this.cameraData.lastRecDate = nextTime;
                         }else{
-                            this.isCameraOffLastRec = true;
+                            this.errorStatusLayer.setData('isCameraOffLastRec', true);
                         }
                         return;
                     }
@@ -1352,6 +1300,7 @@
                 // 	return;
                 // }
                 this.timer = setInterval(() => {
+                    const currentTime = new Date();
                     switch(this.timeline.getData('timeRange')){
                         case 10:
                             this.range = 600000;
@@ -1374,10 +1323,7 @@
                     if(this.plyBtnStatus == false){
                         return;
                     }
-
-                    this.currentTime = new Date();
-                    this.timeline.setData('currentTime', this.currentTime);
-                    this.playEventCb('currentTimeChanged', this.currentTime);
+                    store.dispatch('CURRENT_TIME_CHANGE', currentTime);
                     var currentDomain = this.timeline.getData('currentDomain');
                     if(currentDomain == undefined){
                         return;
@@ -1385,7 +1331,7 @@
 
                     var domain = currentDomain;
 
-                    if (domain[0] + this.range < this.currentTime.getTime() && domain[1]- this.range - this.fixRange > this.currentTime.getTime()) {
+                    if (domain[0] + this.range < currentTime.getTime() && domain[1]- this.range - this.fixRange > currentTime.getTime()) {
                         this.timeline.updateCursor();
                         this.lineMoveFlag = false;
                     }else{
@@ -1450,10 +1396,8 @@
 
                         var date = new Date(data.lastRectStartTime);
                         this.timeline.setData('changeTimeRangeClick', true);
-                        this.cameraStatusAllOff();
-                        this.currentTime = date;
-                        this.timeline.setData('currentTime', this.currentTime);
-                        this.playEventCb('currentTimeChanged', this.currentTime);
+                        this.errorStatusLayer.cameraStatusAllOff();
+                        store.dispatch('CURRENT_TIME_CHANGE', date);
                         this.timeline.zoomDomain(data.lastRectStartTime, timeRange);
                         this.goCvrStatus = true;
                         this.clickedCVRArea(date, status);
@@ -1461,10 +1405,8 @@
                 }else{
                     var date = new Date(time);
                     this.timeline.setData('changeTimeRangeClick', true);
-                    this.cameraStatusAllOff();
-                    this.currentTime = date;
-                    this.timeline.setData('currentTime', this.currentTime);
-                    this.playEventCb('currentTimeChanged', this.currentTime);
+                    this.errorStatusLayer.cameraStatusAllOff();
+                    store.dispatch('CURRENT_TIME_CHANGE', date);
                     this.timeline.zoomDomain(date.getTime(), timeRange);
                     this.goCvrStatus = true;
                     this.clickedCVRArea(date, status);
@@ -1473,14 +1415,10 @@
 
             goLive : function() {
                 this.newTimelineDragCnt=0;
-                this.isLive = true;
-                this.timeline.setData('isLive', this.isLive);
-                this.playEventCb('isLiveChanged', this.isLive);
+                store.dispatch('IS_LIVE_CHANGE', true);
                 this.camInfoBarChange();
-                this.cameraStatusAllOff();
-                this.currentTime = new Date();
-                this.timeline.setData('currentTime', this.currentTime);
-                this.playEventCb('currentTimeChanged', this.currentTime);
+                this.errorStatusLayer.cameraStatusAllOff();
+                store.dispatch('CURRENT_TIME_CHANGE', new Date());
                 this.timeline.setData('changeTimeRangeClick', true);
 
                 this.lineMoveFlag = false;
@@ -1488,6 +1426,43 @@
                 this.timeline.zoomDomain(Date.now(), this.timeline.getData('timeRange'));
                 this.startLiveTimer();
                 this.playEventCb('livePlay');
+            },
+
+            pauseBtn : function() {
+                if (this.cameraData.recorderType == "recorder") {
+                    if ($('#remoteVideosContainer').length) {
+                        if ($('#remoteVideosContainer').children('video').length) {
+                            $('#remoteVideosContainer').children('video')[0].pause();
+                        }
+                    }
+                } else {
+                    if (this.player) {
+                        this.player.pause();
+                    }
+                }
+                this.plyBtnStatus = false;
+            },
+
+            playBtn : function() {
+                if (this.cameraData.recorderType == "recorder") {
+                    if ($('#remoteVideosContainer').length) {
+                        if ($('#remoteVideosContainer').children('video').length) {
+                            $('#remoteVideosContainer').children('video')[0].play();
+                        }
+                    }
+                } else {
+                    if (this.player) {
+                        this.player.play();
+                    }
+                }
+                this.plyBtnStatus = true;
+
+                this.errorStatusLayer.cameraStatusAllOff();
+                if(this.isLive == false){
+                    this.clickedCVRArea(new Date(this.timeline.x.invert($(".cursor").children("line").attr("x1")).getTime()));
+                }else{
+                    this.playEventCb('livePlay');
+                }
             },
 
             stopFullscreenTimer : function() {
@@ -1535,12 +1510,12 @@
                         }
                         toastcamAPIs.call(toastcamAPIs.camera.FIND_CVR, {cameraId: this.cameraData.id, cvrId: findTime, findDirection: 'next'}, (cvrData) => {
                             if (cvrData && cvrData.cvr && cvrData.cvr.start && cvrData.cvr.end) {
-                                this.goCvr(parseInt(cvrData.cvr.start, 10));
+                                this.play(parseInt(cvrData.cvr.start, 10));
                             } else {
-                                this.goLive();
+                                this.play();
                             }
                         }, (err) => {
-                            this.goLive();
+                            this.play();
                         });
                     }
                 };
@@ -1555,10 +1530,6 @@
                         callbackFunc();
                     }
                 });
-            },
-
-            destroy : function() {
-                this.$destroy();
             },
 
             setData : function(key, value) {

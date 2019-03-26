@@ -1,0 +1,16 @@
+{
+  "CAMERA_DETAIL_TURN_OFF_CAMERA_MESSAGE": "카메라의 접속이 끊겼습니다.",
+  "STR_CONNECT_DVR": "DVR을 연결해주세요.",
+  "STR_CONNECT_CAM_TO_DVR": "DVR에 카메라를 연결해주세요.",
+  "STR_CONNECT_DVR_FAIL": "영상을 불러올 수 없습니다.",
+  "CAMERA_DETAIL_LAST_REC": "마지막 서버 저장",
+  "CAMERA_DETAIL_LAST_EVENT": "마지막 이벤트",
+  "MY_CAMERA_LAST_NO_REC": "저장된 마지막 녹화가 없습니다.",
+  "MY_CAMERA_LAST_NO_EVENT": "저장된 마지막 이벤트가 없습니다.",
+  "MY_CAMERA_DELAY": "녹화가 지연되고 있습니다.",
+  "CAMERA_DETAIL_NOT_AVAILABLE_MESSAGE": "저장된 영상이 없는 구간입니다.",
+  "CAMERA_DETAIL_NEXT_REC": "다음 서버 저장",
+  "MY_CAMERA_STREAMING_OFF_MESSAGE": "카메라가 꺼져 있습니다.",
+  "CAMERA_DETAIL_EVENT_DATE_FORMAT": "M월 D일 dddd",
+  "CAMERA_DETAIL_EVENT_TIME_FORMAT": "HH:mm:ss"
+}

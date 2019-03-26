@@ -75,6 +75,15 @@
         computed : {
             cameraData: function () {
                 return store.state.cameraData;
+            },
+            isPlaying: function () {
+                return store.state.isPlaying;
+            },
+            currentTime: function () {
+                return store.state.currentTime;
+            },
+            isLive: function () {
+                return store.state.isLive;
             }
         },
         data : function() {
@@ -87,11 +96,9 @@
                 sensorZones: [],
                 eventZones: [],
                 motionZones: [],
-                isLive: true,
                 serviceDateTime: 0,
                 firstDataLoadingFlag: false,
                 clickDateChange: false,
-                isPlaying: false,
                 eventData: [],
                 cvrData: [],
                 forceDomain: true,

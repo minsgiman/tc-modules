@@ -7,15 +7,20 @@ const store = new Vuex.Store({
         cameraData: {},
         cameraConfig: {},
         shopId: '',
-        isShared: false
+        isShared: false,
+        isFullScreen: false,
+        dataLoadingStatus: true,
+        isPlaying: false,
+        isLive: true,
+        currentTime: new Date()
     },
     getters: {
-        // isExpiredCloud: state => {
-        //     if ((state.cameraData.serviceType === 'n/a' || state.cameraData.serviceType === '0d' || state.cameraData.saveEndDate < Date.now()) && state.cameraData.recorderType !== 'nvr') {
-        //         return true;
-        //     }
-        //     return false;
-        // }
+        isExpiredCloud: state => {
+            if ((state.cameraData.serviceType === 'n/a' || state.cameraData.serviceType === '0d' || state.cameraData.saveEndDate < Date.now()) && state.cameraData.recorderType !== 'nvr') {
+                return true;
+            }
+            return false;
+        }
     },
     actions: {
         CAMERA_DATA_CHANGE: function(context, state) {
@@ -30,9 +35,28 @@ const store = new Vuex.Store({
         IS_SHARED_CHANGE: function(context, state) {
             context.commit('UPDATE_IS_SHARED', state);
         },
+        IS_FULLSCREEN_CHANGE: function(context, state) {
+            context.commit('UPDATE_IS_FULLSCREEN', state);
+        },
+        IS_PLAYING_CHANGE: function(context, state) {
+            context.commit('UPDATE_IS_PLAYING', state);
+        },
+        DATA_LOADING_STATUS_CHANGE: function(context, state) {
+            context.commit('UPDATE_DATA_LOADING_STATUS', state);
+        },
+        CURRENT_TIME_CHANGE: function(context, state) {
+            context.commit('UPDATE_CURRENT_TIME', state);
+        },
+        IS_LIVE_CHANGE: function(context, state) {
+            context.commit('UPDATE_IS_LIVE', state);
+        },
         INIT_ALL_DATA: function(context, state) {
             context.commit('UPDATE_CAMERA_DATA', {});
             context.commit('UPDATE_CAMERA_CONFIG', {});
+            context.commit('UPDATE_SHOP_ID', '');
+            context.commit('UPDATE_IS_SHARED', false);
+            context.commit('UPDATE_IS_FULLSCREEN', false);
+            context.commit('UPDATE_DATA_LOADING_STATUS', true);
         }
     },
     mutations: {
@@ -47,6 +71,21 @@ const store = new Vuex.Store({
         },
         UPDATE_IS_SHARED: function(state, value) {
             state.isShared = value;
+        },
+        UPDATE_IS_FULLSCREEN: function(state, value) {
+            state.isFullScreen = value;
+        },
+        UPDATE_DATA_LOADING_STATUS: function(state, value) {
+            state.dataLoadingStatus = value;
+        },
+        UPDATE_IS_PLAYING: function(state, value) {
+            state.isPlaying = value;
+        },
+        UPDATE_CURRENT_TIME: function(state, value) {
+            state.currentTime = value;
+        },
+        UPDATE_IS_LIVE: function(state, value) {
+            state.isLive = value;
         }
     }
 });
