@@ -6,6 +6,7 @@
     import flashPlayer from './flash_player.vue';
     import timeline from './timeline.vue';
     import fullscreenBtn from './fullscreen_btn.vue';
+    import zoomBtn from './zoom_btn.vue';
     import * as d3 from "d3";
     import toastcamAPIs from './../../service/toastcamAPIs';
     import store from '../../service/test/store';
@@ -140,9 +141,13 @@
             }
         },
         created : function() {
-            const vExtendConstructor = Vue.extend(fullscreenBtn);
-            this.fullscreenBtn = new vExtendConstructor().$mount('#fullscreen_btn_wrap');
+            const vFullscreenBtnConstructor = Vue.extend(fullscreenBtn);
+            this.fullscreenBtn = new vFullscreenBtnConstructor().$mount('#fullscreen_btn_wrap');
             this.fullscreenBtn.$on('fullscreenEvent', this.fullscreenEventHandler.bind(this));
+
+            const vZoomBtnConstructor = Vue.extend(zoomBtn);
+            this.zoomBtn = new vZoomBtnConstructor().$mount('#zoom_btn_wrap');
+            this.zoomBtn.$on('zoomEvent', this.zoomEventHandler.bind(this));
 
             window.onresize = this.resizeTimline.bind(this);
         },
@@ -157,6 +162,9 @@
             }
             if (this.fullscreenBtn) {
                 this.fullscreenBtn.$destroy();
+            }
+            if (this.zoomBtn) {
+                this.zoomBtn.$destroy();
             }
             this.stopTimer();
             this.stopFullscreenTimer();
@@ -931,6 +939,10 @@
                 if (this.player) {
                     this.player.zoomVideo(newZoom);
                 }
+            },
+
+            zoomEventHandler : function(zoom) {
+                this.zoomUp(zoom);
             },
 
             fullscreenEventHandler : function(param) {
