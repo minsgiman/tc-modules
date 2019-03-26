@@ -984,9 +984,6 @@
 
                         that.$emit('timelineEvent', {event: 'checkCVRSeucre', data: (isSecureMode) => {
                                 if(isSecureMode){
-                                    if(document.msFullscreenElement) {
-                                        that.$emit('timelineEvent', {event: 'pressedExitFullScreenButton'});
-                                    }
                                     that.$emit('timelineEvent', {event: 'updateCVRSecureStatus', data: callbackFunc});
                                 }else{
                                     callbackFunc();
@@ -1040,9 +1037,6 @@
                         that.$emit('timelineEvent', {event: 'cursorDragEnd'});
                         that.$emit('timelineEvent', {event: 'checkCVRSeucre', data: function(isSecureMode){
                                 if(isSecureMode){
-                                    if(document.msFullscreenElement) {
-                                        that.$emit('timelineEvent', {event: 'pressedExitFullScreenButton'});
-                                    }
                                     that.$emit('timelineEvent', {event: 'updateCVRSecureStatus'});
                                 }else{
                                     that.$emit('timelineEvent', {event: 'cursorDragEnd'});

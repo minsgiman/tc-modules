@@ -5,15 +5,12 @@
     import Vue from 'vue';
     import flashPlayer from './flash_player.vue';
     import timeline from './timeline.vue';
+    import fullscreenBtn from './fullscreen_btn.vue';
     import * as d3 from "d3";
     import toastcamAPIs from './../../service/toastcamAPIs';
     import store from '../../service/test/store';
     import moment from 'moment';
     import 'moment-timezone';
-
-    var isFullScreen = function () {
-        return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
-    };
 
     var isExpiredCloud = function(camera) {
         if (camera && (camera.serviceType === 'n/a' || camera.serviceType === '0d' || camera.saveEndDate < Date.now()) && camera.recorderType !== 'nvr') {
@@ -76,13 +73,19 @@
             },
             isShared: function () {
                 return store.state.isShared;
+            },
+            isFullScreen: function () {
+                return store.state.isFullScreen;
+            },
+            dataLoadingStatus: function () {
+                return store.state.dataLoadingStatus;
             }
         },
         data : function() {
             return {
                 timeline: null,
                 player : null,
-                fullscreenFlag : false,
+                fullscreenBtn : null,
                 zoomZoneBottom : 149,
                 isLive : true,
                 config : {},
@@ -97,10 +100,10 @@
                 lastCameraStatus : 0,
                 playserStop : null,
                 timer : null,
+                fullScreenMakeViewTimeout : null,
                 statusCheck : 0,
                 stopStatusCheck : 0,
                 currentTime : new Date(),
-                screenloading : 0,
                 beforeServerTime : 0,
                 RecTime : null,
                 cvrCheck : false,
@@ -137,17 +140,9 @@
             }
         },
         created : function() {
-            const bindEventCb = this.fullscreenChangeEvent.bind(this);
-            d3.select('#fullscreen').on('fullscreenchange', bindEventCb);
-            d3.select('#fullscreen').on('webkitfullscreenchange', bindEventCb);
-            d3.select('#fullscreen').on('mozfullscreenchange', bindEventCb);
-            d3.select(document).on('MSFullscreenChange', bindEventCb);
-
-            const bindFullscreenCb = this.fullscreenHandler.bind(this);
-            document.addEventListener('webkitfullscreenchange', bindFullscreenCb, false);
-            document.addEventListener('mozfullscreenchange', bindFullscreenCb, false);
-            document.addEventListener('fullscreenchange', bindFullscreenCb, false);
-            document.addEventListener('MSFullscreenChange', bindFullscreenCb, false);
+            const vExtendConstructor = Vue.extend(fullscreenBtn);
+            this.fullscreenBtn = new vExtendConstructor().$mount('#fullscreen_btn_wrap');
+            this.fullscreenBtn.$on('fullscreenEvent', this.fullscreenEventHandler.bind(this));
 
             window.onresize = this.resizeTimline.bind(this);
         },
@@ -160,12 +155,11 @@
             if (this.timeline) {
                 this.timeline.$destroy();
             }
+            if (this.fullscreenBtn) {
+                this.fullscreenBtn.$destroy();
+            }
             this.stopTimer();
             this.stopFullscreenTimer();
-            document.removeEventListener('webkitfullscreenchange', this.fullscreenHandler, false);
-            document.removeEventListener('mozfullscreenchange', this.fullscreenHandler, false);
-            document.removeEventListener('fullscreenchange', this.fullscreenHandler, false);
-            document.removeEventListener('MSFullscreenChange', this.fullscreenHandler, false);
             window.onresize = null;
         },
         methods : {
@@ -277,11 +271,11 @@
             resizeTimline : function() {
                 this.playEventCb('resizeTimline');
 
-                if(this.fullscreenFlag === false){
+                if(this.isFullScreen === false){
                     this.timeline.redrawWithWidth(parseInt($("#view_timeline_ctrl").width()));
                 }
 
-                if(this.fullscreenFlag == true){
+                if(this.isFullScreen == true){
                     if (this.player) {
                         this.player.zoomZone(260, parseInt($("#player").css("width"))-20);
                     }
@@ -539,9 +533,6 @@
                     case 'checkCVRSeucre':
                         this.playEventCb('checkCVRSeucre', param.data);
                         break;
-                    case 'pressedExitFullScreenButton':
-                        this.playEventCb('pressedExitFullScreenButton');
-                        break;
                     case 'updateCVRSecureStatus':
                         this.playEventCb('updateCVRSecureStatus', param.data);
                         break;
@@ -614,7 +605,7 @@
                 this.player.zoomZone(450, 150);
                 this.player.displayRMCPlayer();
                 setTimeout(() => {
-                    this.screenloading++;
+                    store.dispatch('DATA_LOADING_STATUS_CHANGE', false);
                 },1050);
 
                 return this.player;
@@ -638,7 +629,7 @@
             },
 
             initSizeTimline : function() {
-                var timelineWidth = isFullScreen() ? $('#fullscreen').width() : $("#view_timeline_ctrl").width();
+                var timelineWidth = this.isFullScreen ? $('#fullscreen').width() : $("#view_timeline_ctrl").width();
                 this.timeline.getData('svg').select('.cursor').classed('hide', true);
                 this.timeline.redrawWithWidth(parseInt(timelineWidth));
             },
@@ -852,7 +843,7 @@
             zoomUp : function(zoom) {
                 this.playEventCb('zoomDragValChanged', 0);
 
-                if(this.fullscreenFlag == true){
+                if(this.isFullScreen == true){
                     if (this.player) {
                         this.player.zoomZone(260, parseInt($("#player").css("width"))-20);
                     }
@@ -883,7 +874,7 @@
                     this.isShowControlToggleArea = false;
                 } else {
                     this.isShowZoomLocation = false;
-                    if(isFullScreen()){
+                    if(this.isFullScreen){
                         this.playEventCb('isShowTimelineToggleAreaChanged', true);
                     } else {
                         this.isShowControlToggleArea = true;
@@ -942,16 +933,70 @@
                 }
             },
 
-            fullscreenChangeEvent : function() {
-                var leftDefault = 166;
+            fullscreenEventHandler : function(param) {
+                if (param.event === 'changed') {
+                    this.onFullscreenChanged(param.state);
+                } else if (param.event === 'beforeChange') {
+                    this.onBeforeFullscreenChange(param.state);
+                } else if (param.event === 'dataLoading') {
+                    this.playEventCb('loadingAlert');
+                }
+            },
+
+            onBeforeFullscreenChange : function (fullscreenStatus) {
+                if (fullscreenStatus) {
+                    this.newTimelineDragCnt = 0;
+
+                    if (this.currentZoom > 1) {
+                        this.playEventCb('isShowTimelineToggleAreaChanged', false);
+                    } else {
+                        this.playEventCb('isShowTimelineToggleAreaChanged', true);
+                    }
+                    this.playEventCb('isToggleOnChanged', true);
+                    $("#controlNdTimeLine").hide();
+                    $("#view_timeline_ctrl").hide();
+                    $("#view_timeline_date").hide();
+                    $("#view_btn_area").hide();
+                    $("#view_camdtl_tab").hide();
+                    $("#footer").hide();
+                    $("#header").hide();
+                    $("#timelinedesc").css("top",51);
+                    $("#prevLineBtn").css("top",40);
+                    $("#nextLineBtn").css("top",40);
+                    $("#cursorLeftBtn").css("top",35);
+                    $("#cursorRightBtn").css("top",35);
+                    // $("#player").css("height","");
+                    this.fullScreenMakeViewTimeout = setTimeout(() => {
+                        $(".fs_time").show();
+                        $("#controlNdTimeLine").css("position","relative");
+                        $("#controlNdTimeLine").show();
+                        // $("#controlNdTimeLine").css("top", $("#player").height() - $("#view_timeline_area").height() -10);
+                        $("#showControl").show();
+                        // $("#showControl").css("top", $("#player").height() - $("#controlNdTimeLine").height() + 91);
+                        $("#timebar_area").children("svg").children("g").attr("transform", 'translate(0, -15)');
+                        // $("#timebar_area").children("svg").height("105");
+                        this.timeline.redrawWithWidth(parseInt($("#fullscreen").width()));
+                    },1050);
+                } else {
+                    this.playEventCb('isShowTimelineToggleAreaChanged', true);
+                    this.playEventCb('isToggleOnChanged', false);
+                    $("#view_timeline_ctrl").show();
+                    $("#view_timeline_date").show();
+                    $("#view_btn_area").show();
+                    $("#view_camdtl_tab").show();
+                    $("#footer").show();
+                    $("#header").show();
+                }
+            },
+
+            onFullscreenChanged : function(fullscreenStatus) {
                 var topDefault = 96;
-                this.isFullScreen = isFullScreen();
-                this.playEventCb('isFullScreenChanged', this.isFullScreen);
                 this.newTimelineDragCnt = 0;
-                if (this.isFullScreen) {
+                this.playEventCb('isFullScreenChanged', fullscreenStatus);
+
+                if (fullscreenStatus) {
                     $("#cloud_out_small").hide();
                     $("#cloud_out_full").show();
-                    this.fullscreenFlag = true;
 
                     if (isExpiredCloud(this.cameraData)) {
                         if (this.player) {
@@ -969,7 +1014,6 @@
                     $("#cloud_out_small").show();
                     $("#cloud_out_full").hide();
                     this.playEventCb('fullScreenAlertChanged', false);
-                    this.fullscreenFlag = false;
                     $("#view_timeline_area").removeAttr( 'style' );
 
                     clearTimeout(this.fullscreenTimer);
@@ -1001,7 +1045,7 @@
                     $("#view_timeline_area").css("position","");
                     $("#view_timeline_area").css("bottom","");
 
-                    this.playEventCb('fullScreenMakeViewStop');
+                    clearTimeout(this.fullScreenMakeViewTimeout);
 
                     this.timeline.redrawWithWidth(parseInt($("#view_timeline_ctrl").width()));
                     $(".axis-bottom-line").show();
@@ -1448,29 +1492,6 @@
                 }, 5000);
             },
 
-            fullscreenHandler : function(event) {
-                if (isFullScreen()) {
-                    if (this.cameraData.recorderType === "recorder") {
-                        $('#player').show();
-                        $('#player').css('opacity', 0);
-                        setTimeout(() => {
-                            if ($('#remoteVideosContainer').children('video').length) {
-                                $('#remoteVideosContainer').children('video').css('height', $('#remoteVideosContainer').height() - 100);
-                            }
-                        }, 500);
-                    }
-                } else {
-                    setTimeout(() => {
-                        if (this.cameraData.recorderType === "recorder") {
-                            $('#player').hide();
-                        }
-                        if ($('#remoteVideosContainer').children('video').length) {
-                            $('#remoteVideosContainer').children('video').css('height', $('#remoteVideosContainer').height() - $('#timeline_table').height());
-                        }
-                    }, 100);
-                }
-            },
-
             jumpToNextRecord : function() {
                 var callbackFunc = function() {
                     if (this.cameraData.recordType == "event") {
@@ -1517,9 +1538,6 @@
                 }
                 this.playEventCb('checkCVRSeucre', (isSecureMode) => {
                     if(isSecureMode){
-                        if(document.msFullscreenElement) {
-                            this.playEventCb('pressedExitFullScreenButton');
-                        }
                         this.playEventCb('updateCVRSecureStatus', callbackFunc.bind(this));
                     }else{
                         callbackFunc();
