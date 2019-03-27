@@ -11,7 +11,7 @@
 </template>
 
 <script>
-    import store from '../../service/test/store';
+    import store from '../../service/player/store';
 
     export default {
         name: 'zoomBtn',

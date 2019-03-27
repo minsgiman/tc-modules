@@ -15,7 +15,7 @@
 </template>
 
 <script>
-    import store from '../../service/test/store';
+    import store from '../../service/player/store';
     import moment from 'moment';
     import 'moment-timezone';
 

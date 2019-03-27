@@ -1,4 +1,4 @@
-import player from './components/player/main';
+import player from './../test/player/player_main';
 
 let playerObj = new player({
     cameraId : 'AAAAAACHHX',

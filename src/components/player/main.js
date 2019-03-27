@@ -1,7 +1,7 @@
 import Vue from 'vue';
 //import 'es6-promise/auto';
 import toastcamAPIs from './../../service/toastcamAPIs';
-import store from '../../service/test/store';
+import store from '../../service/player/store';
 import playContainer from './play_container.vue';
 
 class player {

@@ -4,32 +4,15 @@ import Vuex from 'vuex';
 Vue.use(Vuex);
 const store = new Vuex.Store({
     state: {
-        cameraId: null,
-        shopId: null,
-        cameraData: null,
-        cameraConfig: null,
-        timelineData: null,
+        cameraData: {},
+        cameraConfig: {},
+        shopId: '',
+        isShared: false,
+        isFullScreen: false,
+        dataLoadingStatus: true,
         isPlaying: false,
         isLive: true,
-        clickedCvrTime: null,
-        currentTime: null,
-        alarmZones: null,
-        showNoPlayLayer: false,
-        showCameraOffLayer: false,
-        showCameraStreamLayer: false,
-        showNextPlayLayer: false,
-        isCameraOffLastRec: false,
-        isCameraOffLastShowRec: false,
-        isCameraOffLastEvent: false,
-        isCameraOffLastShowEvent: false,
-        isFullScreen: false,
-        isShared: false,
-        cloudOut: false,
-        serviceDay: 0,
-        serviceCalendarDay: null,
-        serviceCalendarDate: null,
-        timelineDate: {},
-        isShowTimelineCalendar: false
+        currentTime: new Date()
     },
     getters: {
         isExpiredCloud: state => {
@@ -40,239 +23,69 @@ const store = new Vuex.Store({
         }
     },
     actions: {
-        SET_CAMERA_ID: function(context, state) {
-            context.commit('UPDATE_CAMERA_ID', state);
-        },
-        SET_CAMERA_DATA: function(context, state) {
+        CAMERA_DATA_CHANGE: function(context, state) {
             context.commit('UPDATE_CAMERA_DATA', state);
         },
-        SET_CAMERA_CONFIG: function(context, state) {
+        CAMERA_CONFIG_CHANGE: function(context, state) {
             context.commit('UPDATE_CAMERA_CONFIG', state);
         },
-        SET_TIMELINE_DATA: function(context, state) {
-            context.commit('UPDATE_TIMELINE_DATA', state);
-        },
-        SET_CURRENT_TIME: function(context, state) {
-            context.commit('UPDATE_CURRENT_TIME', state);
-        },
-        SET_IS_PLAYING: function(context, state) {
-            context.commit('UPDATE_IS_PLAYING', state);
-        },
-        SET_IS_LIVE: function(context, state) {
-            context.commit('UPDATE_IS_LIVE', state);
-        },
-        SET_SHOP_ID: function(context, state) {
+        SHOP_ID_CHANGE: function(context, state) {
             context.commit('UPDATE_SHOP_ID', state);
         },
-        SET_CLICKED_CVR_TIME: function(context, state) {
-            context.commit('UPDATE_CLICKED_CVR_TIME', state);
-        },
-        SET_ALARM_ZONES: function(context, state) {
-            if (!state) {
-                return;
-            }
-            let eventZones = state.eventZones,
-                motionZones = state.zones,
-                soundZone = eventZones.filter((value) => {
-                    return value.id == "0"
-                })[0],
-                accessZone = eventZones.filter((value) => {
-                    return value.id == "10000";
-                })[0];
-            context.commit('UPDATE_ALARM_ZONES', {
-                eventZones, motionZones, soundZone, accessZone
-            });
-        },
-        SET_SHOW_NO_PLAY_LAYER: function(context, state) {
-            context.commit('UPDATE_SHOW_NO_PLAY_LAYER', state);
-        },
-        SET_SHOW_CAMERA_OFF_LAYER: function(context, state) {
-            context.commit('UPDATE_SHOW_CAMERA_OFF_LAYER', state);
-        },
-        SET_SHOW_CAMERA_STREAM_LAYER: function(context, state) {
-            context.commit('UPDATE_SHOW_CAMERA_STREAM_LAYER', state);
-        },
-        SET_SHOW_NEXT_PLAY_LAYER: function(context, state) {
-            context.commit('UPDATE_SHOW_NEXT_PLAY_LAYER', state);
-        },
-        SET_IS_CAMERA_OFF_LAST_REC: function(context, state) {
-            context.commit('UPDATE_IS_CAMERA_OFF_LAST_REC', state);
-        },
-        SET_IS_CAMERA_OFF_LAST_SHOW_REC: function(context, state) {
-            context.commit('UPDATE_IS_CAMERA_OFF_LAST_SHOW_REC', state);
-        },
-        SET_IS_CAMERA_OFF_LAST_EVENT: function(context, state) {
-            context.commit('UPDATE_IS_CAMERA_OFF_LAST_EVENT', state);
-        },
-        SET_IS_CAMERA_OFF_LAST_SHOW_EVENT: function(context, state) {
-            context.commit('UPDATE_IS_CAMERA_OFF_LAST_SHOW_EVENT', state);
-        },
-        SET_IS_FULLSCREEN: function(context, state) {
-            context.commit('UPDATE_IS_FULLSCREEN', state);
-        },
-        SET_IS_SHARED: function(context, state) {
+        IS_SHARED_CHANGE: function(context, state) {
             context.commit('UPDATE_IS_SHARED', state);
         },
-        SET_CLOUD_OUT: function(context, state) {
-            context.commit('UPDATE_CLOUD_OUT', state);
+        IS_FULLSCREEN_CHANGE: function(context, state) {
+            context.commit('UPDATE_IS_FULLSCREEN', state);
         },
-        SET_SERVICE_DAY: function(context, state) {
-            context.commit('UPDATE_SERVICE_DAY', state);
+        IS_PLAYING_CHANGE: function(context, state) {
+            context.commit('UPDATE_IS_PLAYING', state);
         },
-        SET_SERVICE_CALENDAR_DAY: function(context, state) {
-            context.commit('UPDATE_SERVICE_CALENDAR_DAY', state);
+        DATA_LOADING_STATUS_CHANGE: function(context, state) {
+            context.commit('UPDATE_DATA_LOADING_STATUS', state);
         },
-        SET_SERVICE_CALENDAR_DATE: function(context, state) {
-            context.commit('UPDATE_SERVICE_CALENDAR_DATE', state);
+        CURRENT_TIME_CHANGE: function(context, state) {
+            context.commit('UPDATE_CURRENT_TIME', state);
         },
-        SET_TIMELINE_DATE: function(context, state) {
-            context.commit('UPDATE_TIMELINE_DATE', state);
-        },
-        SET_SHOW_TIMELINE_CALENDAR: function(context, state) {
-            context.commit('UPDATE_SHOW_TIMELINE_CALENDAR', state);
-        },
-        CAMERA_REC_DELAY: function(context, state) {
-            context.commit('UPDATE_SHOW_NO_PLAY_LAYER', true);
-            context.commit('UPDATE_SHOW_CAMERA_OFF_LAYER', false);
-            context.commit('UPDATE_SHOW_CAMERA_STREAM_LAYER', false);
-            context.commit('UPDATE_SHOW_NEXT_PLAY_LAYER', false);
-        },
-        CAMERA_CONNECT_OFF: function(context, state) {
-            context.commit('UPDATE_SHOW_NO_PLAY_LAYER', false);
-            context.commit('UPDATE_SHOW_CAMERA_OFF_LAYER', true);
-            context.commit('UPDATE_SHOW_CAMERA_STREAM_LAYER', false);
-            context.commit('UPDATE_SHOW_NEXT_PLAY_LAYER', false);
-            // Camera.isLastRecord({ id: $stateParams.cameraId }, function (data) {
-            //     $scope.currentCameraIsLastRecordDataSet(data);
-            // });
-        },
-        CAMERA_NO_CVR: function(context, state) {
-            context.commit('UPDATE_SHOW_NO_PLAY_LAYER', false);
-            context.commit('UPDATE_SHOW_CAMERA_OFF_LAYER', false);
-            context.commit('UPDATE_SHOW_CAMERA_STREAM_LAYER', false);
-            context.commit('UPDATE_SHOW_NEXT_PLAY_LAYER', true);
-        },
-        CAMERA_REC_OFF: function(context, state) {
-            context.commit('UPDATE_SHOW_NO_PLAY_LAYER', false);
-            context.commit('UPDATE_SHOW_CAMERA_OFF_LAYER', false);
-            context.commit('UPDATE_SHOW_CAMERA_STREAM_LAYER', true);
-            context.commit('UPDATE_SHOW_NEXT_PLAY_LAYER', false);
-        },
-        CAMERA_STATUS_NORMAL: function(context, state) {
-            context.commit('UPDATE_SHOW_NO_PLAY_LAYER', false);
-            context.commit('UPDATE_SHOW_CAMERA_OFF_LAYER', false);
-            context.commit('UPDATE_SHOW_CAMERA_STREAM_LAYER', false);
-            context.commit('UPDATE_SHOW_NEXT_PLAY_LAYER', false);
-            context.commit('UPDATE_IS_CAMERA_OFF_LAST_REC', false);
-            context.commit('UPDATE_IS_CAMERA_OFF_LAST_EVENT', false);
+        IS_LIVE_CHANGE: function(context, state) {
+            context.commit('UPDATE_IS_LIVE', state);
         },
         INIT_ALL_DATA: function(context, state) {
-            context.commit('UPDATE_CAMERA_ID', null);
-            context.commit('UPDATE_SHOP_ID', null);
-            context.commit('UPDATE_CAMERA_DATA', null);
-            context.commit('UPDATE_CAMERA_CONFIG', null);
-            context.commit('UPDATE_TIMELINE_DATA', null);
-            context.commit('UPDATE_IS_PLAYING', false);
-            context.commit('UPDATE_IS_LIVE', true);
-            context.commit('UPDATE_CLICKED_CVR_TIME', null);
-            context.commit('UPDATE_CURRENT_TIME', null);
-            context.commit('UPDATE_ALARM_ZONES', null);
-            context.commit('UPDATE_SHOW_NO_PLAY_LAYER', false);
-            context.commit('UPDATE_SHOW_CAMERA_OFF_LAYER', false);
-            context.commit('UPDATE_SHOW_CAMERA_STREAM_LAYER', false);
-            context.commit('UPDATE_SHOW_NEXT_PLAY_LAYER', false);
-            context.commit('UPDATE_IS_CAMERA_OFF_LAST_REC', false);
-            context.commit('UPDATE_IS_CAMERA_OFF_LAST_SHOW_REC', false);
-            context.commit('UPDATE_IS_CAMERA_OFF_LAST_EVENT', false);
-            context.commit('UPDATE_IS_CAMERA_OFF_LAST_SHOW_EVENT', false);
-            context.commit('UPDATE_IS_FULLSCREEN', false);
+            context.commit('UPDATE_CAMERA_DATA', {});
+            context.commit('UPDATE_CAMERA_CONFIG', {});
+            context.commit('UPDATE_SHOP_ID', '');
             context.commit('UPDATE_IS_SHARED', false);
-            context.commit('UPDATE_CLOUD_OUT', false);
-            context.commit('UPDATE_SERVICE_DAY', 0);
-            context.commit('UPDATE_SERVICE_CALENDAR_DAY', null);
-            context.commit('UPDATE_SERVICE_CALENDAR_DATE', null);
+            context.commit('UPDATE_IS_FULLSCREEN', false);
+            context.commit('UPDATE_DATA_LOADING_STATUS', true);
         }
     },
     mutations: {
-        UPDATE_CAMERA_ID: function(state, id) {
-            state.cameraId = id;
+        UPDATE_CAMERA_DATA: function(state, value) {
+            state.cameraData = value;
         },
-        UPDATE_CAMERA_DATA: function(state, data) {
-            state.cameraData = data;
+        UPDATE_CAMERA_CONFIG: function(state, value) {
+            state.cameraConfig = value;
         },
-        UPDATE_CAMERA_CONFIG: function(state, config) {
-            state.cameraConfig = config;
+        UPDATE_SHOP_ID: function(state, value) {
+            state.shopId = value;
         },
-        UPDATE_TIMELINE_DATA: function(state, data) {
-            state.timelineData = data;
+        UPDATE_IS_SHARED: function(state, value) {
+            state.isShared = value;
         },
-        UPDATE_CURRENT_TIME: function(state, time) {
-            state.currentTime = time;
+        UPDATE_IS_FULLSCREEN: function(state, value) {
+            state.isFullScreen = value;
         },
-        UPDATE_IS_PLAYING: function(state, status) {
-            state.isPlaying = status;
+        UPDATE_DATA_LOADING_STATUS: function(state, value) {
+            state.dataLoadingStatus = value;
         },
-        UPDATE_IS_LIVE: function(state, status) {
-            state.isLive = status;
+        UPDATE_IS_PLAYING: function(state, value) {
+            state.isPlaying = value;
         },
-        UPDATE_SHOP_ID: function(state, id) {
-            state.shopId = id;
+        UPDATE_CURRENT_TIME: function(state, value) {
+            state.currentTime = value;
         },
-        UPDATE_CLICKED_CVR_TIME: function(state, time) {
-            state.clickedCvrTime = time;
-        },
-        UPDATE_ALARM_ZONES: function(state, zones) {
-            state.alarmZones = zones;
-        },
-        UPDATE_SHOW_NO_PLAY_LAYER: function(state, status) {
-            state.showNoPlayLayer = status;
-        },
-        UPDATE_SHOW_CAMERA_OFF_LAYER: function(state, status) {
-            state.showCameraOffLayer = status;
-        },
-        UPDATE_SHOW_CAMERA_STREAM_LAYER: function(state, status) {
-            state.showCameraStreamLayer = status;
-        },
-        UPDATE_SHOW_NEXT_PLAY_LAYER: function(state, status) {
-            state.showNextPlayLayer = status;
-        },
-        UPDATE_IS_CAMERA_OFF_LAST_REC: function(state, status) {
-            state.isCameraOffLastRec = status;
-        },
-        UPDATE_IS_CAMERA_OFF_LAST_SHOW_REC: function(state, status) {
-            state.isCameraOffLastShowRec = status;
-        },
-        UPDATE_IS_CAMERA_OFF_LAST_EVENT: function(state, status) {
-            state.isCameraOffLastEvent = status;
-        },
-        UPDATE_IS_CAMERA_OFF_LAST_SHOW_EVENT: function(state, status) {
-            state.isCameraOffLastShowEvent = status;
-        },
-        UPDATE_IS_FULLSCREEN: function(state, status) {
-            state.isFullScreen = status;
-        },
-        UPDATE_IS_SHARED: function(state, status) {
-            state.isShared = status;
-        },
-        UPDATE_CLOUD_OUT: function(state, status) {
-            state.cloudOut = status;
-        },
-        UPDATE_SERVICE_DAY: function(state, day) {
-            state.serviceDay = day
-        },
-        UPDATE_SERVICE_CALENDAR_DAY: function(state, day) {
-            state.serviceCalendarDay = day;
-        },
-        UPDATE_SERVICE_CALENDAR_DATE: function(state, date) {
-            state.serviceCalendarDate = date;
-        },
-        UPDATE_TIMELINE_DATE: function(state, date) {
-            if (date && date.key) {
-                state.timelineData[date.key] = date.value;
-            }
-        },
-        UPDATE_SHOW_TIMELINE_CALENDAR: function(state, status) {
-            state.isShowTimelineCalendar = status;
+        UPDATE_IS_LIVE: function(state, value) {
+            state.isLive = value;
         }
     }
 });

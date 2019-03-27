@@ -6,7 +6,7 @@
 </template>
 
 <script>
-    import store from '../../service/test/store';
+    import store from '../../service/player/store';
 
     var getFullScreenStatus = function () {
         return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);

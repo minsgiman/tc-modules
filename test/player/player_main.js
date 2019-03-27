@@ -1,11 +1,11 @@
 import Vue from 'vue';
 import 'es6-promise/auto';
-import store from '../../service/player/store';
+import store from './store';
 import playContainer from './play_container';
 import flashPlayer from "./flash_player";
 import webRTCPlayer from "./webrtc_player";
 import timeline from "./timeline";
-import toastAPIs from '../../service/toastcamAPIs';
+import toastAPIs from '../../src/service/toastcamAPIs';
 
 class player {
     constructor(param) {
