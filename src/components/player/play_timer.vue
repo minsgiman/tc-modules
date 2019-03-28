@@ -1,23 +1,5 @@
-<template>
-    <div class="cam_info" id="cam_info" :class="{toggle_on : isShowTimelineToggleArea && isToggleOn , toggle_off : isShowTimelineToggleArea && !isToggleOn }">
-        <div class="cam_info_area cam_info_bg cam_info_bg_en_en_en">
-            <div class="time_area" id="time_area" style="position: relative;">
-                <button type="button" class="sp pause" v-show="isPlaying" @click="pauseBtn()" id="pause_btn"></button>
-                <button type="button" class="sp play" v-show="!isPlaying" @click="playBtn()" id="play_btn"></button>
-                <span class="date">{{formattedDateNotYo(currentTime)}}</span>
-                <span class="time">{{formattedTime(currentTime)}}</span>
-                <button type="button" class="golive" v-show="!isLive" @click="goLive()" id="golive_btn">
-                    <span>GO LIVE</span>
-                </button>
-            </div>
-        </div>
-    </div>
-</template>
-
 <script>
     import store from '../../service/player/store';
-    import moment from 'moment';
-    import 'moment-timezone';
 
     export default {
         name: 'playTimer',
@@ -29,17 +11,23 @@
             currentTime: function () {
                 return store.state.currentTime;
             },
+            cameraData: function () {
+                return store.state.cameraData;
+            },
             isLive: function () {
                 return store.state.isLive;
             },
-            timeZone: function () {
-                return (store.state.cameraConfig && store.state.cameraConfig.timezone) ? store.state.cameraConfig.timezone.split(',')[2] : '';
+            playBtnStatus: function () {
+                return store.state.playBtnStatus;
             }
         },
         data: function () {
             return {
-                isShowTimelineToggleArea : false,
-                isToggleOn : false
+                beforeServerTime : 0,
+                timer : null,
+                playerCheck : false,
+                cursorIdx : 0,
+                cursorNowTime : 0
             }
         },
         created : function() {
@@ -49,68 +37,165 @@
         beforeDestroy : function() {
         },
         methods : {
-            pauseBtn : function() {
-                this.$emit('playTimerEvent', {event: 'pause'});
-                store.dispatch('IS_PLAYING_CHANGE', false);
-            },
-            playBtn : function() {
-                this.$emit('playTimerEvent', {event: 'play'});
-                store.dispatch('IS_PLAYING_CHANGE', true);
-            },
-            formattedDateNotYo: function(date) {
-                var md, tz = this.timeZone;
-                if (tz !== undefined) {
-                    md = moment(new Date(date)).tz(tz);
-                } else {
-                    md = moment(new Date(date));
-                }
-                return md ? md.locale($("html").attr("lang")).format("MM. DD dd") : '';
-            },
+            startRecTimer : function(time, player, timeline) {
+                this.beforeServerTime = 0;
+                store.dispatch('CURRENT_TIME_CHANGE', new Date(time.valueOf()));
+                clearInterval(this.timer);
+                this.timer = setInterval(() => {
 
-            formattedTime: function(date) {
-                var md, tz = this.timeZone;
-                if (tz !== undefined) {
-                    md = moment(new Date(date)).tz(tz);
-                } else {
-                    md = moment(new Date(date));
-                }
-                return md ? md.format("HH:mm:ss") : '';
-            },
-
-            camInfoBarChange : function() {
-                if(this.isLive == false){
-                    if(parseInt(window.innerWidth) < 1900){
-                        $(".cam_info_bg").css("width","280px");
-                        $(".cam_info_bg").css("margin-left"," -140px");
-
-                        $(".cam_info_bg_en").css("width","290px");
-                        $(".cam_info_bg_en").css("margin-left"," -145px");
-                    }else{
-                        $(".cam_info_bg").css("width","280px");
-                        $(".cam_info_bg").css("margin-left"," -140px");
-
-                        $(".cam_info_bg_en").css("width","290px");
-                        $(".cam_info_bg_en").css("margin-left"," -145px");
+                    if(this.playBtnStatus == false){
+                        return;
                     }
-                }else{
-                    if(parseInt(window.innerWidth) < 1900){
-                        $(".cam_info_bg").css("width","206px");
-                        $(".cam_info_bg").css("margin-left"," -103px");
 
-                        $(".cam_info_bg_en").css("width","216px");
-                        $(".cam_info_bg_en").css("margin-left"," -108px");
-                    }else{
-                        $(".cam_info_bg").css("width","206px");
-                        $(".cam_info_bg").css("margin-left"," -103px");
-
-                        $(".cam_info_bg_en").css("width","216px");
-                        $(".cam_info_bg_en").css("margin-left"," -108px");
+                    if(this.playerCheck == false){
+                        return;
                     }
-                }
+
+                    timeline.cvrDrawCheck(this.currentTime);
+
+                    if(timeline.cvrCheck == false){
+                        if (this.cameraData.recordType == "event") {
+                            this.$emit('playTimerEvent', {event: 'jumpToNextRecord'});
+                        } else {
+                            if(timeline.lineMoveFlag == false){
+                                store.dispatch('IS_PLAYING_CHANGE', false);
+                                this.$emit('playTimerEvent', {event: 'noCvrError'});
+                                clearInterval(this.timer);
+                                if (player) {
+                                    player.close();
+                                }
+                                return;
+                            }
+                        }
+                    }else{
+                        store.dispatch('IS_PLAYING_CHANGE', true);
+                        this.$emit('playTimerEvent', {event: 'checkNoCvr'});
+                    }
+
+                    if(this.cursorIdx == 0){
+                        this.cursorNowTime = this.currentTime.valueOf();
+                        this.cursorIdx++;
+                    }else{
+                        if (player) {
+                            var addSec = (((player.getCurrentTime()[0] || 0 ) * 1000) - this.beforeServerTime);
+                            if(addSec <= 0){
+                                addSec = 1000;
+                            }
+                            this.cursorNowTime = this.cursorNowTime + addSec;
+                            this.beforeServerTime = (player.getCurrentTime()[0] || 0 ) * 1000;
+                            store.dispatch('CURRENT_TIME_CHANGE', new Date(this.cursorNowTime));
+                        } else {
+                            addSec = 1000;
+                            this.cursorNowTime = this.cursorNowTime + addSec;
+                            store.dispatch('CURRENT_TIME_CHANGE', new Date(this.cursorNowTime));
+                        }
+                    }
+
+                    var currentDomain = timeline.getData('currentDomain');
+                    if(currentDomain == undefined){
+                        return;
+                    }
+
+                    var range = 0, fixRange = 0, domain = currentDomain;
+
+                    switch(timeline.getData('timeRange')){
+                        case 10:
+                            range = 600000;
+                            fixRange = 0;
+                            break;
+                        case 60:
+                            range = 600000 * 6;
+                            fixRange = 200000;
+                            break;
+                        case 360:
+                            range = 600000 * 6 * 6;
+                            fixRange = 1245000;
+                            break;
+                        case 1440:
+                            range = 600000 * 6 * 6 * 4;
+                            fixRange = 3650000;
+                            break;
+                    }
+
+                    if (domain[0] + range < this.currentTime.valueOf() && domain[1] - range - fixRange > this.currentTime.valueOf()) {
+                        timeline.lineMoveFlag = false;
+                    }else{
+                        if(timeline.lineMoveFlag == false){
+                            timeline.setData('changeTimeRangeClick', true);
+                            this.$emit('playTimerEvent', {event: 'pressedFindCursorButton'});
+                        }
+                    }
+
+                    if(timeline.lineMoveFlag == false){
+                        if (domain[0] < this.cursorNowTime && domain[1] > this.cursorNowTime) {
+                            timeline.updateCursor(new Date(this.cursorNowTime));
+                        }else{
+                            timeline.setData('changeTimeRangeClick', true);
+                            timeline.nextDomain();
+                        }
+                    }
+
+                }, timeline.getData('cursorInterval'));
             },
 
-            goLive: function() {
-                this.$emit('playTimerEvent', {event: 'goLive'});
+            startLiveTimer : function(timeline) {
+                var range = 0, fixRange = 0;
+
+                timeline.setData('forceDomain', true);
+                clearInterval(this.timer);
+                // if($scope.serviceDay == 0){
+                // 	return;
+                // }
+                this.timer = setInterval(() => {
+                    const currentTime = new Date();
+                    switch(timeline.getData('timeRange')){
+                        case 10:
+                            range = 600000;
+                            fixRange = 0;
+                            break;
+                        case 60:
+                            range = 600000 * 6;
+                            fixRange = 200000;
+                            break;
+                        case 360:
+                            range = 600000 * 6 * 6;
+                            fixRange = 1245000;
+                            break;
+                        case 1440:
+                            range = 600000 * 6 * 6 * 4;
+                            fixRange = 3650000;
+                            break;
+                    }
+
+                    if(this.playBtnStatus == false){
+                        return;
+                    }
+                    store.dispatch('CURRENT_TIME_CHANGE', currentTime);
+                    var currentDomain = timeline.getData('currentDomain');
+                    if(currentDomain == undefined){
+                        return;
+                    }
+
+                    var domain = currentDomain;
+
+                    if (domain[0] + range < currentTime.getTime() && domain[1]- range - fixRange > currentTime.getTime()) {
+                        timeline.updateCursor();
+                        timeline.lineMoveFlag = false;
+                    }else{
+                        if(timeline.lineMoveFlag == false){
+                            timeline.setData('changeTimeRangeClick', true);
+                            this.$emit('playTimerEvent', {event: 'pressedFindCursorButton'});
+                            timeline.lineMoveFlag = true;
+                        }
+                    }
+                }, timeline.getData('cursorInterval'));
+            },
+
+            stopTimer : function() {
+                if (this.timer) {
+                    clearInterval(this.timer);
+                    this.timer = null;
+                }
             },
 
             setData : function(key, value) {
@@ -123,8 +208,3 @@
         }
     }
 </script>
-
-<style lang="less">
-    #timebar_area {
-    }
-</style>

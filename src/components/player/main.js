@@ -2,7 +2,7 @@ import Vue from 'vue';
 //import 'es6-promise/auto';
 import toastcamAPIs from './../../service/toastcamAPIs';
 import store from '../../service/player/store';
-import playContainer from './play_container.vue';
+import playContainer from './toastcam_player.vue';
 
 class player {
     constructor(param) {
@@ -38,6 +38,9 @@ class player {
                 break;
             case 'isPlaying':
                 store.dispatch('IS_PLAYING_CHANGE', value);
+                break;
+            case 'playBtnStatus':
+                store.dispatch('PLAY_BTN_STATUS_CHANGE', value);
                 break;
             default:
                 break;

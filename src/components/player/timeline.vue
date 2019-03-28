@@ -113,13 +113,17 @@
                 cvrData: [],
                 arrEvents : [],
                 cvrArray : [],
+                cvrCheck : false,
                 forceDomain: true,
                 dragTimeLine : false,
+                cursorDragStatus : false,
                 isLoading: false,
                 nowScale : "1h",
                 dragThumCancle : false,
                 newTimelineDragCnt : 0,
+                clickTime : 0,
                 cachedTimelineparams : null,
+                lineMoveFlag : false,
                 timelineColorObj: {
                     0: "#18b57b",
                     1: "#ff7900",
@@ -222,6 +226,86 @@
                 }
 
                 this.$emit('timelineEvent', {event: 'resize'});
+            },
+
+            clickedCVRArea : function(time, status) {
+                this.newTimelineDragCnt=0;
+                this.$emit('timelineEvent', {event: 'stopPlayTimer'});
+                if(this.isShared == true){
+                    this.$emit('timelineEvent', {event: 'shareEnd'});
+                }
+
+                var currentDomain = this.currentDomain;
+                this.setupDomain([currentDomain[0], currentDomain[1]]);
+                if((new Date()).valueOf() < time.valueOf()){
+                    this.$emit('timelineEvent', {event: 'goLive'});
+                    return;
+                }
+
+                if(this.cursorDragStatus == true){
+                    return;
+                }
+
+                setTimeout(() => {
+                    this.$emit('timelineEvent', {event: 'cvrPlayRequest', data: {time, status}});
+                },800);
+            },
+
+            cvrDrawCheck : function(time) {
+                store.dispatch('IS_LIVE_CHANGE', false);
+                this.$emit('timelineEvent', {event: 'camInfoBarChange'});
+                var trueCnt = 0;
+                this.cvrCheck = false;
+
+                var nextTime = null;
+                var cvrData = this.cvrData;
+                var currentDomain = this.currentDomain;
+                var timeRange = this.timeRange;
+
+                for(var i=0;i<cvrData.length;i++){
+                    var startX = parseInt(cvrData[i].startTime);
+                    var endX = parseInt(cvrData[i].endTime);
+
+                    if(startX > time.valueOf() && !nextTime){
+                        nextTime = startX;
+                        this.$emit('timelineEvent', {event: 'clearPlayerStopTimeout'});
+                    }
+
+                    if(timeRange == 10){
+                        if(parseInt(cvrData[cvrData.length-1].endTime) <= time.valueOf()+3000){
+                            this.setupDomain([currentDomain[0], currentDomain[1]]);
+                        }
+                    }else{
+                        if(parseInt(cvrData[cvrData.length-1].endTime) <= time.valueOf()+30000){
+                            this.setupDomain([currentDomain[0],currentDomain[1]]);
+                        }
+                    }
+
+                    if(startX <= time.valueOf()  && endX >= time.valueOf()){
+                        this.cvrCheck = true;
+                        trueCnt++;
+                    }else{
+                        if(trueCnt == 0){
+                            this.cvrCheck = false;
+                        }
+                    }
+                }
+                if(this.cvrCheck == false){
+                    if((new Date).valueOf() - time.valueOf() < 8000){
+                        this.$emit('timelineEvent', {event: 'goLive'});
+                        this.newTimelineDragCnt = 0;
+                        return;
+                    }
+
+                    if((new Date).valueOf() - time.valueOf() < 15000){
+                        this.cvrCheck = true;
+                        this.newTimelineDragCnt=0;
+                    }
+                }
+
+                if(this.cvrCheck == false){
+                    this.$emit('timelineEvent', {event: 'noCvr', data: nextTime});
+                }
             },
 
             setupDomain : function(domain) {
@@ -477,8 +561,8 @@
                         setTimeout(() => {
                             dragFlag = false;
                             if(timelineClick == false){
-                                that.$emit('timelineEvent', {event: 'updateByDrag'});
-                                this.dragTimeLine = true;
+                                that.lineMoveFlag = true;
+                                that.dragTimeLine = true;
                                 dragEndStatus = true;
                                 that.dragDomain();
                                 $(".axis").attr("transform","translate(0, 75)");
@@ -640,7 +724,7 @@
                 }
 
                 if(dblClicklive == false){
-                    this.$emit('timelineEvent', {event: 'clickedCVRArea', data: new Date(dblClickTime)});
+                    this.clickedCVRArea(new Date(dblClickTime));
                 }else{
                     this.$emit('timelineEvent', {event: 'goLive'});
                 }
@@ -1158,6 +1242,7 @@
                         }
                         dblClicklive = that.isLive;
                         dblClickTime = that.currentTime.valueOf();
+                        that.lineMoveFlag = false;
                         that.$emit('timelineEvent', {event: 'clickedCVRBg'});
                         that.dragThumCancle = false;
                         timelineClick = true;
@@ -1166,8 +1251,7 @@
 
                         var callbackFunc = function() {
                             that.forceDomain = true;
-                            that.$emit('timelineEvent', {event: 'clickedCVRArea', data: selectedTime});
-
+                            that.clickedCVRArea(selectedTime);
                             that.updateCursor(selectedTime);
                             if (that.currentTime.getTime() - Date.now() >= 0) { // 미래를 선택한 경우
                                 that.$emit('timelineEvent', {event: 'goLive'});
@@ -1202,7 +1286,7 @@
                 var that = this;
                 var drag = d3.behavior.drag()
                     .on('dragstart', () => {
-                        that.$emit('timelineEvent', {event: 'cursorDragStatusChanged', data: true});
+                        that.cursorDragStatus = true;
                         if(that.firstDataLoadingFlag == false){
                             return;
                         }
@@ -1211,7 +1295,7 @@
                         that.$emit('timelineEvent', {event: 'cursorDragStart'});
                     })
                     .on('drag', () => {
-                        that.$emit('timelineEvent', {event: 'cursorDragStatusChanged', data: true});
+                        that.cursorDragStatus = true;
                         if(that.firstDataLoadingFlag == false){
                             that.$emit('timelineEvent', {event: 'loadingDataAlert'});
                             return;
@@ -1229,6 +1313,7 @@
                     })
                     .on('dragend', () => {
                         that.dragThumCancle = false;
+                        that.cursorDragStatus = false;
                         that.$emit('timelineEvent', {event: 'cursorDragEnd'});
                         that.$emit('timelineEvent', {event: 'checkCVRSeucre', data: function(isSecureMode){
                                 if(isSecureMode){
