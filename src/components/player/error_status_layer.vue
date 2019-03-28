@@ -122,7 +122,8 @@
                 lastEventDate: 0,
                 lastRecDate: 0,
                 lastEventDateString: '',
-                lastEventTimeString: ''
+                lastEventTimeString: '',
+                lastCameraStatus : 0
             }
         },
         created : function() {
@@ -132,6 +133,30 @@
         beforeDestroy : function() {
         },
         methods : {
+            cameraStatusChange : function(status) {
+                this.lastCameraStatus = status;
+                switch(status){
+                    case 0:
+                        this.cameraStatusAllOff();
+                        break;
+                    case 1:
+                        this.cameraRecOff();
+                        break;
+                    case 2:
+                        this.cameraRecDelay();
+                        break;
+                    case 3:
+                        this.cameraConnectOff();
+                        break;
+                    case 4:
+                        this.cameraConnectOff();
+                        break;
+                    default:
+                        this.cameraStatusAllOff();
+                        break;
+                }
+            },
+
             cameraRecDelay : function() { //녹화 지연
                 this.showNoPlayLayer = true;
                 this.showCameraOffLayer = false;

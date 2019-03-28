@@ -110,7 +110,6 @@
                 flashStatusFlush : false,
                 playCheackCnt : 0,
                 clickTime : 0,
-                lastCameraStatus : 0,
                 playserStop : null,
                 timer : null,
                 fullScreenMakeViewTimeout : null,
@@ -123,22 +122,14 @@
                 cursorNowTime : 0,
                 fixRange : 0,
                 range : 0,
-                newTimelineDragCnt : 0,
                 cursorDragStatus : false,
-                serviceDateTime : 0,
-                serviceDay : 0,
                 goCvrStatus : false,
                 currentZoom : 1.0,
                 isShowZoomLocation : true,
                 isShowControlToggleArea : false,
                 fullscreenTimer : null,
-                dragThumCancle : false,
                 timeRange : 60,
-                nowScale : "1h",
                 cachedTimelineparams : null,
-                dragTimeLine : false,
-                arrEvents : [],
-                cvrArray : [],
                 lastRec : 0,
                 lastEvent : 0,
                 lineMoveFlag : false
@@ -160,8 +151,6 @@
             const vPlayTimerConstructor = Vue.extend(playTimer);
             this.playTimer = new vPlayTimerConstructor().$mount('#cam_info');
             this.playTimer.$on('playTimerEvent', this.playTimerEventHandler.bind(this));
-
-            window.onresize = this.resizeTimline.bind(this);
         },
         mounted : function() {
         },
@@ -218,82 +207,6 @@
                 }
             },
 
-            resizeTimline : function() {
-                this.playEventCb('resizeTimline');
-
-                if(this.isFullScreen === false){
-                    this.timeline.redrawWithWidth(parseInt($("#view_timeline_ctrl").width()));
-                }
-
-                if(this.isFullScreen == true){
-                    if (this.player) {
-                        this.player.zoomZone(260, parseInt($("#player").css("width"))-20);
-                    }
-                }else{
-                    if (this.player) {
-                        this.player.zoomZone(this.zoomZoneBottom, parseInt($("#player").css("width"))-20);
-                    }
-                }
-
-                this.camInfoBarChange();
-            },
-
-            camInfoBarChange : function() {
-                if(this.isLive == false){
-                    if(parseInt(window.innerWidth) < 1900){
-                        $(".cam_info_bg").css("width","280px");
-                        $(".cam_info_bg").css("margin-left"," -140px");
-
-                        $(".cam_info_bg_en").css("width","290px");
-                        $(".cam_info_bg_en").css("margin-left"," -145px");
-                    }else{
-                        $(".cam_info_bg").css("width","280px");
-                        $(".cam_info_bg").css("margin-left"," -140px");
-
-                        $(".cam_info_bg_en").css("width","290px");
-                        $(".cam_info_bg_en").css("margin-left"," -145px");
-                    }
-                }else{
-                    if(parseInt(window.innerWidth) < 1900){
-                        $(".cam_info_bg").css("width","206px");
-                        $(".cam_info_bg").css("margin-left"," -103px");
-
-                        $(".cam_info_bg_en").css("width","216px");
-                        $(".cam_info_bg_en").css("margin-left"," -108px");
-                    }else{
-                        $(".cam_info_bg").css("width","206px");
-                        $(".cam_info_bg").css("margin-left"," -103px");
-
-                        $(".cam_info_bg_en").css("width","216px");
-                        $(".cam_info_bg_en").css("margin-left"," -108px");
-                    }
-                }
-            },
-
-            cameraStatusChange : function(status) {
-                this.lastCameraStatus = status;
-                switch(status){
-                    case 0:
-                        this.errorStatusLayer.cameraStatusAllOff();
-                        break;
-                    case 1:
-                        this.errorStatusLayer.cameraRecOff();
-                        break;
-                    case 2:
-                        this.errorStatusLayer.cameraRecDelay();
-                        break;
-                    case 3:
-                        this.errorStatusLayer.cameraConnectOff();
-                        break;
-                    case 4:
-                        this.errorStatusLayer.cameraConnectOff();
-                        break;
-                    default:
-                        this.errorStatusLayer.cameraStatusAllOff();
-                        break;
-                }
-            },
-
             flashEventCallback : function(status) {
                 this.playerCheck = true;
 
@@ -313,7 +226,7 @@
                     $("#cam_info").css("background","");
 
                     setTimeout(() => {
-                        this.resizeTimline();
+                        this.timeline.resizeTimline();
                     },100);
                     store.dispatch('IS_PLAYING_CHANGE', true);
                     this.playEventCb('isShowMikeChanged', true);
@@ -327,7 +240,7 @@
                     }
                 } else {
                     if (this.isLive){
-                        this.cameraStatusChange(this.lastCameraStatus);
+                        this.errorStatusLayer.cameraStatusChange(this.errorStatusLayer.lastCameraStatus);
                     }
 
                     if(status === "NetStream.Buffer.Flush"){
@@ -412,7 +325,7 @@
                                 }
                             }
                         }
-                    }else if(status == "NetStream.Buffer.Full" && this.lastCameraStatus == 4){
+                    }else if(status == "NetStream.Buffer.Full" && this.errorStatusLayer.lastCameraStatus == 4){
                         if (this.isLive){
                             this.statusCheck++;
                             if(this.statusCheck == 2){
@@ -431,53 +344,81 @@
 
             onTimelineEvent : function(param) {
                 switch (param.event) {
+                    case 'resize':
+                        this.playEventCb('resizeTimline');
+                        if(this.isFullScreen == true){
+                            if (this.player) {
+                                this.player.zoomZone(260, parseInt($("#player").css("width"))-20);
+                            }
+                        }else{
+                            if (this.player) {
+                                this.player.zoomZone(this.zoomZoneBottom, parseInt($("#player").css("width"))-20);
+                            }
+                        }
+                        this.playTimer.camInfoBarChange();
+                        break;
+                    case 'dragTimeLineStop':
+                        this.playEventCb('changedSelectedZone');
+                        this.playEventCb('thumnailDrawChanged', true);
+                        break;
+                    case 'timelineDataUpdated':
+                        this.playEventCb('eventsChanged', this.timeline.arrEvents);
+                        setTimeout(() => {
+                            this.playEventCb('changedSelectedZone');
+                        },200);
+                        this.playEventCb('changedSelectedZone');
+                        break;
                     case 'clickedCVRArea':
                         this.clickedCVRArea(param.data);
                         break;
                     case 'goLive':
                         this.play();
                         break;
-                    case 'setupDomain':
-                        this.setupDomain(param.data);
-                        break;
                     case 'loadingDataAlert':
                         this.playEventCb('loadingDataAlert');
                         break;
                     case 'doubleClick':
-                        this.newTimelineDragCnt = 0;
                         this.playEventCb('dblClickFlagChanged', true);
                         break;
                     case 'dragStart':
                         this.playEventCb('timelineDragStart');
-                        this.dragThumCancle = true;
                         break;
                     case 'dragging':
                         this.playEventCb('timelineDragging');
                         break;
                     case 'dragEnd':
                         this.playEventCb('timelineDragEnd');
-                        this.newTimelineDragCnt = 0;
-                        this.dragThumCancle = false;
                         break;
                     case 'updateByDrag':
                         this.lineMoveFlag = true;
-                        this.dragTimeLine = true;
-                        break;
-                    case 'moveDomain':
-                        this.newTimelineDragCnt = 0;
-                        this.dragThumCancle = false;
                         break;
                     case 'clickedCVRBg':
                         this.playEventCb('thumnailDrawChanged', true);
                         this.lineMoveFlag = false;
-                        this.dragThumCancle = false;
                         this.plyBtnStatus = true;
+                        break;
+                    case 'cursorChanged':
+                        if (param.data === 'left') {
+                            this.playEventCb('isCursorLeftChanged', true);
+                            this.playEventCb('isCursorRightChanged', false);
+                        } else if (param.data === 'right') {
+                            this.playEventCb('isCursorLeftChanged', false);
+                            this.playEventCb('isCursorRightChanged', true);
+                        } else {
+                            this.playEventCb('isCursorLeftChanged', false);
+                            this.playEventCb('isCursorRightChanged', false);
+                        }
                         break;
                     case 'cursorDragEnd':
                         this.plyBtnStatus = true;
                         this.cursorDragStatus = false;
                         this.liveReloadCnt = 0;
-                        this.dragThumCancle = false;
+                        break;
+                    case 'getAlarmZones':
+                        this.playEventCb('getAlarmZones');
+                        break;
+                    case 'shareEnd':
+                        this.playEventCb('shareEnd');
                         break;
                     case 'checkCVRSeucre':
                         this.playEventCb('checkCVRSeucre', param.data);
@@ -503,17 +444,11 @@
                     case 'hideCursorNavigation':
                         this.playEventCb('hideCursorNavigation');
                         break;
-                    case 'newTimelineDragCntUpdate':
-                        this.newTimelineDragCnt = param.data;
-                        break;
                     case 'cursorDragStatusChanged':
                         this.cursorDragStatus = param.data;
                         break;
                     case 'changeTimeRangeFlagUpdate':
                         this.playEventCb('changeTimeRangeFlagUpdate', param.data);
-                        break;
-                    case 'dragThumCancleUpdate':
-                        this.dragThumCancle = param.data;
                         break;
                     case 'liveReloadCntUpdate':
                         this.liveReloadCnt = param.data;
@@ -574,12 +509,6 @@
                 this.timeline.setData('cursorInterval', 1000);
 
                 return this.timeline;
-            },
-
-            initSizeTimline : function() {
-                var timelineWidth = this.isFullScreen ? $('#fullscreen').width() : $("#view_timeline_ctrl").width();
-                this.timeline.getData('svg').select('.cursor').classed('hide', true);
-                this.timeline.redrawWithWidth(parseInt(timelineWidth));
             },
 
             startRecTimer : function(time) {
@@ -687,14 +616,14 @@
             },
 
             clickedCVRArea : function(time, status) {
-                this.newTimelineDragCnt=0;
+                this.timeline.newTimelineDragCnt=0;
                 clearInterval(this.timer);
                 if(this.isShared == true){
                     this.playEventCb('shareEnd');
                 }
 
                 var currentDomain = this.timeline.getData('currentDomain');
-                this.setupDomain([currentDomain[0], currentDomain[1]]);
+                this.timeline.setupDomain([currentDomain[0], currentDomain[1]]);
                 if((new Date()).valueOf() < time.valueOf()){
                     this.play();
                     return;
@@ -705,11 +634,10 @@
                 }
 
                 setTimeout(() => {
-                    this.serviceDateTime = ((new Date()).valueOf() - (1000*60*60*24*(this.serviceDay)));
-                    this.timeline.setData('serviceDateTime', this.serviceDateTime);
-                    if(this.serviceDateTime > time){
+                    this.timeline.serviceDateTime = ((new Date()).valueOf() - (1000*60*60*24*(this.timeline.serviceDay)));
+                    if(this.timeline.serviceDateTime > time){
                         //return;
-                        time = new Date(this.serviceDateTime + 3000);
+                        time = new Date(this.timeline.serviceDateTime + 3000);
                     }
 
                     this.clickTime = time;
@@ -727,7 +655,7 @@
                     this.startRecTimer(time);
                     if(this.cvrCheck == true || this.goCvrStatus == true){
                         store.dispatch('IS_LIVE_CHANGE', false);
-                        this.camInfoBarChange();
+                        this.playTimer.camInfoBarChange();
                         this.goCvrStatus = false;
                         this.errorStatusLayer.cameraStatusAllOff();
                         toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAM_TOKEN : toastcamAPIs.camera.GET_TOKEN, {cameraId: this.cameraData.id}, (res) => {
@@ -908,7 +836,7 @@
 
             onBeforeFullscreenChange : function (fullscreenStatus) {
                 if (fullscreenStatus) {
-                    this.newTimelineDragCnt = 0;
+                    this.timeline.newTimelineDragCnt = 0;
 
                     if (this.currentZoom > 1) {
                         this.playTimer.setData('isShowTimelineToggleArea', false);
@@ -954,7 +882,7 @@
 
             onFullscreenChanged : function(fullscreenStatus) {
                 var topDefault = 96;
-                this.newTimelineDragCnt = 0;
+                this.timeline.newTimelineDragCnt = 0;
                 this.playEventCb('isFullScreenChanged', fullscreenStatus);
 
                 if (fullscreenStatus) {
@@ -1036,178 +964,9 @@
                 }
             },
 
-            getTimeline : function() {
-                if(this.isShared == false){
-                    toastcamAPIs.call(toastcamAPIs.camera.GET_TIMELINE, this.cachedTimelineparams, (res) => {
-                        this.drawTimelineData(res);
-                    }, (err) => {
-                        this.timeline.setData('isLoading', false);
-                    });
-                }else{
-                    toastcamAPIs.call(toastcamAPIs.camera.GET_SHARE_CAM_TIMELINE, this.cachedTimelineparams, (res) => {
-                        this.drawTimelineData(res);
-                    }, (err) => {
-                        this.timeline.setData('isLoading', false);
-                    });
-                }
-            },
-
-            drawTimelineData : function(d) {
-                var check = 0;
-                var eventTime = d.recTimes;
-
-                d.recTimes = [];
-
-                if (eventTime) {
-                    for(var i=0;i<eventTime.length;i++){
-                        if(i< eventTime.length){
-                            if(eventTime[i+1] != undefined){
-                                if(eventTime[i].endTime == eventTime[i+1].startTime){
-                                    check++;
-                                }else{
-                                    var recTime = {};
-                                    recTime.startTime = eventTime[i-check].startTime;
-                                    recTime.endTime = eventTime[i].endTime;
-                                    d.recTimes.push(recTime);
-                                    check = 0;
-                                }
-                            }else{
-                                var recTime = {};
-                                recTime.startTime = eventTime[i-check].startTime;
-                                recTime.endTime = eventTime[i].endTime;
-                                d.recTimes.push(recTime);
-                                check = 0;
-                            }
-                        }
-                    }
-                }
-                this.timeline.setData('firstDataLoadingFlag', true);
-                this.timelineDataSet(d);
-            },
-
-
-            setupDomain : function(domain) {
-                if(this.isShared == true){
-                    this.playEventCb('shareEnd');
-                }
-                if(this.dragThumCancle == true){
-                    return;
-                }
-
-                this.cachedTimelineparams = {
-                    cameraId: this.cameraData.id,
-                    start: domain[0],
-                    end: domain[1],
-                    shopId: this.shopId
-                };
-
-                //
-                /**타임라인 호출
-                 *10분일땐 1초에 한번
-                 *1시간일땐 1분에 한번
-                 *6시간일땐 5분에 한번
-                 *24시간일땐 10분에 한번 호출
-                 *예외상황 커서 드래그, cvr, 타임라인 드래그, 라이브보기, 이전 타임라인, 다음 타임라인
-                 */
-
-                if (this.timeRange == 10) {
-                    this.cachedTimelineparams.scale = "10m";
-                    this.nowScale = "10m";
-                    this.cachedTimelineparams.start = this.cachedTimelineparams.start - 100000;
-                }else if(this.timeRange == 60){
-                    this.cachedTimelineparams.scale = "1h";
-                    this.nowScale = "1h";
-                    if(this.newTimelineDragCnt > 0 && this.newTimelineDragCnt < 6){
-                        this.newTimelineDragCnt++;
-                        return;
-                    }else if(this.newTimelineDragCnt==6){
-                        this.newTimelineDragCnt=0;
-                    }
-
-                }else if(this.timeRange == 360){
-                    this.cachedTimelineparams.scale = "6h";
-                    this.nowScale = "6h";
-                    if(this.newTimelineDragCnt > 0 && this.newTimelineDragCnt < 30){
-                        this.newTimelineDragCnt++;
-                        return;
-                    }else if(this.newTimelineDragCnt==30){
-                        this.newTimelineDragCnt=0;
-                    }
-                }else if(this.timeRange == 1440){
-                    this.cachedTimelineparams.scale = "24h";
-                    this.nowScale = "24h";
-                    if(this.newTimelineDragCnt > 0 && this.newTimelineDragCnt < 60){
-                        this.newTimelineDragCnt++;
-                        return;
-                    }else if(this.newTimelineDragCnt==60){
-                        this.newTimelineDragCnt=0;
-                    }
-                }
-
-                this.newTimelineDragCnt++;
-                this.timeline.setData('isLoading', true);
-                if(this.serviceDay != 0){
-                    this.serviceDateTime = ((new Date()).valueOf() - (1000*60*60*24*(this.serviceDay)));
-                }else{
-                    this.serviceDateTime = 0;
-                }
-                this.timeline.setData('serviceDateTime', this.serviceDateTime);
-
-                if(this.cachedTimelineparams.start < this.serviceDateTime){
-                    this.cachedTimelineparams.start = this.serviceDateTime;
-                }
-
-                this.playEventCb('getAlarmZones');
-
-                var removedBufferDomain = this.timeline.removeBufferCursorCheckDomain(domain , this.timeline.getData('timeRange'));
-                if (this.currentTime && (removedBufferDomain[0] > this.currentTime.valueOf())) {
-                    this.playEventCb('isCursorLeftChanged', true);
-                    this.playEventCb('isCursorRightChanged', false);
-                } else if (this.currentTime && (removedBufferDomain[1] < this.currentTime.valueOf())) {
-                    this.playEventCb('isCursorLeftChanged', false);
-                    this.playEventCb('isCursorRightChanged', true);
-                } else {
-                    this.playEventCb('isCursorLeftChanged', false);
-                    this.playEventCb('isCursorRightChanged', false);
-                    if(this.isPlaying == false){
-                        this.timeline.updateCursor(this.currentTime);
-                    }
-                }
-            },
-
-            timelineDataSet : function(d){
-                if(this.dragTimeLine == true){
-                    this.dragTimeLine = false;
-                    if (this.isFullScreen) {
-                        $("#timebar_area").children("svg").children("g").attr("transform","translate(0, -15)");
-                    }else{
-                        $("#timebar_area").children("svg").children("g").attr("transform","translate(0, -19)");
-                    }
-                    this.playEventCb('changedSelectedZone');
-                    $(".cvr").attr("transform","");
-                    $(".cursor").attr("transform","");
-                    this.playEventCb('thumnailDrawChanged', true);
-                }
-
-                this.arrEvents = d.events;
-                this.playEventCb('eventsChanged', d.events);
-                this.timeline.setData('cvrData', d.recTimes);
-                this.timeline.drawRecordBar();
-                this.timeline.updateBar(500);
-                this.cvrArray = [];
-                this.cvrArray.push($(".cvr").children("rect"));
-                this.timeline.redrawEvents(d.events, d.avg);
-                this.timeline.setData('isLoading', false);
-                setTimeout(() => {
-                    this.playEventCb('changedSelectedZone');
-                },200);
-
-                this.playEventCb('changedSelectedZone');
-            },
-
             cvrDrawCheck : function(time) {
                 store.dispatch('IS_LIVE_CHANGE', false);
-                this.camInfoBarChange();
+                this.playTimer.camInfoBarChange();
                 var trueCnt = 0;
                 this.startRecTime = time;
                 var cursorX = parseFloat(this.timeline.getData('x')(time));
@@ -1232,11 +991,11 @@
 
                     if(timeRange == 10){
                         if(parseInt(cvrData[cvrData.length-1].endTime) <= time.valueOf()+3000){
-                            this.setupDomain([currentDomain[0], currentDomain[1]]);
+                            this.timeline.setupDomain([currentDomain[0], currentDomain[1]]);
                         }
                     }else{
                         if(parseInt(cvrData[cvrData.length-1].endTime) <= time.valueOf()+30000){
-                            this.setupDomain([currentDomain[0],currentDomain[1]]);
+                            this.timeline.setupDomain([currentDomain[0],currentDomain[1]]);
                         }
                     }
 
@@ -1252,13 +1011,13 @@
                 if(this.cvrCheck == false){
                     if((new Date).valueOf() - time.valueOf() < 8000){
                         this.play();
-                        this.newTimelineDragCnt = 0;
+                        this.timeline.newTimelineDragCnt = 0;
                         return;
                     }
 
                     if((new Date).valueOf() - time.valueOf() < 15000){
                         this.cvrCheck = true;
-                        this.newTimelineDragCnt=0;
+                        this.timeline.newTimelineDragCnt=0;
                     }
                 }
 
@@ -1346,15 +1105,15 @@
 
             goCvr : function(time, status) {
                 clearInterval(this.timer);
-                this.dragThumCancle = false;
+                this.timeline.setData('dragThumCancle', false);
                 var tmpX = 9999;
 
                 if(time == undefined){
                     this.timeline.updateCursor(this.currentTime);
                     var cursorX = parseFloat($(".cursor").children("line").attr("x1"));
-                    for(var i=0;i<this.cvrArray[0].length;i++){
-                        if(cursorX < parseFloat(this.cvrArray[0].eq(i).attr("x"))){
-                            var x = parseFloat(this.cvrArray[0].eq(i).attr("x"));
+                    for(var i=0;i<this.timeline.cvrArray[0].length;i++){
+                        if(cursorX < parseFloat(this.timeline.cvrArray[0].eq(i).attr("x"))){
+                            var x = parseFloat(this.timeline.cvrArray[0].eq(i).attr("x"));
                             if(tmpX >= x){
                                 tmpX = x;
                                 time = this.timeline.getData('x').invert(x).getTime()+1000;
@@ -1365,8 +1124,8 @@
 
                 if(time == undefined){
                     this.timeline.updateCursor(this.currentTime);
-                    if(this.cvrArray[0].length-1 > 0){
-                        var x = parseFloat(this.cvrArray[0].eq(this.cvrArray[0].length-1).attr("x"));
+                    if(this.timeline.cvrArray[0].length-1 > 0){
+                        var x = parseFloat(this.timeline.cvrArray[0].eq(this.timeline.cvrArray[0].length-1).attr("x"));
                         if(tmpX >= x){
                             tmpX = x;
                             time = this.timeline.getData('x').invert(x).getTime()+1000;
@@ -1414,15 +1173,15 @@
             },
 
             goLive : function() {
-                this.newTimelineDragCnt=0;
+                this.timeline.newTimelineDragCnt=0;
                 store.dispatch('IS_LIVE_CHANGE', true);
-                this.camInfoBarChange();
+                this.playTimer.camInfoBarChange();
                 this.errorStatusLayer.cameraStatusAllOff();
                 store.dispatch('CURRENT_TIME_CHANGE', new Date());
                 this.timeline.setData('changeTimeRangeClick', true);
 
                 this.lineMoveFlag = false;
-                this.dragThumCancle = false;
+                this.timeline.setData('dragThumCancle', false);
                 this.timeline.zoomDomain(Date.now(), this.timeline.getData('timeRange'));
                 this.startLiveTimer();
                 this.playEventCb('livePlay');

@@ -6,6 +6,7 @@
     import * as d3 from "d3";
     import {event as currentEvent} from 'd3';
     import $ from "jquery";
+    import toastcamAPIs from './../../service/toastcamAPIs';
     import store from '../../service/player/store';
     import moment from 'moment';
     import 'moment-timezone';
@@ -84,6 +85,15 @@
             },
             isLive: function () {
                 return store.state.isLive;
+            },
+            isFullScreen: function () {
+                return store.state.isFullScreen;
+            },
+            isShared: function () {
+                return store.state.isShared;
+            },
+            shopId: function () {
+                return store.state.shopId;
             }
         },
         data : function() {
@@ -101,8 +111,15 @@
                 clickDateChange: false,
                 eventData: [],
                 cvrData: [],
+                arrEvents : [],
+                cvrArray : [],
                 forceDomain: true,
+                dragTimeLine : false,
                 isLoading: false,
+                nowScale : "1h",
+                dragThumCancle : false,
+                newTimelineDragCnt : 0,
+                cachedTimelineparams : null,
                 timelineColorObj: {
                     0: "#18b57b",
                     1: "#ff7900",
@@ -123,6 +140,7 @@
             this.width = this.pWidth;
             this.height = this.pHeight;
             this.timeRange = this.pTimeRange;
+            window.onresize = this.resizeTimline.bind(this);
         },
         mounted : function() {
             var currentSvg = d3.select("#" + this.elementId + " svg");
@@ -162,6 +180,7 @@
 
             this.svg.on('dblclick', () => {
                 this.$emit('timelineEvent', {event: 'doubleClick'});
+                this.newTimelineDragCnt = 0;
                 var now = new Date();
                 $("#showThumbnailListNew").hide();
                 $("#time_info_tri").hide();
@@ -194,16 +213,177 @@
             });
         },
         beforeDestroy : function() {
+            window.onresize = null;
         },
         methods : {
-            // onFlashPlayerStatusChanged : function(status) {
-            //     this.$emit('flashPlayerStatusChanged', status);
-            // }
+            resizeTimline : function() {
+                if(this.isFullScreen === false){
+                    this.redrawWithWidth(parseInt($("#view_timeline_ctrl").width()));
+                }
+
+                this.$emit('timelineEvent', {event: 'resize'});
+            },
+
+            setupDomain : function(domain) {
+                if(this.isShared == true){
+                    this.$emit('timelineEvent', {event: 'shareEnd'});
+                }
+                if(this.dragThumCancle == true){
+                    return;
+                }
+
+                this.cachedTimelineparams = {
+                    cameraId: this.cameraData.id,
+                    start: domain[0],
+                    end: domain[1],
+                    shopId: this.shopId
+                };
+
+                if (this.timeRange == 10) {
+                    this.cachedTimelineparams.scale = "10m";
+                    this.nowScale = "10m";
+                    this.cachedTimelineparams.start = this.cachedTimelineparams.start - 100000;
+                }else if(this.timeRange == 60){
+                    this.cachedTimelineparams.scale = "1h";
+                    this.nowScale = "1h";
+                    if(this.newTimelineDragCnt > 0 && this.newTimelineDragCnt < 6){
+                        this.newTimelineDragCnt++;
+                        return;
+                    }else if(this.newTimelineDragCnt==6){
+                        this.newTimelineDragCnt=0;
+                    }
+
+                }else if(this.timeRange == 360){
+                    this.cachedTimelineparams.scale = "6h";
+                    this.nowScale = "6h";
+                    if(this.newTimelineDragCnt > 0 && this.newTimelineDragCnt < 30){
+                        this.newTimelineDragCnt++;
+                        return;
+                    }else if(this.newTimelineDragCnt==30){
+                        this.newTimelineDragCnt=0;
+                    }
+                }else if(this.timeRange == 1440){
+                    this.cachedTimelineparams.scale = "24h";
+                    this.nowScale = "24h";
+                    if(this.newTimelineDragCnt > 0 && this.newTimelineDragCnt < 60){
+                        this.newTimelineDragCnt++;
+                        return;
+                    }else if(this.newTimelineDragCnt==60){
+                        this.newTimelineDragCnt=0;
+                    }
+                }
+
+                this.newTimelineDragCnt++;
+                this.isLoading = true;
+                if(this.serviceDay != 0){
+                    this.serviceDateTime = ((new Date()).valueOf() - (1000*60*60*24*(this.serviceDay)));
+                }else{
+                    this.serviceDateTime = 0;
+                }
+
+                if(this.cachedTimelineparams.start < this.serviceDateTime){
+                    this.cachedTimelineparams.start = this.serviceDateTime;
+                }
+
+                this.$emit('timelineEvent', {event: 'getAlarmZones'});
+
+                var removedBufferDomain = this.removeBufferCursorCheckDomain(domain , this.timeRange);
+                if (this.currentTime && (removedBufferDomain[0] > this.currentTime.valueOf())) {
+                    this.$emit('timelineEvent', {event: 'cursorChanged', data: 'left'});
+                } else if (this.currentTime && (removedBufferDomain[1] < this.currentTime.valueOf())) {
+                    this.$emit('timelineEvent', {event: 'cursorChanged', data: 'right'});
+                } else {
+                    this.$emit('timelineEvent', {event: 'cursorChanged', data: 'none'});
+                    if(this.isPlaying == false){
+                        this.updateCursor(this.currentTime);
+                    }
+                }
+            },
+
+            getTimeline : function() {
+                if(this.isShared == false){
+                    toastcamAPIs.call(toastcamAPIs.camera.GET_TIMELINE, this.cachedTimelineparams, (res) => {
+                        this.getRecTimes(res);
+                    }, (err) => {
+                        this.isLoading = false;
+                    });
+                }else{
+                    toastcamAPIs.call(toastcamAPIs.camera.GET_SHARE_CAM_TIMELINE, this.cachedTimelineparams, (res) => {
+                        this.getRecTimes(res);
+                    }, (err) => {
+                        this.isLoading = false;
+                    });
+                }
+            },
+
+            getRecTimes : function(d) {
+                var check = 0;
+                var eventTime = d.recTimes;
+
+                d.recTimes = [];
+
+                if (eventTime) {
+                    for(var i=0;i<eventTime.length;i++){
+                        if(i< eventTime.length){
+                            if(eventTime[i+1] != undefined){
+                                if(eventTime[i].endTime == eventTime[i+1].startTime){
+                                    check++;
+                                }else{
+                                    var recTime = {};
+                                    recTime.startTime = eventTime[i-check].startTime;
+                                    recTime.endTime = eventTime[i].endTime;
+                                    d.recTimes.push(recTime);
+                                    check = 0;
+                                }
+                            }else{
+                                var recTime = {};
+                                recTime.startTime = eventTime[i-check].startTime;
+                                recTime.endTime = eventTime[i].endTime;
+                                d.recTimes.push(recTime);
+                                check = 0;
+                            }
+                        }
+                    }
+                }
+                this.firstDataLoadingFlag = true;
+                this.setTimelineData(d);
+            },
+
+            setTimelineData : function(data) {
+                if(this.dragTimeLine == true){
+                    this.dragTimeLine = false;
+                    if (this.isFullScreen) {
+                        $("#timebar_area").children("svg").children("g").attr("transform","translate(0, -15)");
+                    }else{
+                        $("#timebar_area").children("svg").children("g").attr("transform","translate(0, -19)");
+                    }
+                    $(".cvr").attr("transform","");
+                    $(".cursor").attr("transform","");
+                    this.$emit('timelineEvent', {event: 'dragTimeLineStop'});
+                }
+                this.arrEvents = data.events;
+                this.cvrData = data.recTimes;
+                this.drawRecordBar();
+                this.updateBar(500);
+                this.cvrArray = [];
+                this.cvrArray.push($(".cvr").children("rect"));
+                this.redrawEvents(data.events, data.avg);
+                this.isLoading = false;
+                this.$emit('timelineEvent', {event: 'timelineDataUpdated'});
+            },
+
+            initSizeTimline : function() {
+                var timelineWidth = this.isFullScreen ? $('#fullscreen').width() : $("#view_timeline_ctrl").width();
+                this.svg.select('.cursor').classed('hide', true);
+                this.redrawWithWidth(parseInt(timelineWidth));
+            },
+
             setDragEvent : function() {
                 var that = this;
 
                 return d3.behavior.drag()
                     .on('dragstart', () => {
+                        that.dragThumCancle = true;
                         that.$emit('timelineEvent', {event: 'dragStart'});
                     })
                     .on('drag', () => {
@@ -285,7 +465,9 @@
                         $(".cvrBG2").attr("x",dragX*-1);
                     })
                     .on('dragend', () => {
+                        that.dragThumCancle = false;
                         that.$emit('timelineEvent', {event: 'dragEnd'});
+                        that.newTimelineDragCnt = 0;
                         if(dragX < -10){
                         }else if(dragX > 10){
                         }else{
@@ -296,6 +478,7 @@
                             dragFlag = false;
                             if(timelineClick == false){
                                 that.$emit('timelineEvent', {event: 'updateByDrag'});
+                                this.dragTimeLine = true;
                                 dragEndStatus = true;
                                 that.dragDomain();
                                 $(".axis").attr("transform","translate(0, 75)");
@@ -467,6 +650,8 @@
 
             prevDomain : function() {
                 this.$emit('timelineEvent', {event: 'moveDomain'});
+                this.newTimelineDragCnt = 0;
+                this.dragThumCancle = false;
                 var diff = this.timeRange * 60 * 1000;
                 var newDomain = [this.currentDomain[0] - diff, this.currentDomain[1] - diff];
                 return this.changeDomain(newDomain);
@@ -474,6 +659,8 @@
 
             nextDomain : function() {
                 this.$emit('timelineEvent', {event: 'moveDomain'});
+                this.newTimelineDragCnt = 0;
+                this.dragThumCancle = false;
                 var diff = this.timeRange * 60 * 1000;
                 var newDomain = [this.currentDomain[0] + diff, this.currentDomain[1] + diff];
                 return this.changeDomain(newDomain);
@@ -553,7 +740,7 @@
                 this.currentDomain = domain;
                 this.removedBufferDomain = this.removeBufferDomain(this.currentDomain , this.timeRange);
                 setTimeout(() => {
-                    this.$emit('timelineEvent', {event: 'setupDomain', data: this.currentDomain});
+                    this.setupDomain(this.currentDomain);
                 },1000);
 
                 var extent;
@@ -627,7 +814,7 @@
 
                 this.currentDomain = domain;
                 this.removedBufferDomain = this.removeBufferDomain(this.currentDomain , this.timeRange);
-                this.$emit('timelineEvent', {event: 'setupDomain', data: this.currentDomain});
+                this.setupDomain(this.currentDomain);
 
                 var extent;
                 if (this.brush !== undefined) {
@@ -899,7 +1086,7 @@
                 }
 
                 this.removedBufferDomain = this.removeBufferDomain(this.currentDomain , this.timeRange);
-                this.$emit('timelineEvent', {event: 'setupDomain', data: this.currentDomain});
+                this.setupDomain(this.currentDomain);
 
                 this.x = d3.time.scale()
                     .domain(this.currentDomain)
@@ -957,8 +1144,7 @@
                 var cvrBG2 = this.svg.select('.cvrBG2').attr('width', this.width).attr("height","50px").attr("z-index","999");
 
                 cvrBG.on('click', function () {
-                    that.$emit('timelineEvent', {event: 'newTimelineDragCntUpdate', data: 0});
-
+                    that.newTimelineDragCnt = 0;
                     if(that.firstDataLoadingFlag == false){
                         that.$emit('timelineEvent', {event: 'loadingDataAlert'});
                         return;
@@ -973,6 +1159,7 @@
                         dblClicklive = that.isLive;
                         dblClickTime = that.currentTime.valueOf();
                         that.$emit('timelineEvent', {event: 'clickedCVRBg'});
+                        that.dragThumCancle = false;
                         timelineClick = true;
                         if ((new Date().getTime()) - that.previousDblClickTime < 500) return; // animating caused by dbl click.
 
@@ -1041,6 +1228,7 @@
                         that.$emit('timelineEvent', {event: 'cursorDragging', data: time});
                     })
                     .on('dragend', () => {
+                        that.dragThumCancle = false;
                         that.$emit('timelineEvent', {event: 'cursorDragEnd'});
                         that.$emit('timelineEvent', {event: 'checkCVRSeucre', data: function(isSecureMode){
                                 if(isSecureMode){
@@ -1689,7 +1877,7 @@
 
                     if(dragEndStatus == true){
                         setTimeout(function(){
-                            that.$emit('timelineEvent', {event: 'dragThumCancleUpdate', data: false});
+                            that.dragThumCancle = false;
                         },380);
 
                         dragEndStatus = false;

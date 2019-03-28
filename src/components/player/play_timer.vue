@@ -77,6 +77,38 @@
                 return md ? md.format("HH:mm:ss") : '';
             },
 
+            camInfoBarChange : function() {
+                if(this.isLive == false){
+                    if(parseInt(window.innerWidth) < 1900){
+                        $(".cam_info_bg").css("width","280px");
+                        $(".cam_info_bg").css("margin-left"," -140px");
+
+                        $(".cam_info_bg_en").css("width","290px");
+                        $(".cam_info_bg_en").css("margin-left"," -145px");
+                    }else{
+                        $(".cam_info_bg").css("width","280px");
+                        $(".cam_info_bg").css("margin-left"," -140px");
+
+                        $(".cam_info_bg_en").css("width","290px");
+                        $(".cam_info_bg_en").css("margin-left"," -145px");
+                    }
+                }else{
+                    if(parseInt(window.innerWidth) < 1900){
+                        $(".cam_info_bg").css("width","206px");
+                        $(".cam_info_bg").css("margin-left"," -103px");
+
+                        $(".cam_info_bg_en").css("width","216px");
+                        $(".cam_info_bg_en").css("margin-left"," -108px");
+                    }else{
+                        $(".cam_info_bg").css("width","206px");
+                        $(".cam_info_bg").css("margin-left"," -103px");
+
+                        $(".cam_info_bg_en").css("width","216px");
+                        $(".cam_info_bg_en").css("margin-left"," -108px");
+                    }
+                }
+            },
+
             goLive: function() {
                 this.$emit('playTimerEvent', {event: 'goLive'});
             },
