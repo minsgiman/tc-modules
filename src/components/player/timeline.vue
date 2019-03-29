@@ -17,34 +17,10 @@
         });
     };
 
-
-    var nowWitdh = 0;
-
-    var dragX = 0;
-
-    var draging = 0;
-
-    var dblClickTime = 0;
-
-    var timelineClick = false;
-
-    var thumnailViewFlag = false;
-
-    var timelineDrawFlag = true;
-
-    var dragFlag = false;
-
-    var dragEndStatus = false;
-
-    var dblClicklive = false;
-
-    var startTimeline = 0;
-
-    var serivceDayOver = false;
-
-    var thatEnd, thatStart;
-
-    var browserLang = $("html").attr("lang");
+    var nowWitdh = 0, dragX = 0, draging = 0, dblClickTime = 0, timelineClick = false, thumnailViewFlag = false,
+        timelineDrawFlag = true, dragFlag = false, dragEndStatus = false, dblClicklive = false, startTimeline = 0,
+        serivceDayOver = false, thatEnd, thatStart, browserLang = $("html").attr("lang"), removeWidthStop = true,
+        zoneId = 0, timelineSgidMap = new HashMap();
 
     var getMaxDragX = function(){
         return parseInt($(".cvrBG").attr("width"));
@@ -65,14 +41,9 @@
         return 'translate(' + adjustedTranslateX + ', 0)';
     };
 
-    var removeWidthStop = true;
-
-    var zoneId = 0;
-    var timelineSgidMap = new HashMap();
-
     export default {
         name : 'timeline',
-        props : ['elementId', 'pWidth', 'pHeight', 'pTimeRange'],
+        props : ['elementId', 'pWidth', 'pHeight', 'pTimeRange', 'playEventCallback'],
         computed : {
             cameraData: function () {
                 return store.state.cameraData;
@@ -124,20 +95,8 @@
                 clickTime : 0,
                 cachedTimelineparams : null,
                 lineMoveFlag : false,
-                timelineColorObj: {
-                    0: "#18b57b",
-                    1: "#ff7900",
-                    2: "#3ea1d4",
-                    3: "#a4c800",
-                    4: "#efd600",
-                    5: "#767dff",
-                    6: "#ca7af0",
-                    7: "#ff76bd",
-                    9: "#f0f0f0",
-                    10000: "#ff1e00",
-                    20000: "#ff1e00"
-                }
-
+                timelineColorObj: {0: "#18b57b", 1: "#ff7900", 2: "#3ea1d4", 3: "#a4c800", 4: "#efd600", 5: "#767dff", 6: "#ca7af0",
+                    7: "#ff76bd", 9: "#f0f0f0", 10000: "#ff1e00", 20000: "#ff1e00"}
             }
         },
         created : function() {
@@ -183,7 +142,7 @@
             this.currentDomain = this.timeRange.currentDomain;
 
             this.svg.on('dblclick', () => {
-                this.$emit('timelineEvent', {event: 'doubleClick'});
+                this.playEventCallback('dblClickFlagChanged', true);
                 this.newTimelineDragCnt = 0;
                 var now = new Date();
                 $("#showThumbnailListNew").hide();
@@ -232,7 +191,7 @@
                 this.newTimelineDragCnt=0;
                 this.$emit('timelineEvent', {event: 'stopPlayTimer'});
                 if(this.isShared == true){
-                    this.$emit('timelineEvent', {event: 'shareEnd'});
+                    this.playEventCallback('shareEnd');
                 }
 
                 var currentDomain = this.currentDomain;
@@ -310,7 +269,7 @@
 
             setupDomain : function(domain) {
                 if(this.isShared == true){
-                    this.$emit('timelineEvent', {event: 'shareEnd'});
+                    this.playEventCallback('shareEnd');
                 }
                 if(this.dragThumCancle == true){
                     return;
@@ -369,15 +328,18 @@
                     this.cachedTimelineparams.start = this.serviceDateTime;
                 }
 
-                this.$emit('timelineEvent', {event: 'getAlarmZones'});
+                this.playEventCallback('getAlarmZones');
 
                 var removedBufferDomain = this.removeBufferCursorCheckDomain(domain , this.timeRange);
                 if (this.currentTime && (removedBufferDomain[0] > this.currentTime.valueOf())) {
-                    this.$emit('timelineEvent', {event: 'cursorChanged', data: 'left'});
+                    this.playEventCallback('isCursorLeftChanged', true);
+                    this.playEventCallback('isCursorRightChanged', false);
                 } else if (this.currentTime && (removedBufferDomain[1] < this.currentTime.valueOf())) {
-                    this.$emit('timelineEvent', {event: 'cursorChanged', data: 'right'});
+                    this.playEventCallback('isCursorLeftChanged', false);
+                    this.playEventCallback('isCursorRightChanged', true);
                 } else {
-                    this.$emit('timelineEvent', {event: 'cursorChanged', data: 'none'});
+                    this.playEventCallback('isCursorLeftChanged', false);
+                    this.playEventCallback('isCursorRightChanged', false);
                     if(this.isPlaying == false){
                         this.updateCursor(this.currentTime);
                     }
@@ -443,7 +405,8 @@
                     }
                     $(".cvr").attr("transform","");
                     $(".cursor").attr("transform","");
-                    this.$emit('timelineEvent', {event: 'dragTimeLineStop'});
+                    this.playEventCallback('changedSelectedZone');
+                    this.playEventCallback('thumnailDrawChanged', true);
                 }
                 this.arrEvents = data.events;
                 this.cvrData = data.recTimes;
@@ -453,7 +416,11 @@
                 this.cvrArray.push($(".cvr").children("rect"));
                 this.redrawEvents(data.events, data.avg);
                 this.isLoading = false;
-                this.$emit('timelineEvent', {event: 'timelineDataUpdated'});
+                this.playEventCallback('eventsChanged', this.arrEvents);
+                setTimeout(() => {
+                    this.playEventCallback('changedSelectedZone');
+                },200);
+                this.playEventCallback('changedSelectedZone');
             },
 
             initSizeTimline : function() {
@@ -468,13 +435,13 @@
                 return d3.behavior.drag()
                     .on('dragstart', () => {
                         that.dragThumCancle = true;
-                        that.$emit('timelineEvent', {event: 'dragStart'});
+                        that.playEventCallback('timelineDragStart');
                     })
                     .on('drag', () => {
                         if(timelineDrawFlag == false){
                             return;
                         }
-                        that.$emit('timelineEvent', {event: 'dragging'});
+                        that.playEventCallback('timelineDragging');
                         $("#time_info_tri").hide();
                         $("#showThumbnailListNew").hide();
                         removeWidthStop = true;
@@ -550,7 +517,7 @@
                     })
                     .on('dragend', () => {
                         that.dragThumCancle = false;
-                        that.$emit('timelineEvent', {event: 'dragEnd'});
+                        that.playEventCallback('timelineDragEnd');
                         that.newTimelineDragCnt = 0;
                         if(dragX < -10){
                         }else if(dragX > 10){
@@ -578,7 +545,7 @@
                         },150);
 
                         setTimeout(() => {
-                            that.$emit('timelineEvent', {event: 'changeTimeRangeFlagUpdate', data: false});
+                            that.playEventCallback('changeTimeRangeFlagUpdate', false);
                             timelineDrawFlag = true;
                         },1410);
                     });
@@ -1230,7 +1197,7 @@
                 cvrBG.on('click', function () {
                     that.newTimelineDragCnt = 0;
                     if(that.firstDataLoadingFlag == false){
-                        that.$emit('timelineEvent', {event: 'loadingDataAlert'});
+                        that.playEventCallback('loadingDataAlert');
                         return;
                     }
                     if(dragFlag == false){
@@ -1243,11 +1210,11 @@
                         dblClicklive = that.isLive;
                         dblClickTime = that.currentTime.valueOf();
                         that.lineMoveFlag = false;
-                        that.$emit('timelineEvent', {event: 'clickedCVRBg'});
+                        that.playEventCallback('thumnailDrawChanged', true);
+                        store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
                         that.dragThumCancle = false;
                         timelineClick = true;
                         if ((new Date().getTime()) - that.previousDblClickTime < 500) return; // animating caused by dbl click.
-
 
                         var callbackFunc = function() {
                             that.forceDomain = true;
@@ -1261,19 +1228,19 @@
                         };
 
                         that.$emit('timelineEvent', {event: 'checkCVRSeucre', data: (isSecureMode) => {
-                                if(isSecureMode){
-                                    that.$emit('timelineEvent', {event: 'updateCVRSecureStatus', data: callbackFunc});
-                                }else{
-                                    callbackFunc();
-                                }
-                            }});
+                            if(isSecureMode){
+                                that.$emit('timelineEvent', {event: 'updateCVRSecureStatus', data: callbackFunc});
+                            }else{
+                                callbackFunc();
+                            }
+                        }});
                     }
                 }).on('mousemove', function () {
                     var mouseLocation = d3.mouse(this);
                     var selectedTime = that.x.invert(mouseLocation[0]);
-                    that.$emit('timelineEvent', {event: 'cvrMouseoverEventsNew', data: {position: mouseLocation[0], time: selectedTime}});
+                    that.playEventCallback('cvrMouseoverEventsNew', {position: mouseLocation[0], time: selectedTime});
                 }).on('mouseout', function () {
-                    that.$emit('timelineEvent', {event: 'mouseoutEvents'});
+                    that.playEventCallback('mouseoutEvents');
                 });
 
                 cvrBG2.on('mousemove', function () {
@@ -1292,12 +1259,12 @@
                         }
                         $("#showThumbnailListNew").hide();
                         $("#time_info_tri").hide();
-                        that.$emit('timelineEvent', {event: 'cursorDragStart'});
+                        that.playEventCallback('cursorDragStart');
                     })
                     .on('drag', () => {
                         that.cursorDragStatus = true;
                         if(that.firstDataLoadingFlag == false){
-                            that.$emit('timelineEvent', {event: 'loadingDataAlert'});
+                            that.playEventCallback('loadingDataAlert');
                             return;
                         }
                         var x = d3.event.x;
@@ -1309,17 +1276,17 @@
                         that.cursor.selectAll('line').attr({x1: x, x2: x});
                         that.cursor.selectAll('cursor').attr({x1: x, x2: x});
                         that.cursor.selectAll('circle').attr({cx: x});
-                        that.$emit('timelineEvent', {event: 'cursorDragging', data: time});
+                        that.playEventCallback('cursorDragging', time);
                     })
                     .on('dragend', () => {
                         that.dragThumCancle = false;
                         that.cursorDragStatus = false;
-                        that.$emit('timelineEvent', {event: 'cursorDragEnd'});
+                        that.playEventCallback('cursorDragEnd');
                         that.$emit('timelineEvent', {event: 'checkCVRSeucre', data: function(isSecureMode){
                                 if(isSecureMode){
-                                    that.$emit('timelineEvent', {event: 'updateCVRSecureStatus'});
+                                    that.$emit('timelineEvent', {event: 'updateCVRSecureStatus', data: function() {that.playEventCallback('cursorDragEnd');}});
                                 }else{
-                                    that.$emit('timelineEvent', {event: 'cursorDragEnd'});
+                                    that.playEventCallback('cursorDragEnd');
                                 }
                             }});
                     });
@@ -1409,7 +1376,7 @@
                         }
                         this.svg.select('.cursor').classed('hide', true);
                     } else {
-                        this.$emit('timelineEvent', {event: 'hideCursorNavigation'});
+                        this.playEventCallback('hideCursorNavigation');
                     }
                 }
             },
@@ -1496,9 +1463,9 @@
                 var t = 0;
                 var accessData = [];
                 zoneId = 0;
-                this.$emit('timelineEvent', {event: 'timelineMapChanged', data: new HashMap()});
+                this.playEventCallback('timelineMapChanged', new HashMap());
                 timelineSgidMap = new HashMap();
-                this.$emit('timelineEvent', {event: 'timelineSgidWidthMapChanged', data: new HashMap()});
+                this.playEventCallback('timelineSgidWidthMapChanged', new HashMap());
 
                 if(this.eventData != undefined){
                     this.eventData.forEach(function (d) {
@@ -1607,8 +1574,7 @@
                         width: function(d) {
                             var thatX = that.x(d.startTime);
                             var thatWidth = that.x(d.endTime) - that.x(d.startTime);
-                            that.$emit('timelineEvent', {event: 'timelineSgidWidthMapPut', data: [thatX,thatX + (thatWidth)]});
-
+                            that.playEventCallback('timelineSgidWidthMapPut', [thatX,thatX + (thatWidth)]);
                             return thatWidth;
                         },
                         height: 28
@@ -1658,7 +1624,7 @@
                         width: function(d) {
                             var thatX = that.x(d.startTime);
                             var thatWidth = that.x(d.endTime) - that.x(d.startTime);
-                            that.$emit('timelineEvent', {event: 'timelineSgidWidthMapPut', data: [thatX,thatX + (thatWidth)]});
+                            that.playEventCallback('timelineSgidWidthMapPut', [thatX,thatX + (thatWidth)]);
                             return thatWidth;
                         },
                         height: 36,
@@ -1837,7 +1803,7 @@
                         width: function(d) {
                             var thatX = that.x(d.startTime);
                             var thatWidth = that.x(d.endTime) - that.x(d.startTime);
-                            that.$emit('timelineEvent', {event: 'timelineSgidWidthMapPut', data: [thatX,thatX + (thatWidth)]});
+                            that.playEventCallback('timelineSgidWidthMapPut', [thatX,thatX + (thatWidth)]);
 
                             return thatWidth;
                         },

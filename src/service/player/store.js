@@ -12,6 +12,7 @@ const store = new Vuex.Store({
         dataLoadingStatus: true,
         isPlaying: false,
         isLive: true,
+        playBtnStatus: false,
         currentTime: new Date()
     },
     getters: {
@@ -50,6 +51,9 @@ const store = new Vuex.Store({
         IS_LIVE_CHANGE: function(context, state) {
             context.commit('UPDATE_IS_LIVE', state);
         },
+        PLAY_BTN_STATUS_CHANGE: function(context, state) {
+            context.commit('UPDATE_PLAY_BTN_STATUS', state);
+        },
         INIT_ALL_DATA: function(context, state) {
             context.commit('UPDATE_CAMERA_DATA', {});
             context.commit('UPDATE_CAMERA_CONFIG', {});
@@ -86,6 +90,9 @@ const store = new Vuex.Store({
         },
         UPDATE_IS_LIVE: function(state, value) {
             state.isLive = value;
+        },
+        UPDATE_PLAY_BTN_STATUS: function(state, value) {
+            state.playBtnStatus = value;
         }
     }
 });

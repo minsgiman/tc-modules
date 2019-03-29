@@ -12,5 +12,10 @@
   "CAMERA_DETAIL_NEXT_REC": "次のサーバー保存",
   "MY_CAMERA_STREAMING_OFF_MESSAGE": "カメラがOFFになっています。",
   "CAMERA_DETAIL_EVENT_DATE_FORMAT": "M月D日 dddd",
-  "CAMERA_DETAIL_EVENT_TIME_FORMAT": "HH:mm:ss"
+  "CAMERA_DETAIL_EVENT_TIME_FORMAT": "HH:mm:ss",
+  "CAMERA_SECURITY_UPGRADE": "録画映像セキュリティ強化",
+  "CAMERA_SHOW_VIDEO_INPUT_PASSWORD": "録画映像を見るため、パスワードを入力してください。",
+  "CAMERA_INPUT_PASSWORD_SHARE_MAN": "カメラを共有した人が設定したパスワードを入力してください。",
+  "CAMERA_PASSWORD_INPUT": "パスワード入力",
+  "BUTTON_CONFIRM": "確認"
 }

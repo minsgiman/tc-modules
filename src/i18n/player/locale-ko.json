@@ -12,5 +12,10 @@
   "CAMERA_DETAIL_NEXT_REC": "다음 서버 저장",
   "MY_CAMERA_STREAMING_OFF_MESSAGE": "카메라가 꺼져 있습니다.",
   "CAMERA_DETAIL_EVENT_DATE_FORMAT": "M월 D일 dddd",
-  "CAMERA_DETAIL_EVENT_TIME_FORMAT": "HH:mm:ss"
+  "CAMERA_DETAIL_EVENT_TIME_FORMAT": "HH:mm:ss",
+  "CAMERA_SECURITY_UPGRADE": "녹화영상 보안강화",
+  "CAMERA_SHOW_VIDEO_INPUT_PASSWORD": "녹화 영상을 보기 위해 비밀번호를 입력해주세요.",
+  "CAMERA_INPUT_PASSWORD_SHARE_MAN": "카메라를 공유한 사람이 설정한 비밀번호를 입력 해주세요.",
+  "CAMERA_PASSWORD_INPUT": "비밀번호 입력",
+  "BUTTON_CONFIRM": "확인"
 }

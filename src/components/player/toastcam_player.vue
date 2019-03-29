@@ -4,14 +4,14 @@
 <script>
     import Vue from 'vue';
     import { i18n } from '../../i18n/player/i18n';
-    import flashPlayer from './flash_player.vue';
+    import playContainer from './player_container/player_container';
     import timeline from './timeline.vue';
     import fullscreenBtn from './fullscreen_btn.vue';
     import zoomBtn from './zoom_btn.vue';
     import playInfoBar from './play_info_bar.vue';
     import playTimer from './play_timer.vue';
     import errorStatusLayer from './error_status_layer.vue';
-    import * as d3 from "d3";
+    import cvrPlaySecureManager from './cvrPlaySecureManager.vue';
     import toastcamAPIs from './../../service/toastcamAPIs';
     import store from '../../service/player/store';
     import moment from 'moment';
@@ -22,47 +22,6 @@
             return true;
         }
         return false;
-    };
-
-    var getNvrServerUrl = function(data){
-
-        var returnUrl = "";
-        if(data == "" || data == undefined){
-            return "";
-        }
-
-        var rtIdx = data.indexOf("//");
-        var rt = "";
-        if(rtIdx != -1){
-            rt = data.substring(0,rtIdx+2);
-        }
-
-        var tmp = data.substring(rtIdx+2,data.length);
-
-        if(tmp.indexOf("/") != -1){
-            returnUrl = rt+tmp.substring(0,tmp.indexOf("/"));
-        }
-
-        return returnUrl;
-    };
-
-    var getCvrServerUrl = function(data){
-
-        var returnUrl = "";
-        if(data == "" || data == undefined){
-            return "";
-        }
-
-        returnUrl = data;
-        var tmp = returnUrl.replace("://","");
-
-        var getPort = parseInt(tmp.substring(tmp.indexOf(":")+1,tmp.length));
-        var iePort = getPort+1
-        if (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0) {
-            returnUrl = returnUrl.replace(getPort,iePort);
-        }
-
-        return returnUrl;
     };
 
     export default {
@@ -105,7 +64,6 @@
                 zoomBtn : null,
                 errorStatusLayer : null,
                 fullscreenBtn : null,
-                zoomZoneBottom : 149,
                 config : {},
                 cvrReplay : 0,
                 liveReloadCnt : 1,
@@ -119,9 +77,6 @@
                 fixRange : 0,
                 range : 0,
                 goCvrStatus : false,
-                currentZoom : 1.0,
-                isShowZoomLocation : true,
-                isShowControlToggleArea : false,
                 fullscreenTimer : null,
                 timeRange : 60,
                 cachedTimelineparams : null,
@@ -149,63 +104,61 @@
             const vPlayTimerConstructor = Vue.extend(playTimer);
             this.playTimer = new vPlayTimerConstructor();
             this.playTimer.$on('playTimerEvent', this.playTimerEventHandler.bind(this));
+
+            const vCvrPlaySecureManager = Vue.extend(cvrPlaySecureManager);
+            this.cvrPlaySecureManager = new vCvrPlaySecureManager({i18n}).$mount('#cvr_play_manager_wrap');
+            this.cvrPlaySecureManager.$on('cvrPlaySecureEvent', this.cvrPlaySecureEventHandler.bind(this));
         },
         mounted : function() {
         },
         beforeDestroy : function() {
-            if (this.player) {
-                this.player.$destroy();
-            }
-            if (this.timeline) {
-                this.timeline.$destroy();
-            }
-            if (this.fullscreenBtn) {
-                this.fullscreenBtn.$destroy();
-            }
-            if (this.zoomBtn) {
-                this.zoomBtn.$destroy();
-            }
-            if (this.errorStatusLayer) {
-                this.errorStatusLayer.$destroy();
-            }
-            if (this.playInfoBar) {
-                this.playInfoBar.$destroy();
-            }
-            this.playTimer.stopTimer();
+            // if (this.player) {
+            //     this.player.$destroy();
+            // }
+            // if (this.timeline) {
+            //     this.timeline.$destroy();
+            // }
+            // if (this.fullscreenBtn) {
+            //     this.fullscreenBtn.$destroy();
+            // }
+            // if (this.zoomBtn) {
+            //     this.zoomBtn.$destroy();
+            // }
+            // if (this.errorStatusLayer) {
+            //     this.errorStatusLayer.$destroy();
+            // }
+            // if (this.playInfoBar) {
+            //     this.playInfoBar.$destroy();
+            // }
             this.stopFullscreenTimer();
             window.onresize = null;
         },
         methods : {
-            play : function (time, status) {
-                if (time) {
-                    this.goCvr(time, status);
-                } else {
-                    this.goLive();
-                }
-            },
-
-            livePlayStart : function(mediaUrl) {
-                if (this.cameraData.recorderType == "nvr") {
-                    if (this.player) {
-                        this.player.setPath(getNvrServerUrl(this.cameraData.mediaStreamURL), this.cameraData.channel);
+            playStatusChangedHandler : function(status) {
+                if (status.status) {
+                    if (status.status === this.player.getData('webRTCStatusEnum').EVENT_STREAM_CONNECTED) {
+                        this.player.setData('dvrConnectFail', false);
+                        if ($('#remoteVideosContainer').children('video').length) {
+                            $('#remoteVideosContainer').children('video').css('height', $('#remoteVideosContainer').height() - $('#timeline_table').height());
+                        }
+                        $('#webrtc_logo').hide();
+                        $('#webrtc_loading').hide();
+                        this.playTimer.playerCheck = true;
+                        if (this.isLive) {
+                            this.playTimer.startLiveTimer();
+                        } else {
+                            this.playTimer.startRecTimer(this.timeline.clickTime);
+                        }
+                    } else if (status.status === this.player.getData('webRTCStatusEnum').EVENT_STREAM_DISCONNECTED) {
+                        //$('#remote_stream').hide();
+                        this.player.setData('dvrConnectFail', true);
+                        this.playTimer.stopTimer();
+                        this.player.stop(this.currentCamera.id);
+                        this.errorStatusLayer.cameraStatusChange(3);
                     }
-                } else if (this.cameraData.recorderType == "recorder") {
-                    //TODO:
-                    //$scope.webRTCStart(0);
-                } else {
-                    toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAM_TOKEN : toastcamAPIs.camera.GET_TOKEN, {cameraId: this.cameraData.id}, (res) => {
-                        setTimeout(() => {
-                            if (this.player) {
-                                this.player.setPath(mediaUrl, this.cameraData.id + '?token=' + res.token);
-                            }
-                        }, 1000);
-                    }, (err) => {
-                        console.log(err);
-                    });
+                    return;
                 }
-            },
 
-            flashEventCallback : function(status) {
                 this.playTimer.playerCheck = true;
 
                 if(this.errorStatusLayer.showNextPlayLayer == true){
@@ -350,21 +303,10 @@
                             }
                         }else{
                             if (this.player) {
-                                this.player.zoomZone(this.zoomZoneBottom, parseInt($("#player").css("width"))-20);
+                                this.player.zoomZone(this.player.zoomZoneBottom, parseInt($("#player").css("width"))-20);
                             }
                         }
                         this.playInfoBar.camInfoBarChange();
-                        break;
-                    case 'dragTimeLineStop':
-                        this.playEventCb('changedSelectedZone');
-                        this.playEventCb('thumnailDrawChanged', true);
-                        break;
-                    case 'timelineDataUpdated':
-                        this.playEventCb('eventsChanged', this.timeline.arrEvents);
-                        setTimeout(() => {
-                            this.playEventCb('changedSelectedZone');
-                        },200);
-                        this.playEventCb('changedSelectedZone');
                         break;
                     case 'goLive':
                         this.play();
@@ -418,31 +360,7 @@
                             this.playInfoBar.camInfoBarChange();
                             this.goCvrStatus = false;
                             this.errorStatusLayer.cameraStatusAllOff();
-                            toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAM_TOKEN : toastcamAPIs.camera.GET_TOKEN, {cameraId: this.cameraData.id}, (res) => {
-                                if (this.cameraData.recorderType == "nvr") {
-                                    if (this.player) {
-                                        this.player.setPath(getNvrServerUrl(this.cameraData.mediaStreamURL), this.cameraData.channel + "?time=" + time.getTime());
-                                    }
-                                    store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
-                                } else if (this.cameraData.recorderType == "recorder") {
-                                    //TODO:
-                                    //$scope.webRTCStart(time.getTime());
-                                } else{
-                                    var newURL = res.cvrHostPort + "/token=" + res.token + "&time=" + time.getTime();
-                                    if (this.player) {
-                                        this.player.setPath(getCvrServerUrl(res.cvrHostPort),'/token=' + res.token + '&time=' + time.getTime());
-                                    }
-                                    store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
-                                }
-                                //TODO:
-                                // if($scope.currentTab == 'zone'){
-                                //     setTimeout(function(){
-                                //         $scope.setCurrentTab('zone');
-                                //     },500);
-                                // }
-                            }, (err) => {
-                                console.log(err);
-                            });
+                            this.player.play(time);
                         }else{
                             if (this.cameraData.recordType == "event") {
                                 this.jumpToNextRecord();
@@ -452,91 +370,24 @@
                         this.playEventCb('isCursorLeftChanged', false);
                         this.playEventCb('isCursorRightChanged', false);
                         break;
-                    case 'loadingDataAlert':
-                        this.playEventCb('loadingDataAlert');
-                        break;
-                    case 'doubleClick':
-                        this.playEventCb('dblClickFlagChanged', true);
-                        break;
-                    case 'dragStart':
-                        this.playEventCb('timelineDragStart');
-                        break;
-                    case 'dragging':
-                        this.playEventCb('timelineDragging');
-                        break;
-                    case 'dragEnd':
-                        this.playEventCb('timelineDragEnd');
-                        break;
                     case 'camInfoBarChange':
                         this.playInfoBar.camInfoBarChange();
                         break;
                     case 'clearPlayerStopTimeout':
                         clearTimeout(this.playserStop);
                         break;
-                    case 'clickedCVRBg':
-                        this.playEventCb('thumnailDrawChanged', true);
-                        store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
-                        break;
-                    case 'cursorChanged':
-                        if (param.data === 'left') {
-                            this.playEventCb('isCursorLeftChanged', true);
-                            this.playEventCb('isCursorRightChanged', false);
-                        } else if (param.data === 'right') {
-                            this.playEventCb('isCursorLeftChanged', false);
-                            this.playEventCb('isCursorRightChanged', true);
-                        } else {
-                            this.playEventCb('isCursorLeftChanged', false);
-                            this.playEventCb('isCursorRightChanged', false);
-                        }
-                        break;
                     case 'cursorDragEnd':
                         store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
                         this.liveReloadCnt = 0;
                         break;
-                    case 'getAlarmZones':
-                        this.playEventCb('getAlarmZones');
-                        break;
-                    case 'shareEnd':
-                        this.playEventCb('shareEnd');
-                        break;
                     case 'checkCVRSeucre':
-                        this.playEventCb('checkCVRSeucre', param.data);
+                        this.cvrPlaySecureManager.checkCVRSeucre(param.data);
                         break;
                     case 'updateCVRSecureStatus':
-                        this.playEventCb('updateCVRSecureStatus', param.data);
-                        break;
-                    case 'cvrMouseoverEventsNew':
-                        this.playEventCb('cvrMouseoverEventsNew', param.data);
-                        break;
-                    case 'mouseoutEvents':
-                        this.playEventCb('mouseoutEvents');
-                        break;
-                    case 'cursorDragStart':
-                        this.playEventCb('cursorDragStart');
-                        break;
-                    case 'cursorDragging':
-                        this.playEventCb('cursorDragging', param.data);
-                        break;
-                    case 'cursorDragEnd':
-                        this.playEventCb('cursorDragEnd');
-                        break;
-                    case 'hideCursorNavigation':
-                        this.playEventCb('hideCursorNavigation');
-                        break;
-                    case 'changeTimeRangeFlagUpdate':
-                        this.playEventCb('changeTimeRangeFlagUpdate', param.data);
+                        this.cvrPlaySecureManager.setCVRSecureCallback(param.data);
                         break;
                     case 'liveReloadCntUpdate':
                         this.liveReloadCnt = param.data;
-                        break;
-                    case 'timelineMapChanged':
-                        this.playEventCb('timelineMapChanged', param.data);
-                        break;
-                    case 'timelineSgidWidthMapChanged':
-                        this.playEventCb('timelineSgidWidthMapChanged', param.data);
-                        break;
-                    case 'timelineSgidWidthMapPut':
-                        this.playEventCb('timelineSgidWidthMapPut', param.data);
                         break;
                     default:
                         break;
@@ -544,29 +395,34 @@
             },
 
             initPlayer : function() {
-                const vExtendConstructor = Vue.extend(flashPlayer);
-                this.player = new vExtendConstructor({
-                    propsData : {
-                        varPlayerId: 'player',
-                        varName: 'rmcPlayer_flash',
-                        videoId: '',
-                        inKey: '',
-                        outKey: '',
-                        player: 'flash',
-                        width: '100%',
-                        height: '100%',
-                        serviceId: '',
-                        varCoreSwf: '/resources/vendor/nvp_web_player/LCP_web_player2016082601.swf',
-                        varSkinPath: '/resources/vendor/nvp_web_player/NVP_web_player_skin_tvcast_white.swf',
-                        varServerUrl: ''
-                    }
-                }).$mount('#player');
-                this.player.$on('flashPlayerStatusChanged', this.flashEventCallback.bind(this));
-                this.player.zoomZone(450, 150);
-                this.player.displayRMCPlayer();
-                setTimeout(() => {
-                    store.dispatch('DATA_LOADING_STATUS_CHANGE', false);
-                },1050);
+                const vExtendConstructor = Vue.extend(playContainer);
+                this.player = new vExtendConstructor();
+                this.player.$on('playerStatusChanged', this.playStatusChangedHandler.bind(this));
+                //TODO:
+
+                // const vExtendConstructor = Vue.extend(flashPlayer);
+                // this.player = new vExtendConstructor({
+                //     propsData : {
+                //         varPlayerId: 'player',
+                //         varName: 'rmcPlayer_flash',
+                //         videoId: '',
+                //         inKey: '',
+                //         outKey: '',
+                //         player: 'flash',
+                //         width: '100%',
+                //         height: '100%',
+                //         serviceId: '',
+                //         varCoreSwf: '/resources/vendor/nvp_web_player/LCP_web_player2016082601.swf',
+                //         varSkinPath: '/resources/vendor/nvp_web_player/NVP_web_player_skin_tvcast_white.swf',
+                //         varServerUrl: ''
+                //     }
+                // }).$mount('#player');
+                // this.player.$on('flashPlayerStatusChanged', this.flashEventCallback.bind(this));
+                // this.player.zoomZone(450, 150);
+                // this.player.displayRMCPlayer();
+                // setTimeout(() => {
+                //     store.dispatch('DATA_LOADING_STATUS_CHANGE', false);
+                // },1050);
 
                 return this.player;
             },
@@ -578,118 +434,14 @@
                         elementId: 'timebar_area',
                         pWidth: $("#timeline_table").width(),
                         pHeight: $("#timebar_area").height(),
-                        pTimeRange: 60
+                        pTimeRange: 60,
+                        playEventCallback: this.playEventCb
                     }
                 }).$mount('#timebar_area');
                 this.timeline.$on('timelineEvent', this.onTimelineEvent.bind(this));
                 this.timeline.setData('cursorInterval', 1000);
 
                 return this.timeline;
-            },
-
-            zoomVideoWithZoomablePoint : function(x, y) {
-                var containerWidth = parseInt($("#zoom_area").width());
-                var containerHeight = parseInt($("#zoom_area").height());
-
-                var percentX = parseInt(x / containerWidth * 100);
-                var percentY = parseInt(y / containerHeight * 100);
-
-                if (this.player) {
-                    this.player.zoomVideo(this.currentZoom, percentY, percentX);
-                }
-            },
-
-            zoomUp : function(zoom) {
-                this.playEventCb('zoomDragValChanged', 0);
-
-                if(this.isFullScreen == true){
-                    if (this.player) {
-                        this.player.zoomZone(260, parseInt($("#player").css("width"))-20);
-                    }
-                }else{
-                    if (this.player) {
-                        this.player.zoomZone(this.zoomZoneBottom, parseInt($("#player").css("width"))-20);
-                    }
-                }
-
-                var newZoom = this.currentZoom + zoom;
-                if (newZoom > 5.0) {
-                    newZoom = 5.0;
-                }
-
-                if (newZoom < 1.0) {
-                    newZoom = 1.0;
-                }
-
-                $("#zoom_cursor_length").css("width",((newZoom-1) * 25)+"%");
-
-                this.zoomUpWithZoom(newZoom);
-            },
-
-            zoomUpWithZoom : function(zoom) {
-                if (zoom > 1.0) {
-                    this.isShowZoomLocation = true;
-                    this.playInfoBar.setData('isShowTimelineToggleArea', false);
-                    this.isShowControlToggleArea = false;
-                } else {
-                    this.isShowZoomLocation = false;
-                    if(this.isFullScreen){
-                        this.playInfoBar.setData('isShowTimelineToggleArea', true);
-                    } else {
-                        this.isShowControlToggleArea = true;
-                    }
-                }
-
-                this.currentZoom = zoom;
-                this.playEventCb('currentZoomChanged', this.currentZoom);
-                this.positionZoomable(zoom);
-            },
-
-            positionZoomable : function(newZoom) {
-                var zoomable = d3.select('.zoom_area .selected');
-                var container = d3.select('.zoom_area');
-                var containerWidth = parseInt(getComputedStyle(container.node()).width);
-                var containerHeight = parseInt(getComputedStyle(container.node()).height);
-
-                var zoomableX = 0;
-                var zoomableY = 0;
-
-                if(newZoom == 2){
-                    $("#zoom_area").css("left", "0px");
-                    $("#zoom_area").css("top", "0px");
-                }else{
-                    zoomableX =  parseInt($("#zoom_area").css("left"));
-                    zoomableY =  parseInt($("#zoom_area").css("top"));
-                }
-
-                var zoomableWidth = parseInt($("#zoom_area").width());
-                var zoomableHeight = parseInt($("#zoom_area").height());
-
-                var currentCenterX = zoomableX + parseInt(zoomableWidth / 2);
-                var currentCenterY = zoomableY + parseInt(zoomableHeight / 2);
-
-                var newZoomableWidth = containerWidth / newZoom;
-                var newZoomableHeight = containerHeight / newZoom;
-
-                var newX = currentCenterX - parseInt(newZoomableWidth / 2);
-                if (newX < 0) {
-                    newX = 0;
-                } else if (newX + newZoomableWidth > containerWidth) {
-                    newX = containerWidth - newZoomableWidth;
-                }
-
-                var newY = currentCenterY - parseInt(newZoomableHeight / 2);
-                if (newY < 0) {
-                    newY = 0;
-                } else if (newY + newZoomableHeight > containerHeight) {
-                    newY = containerHeight - newZoomableHeight;
-                }
-
-                var percentX = newX / containerWidth * 100;
-                var percentY = newY / containerHeight * 100;
-                if (this.player) {
-                    this.player.zoomVideo(newZoom);
-                }
             },
 
             playInfoBarEventHandler : function(param) {
@@ -716,6 +468,17 @@
                 }
             },
 
+            cvrPlaySecureEventHandler : function(param) {
+                if (param.event === 'stopTimer') {
+                    this.playTimer.stopTimer();
+                } else if (param.event === 'goLiveByCancleCVR') {
+                    this.playEventCb('cursorOnChanged', false);
+                    this.play();
+                } else if (param.event === 'isIncorrectPlayPasswordChanged') {
+                    this.playEventCb('isIncorrectPlayPasswordChanged', param.data);
+                }
+            },
+
             errorLayerEventHandler : function(param) {
                 if (param.event === 'lastEvent') {
                     this.lastEvent = param.value;
@@ -727,7 +490,8 @@
             },
 
             zoomEventHandler : function(zoom) {
-                this.zoomUp(zoom);
+                this.playEventCb('zoomDragValChanged', 0);
+                this.player.zoomUp(zoom);
             },
 
             fullscreenEventHandler : function(param) {
@@ -744,7 +508,7 @@
                 if (fullscreenStatus) {
                     this.timeline.newTimelineDragCnt = 0;
 
-                    if (this.currentZoom > 1) {
+                    if (this.player.getData('currentZoom') > 1) {
                         this.playInfoBar.setData('isShowTimelineToggleArea', false);
                     } else {
                         this.playInfoBar.setData('isShowTimelineToggleArea', true);
@@ -819,10 +583,10 @@
                     }
                     this.playEventCb('timelineVisibleChanged', true);
 
-                    if (this.currentZoom > 1) {
-                        this.currentZoom = 1;	// 줌 상태일 경우 줌해제 처리
-                        this.playEventCb('currentZoomChanged', this.currentZoom);
-                        this.zoomUp(0);
+                    if (this.player.getData('currentZoom') > 1) {
+                        this.player.setData('currentZoom', 1);	// 줌 상태일 경우 줌해제 처리
+                        this.playEventCb('zoomDragValChanged', 0);
+                        this.player.zoomUp(0);
                     }
 
                     this.playEventCb('isClickTimelineShowChanged', false);
@@ -867,6 +631,14 @@
                     $(".fs_time").hide();
                     $(".cam_info_area").css("top","");
                     $("#cloud_out_small").children("img").css("margin-left","20px");
+                }
+            },
+
+            play : function (time, status) {
+                if (time) {
+                    this.goCvr(time, status);
+                } else {
+                    this.goLive();
                 }
             },
 
@@ -955,32 +727,12 @@
             },
 
             pauseBtn : function() {
-                if (this.cameraData.recorderType == "recorder") {
-                    if ($('#remoteVideosContainer').length) {
-                        if ($('#remoteVideosContainer').children('video').length) {
-                            $('#remoteVideosContainer').children('video')[0].pause();
-                        }
-                    }
-                } else {
-                    if (this.player) {
-                        this.player.pause();
-                    }
-                }
+                this.player.pause();
                 store.dispatch('PLAY_BTN_STATUS_CHANGE', false);
             },
 
             playBtn : function() {
-                if (this.cameraData.recorderType == "recorder") {
-                    if ($('#remoteVideosContainer').length) {
-                        if ($('#remoteVideosContainer').children('video').length) {
-                            $('#remoteVideosContainer').children('video')[0].play();
-                        }
-                    }
-                } else {
-                    if (this.player) {
-                        this.player.play();
-                    }
-                }
+                this.player.resume();
                 store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
 
                 this.errorStatusLayer.cameraStatusAllOff();
@@ -1049,9 +801,9 @@
                     clearTimeout(this.playserStop);
                     this.playserStop = null;
                 }
-                this.playEventCb('checkCVRSeucre', (isSecureMode) => {
+                this.cvrPlaySecureManager.checkCVRSeucre((isSecureMode) => {
                     if(isSecureMode){
-                        this.playEventCb('updateCVRSecureStatus', callbackFunc.bind(this));
+                        this.cvrPlaySecureManager.setCVRSecureCallback(callbackFunc.bind(this));
                     }else{
                         callbackFunc();
                     }

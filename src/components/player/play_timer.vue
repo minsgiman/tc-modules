@@ -35,6 +35,7 @@
         mounted : function() {
         },
         beforeDestroy : function() {
+            this.stopTimer();
         },
         methods : {
             startRecTimer : function(time, player, timeline) {
