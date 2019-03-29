@@ -74,6 +74,24 @@
             },
             currentDomain: function () {
                 return store.state.currentDomain;
+            },
+            cvrData: function () {
+                return store.state.cvrData;
+            },
+            arrEvents: function () {
+                return store.state.arrEvents;
+            },
+            inoutFilter: function () {
+                return store.state.inoutFilter;
+            },
+            sensorZones: function () {
+                return store.state.sensorZones;
+            },
+            eventZones: function () {
+                return store.state.eventZones;
+            },
+            motionZones: function () {
+                return store.state.motionZones;
             }
         },
         data : function() {
@@ -81,16 +99,10 @@
                 width: 0,
                 height: 0,
                 timeRange: 0,
-                inoutFilter: false,
-                sensorZones: [],
-                eventZones: [],
-                motionZones: [],
                 serviceDateTime: 0,
                 firstDataLoadingFlag: false,
                 clickDateChange: false,
                 eventData: [],
-                cvrData: [],
-                arrEvents : [],
                 cvrArray : [],
                 cvrCheck : false,
                 forceDomain: true,
@@ -192,12 +204,12 @@
                     this.redrawWithWidth(parseInt($("#view_timeline_ctrl").width()));
                 }
 
-                this.$emit('timelineEvent', {event: 'resize'});
+                this.$emit('event', {event: 'resize'});
             },
 
             clickedCVRArea : function(time, status) {
                 this.newTimelineDragCnt=0;
-                this.$emit('timelineEvent', {event: 'stopPlayTimer'});
+                this.$emit('event', {event: 'stopPlayTimer'});
                 if(this.isShared == true){
                     this.playEventCallback('shareEnd');
                 }
@@ -205,7 +217,7 @@
                 var currentDomain = this.currentDomain;
                 this.setupDomain([currentDomain[0], currentDomain[1]]);
                 if((new Date()).valueOf() < time.valueOf()){
-                    this.$emit('timelineEvent', {event: 'goLive'});
+                    this.$emit('event', {event: 'goLive'});
                     return;
                 }
 
@@ -214,13 +226,13 @@
                 }
 
                 setTimeout(() => {
-                    this.$emit('timelineEvent', {event: 'cvrPlayRequest', data: {time, status}});
+                    this.$emit('event', {event: 'cvrPlayRequest', data: {time, status}});
                 },800);
             },
 
             cvrDrawCheck : function(time) {
                 store.dispatch('IS_LIVE_CHANGE', false);
-                this.$emit('timelineEvent', {event: 'camInfoBarChange'});
+                this.$emit('event', {event: 'camInfoBarChange'});
                 var trueCnt = 0;
                 this.cvrCheck = false;
 
@@ -235,7 +247,7 @@
 
                     if(startX > time.valueOf() && !nextTime){
                         nextTime = startX;
-                        this.$emit('timelineEvent', {event: 'clearPlayerStopTimeout'});
+                        this.$emit('event', {event: 'clearPlayerStopTimeout'});
                     }
 
                     if(timeRange == 10){
@@ -259,7 +271,7 @@
                 }
                 if(this.cvrCheck == false){
                     if((new Date).valueOf() - time.valueOf() < 8000){
-                        this.$emit('timelineEvent', {event: 'goLive'});
+                        this.$emit('event', {event: 'goLive'});
                         this.newTimelineDragCnt = 0;
                         return;
                     }
@@ -271,7 +283,7 @@
                 }
 
                 if(this.cvrCheck == false){
-                    this.$emit('timelineEvent', {event: 'noCvr', data: nextTime});
+                    this.$emit('event', {event: 'noCvr', data: nextTime});
                 }
             },
 
@@ -416,15 +428,15 @@
                     this.playEventCallback('changedSelectedZone');
                     this.playEventCallback('thumnailDrawChanged', true);
                 }
-                this.arrEvents = data.events;
-                this.cvrData = data.recTimes;
+                store.dispatch('EVENTS_CHANGE', data.events);
+                store.dispatch('CVR_DATA_CHANGE', data.recTimes);
                 this.drawRecordBar();
                 this.updateBar(500);
                 this.cvrArray = [];
                 this.cvrArray.push($(".cvr").children("rect"));
                 this.redrawEvents(data.events, data.avg);
                 this.isLoading = false;
-                this.playEventCallback('eventsChanged', this.arrEvents);
+                this.playEventCallback('eventsChanged', data.events);
                 setTimeout(() => {
                     this.playEventCallback('changedSelectedZone');
                 },200);
@@ -694,14 +706,14 @@
                 if(dblClicklive == false){
                     this.clickedCVRArea(new Date(dblClickTime));
                 }else{
-                    this.$emit('timelineEvent', {event: 'goLive'});
+                    this.$emit('event', {event: 'goLive'});
                 }
 
                 return this.changeDomain(newDomain);
             },
 
             prevDomain : function() {
-                this.$emit('timelineEvent', {event: 'moveDomain'});
+                this.$emit('event', {event: 'moveDomain'});
                 this.newTimelineDragCnt = 0;
                 this.dragThumCancle = false;
                 var diff = this.timeRange * 60 * 1000;
@@ -710,7 +722,7 @@
             },
 
             nextDomain : function() {
-                this.$emit('timelineEvent', {event: 'moveDomain'});
+                this.$emit('event', {event: 'moveDomain'});
                 this.newTimelineDragCnt = 0;
                 this.dragThumCancle = false;
                 var diff = this.timeRange * 60 * 1000;
@@ -911,7 +923,7 @@
 
             redrawWithWidth : function(width) {
 
-                if(width == 0){
+                if(width <= 0){
                     width = nowWitdh;
                 }
 
@@ -1206,7 +1218,7 @@
                         return;
                     }
                     if(dragFlag == false){
-                        that.$emit('timelineEvent', {event: 'liveReloadCntUpdate', data: 0});
+                        that.$emit('event', {event: 'liveReloadCntUpdate', data: 0});
                         var mouseLocation = d3.mouse(this);
                         var selectedTime = that.x.invert(mouseLocation[0]);
                         if(that.serviceDateTime > selectedTime.valueOf()){
@@ -1226,15 +1238,15 @@
                             that.clickedCVRArea(selectedTime);
                             that.updateCursor(selectedTime);
                             if (that.currentTime.getTime() - Date.now() >= 0) { // 미래를 선택한 경우
-                                that.$emit('timelineEvent', {event: 'goLive'});
+                                that.$emit('event', {event: 'goLive'});
                                 return;
                             }
 
                         };
 
-                        that.$emit('timelineEvent', {event: 'checkCVRSeucre', data: (isSecureMode) => {
+                        that.$emit('event', {event: 'checkCVRSeucre', data: (isSecureMode) => {
                             if(isSecureMode){
-                                that.$emit('timelineEvent', {event: 'updateCVRSecureStatus', data: callbackFunc});
+                                that.$emit('event', {event: 'updateCVRSecureStatus', data: callbackFunc});
                             }else{
                                 callbackFunc();
                             }
@@ -1287,9 +1299,9 @@
                         that.dragThumCancle = false;
                         that.cursorDragStatus = false;
                         that.playEventCallback('cursorDragEnd');
-                        that.$emit('timelineEvent', {event: 'checkCVRSeucre', data: function(isSecureMode){
+                        that.$emit('event', {event: 'checkCVRSeucre', data: function(isSecureMode){
                                 if(isSecureMode){
-                                    that.$emit('timelineEvent', {event: 'updateCVRSecureStatus', data: function() {that.playEventCallback('cursorDragEnd');}});
+                                    that.$emit('event', {event: 'updateCVRSecureStatus', data: function() {that.playEventCallback('cursorDragEnd');}});
                                 }else{
                                     that.playEventCallback('cursorDragEnd');
                                 }
@@ -1434,34 +1446,6 @@
                 }
             },
 
-            getAllFilteredZonesIds : function(zoneData) {
-                var filteredEventZoneIdsArr = this.eventZones.filter(item => item.filterMark === 'on').map(item => item.id);
-                var filteredMotionZoneIdsArr = this.motionZones.filter(item => item.filterMark === 'on' && item.id !== '9').map(item => item.uid);
-                var allFilteredZoneIdsArr = filteredEventZoneIdsArr.concat(filteredMotionZoneIdsArr);	// 체크 처리된 모든 zoneId
-                var deleteZone = this.motionZones.find(item => item.id === 9);
-                var isCheckedDeleteZoneId = (deleteZone && deleteZone.filterMark === 'on') ? true : false;
-
-                // 삭제된 이벤트가 체크된 경우 이벤트에서 alarmzone으로 설정된 zoneId가 아닌 zoneId 모두를 추출.
-                if (isCheckedDeleteZoneId) {
-                    var allZoneIdsArr = this.eventZones.map(item => item.id).concat(this.motionZones.filter(item => item.id !== '9').map(item => item.uid));
-                    var deletedZoneIdsArr = zoneData.filter(item => !allZoneIdsArr.includes(item));
-                    allFilteredZoneIdsArr = allFilteredZoneIdsArr.concat(deletedZoneIdsArr.filter(item => (o !== "ACCESS_ENTER" && o !== "ACCESS_EXIT" && o !== "SENSOR_TEMP" && o !== "SENSOR_HUMID" && o !== "SENSOR_MOTION" && o !== "SENSOR_MAGNETIC" && o !== "SENSOR_SMOKE" && o !== "SENSOR_GAS" && o !== "SENSOR_PLUG" && o !== "DOORLOCK_EVENT")));
-                }
-
-                if (this.inoutFilter) {
-                    allFilteredZoneIdsArr = allFilteredZoneIdsArr.concat(["ACCESS_ENTER", "ACCESS_EXIT"]);
-                }
-                if (this.sensorZones) {
-                    var i, len = this.sensorZones.length;
-                    for (i = 0; i < len; i+=1) {
-                        if (this.sensorZones[i].filterMark === "on") {
-                            allFilteredZoneIdsArr.push(this.sensorZones[i].id);
-                        }
-                    }
-                }
-                return allFilteredZoneIdsArr;
-            },
-
             drawEvents : function() {
                 var that = this;
                 var filteredData = [];
@@ -1474,7 +1458,7 @@
 
                 if(this.eventData != undefined){
                     this.eventData.forEach(function (d) {
-                        var allFilteredZoneIds = that.getAllFilteredZonesIds(d.zoneIdxs.split(","));
+                        var allFilteredZoneIds = store.getters.getAllFilteredZonesIds(d.zoneIdxs.split(","));
                         var isCheckedEvent = d.zoneIdxs.split(",").filter(item => allFilteredZoneIds.includes(item));
 
                         if (parseInt(d.endTime) <= parseInt(Date.now()) && isCheckedEvent.length > 0) {

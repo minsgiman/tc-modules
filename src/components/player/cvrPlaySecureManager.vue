@@ -55,7 +55,7 @@
             checkCVRSeucre: function(callback) {
                 toastcamAPIs.call(toastcamAPIs.camera.GET_CAMERA_CONFIG, {cameraId: this.cameraData.id}, (data) => {
                     if(data.secureMode == "on"){
-                        this.$emit('cvrPlaySecureEvent', {event: 'stopTimer'});
+                        this.$emit('event', {event: 'stopTimer'});
                         var passCVRSecure = sessionStorage.getItem("passCVRSecureCameraIds");
                         if (passCVRSecure == null || passCVRSecure === "undefined"){
                             callback(true);
@@ -98,14 +98,14 @@
                             this.cvrPasswordSuccessCallback();
                         }
                     } else {
-                        this.$emit('cvrPlaySecureEvent', {event: 'isIncorrectPlayPasswordChanged', data: true});
+                        this.$emit('event', {event: 'isIncorrectPlayPasswordChanged', data: true});
                     }
                 }, (err) => {});
             },
 
             cancelCVRPlay: function() {
                 if(this.isLive){
-                    this.$emit('cvrPlaySecureEvent', {event: 'goLiveByCancleCVR'});
+                    this.$emit('event', {event: 'goLiveByCancleCVR'});
                 }
                 this.isShowCVRPlayPasswordConfirm = false;
             },

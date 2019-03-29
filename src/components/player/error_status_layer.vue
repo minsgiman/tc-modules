@@ -198,7 +198,7 @@
             },
 
             requestPlayCvr : function(time, status) {
-                this.$emit('errorLayerEvent', {event: 'playCvr', value: {time, status}});
+                this.$emit('event', {event: 'playCvr', value: {time, status}});
             },
 
             currentCameraIsLastRecordDataSet : function(data){
@@ -213,7 +213,7 @@
                     this.lastEventDateString = lastEventMoment.locale(browserLang).format(videoDateFormat);
                     this.lastEventTimeString = lastEventMoment.locale(browserLang).format(videoTimeFormat);
                     $("#camera_off_lastevnt").show();
-                    this.$emit('errorLayerEvent', {event: 'lastEvent', value: lastEventMoment._i});
+                    this.$emit('event', {event: 'lastEvent', value: lastEventMoment._i});
                     this.isCameraOffLastShowEvent = true;
                 }else{
                     this.isCameraOffLastShowEvent = false;
@@ -225,7 +225,7 @@
                     this.lastRecDateString = lastRecMoment.locale(browserLang).format(videoDateFormat);
                     this.lastRecTimeString = lastRecMoment.locale(browserLang).format(videoTimeFormat);
                     $("#camera_off_lastrec").show();
-                    this.$emit('errorLayerEvent', {event: 'lastRec', value: lastRecMoment._i});
+                    this.$emit('event', {event: 'lastRec', value: lastRecMoment._i});
                     this.isCameraOffLastShowRec = true;
                 }else{
                     this.isCameraOffLastShowRec = false;

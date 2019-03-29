@@ -64,7 +64,7 @@
 
                 if(this.dataLoadingStatus == true){
                     if (this.cameraData.recorderType !== "recorder") {
-                        this.$emit('fullscreenEvent', {event: 'dataLoading'});
+                        this.$emit('event', {event: 'dataLoading'});
                         return;
                     }
                 }
@@ -80,7 +80,7 @@
                     element.msRequestFullscreen();
                 }
 
-                this.$emit('fullscreenEvent', {event: 'beforeChange', state: true});
+                this.$emit('event', {event: 'beforeChange', state: true});
             },
             pressedExitFullScreenButton: function() {
                 if (document.exitFullscreen) {
@@ -93,13 +93,13 @@
                     document.msExitFullscreen();
                 }
 
-                this.$emit('fullscreenEvent', {event: 'beforeChange', state: false});
+                this.$emit('event', {event: 'beforeChange', state: false});
             },
             fullscreenChangeEvent : function() {
                 var isFullScreenStatus = getFullScreenStatus();
 
                 store.dispatch('IS_FULLSCREEN_CHANGE', isFullScreenStatus);
-                this.$emit('fullscreenEvent', {event: 'changed', state: isFullScreenStatus});
+                this.$emit('event', {event: 'changed', state: isFullScreenStatus});
             },
             fullscreenHandler : function(event) {
                 if (getFullScreenStatus()) {

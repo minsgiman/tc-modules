@@ -50,11 +50,11 @@
         },
         methods : {
             pauseBtn : function() {
-                this.$emit('playInfoBarEvent', {event: 'pause'});
+                this.$emit('event', {event: 'pause'});
                 store.dispatch('IS_PLAYING_CHANGE', false);
             },
             playBtn : function() {
-                this.$emit('playInfoBarEvent', {event: 'play'});
+                this.$emit('event', {event: 'play'});
                 store.dispatch('IS_PLAYING_CHANGE', true);
             },
             formattedDateNotYo: function(date) {
@@ -110,7 +110,7 @@
             },
 
             goLive: function() {
-                this.$emit('playInfoBarEvent', {event: 'goLive'});
+                this.$emit('event', {event: 'goLive'});
             },
 
             setData : function(key, value) {

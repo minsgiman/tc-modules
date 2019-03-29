@@ -56,11 +56,11 @@
 
                     if(timeline.cvrCheck == false){
                         if (this.cameraData.recordType == "event") {
-                            this.$emit('playTimerEvent', {event: 'jumpToNextRecord'});
+                            this.$emit('event', {event: 'jumpToNextRecord'});
                         } else {
                             if(timeline.lineMoveFlag == false){
                                 store.dispatch('IS_PLAYING_CHANGE', false);
-                                this.$emit('playTimerEvent', {event: 'noCvrError'});
+                                this.$emit('event', {event: 'noCvrError'});
                                 clearInterval(this.timer);
                                 if (player) {
                                     player.close();
@@ -70,7 +70,7 @@
                         }
                     }else{
                         store.dispatch('IS_PLAYING_CHANGE', true);
-                        this.$emit('playTimerEvent', {event: 'checkNoCvr'});
+                        this.$emit('event', {event: 'checkNoCvr'});
                     }
 
                     if(this.cursorIdx == 0){
@@ -123,7 +123,7 @@
                     }else{
                         if(timeline.lineMoveFlag == false){
                             timeline.setData('changeTimeRangeClick', true);
-                            this.$emit('playTimerEvent', {event: 'pressedFindCursorButton'});
+                            this.$emit('event', {event: 'pressedFindCursorButton'});
                         }
                     }
 
@@ -182,7 +182,7 @@
                     }else{
                         if(timeline.lineMoveFlag == false){
                             timeline.setData('changeTimeRangeClick', true);
-                            this.$emit('playTimerEvent', {event: 'pressedFindCursorButton'});
+                            this.$emit('event', {event: 'pressedFindCursorButton'});
                             timeline.lineMoveFlag = true;
                         }
                     }

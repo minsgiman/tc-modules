@@ -90,7 +90,7 @@
             },
 
             pressedCalendarDateButton: function (dateString) {
-                this.$emit('timlineDateSelectorEvent', {event: 'pressedCalendarDate', data: dateString});
+                this.$emit('event', {event: 'pressedCalendarDate', data: dateString});
             },
 
             getServiceCalendarDate: function (num) {

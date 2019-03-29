@@ -45,6 +45,18 @@ class player {
             case 'serviceDay':
                 store.dispatch('SERVICE_DAY_CHANGE', value);
                 break;
+            case 'inoutFilter':
+                store.dispatch('INOUT_FILTER_CHANGE', value);
+                break;
+            case 'sensorZones':
+                store.dispatch('SENSOR_ZONES_CHANGE', value);
+                break;
+            case 'eventZones':
+                store.dispatch('EVENT_ZONES_CHANGE', value);
+                break;
+            case 'motionZones':
+                store.dispatch('MOTION_ZONES_CHANGE', value);
+                break;
             default:
                 break;
         }

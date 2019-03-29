@@ -186,7 +186,7 @@
                 }
             },
             playerStatusChangedHandler : function (status) {
-                this.$emit('playerStatusChanged', status);
+                this.$emit('event', status);
             },
             setData : function(key, value) {
                 if (this.player.setData) {

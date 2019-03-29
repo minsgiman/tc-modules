@@ -30,7 +30,7 @@
         },
         methods : {
             zoomUp: function (zoom) {
-                this.$emit('zoomEvent', zoom);
+                this.$emit('event', zoom);
             }
         }
     }

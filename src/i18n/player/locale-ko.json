@@ -17,5 +17,6 @@
   "CAMERA_SHOW_VIDEO_INPUT_PASSWORD": "녹화 영상을 보기 위해 비밀번호를 입력해주세요.",
   "CAMERA_INPUT_PASSWORD_SHARE_MAN": "카메라를 공유한 사람이 설정한 비밀번호를 입력 해주세요.",
   "CAMERA_PASSWORD_INPUT": "비밀번호 입력",
-  "BUTTON_CONFIRM": "확인"
+  "BUTTON_CONFIRM": "확인",
+  "CAMERA_EVENT_MOVE": "이벤트 이동"
 }

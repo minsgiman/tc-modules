@@ -16,6 +16,12 @@ const store = new Vuex.Store({
         serviceDay: 0,
         currentTime: new Date(),
         timezone: '',
+        cvrData: [],
+        arrEvents: [],
+        inoutFilter: false,
+        sensorZones: [],
+        eventZones: [],
+        motionZones: [],
         currentDomain: null
     },
     getters: {
@@ -24,6 +30,35 @@ const store = new Vuex.Store({
                 return true;
             }
             return false;
+        },
+        getAllFilteredZonesIds: state => {
+            return zoneData => {
+                var filteredEventZoneIdsArr = state.eventZones.filter(item => item.filterMark === 'on').map(item => item.id);
+                var filteredMotionZoneIdsArr = state.motionZones.filter(item => item.filterMark === 'on' && item.id !== '9').map(item => item.uid);
+                var allFilteredZoneIdsArr = filteredEventZoneIdsArr.concat(filteredMotionZoneIdsArr);	// 체크 처리된 모든 zoneId
+                var deleteZone = state.motionZones.find(item => item.id === 9);
+                var isCheckedDeleteZoneId = (deleteZone && deleteZone.filterMark === 'on') ? true : false;
+
+                // 삭제된 이벤트가 체크된 경우 이벤트에서 alarmzone으로 설정된 zoneId가 아닌 zoneId 모두를 추출.
+                if (isCheckedDeleteZoneId) {
+                    var allZoneIdsArr = state.eventZones.map(item => item.id).concat(state.motionZones.filter(item => item.id !== '9').map(item => item.uid));
+                    var deletedZoneIdsArr = zoneData.filter(item => !allZoneIdsArr.includes(item));
+                    allFilteredZoneIdsArr = allFilteredZoneIdsArr.concat(deletedZoneIdsArr.filter(item => (o !== "ACCESS_ENTER" && o !== "ACCESS_EXIT" && o !== "SENSOR_TEMP" && o !== "SENSOR_HUMID" && o !== "SENSOR_MOTION" && o !== "SENSOR_MAGNETIC" && o !== "SENSOR_SMOKE" && o !== "SENSOR_GAS" && o !== "SENSOR_PLUG" && o !== "DOORLOCK_EVENT")));
+                }
+
+                if (state.inoutFilter) {
+                    allFilteredZoneIdsArr = allFilteredZoneIdsArr.concat(["ACCESS_ENTER", "ACCESS_EXIT"]);
+                }
+                if (state.sensorZones) {
+                    var i, len = state.sensorZones.length;
+                    for (i = 0; i < len; i+=1) {
+                        if (state.sensorZones[i].filterMark === "on") {
+                            allFilteredZoneIdsArr.push(state.sensorZones[i].id);
+                        }
+                    }
+                }
+                return allFilteredZoneIdsArr;
+            }
         }
     },
     actions: {
@@ -71,6 +106,24 @@ const store = new Vuex.Store({
         },
         CURRENT_DOMAIN_CHANGE: function(context, state) {
             context.commit('UPDATE_CURRENT_DOMAIN', state);
+        },
+        CVR_DATA_CHANGE: function(context, state) {
+            context.commit('UPDATE_CVR_DATA', state);
+        },
+        EVENTS_CHANGE: function(context, state) {
+            context.commit('UPDATE_EVENTS', state);
+        },
+        INOUT_FILTER_CHANGE: function(context, state) {
+            context.commit('UPDATE_INOUT_FILTER', state);
+        },
+        SENSOR_ZONES_CHANGE: function(context, state) {
+            context.commit('UPDATE_SENSOR_ZONES', state);
+        },
+        EVENT_ZONES_CHANGE: function(context, state) {
+            context.commit('UPDATE_EVENT_ZONES', state);
+        },
+        MOTION_ZONES_CHANGE: function(context, state) {
+            context.commit('UPDATE_MOTION_ZONES', state);
         },
         INIT_ALL_DATA: function(context, state) {
             context.commit('UPDATE_CAMERA_DATA', {});
@@ -120,6 +173,24 @@ const store = new Vuex.Store({
         },
         UPDATE_TIMEZONE: function(state, value) {
             state.timezone = value;
+        },
+        UPDATE_CVR_DATA: function(state, value) {
+            state.cvrData = value;
+        },
+        UPDATE_EVENTS: function(state, value) {
+            state.arrEvents = value;
+        },
+        UPDATE_INOUT_FILTER: function(state, value) {
+            state.inoutFilter = value;
+        },
+        UPDATE_SENSOR_ZONES: function(state, value) {
+            state.sensorZones = value;
+        },
+        UPDATE_EVENT_ZONES: function(state, value) {
+            state.eventZones = value;
+        },
+        UPDATE_MOTION_ZONES: function(state, value) {
+            state.motionZones = value;
         }
     }
 });

@@ -13,6 +13,7 @@
     import errorStatusLayer from './error_status_layer.vue';
     import cvrPlaySecureManager from './cvrPlaySecureManager.vue';
     import timelineDateSelector from './timeline_date_selector.vue';
+    import eventMoveBtn from './event_move_btn.vue';
     import toastcamAPIs from './../../service/toastcamAPIs';
     import store from '../../service/player/store';
     import moment from 'moment';
@@ -62,6 +63,9 @@
             },
             serviceDay: function () {
                 return store.state.serviceDay;
+            },
+            cvrData: function () {
+                return store.state.cvrData;
             }
         },
         data : function() {
@@ -85,40 +89,21 @@
                 range : 0,
                 goCvrStatus : false,
                 fullscreenTimer : null,
-                timeRange : 60,
                 cachedTimelineparams : null,
                 lastRec : 0,
                 lastEvent : 0
             }
         },
         created : function() {
-            const vFullscreenBtnConstructor = Vue.extend(fullscreenBtn);
-            this.fullscreenBtn = new vFullscreenBtnConstructor().$mount('#fullscreen_btn_wrap');
-            this.fullscreenBtn.$on('fullscreenEvent', this.fullscreenEventHandler.bind(this));
-
-            const vZoomBtnConstructor = Vue.extend(zoomBtn);
-            this.zoomBtn = new vZoomBtnConstructor().$mount('#zoom_btn_wrap');
-            this.zoomBtn.$on('zoomEvent', this.zoomEventHandler.bind(this));
-
-            const vErrorStatusLayerConstructor = Vue.extend(errorStatusLayer);
-            this.errorStatusLayer = new vErrorStatusLayerConstructor({i18n}).$mount('#error_status_wrap');
-            this.errorStatusLayer.$on('errorLayerEvent', this.errorLayerEventHandler.bind(this));
-
-            const vPlayInfoBarConstructor = Vue.extend(playInfoBar);
-            this.playInfoBar = new vPlayInfoBarConstructor().$mount('#cam_info');
-            this.playInfoBar.$on('playInfoBarEvent', this.playInfoBarEventHandler.bind(this));
-
-            const vPlayTimerConstructor = Vue.extend(playTimer);
-            this.playTimer = new vPlayTimerConstructor();
-            this.playTimer.$on('playTimerEvent', this.playTimerEventHandler.bind(this));
-
-            const vCvrPlaySecureManager = Vue.extend(cvrPlaySecureManager);
-            this.cvrPlaySecureManager = new vCvrPlaySecureManager({i18n}).$mount('#cvr_play_manager_wrap');
-            this.cvrPlaySecureManager.$on('cvrPlaySecureEvent', this.cvrPlaySecureEventHandler.bind(this));
-
-            const vTimelineDateSelector = Vue.extend(timelineDateSelector);
-            this.timelineDateSelector = new vTimelineDateSelector().$mount('#view_timeline_date');
-            this.timelineDateSelector.$on('timlineDateSelectorEvent', this.timlineDateSelectorEventHandler.bind(this));
+            this.fullscreenBtn = this.createComponent(fullscreenBtn, 'fullscreen_btn_wrap', this.fullscreenEventHandler.bind(this));
+            this.zoomBtn = this.createComponent(zoomBtn, 'zoom_btn_wrap', this.zoomEventHandler.bind(this));
+            this.errorStatusLayer = this.createComponent(errorStatusLayer, 'error_status_wrap', this.errorLayerEventHandler.bind(this));
+            this.playInfoBar = this.createComponent(playInfoBar, 'cam_info', this.playInfoBarEventHandler.bind(this));
+            this.playTimer = this.createComponent(playTimer, null, this.playTimerEventHandler.bind(this));
+            this.cvrPlaySecureManager = this.createComponent(cvrPlaySecureManager, 'cvr_play_manager_wrap', this.cvrPlaySecureEventHandler.bind(this));
+            this.timelineDateSelector = this.createComponent(timelineDateSelector, 'view_timeline_date', this.timlineDateSelectorEventHandler.bind(this));
+            this.eventMoveBtn = this.createComponent(eventMoveBtn, 'event_move_btn_wrap', this.eventMoveBtnEventHandler.bind(this));
+            this.eventMoveFullBtn = this.createComponent(eventMoveBtn, 'event_move_btn_full_wrap', this.eventMoveBtnEventHandler.bind(this), {fullMode: true});
         },
         mounted : function() {
         },
@@ -146,6 +131,15 @@
             window.onresize = null;
         },
         methods : {
+            createComponent : function (constructor, elementId, eventHandler, prop) {
+                const vConstructor = Vue.extend(constructor);
+                const vComponent = new vConstructor({i18n, propsData: prop});
+                if (elementId) {
+                    vComponent.$mount('#' + elementId);
+                }
+                vComponent.$on('event', eventHandler);
+                return vComponent;
+            },
             playStatusChangedHandler : function(status) {
                 if (status.status) {
                     if (status.status === this.player.getData('webRTCStatusEnum').EVENT_STREAM_CONNECTED) {
@@ -254,7 +248,7 @@
                                 this.stopStatusCheck++;
                                 if (this.stopStatusCheck == 2) {
                                     this.stopStatusCheck = 0;
-                                    var i, len, curTime, cvrData = this.timeline.getData('cvrData');
+                                    var i, len, curTime, cvrData = this.cvrData;
                                     if (this.currentTime && cvrData && cvrData.length) {
                                         len = cvrData.length;
                                         curTime = this.currentTime.getTime();
@@ -271,7 +265,7 @@
                                     }
                                 }
                             } else if (status === "NetConnection.Connect.Closed") {
-                                var i, len, curTime, cvrData = this.timeline.getData('cvrData');
+                                var i, len, curTime, cvrData = this.cvrData;
                                 if (this.currentTime && cvrData && cvrData.length) {
                                     len = cvrData.length;
                                     curTime = this.currentTime.getTime();
@@ -409,7 +403,7 @@
             initPlayer : function() {
                 const vExtendConstructor = Vue.extend(playContainer);
                 this.player = new vExtendConstructor();
-                this.player.$on('playerStatusChanged', this.playStatusChangedHandler.bind(this));
+                this.player.$on('event', this.playStatusChangedHandler.bind(this));
                 //TODO:
 
                 // const vExtendConstructor = Vue.extend(flashPlayer);
@@ -450,7 +444,7 @@
                         playEventCallback: this.playEventCb
                     }
                 }).$mount('#timebar_area');
-                this.timeline.$on('timelineEvent', this.onTimelineEvent.bind(this));
+                this.timeline.$on('event', this.onTimelineEvent.bind(this));
                 this.timeline.setData('cursorInterval', 1000);
 
                 return this.timeline;
@@ -514,6 +508,22 @@
                             }
                         }
                     },500);
+                }
+            },
+
+            eventMoveBtnEventHandler: function (param) {
+                if (param.event === 'checkCVRSeucre') {
+                    this.cvrPlaySecureManager.checkCVRSeucre(param.data);
+                } else if (param.event === 'updateCVRSecureStatus') {
+                    this.cvrPlaySecureManager.setCVRSecureCallback(param.data);
+                } else if (param.event === 'play') {
+                    this.play(param.data);
+                } else if (param.event === 'noPrevEvent') {
+                    this.playEventCb('noPrevEvent');
+                } else if (param.event === 'noNextEvent') {
+                    this.playEventCb('noNextEvent');
+                } else if (param.event === 'serviceDateTimeUpdate') {
+                    this.timeline.setData('serviceDateTime', param.data);
                 }
             },
 
@@ -800,7 +810,7 @@
                     if (this.cameraData.recordType == "event") {
                         var curTime = this.currentTime.getTime();
                         var currentDomain = this.currentDomain;
-                        var cvrData = this.timeline.getData('cvrData');
+                        var cvrData = this.cvrData;
                         if (!currentDomain || !currentDomain[0] || !currentDomain[1]) {
                             return;
                         }
