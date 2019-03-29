@@ -65,6 +65,15 @@
             },
             shopId: function () {
                 return store.state.shopId;
+            },
+            serviceDay: function () {
+                return store.state.serviceDay;
+            },
+            timezone: function () {
+                return store.state.timezone;
+            },
+            currentDomain: function () {
+                return store.state.currentDomain;
             }
         },
         data : function() {
@@ -72,7 +81,6 @@
                 width: 0,
                 height: 0,
                 timeRange: 0,
-                serviceDay: 0,
                 inoutFilter: false,
                 sensorZones: [],
                 eventZones: [],
@@ -107,7 +115,7 @@
         },
         mounted : function() {
             var currentSvg = d3.select("#" + this.elementId + " svg");
-            if (currentSvg !== undefined) {
+            if (currentSvg) {
                 currentSvg.remove();
             }
             this.svg = d3.select("#" + this.elementId).append('svg')
@@ -139,7 +147,7 @@
             this.inoutEvents = this.mainContainer.append('g').attr('class', 'inouts');
             this.isDblZooming = false;
             this.previousDblClickTime = 0;
-            this.currentDomain = this.timeRange.currentDomain;
+            store.dispatch('CURRENT_DOMAIN_CHANGE', this.timeRange.currentDomain);
 
             this.svg.on('dblclick', () => {
                 this.playEventCallback('dblClickFlagChanged', true);
@@ -555,13 +563,6 @@
                 this.boundDateFormat = format;
             },
 
-            setTimezone : function(timezone) {
-                if (timezone !== undefined && timezone !== "") {
-                    var tokens = timezone.split(',');
-                    this.tz = tokens[2];
-                }
-            },
-
             bufferDomain : function(minutes) {
                 var buffer = 0;
                 switch (minutes) {
@@ -759,7 +760,7 @@
             },
 
             domainCenterTime : function() {
-                if (this.currentDomain !== undefined) {
+                if (this.currentDomain) {
                     return (this.currentDomain[0] + this.currentDomain[1])/2 + (this.currentDomain[1] - this.currentDomain[0])/8;
                 }
 
@@ -784,14 +785,15 @@
             },
 
             changeDomain : function(domain, duration, time) {
-                var range, fixRange;
+                var range, fixRange, currentDomain;
 
                 this.svg.select('.cursor').classed('hide', true);
 
-                this.currentDomain = domain;
-                this.removedBufferDomain = this.removeBufferDomain(this.currentDomain , this.timeRange);
+                currentDomain = domain;
+                store.dispatch('CURRENT_DOMAIN_CHANGE', currentDomain);
+                this.removedBufferDomain = this.removeBufferDomain(currentDomain , this.timeRange);
                 setTimeout(() => {
-                    this.setupDomain(this.currentDomain);
+                    this.setupDomain(currentDomain);
                 },1000);
 
                 var extent;
@@ -861,11 +863,13 @@
             },
 
             changeDragDomain : function(domain, duration, time) {
+                var currentDomain;
                 this.svg.select('.cursor').classed('hide', true);
 
-                this.currentDomain = domain;
-                this.removedBufferDomain = this.removeBufferDomain(this.currentDomain , this.timeRange);
-                this.setupDomain(this.currentDomain);
+                currentDomain = domain;
+                store.dispatch('CURRENT_DOMAIN_CHANGE', currentDomain);
+                this.removedBufferDomain = this.removeBufferDomain(currentDomain , this.timeRange);
+                this.setupDomain(currentDomain);
 
                 var extent;
                 if (this.brush !== undefined) {
@@ -932,8 +936,8 @@
                     .tickFormat((d, i) => {
                         var md;
 
-                        if (this.tz !== undefined) {
-                            md = moment(d).tz(this.tz).locale(browserLang);
+                        if (this.timezone) {
+                            md = moment(d).tz(this.timezone).locale(browserLang);
                         } else {
                             md = moment(d).locale(browserLang);
                         }
@@ -1014,8 +1018,8 @@
                     .tickFormat(function (d, i) {
                         var md;
 
-                        if (that.tz !== undefined) {
-                            md = moment(d).tz(that.tz).locale(browserLang);
+                        if (that.timezone) {
+                            md = moment(d).tz(that.timezone).locale(browserLang);
                         } else {
                             md = moment(d).locale(browserLang);
                         }
@@ -1128,19 +1132,20 @@
             },
 
             drawAxis : function(domain) {
-                var that = this;
+                var that = this, currentDomain = this.currentDomain;
 
                 if (domain === undefined) {
-                    this.currentDomain = this.dateDomain(this.timeRange);
-                    this.currentDomain[0] = this.currentDomain[0] - 1000*60*60;
-                    this.currentDomain[1] = this.currentDomain[1] + 1000*60*60;
+                    currentDomain = this.dateDomain(this.timeRange);
+                    currentDomain[0] = currentDomain[0] - 1000*60*60;
+                    currentDomain[1] = currentDomain[1] + 1000*60*60;
+                    store.dispatch('CURRENT_DOMAIN_CHANGE', currentDomain);
                 }
 
-                this.removedBufferDomain = this.removeBufferDomain(this.currentDomain , this.timeRange);
-                this.setupDomain(this.currentDomain);
+                this.removedBufferDomain = this.removeBufferDomain(currentDomain , this.timeRange);
+                this.setupDomain(currentDomain);
 
                 this.x = d3.time.scale()
-                    .domain(this.currentDomain)
+                    .domain(currentDomain)
                     .range([-this.width, this.width*2]);
 
                 if (this.axisContainer === undefined) {
@@ -1328,7 +1333,7 @@
 
             updateCursor : function(time) {
                 var now = Date.now()
-                if (time !== undefined) {
+                if (time) {
                     now = time.valueOf();
                 }
                 this.cursorTime = now;
@@ -1549,7 +1554,7 @@
                     });
 
                 var motions = this.motionEvents.selectAll('.event-bar').data(filteredData.filter(function (d){
-                    return (d.endTime !== undefined && d.detectType !== "inout" && d.detectType !== "sensor")
+                    return (d.endTime && d.detectType !== "inout" && d.detectType !== "sensor")
                 })).enter()
                     .append('rect').attr({
                         class: function(d) { return ['event-bar', d.detectType, d.idx].join(' '); },

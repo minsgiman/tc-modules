@@ -34,8 +34,8 @@
         name: 'webrtcPlayerContainer',
         props: [],
         computed: {
-            currentCamera: function () {
-                return store.state.currentCamera;
+            cameraData: function () {
+                return store.state.cameraData;
             }
         },
         data: function () {
@@ -69,8 +69,8 @@
                     if (this.player.currentWebRTCPeerId) {
                         this.stop(this.player.currentWebRTCPeerId);
                     }
-                    this.player.currentWebRTCPeerId = this.currentCamera.id;
-                    this.player.play(this.currentCamera.id, time);
+                    this.player.currentWebRTCPeerId = this.cameraData.id;
+                    this.player.play(this.cameraData.id, time);
                     $('#webrtc_logo').show();
                     $('#webrtc_loading').show();
                 } else {

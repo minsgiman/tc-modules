@@ -13,7 +13,10 @@ const store = new Vuex.Store({
         isPlaying: false,
         isLive: true,
         playBtnStatus: false,
-        currentTime: new Date()
+        serviceDay: 0,
+        currentTime: new Date(),
+        timezone: '',
+        currentDomain: null
     },
     getters: {
         isExpiredCloud: state => {
@@ -28,7 +31,13 @@ const store = new Vuex.Store({
             context.commit('UPDATE_CAMERA_DATA', state);
         },
         CAMERA_CONFIG_CHANGE: function(context, state) {
+            let timezone = '';
+            if (state && state.timezone) {
+                var tokens = state.timezone.split(',');
+                timezone = tokens[2];
+            }
             context.commit('UPDATE_CAMERA_CONFIG', state);
+            context.commit('UPDATE_TIMEZONE', timezone);
         },
         SHOP_ID_CHANGE: function(context, state) {
             context.commit('UPDATE_SHOP_ID', state);
@@ -53,6 +62,15 @@ const store = new Vuex.Store({
         },
         PLAY_BTN_STATUS_CHANGE: function(context, state) {
             context.commit('UPDATE_PLAY_BTN_STATUS', state);
+        },
+        SERVICE_DAY_CHANGE: function(context, state) {
+            context.commit('UPDATE_SERVICE_DAY', state);
+        },
+        TIME_ZONE_CHANGE: function(context, state) {
+            context.commit('UPDATE_TIME_ZONE', state);
+        },
+        CURRENT_DOMAIN_CHANGE: function(context, state) {
+            context.commit('UPDATE_CURRENT_DOMAIN', state);
         },
         INIT_ALL_DATA: function(context, state) {
             context.commit('UPDATE_CAMERA_DATA', {});
@@ -93,6 +111,15 @@ const store = new Vuex.Store({
         },
         UPDATE_PLAY_BTN_STATUS: function(state, value) {
             state.playBtnStatus = value;
+        },
+        UPDATE_SERVICE_DAY: function(state, value) {
+            state.serviceDay = value;
+        },
+        UPDATE_CURRENT_DOMAIN: function(state, value) {
+            state.currentDomain = value;
+        },
+        UPDATE_TIMEZONE: function(state, value) {
+            state.timezone = value;
         }
     }
 });

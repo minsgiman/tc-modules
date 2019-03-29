@@ -42,6 +42,9 @@ class player {
             case 'playBtnStatus':
                 store.dispatch('PLAY_BTN_STATUS_CHANGE', value);
                 break;
+            case 'serviceDay':
+                store.dispatch('SERVICE_DAY_CHANGE', value);
+                break;
             default:
                 break;
         }

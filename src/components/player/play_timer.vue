@@ -144,9 +144,6 @@
 
                 timeline.setData('forceDomain', true);
                 clearInterval(this.timer);
-                // if($scope.serviceDay == 0){
-                // 	return;
-                // }
                 this.timer = setInterval(() => {
                     const currentTime = new Date();
                     switch(timeline.getData('timeRange')){

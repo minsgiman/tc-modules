@@ -12,6 +12,7 @@
     import playTimer from './play_timer.vue';
     import errorStatusLayer from './error_status_layer.vue';
     import cvrPlaySecureManager from './cvrPlaySecureManager.vue';
+    import timelineDateSelector from './timeline_date_selector.vue';
     import toastcamAPIs from './../../service/toastcamAPIs';
     import store from '../../service/player/store';
     import moment from 'moment';
@@ -50,11 +51,17 @@
             currentTime: function () {
                 return store.state.currentTime;
             },
+            currentDomain: function () {
+                return store.state.currentDomain;
+            },
             dataLoadingStatus: function () {
                 return store.state.dataLoadingStatus;
             },
             playBtnStatus: function () {
                 return store.state.playBtnStatus;
+            },
+            serviceDay: function () {
+                return store.state.serviceDay;
             }
         },
         data : function() {
@@ -108,6 +115,10 @@
             const vCvrPlaySecureManager = Vue.extend(cvrPlaySecureManager);
             this.cvrPlaySecureManager = new vCvrPlaySecureManager({i18n}).$mount('#cvr_play_manager_wrap');
             this.cvrPlaySecureManager.$on('cvrPlaySecureEvent', this.cvrPlaySecureEventHandler.bind(this));
+
+            const vTimelineDateSelector = Vue.extend(timelineDateSelector);
+            this.timelineDateSelector = new vTimelineDateSelector().$mount('#view_timeline_date');
+            this.timelineDateSelector.$on('timlineDateSelectorEvent', this.timlineDateSelectorEventHandler.bind(this));
         },
         mounted : function() {
         },
@@ -130,6 +141,7 @@
             // if (this.playInfoBar) {
             //     this.playInfoBar.$destroy();
             // }
+            this.playTimer.stopTimer();
             this.stopFullscreenTimer();
             window.onresize = null;
         },
@@ -337,7 +349,7 @@
                         break;
                     case 'cvrPlayRequest':
                         var time = param.data.time, status = param.data.status;
-                        this.timeline.serviceDateTime = ((new Date()).valueOf() - (1000*60*60*24*(this.timeline.serviceDay)));
+                        this.timeline.serviceDateTime = ((new Date()).valueOf() - (1000*60*60*24*(this.serviceDay)));
                         if(this.timeline.serviceDateTime > time){
                             //return;
                             time = new Date(this.timeline.serviceDateTime + 3000);
@@ -476,6 +488,32 @@
                     this.play();
                 } else if (param.event === 'isIncorrectPlayPasswordChanged') {
                     this.playEventCb('isIncorrectPlayPasswordChanged', param.data);
+                }
+            },
+
+            timlineDateSelectorEventHandler: function (param) {
+                if (param.event === 'pressedCalendarDate') {
+                    this.timeline.setData('lineMoveFlag', true);
+                    this.timeline.setData('clickDateChange', true);
+                    this.timeline.setData('timeRange', 1440);
+                    this.timeline.setTimeRangeAtDateString(param.data, 1440);
+
+                    setTimeout(() => {
+                        this.timeline.setData('newTimelineDragCnt', 0);
+                        var currentDomain = this.currentDomain;
+                        this.timeline.setupDomain([currentDomain[0], currentDomain[1]]);
+                        if(this.isPlaying == false){
+                            var format = d3.time.format("%Y%m%d%H%M%S");
+                            var startDate = format.parse(param.data + "000000");
+                            var endDate = format.parse(param.data + "240000");
+                            var startTime = startDate.getTime();
+                            var endTime = endDate.getTime();
+                            if(startTime < this.currentTime.valueOf() && endTime > this.currentTime.valueOf()){
+                                this.timeline.updateCursor(this.currentTime);
+                                this.timeline.setData('newTimelineDragCnt', 0);
+                            }
+                        }
+                    },500);
                 }
             },
 
@@ -761,7 +799,7 @@
                 var callbackFunc = function() {
                     if (this.cameraData.recordType == "event") {
                         var curTime = this.currentTime.getTime();
-                        var currentDomain = this.timeline.getData('currentDomain');
+                        var currentDomain = this.currentDomain;
                         var cvrData = this.timeline.getData('cvrData');
                         if (!currentDomain || !currentDomain[0] || !currentDomain[1]) {
                             return;

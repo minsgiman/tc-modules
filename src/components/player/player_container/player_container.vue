@@ -126,49 +126,77 @@
                 }
             },
             resume : function () {
-                this.player.resume();
+                if (this.player.resume) {
+                    this.player.resume();
+                }
             },
             pause : function () {
-                this.player.pause();
+                if (this.player.pause) {
+                    this.player.pause();
+                }
             },
             stop : function () {
-                this.player.stop();
+                if (this.player.stop) {
+                    this.player.stop();
+                }
             },
             close : function () {
-                this.player.close();
+                if (this.player.close) {
+                    this.player.close();
+                }
             },
             getCurrentTime : function () {
-                return this.player.getCurrentTime();
+                if (this.player.getCurrentTime) {
+                    return this.player.getCurrentTime();
+                }
             },
             getStatus : function () {
-                return this.player.getStatus();
+                if (this.player.getStatus) {
+                    return this.player.getStatus();
+                }
             },
             zoomZone : function (top, left) {
-                this.player.zoomZone(top, left);
+                if (this.player.zoomZone) {
+                    this.player.zoomZone(top, left);
+                }
             },
             zoomVideo : function (ratio) {
-                this.player.zoomVideo(ratio);
+                if (this.player.zoomVideo) {
+                    this.player.zoomVideo(ratio);
+                }
             },
             zoomVideoWithZoomablePoint : function(x, y) {
-                this.player.zoomVideoWithZoomablePoint(x, y);
+                if (this.player.zoomVideoWithZoomablePoint) {
+                    this.player.zoomVideoWithZoomablePoint(x, y);
+                }
             },
             zoomUp : function(zoom) {
-                this.player.zoomUp(zoom);
+                if (this.player.zoomUp) {
+                    this.player.zoomUp(zoom);
+                }
             },
             zoomUpWithZoom : function(zoom) {
-                this.player.zoomUpWithZoom(zoom);
+                if (this.player.zoomUpWithZoom) {
+                    this.player.zoomUpWithZoom(zoom);
+                }
             },
             positionZoomable : function(zoom) {
-                this.player.positionZoomable(zoom);
+                if (this.player.positionZoomable) {
+                    this.player.positionZoomable(zoom);
+                }
             },
             playerStatusChangedHandler : function (status) {
                 this.$emit('playerStatusChanged', status);
             },
             setData : function(key, value) {
-                this.player.setData(key, value);
+                if (this.player.setData) {
+                    this.player.setData(key, value);
+                }
             },
             getData : function(key) {
-                return this.player.getData(key);
+                if (this.player.getData) {
+                    return this.player.getData(key);
+                }
             }
         }
     }

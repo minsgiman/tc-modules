@@ -24,7 +24,7 @@
     import toastcamAPIs from './../../service/toastcamAPIs';
 
     export default {
-        name: 'playTimer',
+        name: 'cvrPlaySecureManager',
         props: [],
         computed: {
             cameraData: function () {

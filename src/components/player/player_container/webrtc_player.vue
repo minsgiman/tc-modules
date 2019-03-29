@@ -155,11 +155,11 @@
             }
         },
         created : function() {
+        },
+        mounted : function() {
             $('#player').hide();
             $('#remote_stream').show();
             this.videoStreamObj.preview = document.getElementById('localVideo');
-        },
-        mounted : function() {
         },
         beforeDestroy : function() {
         },
@@ -167,7 +167,7 @@
             play : function(cameraIdValue, timestamp) {
                 var realURL;
 
-                toastcamAPIs.call(toastcamAPIs.account.ME, null, (data) => {
+                toastcamAPIs.call(toastcamAPIs.account.ME, {}, (data) => {
                     this.userData = data;
                     if (this.userData && this.userData.country === 'JP') {
                         realURL = this.controlServerJpUrl;
@@ -192,79 +192,77 @@
                     } else {
                         this.socket = io.connect(realURL,{transports: ['websocket'], forceNew:true, secure:true});
                     }
-                });
 
-                this.socket.on('LoginRequired', (data) => {
-                    if (this.socket) {
-                        this.socket.emit('login', {
-                            msgid : makeMsgId(),
-                            type : "req",
-                            messageversion : "s-2.0.0",
-                            devicetype : "WEB",
-                            deviceinfo : {
-                                userid : this.userData.userId,
-                                appname : "toastcam_b2b",
-                                appversion : "1.3.12",
-                                browsertype : "chrome",
-                                osversion : "6.0",
-                                sessionid : this.sessionId
-                            }
-                        });
-                    } else {
-                        this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_DISCONNECTED;
-                        this.$emit('playerStatusChanged', {status : this.webRTCStatus, code: 'nosocket'});
-                    }
-                });
-
-                this.socket.on('login', (data) => {
-                    if (data.code == 0) {
+                    this.socket.on('LoginRequired', (data) => {
                         if (this.socket) {
-                            if (this.dvrId && this.channelId) {
-                                this.socket.emit('webrtc_request', {
-                                    msgid : makeMsgId(),
-                                    type : 'req',
-                                    scenario : 'livestream',
-                                    channel : this.channelId,
-                                    resolution : 'HD',
-                                    timestamp : timestamp,
-                                    from : this.sessionId,
-                                    to : this.dvrId
-                                });
-                                if (this.timeoutId) {
-                                    clearTimeout(this.timeoutId);
+                            this.socket.emit('login', {
+                                msgid : makeMsgId(),
+                                type : "req",
+                                messageversion : "s-2.0.0",
+                                devicetype : "WEB",
+                                deviceinfo : {
+                                    userid : this.userData.userId,
+                                    appname : "toastcam_b2b",
+                                    appversion : "1.3.12",
+                                    browsertype : "chrome",
+                                    osversion : "6.0",
+                                    sessionid : this.sessionId
                                 }
-                                this.timeoutId = setTimeout(() => {
+                            });
+                        } else {
+                            this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_DISCONNECTED;
+                            this.$emit('playerStatusChanged', {status : this.webRTCStatus, code: 'nosocket'});
+                        }
+                    });
+
+                    this.socket.on('login', (data) => {
+                        if (data.code == 0) {
+                            if (this.socket) {
+                                if (this.dvrId && this.channelId) {
+                                    this.socket.emit('webrtc_request', {
+                                        msgid : makeMsgId(),
+                                        type : 'req',
+                                        scenario : 'livestream',
+                                        channel : this.channelId,
+                                        resolution : 'HD',
+                                        timestamp : timestamp,
+                                        from : this.sessionId,
+                                        to : this.dvrId
+                                    });
+                                    if (this.timeoutId) {
+                                        clearTimeout(this.timeoutId);
+                                    }
+                                    this.timeoutId = setTimeout(() => {
+                                        this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_DISCONNECTED;
+                                        this.$emit('playerStatusChanged', {status : this.webRTCStatus, code : 'timeout'});
+                                    }, 15 * 1000);
+                                } else {
                                     this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_DISCONNECTED;
-                                    this.$emit('playerStatusChanged', {status : this.webRTCStatus, code : 'timeout'});
-                                }, 15 * 1000);
+                                    this.$emit('playerStatusChanged', {status : this.webRTCStatus, code : 'nocamera'});
+                                }
                             } else {
                                 this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_DISCONNECTED;
-                                this.$emit('playerStatusChanged', {status : this.webRTCStatus, code : 'nocamera'});
+                                this.$emit('playerStatusChanged', {status : this.webRTCStatus, code : 'nosocket'});
                             }
                         } else {
                             this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_DISCONNECTED;
-                            this.$emit('playerStatusChanged', {status : this.webRTCStatus, code : 'nosocket'});
+                            this.$emit('playerStatusChanged', {status : this.webRTCStatus, code : 'loginfail'});
                         }
-                    } else {
-                        this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_DISCONNECTED;
-                        this.$emit('playerStatusChanged', {status : this.webRTCStatus, code : 'loginfail'});
-                    }
-                });
+                    });
 
-                this.socket.on('webrtc_request', (data) => {
-                    if (this.timeoutId) {
-                        clearTimeout(this.timeoutId);
-                        this.timeoutId = null;
-                    }
-                    this.handleMessageRequest(data);
-                });
+                    this.socket.on('webrtc_request', (data) => {
+                        if (this.timeoutId) {
+                            clearTimeout(this.timeoutId);
+                            this.timeoutId = null;
+                        }
+                        this.handleMessageRequest(data);
+                    });
 
-                this.socket.on('webrtc_signaling', (data) => {
-                    this.handleMessage(data);
+                    this.socket.on('webrtc_signaling', (data) => {
+                        this.handleMessage(data);
+                    });
+                }, (err) => {
                 });
-            },
-
-            pause : function() {
             },
 
             stop : function() {
