@@ -99,6 +99,7 @@
             }
         },
         created : function() {
+            this.player = this.createComponent(playContainer, null, this.playStatusChangedHandler.bind(this));
             this.timeline = this.createComponent(timeline, 'view_timeline_area', this.onTimelineEvent.bind(this), {elementId: 'timebar_area', playEventCallback: this.playEventCb});
             this.fullscreenBtn = this.createComponent(fullscreenBtn, 'fullscreen_btn_wrap', this.fullscreenEventHandler.bind(this));
             this.zoomBtn = this.createComponent(zoomBtn, 'zoom_btn_wrap', this.zoomEventHandler.bind(this));
@@ -321,6 +322,9 @@
                     case 'stopPlayTimer':
                         this.playTimer.stopTimer();
                         break;
+                    case 'cameraStatusAllOff':
+                        this.errorStatusLayer.cameraStatusAllOff();
+                        break;
                     case 'noCvr':
                         if(this.timeline.lineMoveFlag == false && this.playBtnStatus == true){
                             this.timeline.lineMoveFlag = false;
@@ -389,10 +393,6 @@
                     case 'clearPlayerStopTimeout':
                         clearTimeout(this.playserStop);
                         break;
-                    case 'cursorDragEnd':
-                        store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
-                        this.liveReloadCnt = 0;
-                        break;
                     case 'checkCVRSeucre':
                         this.cvrPlaySecureManager.checkCVRSeucre(param.data);
                         break;
@@ -405,39 +405,6 @@
                     default:
                         break;
                 }
-            },
-
-            initPlayer : function() {
-                const vExtendConstructor = Vue.extend(playContainer);
-                this.player = new vExtendConstructor();
-                this.player.$on('event', this.playStatusChangedHandler.bind(this));
-                //TODO:
-
-                // const vExtendConstructor = Vue.extend(flashPlayer);
-                // this.player = new vExtendConstructor({
-                //     propsData : {
-                //         varPlayerId: 'player',
-                //         varName: 'rmcPlayer_flash',
-                //         videoId: '',
-                //         inKey: '',
-                //         outKey: '',
-                //         player: 'flash',
-                //         width: '100%',
-                //         height: '100%',
-                //         serviceId: '',
-                //         varCoreSwf: '/resources/vendor/nvp_web_player/LCP_web_player2016082601.swf',
-                //         varSkinPath: '/resources/vendor/nvp_web_player/NVP_web_player_skin_tvcast_white.swf',
-                //         varServerUrl: ''
-                //     }
-                // }).$mount('#player');
-                // this.player.$on('flashPlayerStatusChanged', this.flashEventCallback.bind(this));
-                // this.player.zoomZone(450, 150);
-                // this.player.displayRMCPlayer();
-                // setTimeout(() => {
-                //     store.dispatch('DATA_LOADING_STATUS_CHANGE', false);
-                // },1050);
-
-                return this.player;
             },
 
             playInfoBarEventHandler : function(param) {

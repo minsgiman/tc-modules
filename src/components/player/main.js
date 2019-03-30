@@ -11,6 +11,8 @@ class player {
                 prefix: '/json/biz/'
             });
         }
+        this.setData('cameraConfig', param.cameraConfig);
+        this.setData('cameraData', param.cameraData);
         this.setData('shopId', param.shopId ? param.shopId : '');
         this.setData('isShared', param.isShared);
 

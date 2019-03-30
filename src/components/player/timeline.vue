@@ -41,7 +41,7 @@
     var nowWitdh = 0, dragX = 0, draging = 0, dblClickTime = 0, timelineClick = false, thumnailViewFlag = false,
         timelineDrawFlag = true, dragFlag = false, dragEndStatus = false, dblClicklive = false, startTimeline = 0,
         serivceDayOver = false, thatEnd, thatStart, browserLang = $("html").attr("lang"), removeWidthStop = true,
-        zoneId = 0, timelineSgidMap = new HashMap(), timelineSgidWidthMap = new HashMap();
+        zoneId = 0, timelineSgidMap = new HashMap(), timelineSgidWidthMap = new HashMap(), boundDateFormat = browserLang === 'ja' ? 'M月D日(ddd)' : 'M월 D일(ddd)';
 
     var getMaxDragX = function(){
         return parseInt($(".cvrBG").attr("width"));
@@ -164,6 +164,7 @@
                 isCursorLeft : false,
                 isCursorRight : false,
                 changeTimeRangeFlag: false,
+                timeLineMap: null,
 
                 firstDataLoadingFlag: false,
                 clickDateChange: false,
@@ -185,6 +186,7 @@
             }
         },
         created : function() {
+            this.timeLineMap = new HashMap();
             window.onresize = this.resizeTimline.bind(this);
         },
         mounted : function() {
@@ -225,6 +227,9 @@
             this.isDblZooming = false;
             this.previousDblClickTime = 0;
             store.dispatch('CURRENT_DOMAIN_CHANGE', this.timeRange.currentDomain);
+
+            this.initSizeTimline();
+            this.draw();
 
             this.svg.on('dblclick', () => {
                 this.dblClickFlag = true;
@@ -636,10 +641,6 @@
                     });
             },
 
-            setBoundDateFormat : function(format) {
-                this.boundDateFormat = format;
-            },
-
             bufferDomain : function(minutes) {
                 var buffer = 0;
                 switch (minutes) {
@@ -1023,7 +1024,7 @@
                         var todayCheck = new Date(md.year(), md.month(), md.date());
                         var todayFlag = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-                        var dateFormat = this.boundDateFormat;
+                        var dateFormat = boundDateFormat;
 
                         if(dateFormat === undefined) {
                             dateFormat = "HH:mm";
@@ -1032,7 +1033,7 @@
                         } else if ((todayFlag - todayCheck)/(1000 * 60 * 60 * 24) == 1) {
                             dateFormat = yesterdayWord + "(ddd)";
                         } else {
-                            dateFormat = this.boundDateFormat;
+                            dateFormat = boundDateFormat;
                         }
 
                         if(this.timeRange == 10){
@@ -1340,7 +1341,8 @@
                         }
                         $("#showThumbnailListNew").hide();
                         $("#time_info_tri").hide();
-                        that.playEventCallback('cursorDragStart');
+                        that.cursorOn = true;
+                        that.$emit('event', {event: 'stopPlayTimer'});
                     })
                     .on('drag', () => {
                         that.cursorDragStatus = true;
@@ -1357,17 +1359,18 @@
                         that.cursor.selectAll('line').attr({x1: x, x2: x});
                         that.cursor.selectAll('cursor').attr({x1: x, x2: x});
                         that.cursor.selectAll('circle').attr({cx: x});
-                        that.playEventCallback('cursorDragging', time);
+                        store.dispatch('CURRENT_TIME_CHANGE', time);
                     })
                     .on('dragend', () => {
-                        that.dragThumCancle = false;
+                        store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
                         that.cursorDragStatus = false;
-                        that.playEventCallback('cursorDragEnd');
+                        that.$emit('event', {event: 'liveReloadCntUpdate', data: 0});
+                        that.dragThumCancle = false;
                         that.$emit('event', {event: 'checkCVRSeucre', data: function(isSecureMode){
                                 if(isSecureMode){
-                                    that.$emit('event', {event: 'updateCVRSecureStatus', data: function() {that.playEventCallback('cursorDragEnd');}});
+                                    that.$emit('event', {event: 'updateCVRSecureStatus', data: function() {that.cursorDragEnd();}});
                                 }else{
-                                    that.playEventCallback('cursorDragEnd');
+                                    that.cursorDragEnd();
                                 }
                             }});
                     });
@@ -1517,7 +1520,7 @@
                 var t = 0;
                 var accessData = [];
                 zoneId = 0;
-                this.playEventCallback('timelineMapChanged', new HashMap());
+                this.timeLineMap = new HashMap();
                 timelineSgidMap = new HashMap();
                 timelineSgidWidthMap = new HashMap();
 
@@ -2183,6 +2186,43 @@
                         $("#time_info_tri").hide();
                         $("#showThumbnailListNew").hide();
                     }
+                }
+            },
+
+            cursorDragEnd : function () {
+                var curosEmptyData = 0;
+                this.cursorOn = false;
+                this.lineMoveFlag = false;
+
+                this.$emit('event', {event: 'cameraStatusAllOff'});
+                if (this.currentTime.getTime() - Date.now() >= 0) {
+                    this.$emit('event', {event: 'goLive'});
+                    return;
+                }
+
+                this.clickedCVRArea(this.currentTime);
+
+                var now = Date.now();
+                var removedBufferDomain = this.removedBufferDomain;
+                var right = parseInt(removedBufferDomain[1]);
+                var left =  parseInt(removedBufferDomain[0]);
+                var x = this.svg.select('.cursor').select("line").attr('x1');
+                var cursorTime = this.x.invert(x).getTime();
+                var timeRange = this.timeRange;
+                if(timeRange == 60){
+                    curosEmptyData = 200000;
+                }else if(timeRange == 360){
+                    curosEmptyData = 1200000;
+                }else if(timeRange == 1440){
+                    curosEmptyData = 4800000;
+                }
+
+                if(cursorTime < left-curosEmptyData){
+                    this.prevDomain();
+                }
+
+                if(cursorTime > right+curosEmptyData){
+                    this.nextDomain();
                 }
             },
 
