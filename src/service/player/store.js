@@ -140,6 +140,21 @@ const store = new Vuex.Store({
             context.commit('UPDATE_IS_SHARED', false);
             context.commit('UPDATE_IS_FULLSCREEN', false);
             context.commit('UPDATE_DATA_LOADING_STATUS', true);
+            context.commit('UPDATE_IS_PLAYING', false);
+            context.commit('UPDATE_CURRENT_TIME', null);
+            context.commit('UPDATE_IS_LIVE', true);
+            context.commit('UPDATE_PLAY_BTN_STATUS', false);
+            context.commit('UPDATE_SERVICE_DAY', 0);
+            context.commit('UPDATE_TIME_ZONE', '');
+            context.commit('UPDATE_CURRENT_DOMAIN', null);
+            context.commit('UPDATE_CVR_DATA', []);
+            context.commit('UPDATE_EVENTS', []);
+            context.commit('UPDATE_INOUT_FILTER', false);
+            context.commit('UPDATE_SENSOR_ZONES', []);
+            context.commit('UPDATE_EVENT_ZONES', []);
+            context.commit('UPDATE_MOTION_ZONES', []);
+            context.commit('UPDATE_TIME_RANGE', 60);
+            context.commit('UPDATE_IS_SHOW_CALENDAR', false);
         }
     },
     mutations: {

@@ -23,5 +23,9 @@
   "TIMELINE_1HOUR": "1시간",
   "TIMELINE_6HOUR": "6시간",
   "TIMELINE_24HOUR": "24시간",
-  "CAMERA_DAY_TIME": "날짜/시간"
+  "CAMERA_DAY_TIME": "날짜/시간",
+  "CLIPS_SORT_BY_DATE_TITLE_FORMAT": "MM월DD일",
+  "TIMELINE_TODAY": "오늘",
+  "EVENT_SOUND_AREA": "소리 이벤트",
+  "EVENT_ETC_AREA": "삭제된 알림존"
 }

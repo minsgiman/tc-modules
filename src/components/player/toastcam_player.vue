@@ -99,7 +99,7 @@
             }
         },
         created : function() {
-            this.timeline = this.createComponent(timeline, 'timebar_area', this.onTimelineEvent.bind(this), {elementId: 'timebar_area', pWidth: $("#timeline_table").width(), pHeight: $("#timebar_area").height(), playEventCallback: this.playEventCb});
+            this.timeline = this.createComponent(timeline, 'view_timeline_area', this.onTimelineEvent.bind(this), {elementId: 'timebar_area', playEventCallback: this.playEventCb});
             this.fullscreenBtn = this.createComponent(fullscreenBtn, 'fullscreen_btn_wrap', this.fullscreenEventHandler.bind(this));
             this.zoomBtn = this.createComponent(zoomBtn, 'zoom_btn_wrap', this.zoomEventHandler.bind(this));
             this.errorStatusLayer = this.createComponent(errorStatusLayer, 'error_status_wrap', this.errorLayerEventHandler.bind(this));
@@ -115,25 +115,19 @@
         mounted : function() {
         },
         beforeDestroy : function() {
-            // if (this.player) {
-            //     this.player.$destroy();
-            // }
-            // if (this.timeline) {
-            //     this.timeline.$destroy();
-            // }
-            // if (this.fullscreenBtn) {
-            //     this.fullscreenBtn.$destroy();
-            // }
-            // if (this.zoomBtn) {
-            //     this.zoomBtn.$destroy();
-            // }
-            // if (this.errorStatusLayer) {
-            //     this.errorStatusLayer.$destroy();
-            // }
-            // if (this.playInfoBar) {
-            //     this.playInfoBar.$destroy();
-            // }
-            this.playTimer.stopTimer();
+            this.timeline.destroy();
+            this.zoomBtn.destroy();
+            this.errorStatusLayer.destroy();
+            this.playInfoBar.destroy();
+            this.playTimer.destroy();
+            this.cvrPlaySecureManager.destroy();
+            this.timelineDateSelector.destroy();
+            this.eventMoveBtn.destroy();
+            this.eventMoveFullBtn.destroy();
+            this.timelineTimeController.destroy();
+            this.timelineTimeFullController.destroy();
+            this.fullscreenBtn.destroy();
+            //this.playTimer.stopTimer();
             this.stopFullscreenTimer();
             window.onresize = null;
         },
@@ -158,9 +152,9 @@
                         $('#webrtc_loading').hide();
                         this.playTimer.playerCheck = true;
                         if (this.isLive) {
-                            this.playTimer.startLiveTimer();
+                            this.playTimer.startLiveTimer(this.timeline);
                         } else {
-                            this.playTimer.startRecTimer(this.timeline.clickTime);
+                            this.playTimer.startRecTimer(this.timeline.clickTime, this.player, this.timeline);
                         }
                     } else if (status.status === this.player.getData('webRTCStatusEnum').EVENT_STREAM_DISCONNECTED) {
                         //$('#remote_stream').hide();
@@ -380,8 +374,14 @@
                             }
                         }
                         this.timeline.updateCursor(new Date(time));
-                        this.playEventCb('isCursorLeftChanged', false);
-                        this.playEventCb('isCursorRightChanged', false);
+                        this.timeline.isCursorLeft = false;
+                        this.timeline.isCursorRight = false;
+                        break;
+                    case 'startRecTimer':
+                        this.playTimer.startRecTimer(param.data, this.player, this.timeline);
+                        break;
+                    case 'timerCursorIdxChange':
+                        this.playTimer.cursorIdx = param.data;
                         break;
                     case 'camInfoBarChange':
                         this.playInfoBar.camInfoBarChange();
@@ -460,7 +460,7 @@
                         this.play(this.currentTime.valueOf());
                     }
                 } else if (param.event === 'pressedFindCursorButton') {
-                    this.playEventCb('pressedFindCursorButton');
+                    this.timeline.pressedFindCursorButton();
                 }
             },
 
@@ -468,7 +468,7 @@
                 if (param.event === 'stopTimer') {
                     this.playTimer.stopTimer();
                 } else if (param.event === 'goLiveByCancleCVR') {
-                    this.playEventCb('cursorOnChanged', false);
+                    this.timeline.cursorOn = false;
                     this.play();
                 } else if (param.event === 'isIncorrectPlayPasswordChanged') {
                     this.playEventCb('isIncorrectPlayPasswordChanged', param.data);
@@ -519,7 +519,7 @@
 
             timelineTimeControllerEventHandler: function (param) {
                 if (param.event === 'dblClickFlagChanged') {
-                    this.playEventCb('dblClickFlagChanged', param.data);
+                    this.timeline.setData('dblClickFlag', param.data);
                 } else if (param.event === 'loadingDataAlert') {
                     this.playEventCb('loadingDataAlert');
                 }

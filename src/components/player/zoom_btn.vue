@@ -31,6 +31,9 @@
         methods : {
             zoomUp: function (zoom) {
                 this.$emit('event', zoom);
+            },
+
+            destroy : function() {
             }
         }
     }

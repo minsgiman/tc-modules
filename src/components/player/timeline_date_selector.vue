@@ -76,7 +76,6 @@
         mounted : function() {
         },
         beforeDestroy : function() {
-
         },
         methods : {
             moveServiceDate: function(type){
@@ -166,6 +165,9 @@
                 }
 
                 return null;
+            },
+
+            destroy : function() {
             }
         }
     }

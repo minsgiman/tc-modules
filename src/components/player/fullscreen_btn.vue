@@ -44,10 +44,6 @@
         mounted : function() {
         },
         beforeDestroy : function() {
-            document.removeEventListener('webkitfullscreenchange', this.bindFullscreenCb, false);
-            document.removeEventListener('mozfullscreenchange', this.bindFullscreenCb, false);
-            document.removeEventListener('fullscreenchange', this.bindFullscreenCb, false);
-            document.removeEventListener('MSFullscreenChange', this.bindFullscreenCb, false);
         },
         methods : {
             pressedFullScreenButton: function() {
@@ -122,6 +118,13 @@
                         }
                     }, 100);
                 }
+            },
+
+            destroy : function() {
+                document.removeEventListener('webkitfullscreenchange', this.bindFullscreenCb, false);
+                document.removeEventListener('mozfullscreenchange', this.bindFullscreenCb, false);
+                document.removeEventListener('fullscreenchange', this.bindFullscreenCb, false);
+                document.removeEventListener('MSFullscreenChange', this.bindFullscreenCb, false);
             }
         }
     }

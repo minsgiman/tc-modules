@@ -69,7 +69,6 @@
         },
         data: function () {
             return {
-                changeTimeRangeFlag: false
             }
         },
         created : function() {
@@ -77,7 +76,6 @@
         mounted : function() {
         },
         beforeDestroy : function() {
-
         },
         methods : {
             changeTimeRange: function (minutes) {
@@ -90,15 +88,15 @@
                     return;
                 }
 
-                if(this.changeTimeRangeFlag == true){
+                if(this.timeline.changeTimeRangeFlag == true){
                     this.$emit('event', {event: 'loadingDataAlert'});
                     return;
                 }
 
-                this.changeTimeRangeFlag = true;
+                this.timeline.changeTimeRangeFlag = true;
 
                 setTimeout(() => {
-                    this.changeTimeRangeFlag = false;
+                    this.timeline.changeTimeRangeFlag = false;
                     this.timeline.updateCursor(this.currentTime);
                     this.timeline.getData('svg').select('.cursor').classed('hide', false);
                 },800);
@@ -118,6 +116,9 @@
                 //$scope.timelineDatePicker._d = playerObj.control.getData('currentTime'); //TODO: calendar 쪽으로 보낸다.
                 //$scope.timelineDate.date = moment(parseInt($scope.timelineDatePicker._d.getTime())).locale(Util.getBrowserLanguage()).format($translate.instant('CLIP_CREATE_CLIP_DATE_FORMAT')); //TODO:
                 //setTimelineTimeMoment(moment(parseInt($scope.timelineDatePicker._d.getTime())));  //TODO:
+            },
+
+            destroy : function() {
             }
         }
     }

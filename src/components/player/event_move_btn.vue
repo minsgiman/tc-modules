@@ -101,7 +101,7 @@
                         }
                         if(prevTime != 0){
                             that.currentPrevTime = prevTime;
-                            that.$emit('event', {event: 'play', data: prevTime});
+                            that.$emit('event', {event: 'play', data: parseInt(prevTime, 10)});
                         } else {
                             var regDate = that.cameraData.regDate;
                             var serviceDateTime = (new Date()).valueOf() - (1000*60*60*24*(that.serviceDay));
@@ -127,7 +127,7 @@
                                         var allFilteredZoneIds = store.getters.getAllFilteredZonesIds(data.zoneIdxs.split(","));
                                         var isCheckFilter = allFilteredZoneIds.filter(item => data.zoneIdxs.split(",").includes(item)).length;
                                         if (isCheckFilter > 0) {
-                                            that.$emit('event', {event: 'play', data: startTime});
+                                            that.$emit('event', {event: 'play', data: parseInt(startTime, 10)});
                                         } else {
                                             goPrevEvent(queryTime - (1000*60*60*24*2));
                                         }
@@ -204,7 +204,7 @@
 
                         if(nextTime != 0){
                             that.currentNextTime = nextTime;
-                            that.$emit('event', {event: 'play', data: nextTime});
+                            that.$emit('event', {event: 'play', data: parseInt(nextTime, 10)});
                         } else {
                             var goNextEvent = function(queryTime){
                                 var deleteZone = that.motionZones ? that.motionZones.find(item => item.id === 9) : null;
@@ -230,7 +230,7 @@
                                         var allFilteredZoneIds = store.getters.getAllFilteredZonesIds(data.zoneIdxs.split(","));
                                         var isCheckFilter = allFilteredZoneIds.filter(item => data.zoneIdxs.split(",").includes(item)).length;
                                         if (isCheckFilter > 0) {
-                                            that.$emit('event', {event: 'play', data: startTime});
+                                            that.$emit('event', {event: 'play', data: parseInt(startTime, 10)});
                                         } else {
                                             goNextEvent(queryTime + (1000*60*60*24*2));
                                         }
@@ -254,6 +254,9 @@
                         callbackFunc();
                     }
                 }});
+            },
+
+            destroy : function() {
             }
         }
     }

@@ -23,5 +23,9 @@
   "TIMELINE_1HOUR": "1時間",
   "TIMELINE_6HOUR": "6時間",
   "TIMELINE_24HOUR": "24時間",
-  "CAMERA_DAY_TIME": "日付/時間"
+  "CAMERA_DAY_TIME": "日付/時間",
+  "CLIPS_SORT_BY_DATE_TITLE_FORMAT": "MM月DD日",
+  "TIMELINE_TODAY": "今日",
+  "EVENT_SOUND_AREA": "サウンドイベント",
+  "EVENT_ETC_AREA": "削除済みの通知エリア"
 }

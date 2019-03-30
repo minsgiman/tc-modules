@@ -198,7 +198,7 @@
             },
 
             requestPlayCvr : function(time, status) {
-                this.$emit('event', {event: 'playCvr', value: {time, status}});
+                this.$emit('event', {event: 'playCvr', value: {time: parseInt(time, 10), status}});
             },
 
             currentCameraIsLastRecordDataSet : function(data){
@@ -239,6 +239,9 @@
 
             getData : function(key) {
                 return this[key];
+            },
+
+            destroy : function() {
             }
         }
     }

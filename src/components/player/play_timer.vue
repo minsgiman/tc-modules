@@ -35,7 +35,6 @@
         mounted : function() {
         },
         beforeDestroy : function() {
-            this.stopTimer();
         },
         methods : {
             startRecTimer : function(time, player, timeline) {
@@ -202,6 +201,10 @@
 
             getData : function(key) {
                 return this[key];
+            },
+
+            destroy : function() {
+                this.stopTimer();
             }
         }
     }

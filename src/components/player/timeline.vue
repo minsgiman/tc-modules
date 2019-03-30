@@ -1,5 +1,27 @@
 <template>
-    <div class="timebar_area" id="timebar_area" style="z-index: 1000; position: relative;"></div>
+    <div id="view_timeline_area" class="timeline_area" :class="{timeline_area_full: isFullScreen}">
+        <div class="time_bar" id="view_time_bar">
+            <div class="timebar_outer toggle">
+                <div class="timebar">
+                    <div class="thumbnail-container time_info" id="showThumbnailListNew" style="left: 0px; top: 0px; z-index: 800;">
+                        <div id="thumnail_prev" style="float: left; font-size: 10px; display: none; position: absolute; z-index: 1;">
+                            <button type="button" id="thumnail_prev_btn" @click="showThum(-1)" style="background: url(/resources/images/icon_fs_timebar_left_N.png) no-repeat; width: 20px; height: 20px; margin-top: 44px; margin-left: 8px;"></button>
+                        </div>
+                        <div id="thumbnailList"></div>
+                        <div id="thumnail_next" style="float: right; font-size: 10px; display: none; position: absolute; left: 573px;">
+                            <button type="button" id="thumnail_next_btn" @click="showThum(1)" style="background: url(/resources/images/icon_fs_timebar_right_N.png) no-repeat; width: 20px; height: 20px; display: none; margin-top: 44px; margin-left: -4px;"></button>
+                        </div>
+                    </div>
+                    <div class="thumbnail-container time_info time_info_tri" id="time_info_tri" style="display: none;"></div>
+                    <div class="timebar_area" id="timebar_area" style="z-index: 1000; position: relative;"></div>
+                </div>
+            </div>
+        </div>
+        <button type="button" id="prevLineBtn" class="sp prev" @click="prevLine()" style="z-index: 1002;">{{'PREVIOUS' | translate}}</button>
+        <button type="button" id="cursorLeftBtn" class="sp_cursor prev" v-show="isCursorLeft" @click="pressedFindCursorButton('click')" style="z-index: 1000;"></button>
+        <button type="button" id="nextLineBtn" class="sp next" @click="nextLine()" style="z-index: 1002;">{{'NEXT' | translate}}</button>
+        <button type="button" id="cursorRightBtn" class="sp_cursor next" v-show="isCursorRight" @click="pressedFindCursorButton()" style="z-index: 1000;"></button>
+    </div>
 </template>
 
 <script>
@@ -19,7 +41,7 @@
     var nowWitdh = 0, dragX = 0, draging = 0, dblClickTime = 0, timelineClick = false, thumnailViewFlag = false,
         timelineDrawFlag = true, dragFlag = false, dragEndStatus = false, dblClicklive = false, startTimeline = 0,
         serivceDayOver = false, thatEnd, thatStart, browserLang = $("html").attr("lang"), removeWidthStop = true,
-        zoneId = 0, timelineSgidMap = new HashMap();
+        zoneId = 0, timelineSgidMap = new HashMap(), timelineSgidWidthMap = new HashMap();
 
     var getMaxDragX = function(){
         return parseInt($(".cvrBG").attr("width"));
@@ -40,9 +62,28 @@
         return 'translate(' + adjustedTranslateX + ', 0)';
     };
 
+    var imageBackgroundLocation = function (index, width, height) {
+        if (width === undefined) {
+            width = 160;
+        }
+
+        if (height === undefined) {
+            height = 90;
+        }
+
+        var top = 0;
+        if (index / 5 >= 1) {
+            top = -height;
+        }
+
+        var left = (index % 5) * width;
+
+        return { top: top, left: left };
+    };
+
     export default {
         name : 'timeline',
-        props : ['elementId', 'pWidth', 'pHeight', 'playEventCallback'],
+        props : ['elementId', 'playEventCallback'],
         computed : {
             cameraData: function () {
                 return store.state.cameraData;
@@ -102,6 +143,28 @@
                 height: 0,
                 cursorInterval: 1000,
                 serviceDateTime: 0,
+
+                showThumClick: 0,
+                thumnailDraw: true,
+                dblClickFlag: false,
+                thumNailFlag: false,
+                thumNailIntervalId: null,
+                cursorOn: false,
+                eventThumbIndex: 0,
+                sgid: '',
+                beforeSgid: '',
+                beforeCheckedLength: 0,
+                thumPageCnt: 1,
+                thumNailDataList: null,
+                startThumSize: 0,
+                endThumSize: 0,
+                thumTotal: 0,
+                thumname_list: [],
+                lastTimestamp: 0,
+                isCursorLeft : false,
+                isCursorRight : false,
+                changeTimeRangeFlag: false,
+
                 firstDataLoadingFlag: false,
                 clickDateChange: false,
                 eventData: [],
@@ -122,11 +185,12 @@
             }
         },
         created : function() {
-            this.width = this.pWidth;
-            this.height = this.pHeight;
             window.onresize = this.resizeTimline.bind(this);
         },
         mounted : function() {
+            this.width = $("#timeline_table").width();
+            this.height = $("#timebar_area").height();
+
             var currentSvg = d3.select("#" + this.elementId + " svg");
             if (currentSvg) {
                 currentSvg.remove();
@@ -163,7 +227,7 @@
             store.dispatch('CURRENT_DOMAIN_CHANGE', this.timeRange.currentDomain);
 
             this.svg.on('dblclick', () => {
-                this.playEventCallback('dblClickFlagChanged', true);
+                this.dblClickFlag = true;
                 this.newTimelineDragCnt = 0;
                 var now = new Date();
                 $("#showThumbnailListNew").hide();
@@ -197,7 +261,6 @@
             });
         },
         beforeDestroy : function() {
-            window.onresize = null;
         },
         methods : {
             resizeTimline : function() {
@@ -353,14 +416,14 @@
 
                 var removedBufferDomain = this.removeBufferCursorCheckDomain(domain , this.timeRange);
                 if (this.currentTime && (removedBufferDomain[0] > this.currentTime.valueOf())) {
-                    this.playEventCallback('isCursorLeftChanged', true);
-                    this.playEventCallback('isCursorRightChanged', false);
+                    this.isCursorLeft = true;
+                    this.isCursorRight = false;
                 } else if (this.currentTime && (removedBufferDomain[1] < this.currentTime.valueOf())) {
-                    this.playEventCallback('isCursorLeftChanged', false);
-                    this.playEventCallback('isCursorRightChanged', true);
+                    this.isCursorLeft = false;
+                    this.isCursorRight = true;
                 } else {
-                    this.playEventCallback('isCursorLeftChanged', false);
-                    this.playEventCallback('isCursorRightChanged', false);
+                    this.isCursorLeft = false;
+                    this.isCursorRight = false;
                     if(this.isPlaying == false){
                         this.updateCursor(this.currentTime);
                     }
@@ -427,7 +490,7 @@
                     $(".cvr").attr("transform","");
                     $(".cursor").attr("transform","");
                     this.playEventCallback('changedSelectedZone');
-                    this.playEventCallback('thumnailDrawChanged', true);
+                    this.thumnailDraw = true;
                 }
                 store.dispatch('EVENTS_CHANGE', data.events);
                 store.dispatch('CVR_DATA_CHANGE', data.recTimes);
@@ -456,13 +519,14 @@
                 return d3.behavior.drag()
                     .on('dragstart', () => {
                         that.dragThumCancle = true;
-                        that.playEventCallback('timelineDragStart');
+                        that.changeTimeRangeFlag = true;
+                        that.thumnailDraw = false;
                     })
                     .on('drag', () => {
                         if(timelineDrawFlag == false){
                             return;
                         }
-                        that.playEventCallback('timelineDragging');
+                        that.beforeSgid = '';
                         $("#time_info_tri").hide();
                         $("#showThumbnailListNew").hide();
                         removeWidthStop = true;
@@ -538,7 +602,7 @@
                     })
                     .on('dragend', () => {
                         that.dragThumCancle = false;
-                        that.playEventCallback('timelineDragEnd');
+                        that.beforeSgid = '';
                         that.newTimelineDragCnt = 0;
                         if(dragX < -10){
                         }else if(dragX > 10){
@@ -566,7 +630,7 @@
                         },150);
 
                         setTimeout(() => {
-                            that.playEventCallback('changeTimeRangeFlagUpdate', false);
+                            that.changeTimeRangeFlag = false;
                             timelineDrawFlag = true;
                         },1410);
                     });
@@ -832,7 +896,7 @@
 
                 this.nowAnimating = true;
                 this.updateAxis(duration);
-                this.updateBar(duration)
+                this.updateBar(duration);
                 this.updateEvents(duration);
                 this.updateAccessIcons(duration);
                 this.nowAnimating = false;
@@ -1228,7 +1292,7 @@
                         dblClicklive = that.isLive;
                         dblClickTime = that.currentTime.valueOf();
                         that.lineMoveFlag = false;
-                        that.playEventCallback('thumnailDrawChanged', true);
+                        that.thumnailDraw = true;
                         store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
                         that.dragThumCancle = false;
                         timelineClick = true;
@@ -1256,9 +1320,8 @@
                 }).on('mousemove', function () {
                     var mouseLocation = d3.mouse(this);
                     var selectedTime = that.x.invert(mouseLocation[0]);
-                    that.playEventCallback('cvrMouseoverEventsNew', {position: mouseLocation[0], time: selectedTime});
+                    that.cvrMouseoverEventsNew(mouseLocation[0], selectedTime);
                 }).on('mouseout', function () {
-                    that.playEventCallback('mouseoutEvents');
                 });
 
                 cvrBG2.on('mousemove', function () {
@@ -1394,7 +1457,8 @@
                         }
                         this.svg.select('.cursor').classed('hide', true);
                     } else {
-                        this.playEventCallback('hideCursorNavigation');
+                        this.isCursorLeft = false;
+                        this.isCursorRight = false;
                     }
                 }
             },
@@ -1455,7 +1519,7 @@
                 zoneId = 0;
                 this.playEventCallback('timelineMapChanged', new HashMap());
                 timelineSgidMap = new HashMap();
-                this.playEventCallback('timelineSgidWidthMapChanged', new HashMap());
+                timelineSgidWidthMap = new HashMap();
 
                 if(this.eventData != undefined){
                     this.eventData.forEach(function (d) {
@@ -1564,7 +1628,7 @@
                         width: function(d) {
                             var thatX = that.x(d.startTime);
                             var thatWidth = that.x(d.endTime) - that.x(d.startTime);
-                            that.playEventCallback('timelineSgidWidthMapPut', [thatX,thatX + (thatWidth)]);
+                            timelineSgidWidthMap.put([thatX,thatX + (thatWidth)], d.sgid);
                             return thatWidth;
                         },
                         height: 28
@@ -1614,7 +1678,7 @@
                         width: function(d) {
                             var thatX = that.x(d.startTime);
                             var thatWidth = that.x(d.endTime) - that.x(d.startTime);
-                            that.playEventCallback('timelineSgidWidthMapPut', [thatX,thatX + (thatWidth)]);
+                            timelineSgidWidthMap.put([thatX,thatX + (thatWidth)], d.sgid);
                             return thatWidth;
                         },
                         height: 36,
@@ -1793,7 +1857,7 @@
                         width: function(d) {
                             var thatX = that.x(d.startTime);
                             var thatWidth = that.x(d.endTime) - that.x(d.startTime);
-                            that.playEventCallback('timelineSgidWidthMapPut', [thatX,thatX + (thatWidth)]);
+                            timelineSgidWidthMap.put([thatX,thatX + (thatWidth)], d.sgid);
 
                             return thatWidth;
                         },
@@ -2032,12 +2096,415 @@
                 this.svg.select('.cursor').classed('hide', false);
             },
 
+            ////////NEW
+            cvrMouseoverEventsNew : function (x, mousetime) {
+                if(this.thumnailDraw == false || this.dblClickFlag == true){
+                    return;
+                }
+                if(this.isFullScreen || this.thumNailFlag == true){
+                    return;
+                }
+
+                if(this.dragThumCancle == true){
+                    return;
+                }
+
+                this.thumNailIntervalId = setInterval(() => {
+                    this.thumNailFlag = false;
+                }, 150);
+
+                if (!this.cursorOn) {
+                    this.thumNailFlag = true;
+                    var timebarWidth = parseInt(d3.select('.timebar').style('width'));
+
+                    if (this.isFullScreen) {
+                        if (x < 0) {
+                            x = 0;
+                        } else if (x > timebarWidth - 180) {
+                        }
+                    }
+                    x = x + 5;
+                    var xFlag = false;
+                    var start = 0;
+                    var end = 0;
+                    var checkMapIdx = 0;
+
+                    for(var i = 0; i < timelineSgidWidthMap.size(); i++){
+                        start = timelineSgidWidthMap.keyArray[i][0];
+                        end = timelineSgidWidthMap.keyArray[i][1];
+                        checkMapIdx = i;
+                        if(start <= x + 1 && end >= x - 5){
+                            xFlag = true;
+                            break;
+                        }
+                    }
+                    var tmp = x;
+
+                    $("#thumTimeInfoTri").css("left",tmp+"px");
+                    if(xFlag == true){
+                        var sgid = timelineSgidWidthMap.get(timelineSgidWidthMap.keyArray[checkMapIdx]);
+
+                        var checkMotionX = timelineSgidWidthMap.keyArray[checkMapIdx][0];
+                        var checkMotionCnt = 0;
+                        for(var i=checkMapIdx-10;i<=checkMapIdx+10;i++){
+                            if($(".motion").eq(i).attr("x") != undefined){
+                                if($(".motion").eq(i).css("display") != "none" && checkMotionX.toFixed(2) == parseFloat($(".motion").eq(i).attr("x")).toFixed(2)){
+                                    checkMotionCnt++;
+                                }
+                            }
+                        }
+
+                        if(checkMotionCnt == 0){
+                            return;
+                        }
+
+                        var currentCheckedLength = store.getters.getAllFilteredZonesIds().length;
+                        if(this.beforeSgid == sgid && this.beforeCheckedLength == currentCheckedLength){
+                            if(this.thumTotal > 0){
+                                if(parseInt($("#showThumbnailListNew").css("left")) > x){
+                                    x = parseInt($("#showThumbnailListNew").css("left"));
+                                }else if(parseInt($("#showThumbnailListNew").css("left"))+parseInt($("#showThumbnailListNew").css("width")) < parseInt($("#time_info_tri").css("width")) + x){
+                                    x = parseInt($("#showThumbnailListNew").css("left"))+parseInt($("#showThumbnailListNew").css("width")) - parseInt($("#time_info_tri").css("width"))+2;
+                                }
+                                $("#time_info_tri").css("left",parseInt(x+3));
+                                $("#time_info_tri").show();
+                                $("#showThumbnailListNew").show();
+                            }
+                            return;
+                        }else{
+                            this.beforeSgid = sgid;
+                            this.beforeCheckedLength = currentCheckedLength;
+                        }
+
+                        this.thumPageCnt = 1;
+                        this.thumNailDataList = new HashMap();
+                        this.thumnailData(sgid, start, end, 0, "N", x);
+                    }else{
+                        $("#time_info_tri").hide();
+                        $("#showThumbnailListNew").hide();
+                    }
+                }
+            },
+
+            thumnailData : function(sgid,start,end,lastTimestamp,status,x){
+                this.sgid = sgid;
+                this.startThumSize = start;
+                this.endThumSize = end;
+                var filteredMotionZoneIds = this.motionZones.filter(item => item.filterMark === 'on' && item.id !== '9').map(item => item.uid);
+                var filteredEventZoneIds = this.eventZones.filter(item => item.filterMark === 'on').map(item => item.id);
+                var allFilteredZoneIds = filteredMotionZoneIds.concat(filteredEventZoneIds);
+                var deleteZone = this.motionZones.find(item => item.id === 9);
+                var isCheckedDeleteZoneId = (deleteZone && deleteZone.filterMark === 'on') ? true : false;
+
+                if (isCheckedDeleteZoneId) {
+                    allFilteredZoneIds.push("d");
+                }
+
+                if(!this.isShared){
+                    toastcamAPIs.call(toastcamAPIs.camera.GET_THUMBNAIL, {
+                        cameraId: this.cameraData.id,
+                        sgid: sgid,
+                        scale: this.nowScale,
+                        count:4,
+                        lastTimestamp:lastTimestamp,
+                        zones: allFilteredZoneIds.join(",")
+                    }, (data) => {
+                        this.thumbnailDataSet(data,sgid,start,end,lastTimestamp,status,x);
+                    }, (err) => {
+                    });
+                }else{
+                    toastcamAPIs.call(toastcamAPIs.camera.GET_SHRARE_CAM_THUMBNAIL, {
+                        cameraId: this.cameraData.id,
+                        sgid: sgid,
+                        scale: this.nowScale,
+                        count:4,
+                        lastTimestamp:lastTimestamp,
+                        zones: allFilteredZoneIds.join(",")
+                    }, (data) => {
+                        this.thumbnailDataSet(data,sgid,start,end,lastTimestamp,status,x);
+                    }, (err) => {
+                        this.playEventCallback('shareEnd');
+                    });
+                }
+            },
+
+            setThumEventTime : function (time) {
+                var dateString;
+                var today = moment(new Date());
+                var targetDate = new Date(parseInt(time));
+                var targetMoment = moment(targetDate);
+
+                var dateString = targetMoment.locale(browserLang).format(this.$i18n.t('CLIPS_SORT_BY_DATE_TITLE_FORMAT'));
+                var todayString = today.locale(browserLang).format(this.$i18n.t('CLIPS_SORT_BY_DATE_TITLE_FORMAT'));
+                if (dateString === todayString) {
+                    dateString = this.$i18n.t('TIMELINE_TODAY');
+                }
+
+                var timeformat = d3.time.format("%H:%M");
+                var timeString = timeformat(targetDate);
+
+                return dateString + " " + timeString;
+            },
+
+            thumbnailDataSet : function(data,sgid,start,end,lastTimestamp,status,x){
+                if(data.events == undefined){
+                    $("#showThumbnailListNew").hide();
+                    $("#time_info_tri").hide();
+                    return;
+                }
+
+                if(data.events.length == 0){
+                    $("#showThumbnailListNew").hide();
+                    $("#time_info_tri").hide();
+                    return;
+                }
+
+                this.thumTotal = data.totalCount;
+                var thumname_move = (start + end) / 2;
+                var html = "";
+                this.thumname_list = [];
+                if(data.totalCount == 0){
+                    return;
+                }
+
+                if(data.events == null){
+                    return;
+                }
+
+                for(var i=0;i<data.events.length;i++){
+                    var eventTime = this.setThumEventTime(data.events[i].startTime);
+                    var path = "";
+                    if(location.port != ""){
+                        path = location.protocol+"//"+data.events[i].filePath.replace(".com/",".com:"+location.port+"/");
+                    }else{
+                        path = location.protocol+"//"+data.events[i].filePath;
+                    }
+
+                    html +='<div id="thumnail_'+i+'" style="float:left;font-size:11px;height:103px';
+                    if(i>4){
+                        html+='display:none;';
+                    }
+
+                    if(data.events[i].index == 0){
+                        data.events[i].labelName = this.$i18n.t('EVENT_SOUND_AREA');
+                    }else if(data.events[i].index == 8 || data.events[i].color == ""){
+                        data.events[i].labelName = this.$i18n.t('EVENT_ETC_AREA');
+                        data.events[i].color = "#FFFFFF";
+                    }
+
+                    html +='">';
+                    var motionItem, eventItem, imgIndex = "";
+
+                    if (data.events[i].detectType === "motion") {
+                        motionItem = this.motionZones.find(item => item.uid === data.events[i].uindex && item.id !== '9');
+                        imgIndex = motionItem ? motionItem.id : '';
+                    } else {
+                        eventItem = this.eventZones.find(item => item.id === data.events[i].uindex);
+                        imgIndex = eventItem ? eventItem.id : '';
+                    }
+
+                    if(imgIndex == "" || typeof imgIndex === 'undefined'){
+                        imgIndex = "9";
+                    }
+
+                    html +='<div style="font-size:12px;position:relative;top:2px;z-index:4;color:'+data.events[i].color+';background:rgba(0,0,0,.7);width:147px;left:1px;line-height: 22px;"><img src="/resources/im/ic_area_color0'+imgIndex+'_N.png" style="top: 3px;position: relative;">&nbsp;'+data.events[i].labelName+'<br></div>';
+                    html +='<span style="margin-left: 1px;top:-20px;position: relative;z-index: 0;"><a ng-click="pressedThumNailEventItem('+data.events[i].startTime+',\'timeline\')"><img src="'+path+'" onerror="imgError()" style="width:145px;height:98px; border:1px solid rgba(0,0,0,.7)"></a></span>';
+
+                    var colorId =data.events[i].color;
+
+                    if(colorId == ""){
+                        colorId = "#f0f0f0";
+                    }
+
+                    var eventDate = (new Date(parseInt(data.events[i].startTime))).getYear()+""+(new Date(parseInt(data.events[i].startTime))).getMonth()+""+(new Date(parseInt(data.events[i].startTime))).getDate();
+                    var todayDate = (new Date()).getYear()+""+(new Date()).getMonth()+""+(new Date()).getDate();
+
+                    if(eventDate == todayDate){
+                        html +='<div style="margin:0 auto;width:70px;line-height: 22px;position: relative;top: -44px;z-index:10; background:rgba(0,0,0,.6);"><div style="color:#fff; font-size:12px;"><span>'+eventTime+'</span></div></div></div>';
+                    }else{
+                        html +='<div style="margin:0 auto;width:94px;line-height: 22px;position: relative;top: -44px;z-index:10; background:rgba(0,0,0,.6);"><div style="color:#fff; font-size:12px;"><span>'+eventTime+'</span></div></div></div>';
+                    }
+
+                    this.thumname_list.push('thumnail_'+i);
+                    if(lastTimestamp == 0 && status == "N"){
+                        $("#thumnail_prev_btn").hide();
+                        $("#thumnail_next_btn").hide();
+                        $("#thumnail_prev").css("height","");
+                        $("#thumnail_next").css("height","");
+                    }
+                    if(i == 0){
+                        this.lastTimestamp = data.events[i].startTime;
+                    }
+
+                    if(status == "N"){
+                        this.thumNailDataList.put(i,data.events[i]);
+                    }else{
+                        this.thumNailDataList.put(this.thumPageCnt + 3,data.events[i]);
+                    }
+                }
+
+                $("#thumbnailList").html(html);
+
+                $("#thumbnailList").css("padding","1px");
+                $("#thumbnailList").css("padding-top","0px");
+                for(var i=0;i<data.events.length;i++){
+                    $("#thumnail_"+i).find("img").error(function(){
+                        $(this).attr('src', '/resources/im/@thumb/thmb_none.jpg');
+                    });
+                }
+
+                switch(data.totalCount){
+                    case 1:
+                        $("#showThumbnailListNew").css("width","151px");
+                        break;
+                    case 2:
+                        $("#showThumbnailListNew").css("width","299px");
+                        break;
+                    case 3:
+                        $("#showThumbnailListNew").css("width","447px");
+                        break;
+                    case 4:
+                        $("#showThumbnailListNew").css("width","595px");
+                        break;
+                    default:
+                        $("#showThumbnailListNew").css("width","595px");
+                        $("#thumnail_prev").css("height","103px");
+                        $("#thumnail_next").css("height","103px");
+                        break;
+                }
+
+                $("#showThumbnailListNew").css("height","104px");
+
+                if(status == "N"){
+                    if(data.totalCount > 4){
+                        $("#thumnail_prev_btn").hide();
+                        $("#thumnail_next_btn").show();
+                        $("#thumnail_next").show();
+                        $("#thumnail_prev").show();
+                    }
+
+                    thumname_move = thumname_move - parseInt($("#showThumbnailListNew").width() / 2);
+
+                    if(thumname_move <= 0){
+                        thumname_move = 0;
+                    }
+
+                    if($("#view_timeline_ctrl").width() < thumname_move+ $("#showThumbnailListNew").width()){
+                        thumname_move = parseInt($("#showThumbnailListNew").css("left")) - ($("#showThumbnailListNew").width() - ($("#view_timeline_ctrl").width() - parseInt($("#showThumbnailListNew").css("left"))));
+                    }
+                    var timeInfo = x;
+                    $("#showThumbnailListNew").css("left",parseInt(thumname_move));
+                    $("#time_info_tri").css("left",parseInt(timeInfo+3));
+                    $("#thumbnailList").append('<div class= "timelineafter"></div>');
+                    $("#showThumbnailListNew").css("top","-89px");
+                    if(data.events.length > 0){
+                        $("#time_info_tri").show();
+                        $("#showThumbnailListNew").show();
+                    }
+
+                }
+                this.playEventCallback('thumbItemCompile');
+                this.showThumClick = 0;
+            },
+
+            showThum : function(check){
+
+                if(this.showThumClick == 0){
+                    this.showThumClick++;
+                    $("#thumnail_prev_btn").show();
+                    $("#thumnail_next_btn").show();
+                    if(check == 1){
+                        this.thumnailData(this.sgid, this.startThumSize, this.endThumSize, this.lastTimestamp, "T");
+
+                        if(this.thumPageCnt + 4 == this.thumTotal){
+                            $("#thumnail_next_btn").hide();
+                        }
+                        this.thumPageCnt++;
+                    }else{
+                        this.thumPageCnt--;
+                        if(this.thumPageCnt == 1){
+                            this.lastTimestamp = 0;
+                        }else{
+                            this.lastTimestamp = this.thumNailDataList.get(this.thumPageCnt-2).startTime;
+                        }
+                        this.thumnailData(this.sgid, this.startThumSize, this.endThumSize, this.lastTimestamp, "P");
+
+                        if(this.thumPageCnt == 1){
+                            $("#thumnail_prev_btn").hide();
+                            $("#thumnail_next_btn").show();
+                        }
+                    }
+                }
+            },
+
+            pressedFindCursorButton : function (check) {
+                this.isCursorRight = false;
+                this.isCursorLeft = false;
+                this.newTimelineDragCnt = 0;
+                if(check=="click"){
+                    this.dblClickFlag = false;
+                }
+                this.$emit('event', {event: 'timerCursorIdxChange', data: 0});
+                this.lineMoveFlag = true;
+                this.changeTimeRangeClick = true;
+                if(this.dblClickFlag == false){
+                    this.zoomDomain(this.currentTime.valueOf(), this.timeRange);
+                }
+            },
+
+            prevLine : function(click){
+                var nowTime = (new Date()).valueOf();
+                var overTime = -0.9870;
+                var timeRange = this.timeRange;
+                if(timeRange == 60){
+                    overTime = -0.918;
+                }else if(timeRange == 360){
+                    overTime = -0.59;
+                }else if(timeRange == 1440){
+                    overTime = 0.9;
+                }
+                var serviceTime = (nowTime - (1000*60*60*24*(this.serviceDay+overTime)));
+                if(serviceTime > this.removedBufferDomain[0]){
+                    return;
+                }
+                this.dblClickFlag = false;
+                this.changeTimeRangeClick = true;
+                this.lineMoveFlag = true;
+                this.prevDomain();
+                if(this.isPlaying == true){
+                    setTimeout(() => {
+                        if(this.isLive == false){
+                            this.$emit('event', {event: 'startRecTimer', data: this.currentTime.valueOf()});
+                        }
+                    },1050);
+                }
+            },
+
+            nextLine : function(click){
+                this.dblClickFlag = false;
+                this.changeTimeRangeClick = true;
+                this.lineMoveFlag = true;
+                this.nextDomain();
+                if(this.isPlaying == true){
+                    setTimeout(() => {
+                        if(this.isLive == false){
+                            this.$emit('event', {event: 'startRecTimer', data: this.currentTime.valueOf()});
+                        }
+                    },1050);
+                }
+            },
+
             setData : function(key, value) {
                 this[key] = value;
             },
 
             getData : function(key) {
                 return this[key];
+            },
+
+            destroy : function() {
+                window.onresize = null;
+                clearInterval(this.thumNailIntervalId);
             }
         }
     }
