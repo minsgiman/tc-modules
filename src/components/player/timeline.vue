@@ -5,11 +5,10 @@
 <script>
     import * as d3 from "d3";
     import {event as currentEvent} from 'd3';
-    import $ from "jquery";
     import toastcamAPIs from './../../service/toastcamAPIs';
     import store from '../../service/player/store';
-    import moment from 'moment';
-    import 'moment-timezone';
+    //import moment from 'moment';
+    //import 'moment-timezone';
 
     d3.selection.prototype.moveToFront = function() {
         return this.each(function(){
@@ -43,7 +42,7 @@
 
     export default {
         name : 'timeline',
-        props : ['elementId', 'pWidth', 'pHeight', 'pTimeRange', 'playEventCallback'],
+        props : ['elementId', 'pWidth', 'pHeight', 'playEventCallback'],
         computed : {
             cameraData: function () {
                 return store.state.cameraData;
@@ -92,13 +91,16 @@
             },
             motionZones: function () {
                 return store.state.motionZones;
+            },
+            timeRange: function () {
+                return store.state.timeRange;
             }
         },
         data : function() {
             return {
                 width: 0,
                 height: 0,
-                timeRange: 0,
+                cursorInterval: 1000,
                 serviceDateTime: 0,
                 firstDataLoadingFlag: false,
                 clickDateChange: false,
@@ -122,7 +124,6 @@
         created : function() {
             this.width = this.pWidth;
             this.height = this.pHeight;
-            this.timeRange = this.pTimeRange;
             window.onresize = this.resizeTimline.bind(this);
         },
         mounted : function() {
@@ -672,7 +673,7 @@
 
             zoomDomain : function(time, timeRange) {
                 thumnailViewFlag = false;
-                this.timeRange = timeRange;
+                store.dispatch('TIME_RANGE_CHANGE', timeRange);
 
                 var range = 1000*60 * timeRange;
                 var diff = timeRange / 2 * 60 * 1000;
@@ -684,7 +685,7 @@
             },
 
             dblZoomDomain : function(time, timeRange) {
-                this.timeRange = timeRange;
+                store.dispatch('TIME_RANGE_CHANGE', timeRange);
 
                 var range = 1000*60 * timeRange;
                 var diff = timeRange / 2 * 60 * 1000;
@@ -763,7 +764,7 @@
             },
 
             setTimeRange : function(minutes, callback) {
-                this.timeRange = parseInt(minutes);
+                store.dispatch('TIME_RANGE_CHANGE', parseInt(minutes));
 
                 var x = this.svg.select('.cursor').select("line").attr('x1');
                 var cursorTime = this.x.invert(x).getTime();
@@ -780,7 +781,7 @@
             },
 
             setTimeRangeAtDateString : function(dateString, timeRange) {
-                this.timeRange = 1440;
+                store.dispatch('TIME_RANGE_CHANGE', 1440);
 
                 var format = d3.time.format("%Y%m%d%H%M%S");
 
@@ -791,7 +792,7 @@
 
                 var startTime = startDate.getTime();
                 var endTime = endDate.getTime();
-                var newDomain = this.bufferedDomain([startTime-range, endTime+range], this.timeRange);
+                var newDomain = this.bufferedDomain([startTime-range, endTime+range], 1440);
 
                 return this.changeDomain(newDomain);
             },

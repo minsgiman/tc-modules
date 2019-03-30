@@ -13,11 +13,12 @@
     import errorStatusLayer from './error_status_layer.vue';
     import cvrPlaySecureManager from './cvrPlaySecureManager.vue';
     import timelineDateSelector from './timeline_date_selector.vue';
+    import timelineTimeController from './timeline_time_controller.vue';
     import eventMoveBtn from './event_move_btn.vue';
     import toastcamAPIs from './../../service/toastcamAPIs';
     import store from '../../service/player/store';
-    import moment from 'moment';
-    import 'moment-timezone';
+    // import moment from 'moment';
+    // import 'moment-timezone';
 
     var isExpiredCloud = function(camera) {
         if (camera && (camera.serviceType === 'n/a' || camera.serviceType === '0d' || camera.saveEndDate < Date.now()) && camera.recorderType !== 'nvr') {
@@ -66,6 +67,9 @@
             },
             cvrData: function () {
                 return store.state.cvrData;
+            },
+            timeRange: function () {
+                return store.state.timeRange;
             }
         },
         data : function() {
@@ -95,6 +99,7 @@
             }
         },
         created : function() {
+            this.timeline = this.createComponent(timeline, 'timebar_area', this.onTimelineEvent.bind(this), {elementId: 'timebar_area', pWidth: $("#timeline_table").width(), pHeight: $("#timebar_area").height(), playEventCallback: this.playEventCb});
             this.fullscreenBtn = this.createComponent(fullscreenBtn, 'fullscreen_btn_wrap', this.fullscreenEventHandler.bind(this));
             this.zoomBtn = this.createComponent(zoomBtn, 'zoom_btn_wrap', this.zoomEventHandler.bind(this));
             this.errorStatusLayer = this.createComponent(errorStatusLayer, 'error_status_wrap', this.errorLayerEventHandler.bind(this));
@@ -104,6 +109,8 @@
             this.timelineDateSelector = this.createComponent(timelineDateSelector, 'view_timeline_date', this.timlineDateSelectorEventHandler.bind(this));
             this.eventMoveBtn = this.createComponent(eventMoveBtn, 'event_move_btn_wrap', this.eventMoveBtnEventHandler.bind(this));
             this.eventMoveFullBtn = this.createComponent(eventMoveBtn, 'event_move_btn_full_wrap', this.eventMoveBtnEventHandler.bind(this), {fullMode: true});
+            this.timelineTimeController = this.createComponent(timelineTimeController, 'timeline_time_controller_wrap', this.timelineTimeControllerEventHandler.bind(this), {timeline: this.timeline, fullMode: false});
+            this.timelineTimeFullController = this.createComponent(timelineTimeController, 'timeline_time_controller_full_wrap', this.timelineTimeControllerEventHandler.bind(this), {timeline: this.timeline, fullMode: true});
         },
         mounted : function() {
         },
@@ -433,23 +440,6 @@
                 return this.player;
             },
 
-            initTimeline : function() {
-                const vExtendConstructor = Vue.extend(timeline);
-                this.timeline = new vExtendConstructor({
-                    propsData: {
-                        elementId: 'timebar_area',
-                        pWidth: $("#timeline_table").width(),
-                        pHeight: $("#timebar_area").height(),
-                        pTimeRange: 60,
-                        playEventCallback: this.playEventCb
-                    }
-                }).$mount('#timebar_area');
-                this.timeline.$on('event', this.onTimelineEvent.bind(this));
-                this.timeline.setData('cursorInterval', 1000);
-
-                return this.timeline;
-            },
-
             playInfoBarEventHandler : function(param) {
                 if (param.event === 'pause') {
                     this.pauseBtn();
@@ -489,7 +479,7 @@
                 if (param.event === 'pressedCalendarDate') {
                     this.timeline.setData('lineMoveFlag', true);
                     this.timeline.setData('clickDateChange', true);
-                    this.timeline.setData('timeRange', 1440);
+                    store.dispatch('TIME_RANGE_CHANGE', 1440);
                     this.timeline.setTimeRangeAtDateString(param.data, 1440);
 
                     setTimeout(() => {
@@ -524,6 +514,14 @@
                     this.playEventCb('noNextEvent');
                 } else if (param.event === 'serviceDateTimeUpdate') {
                     this.timeline.setData('serviceDateTime', param.data);
+                }
+            },
+
+            timelineTimeControllerEventHandler: function (param) {
+                if (param.event === 'dblClickFlagChanged') {
+                    this.playEventCb('dblClickFlagChanged', param.data);
+                } else if (param.event === 'loadingDataAlert') {
+                    this.playEventCb('loadingDataAlert');
                 }
             },
 
@@ -727,7 +725,7 @@
                     }
                 }
 
-                var timeRange = this.timeline.getData('timeRange');
+                var timeRange = this.timeRange;
                 if(time == 0){
                     toastcamAPIs.call(toastcamAPIs.camera.CHECK_IS_LAST_RECORD, {cameraId: this.cameraData.id}, (data) => {
                         this.cameraData.lastEventDate = data.lastEventStartTime;
@@ -769,7 +767,7 @@
 
                 this.timeline.lineMoveFlag = false;
                 this.timeline.setData('dragThumCancle', false);
-                this.timeline.zoomDomain(Date.now(), this.timeline.getData('timeRange'));
+                this.timeline.zoomDomain(Date.now(), this.timeRange);
                 this.playTimer.startLiveTimer(this.timeline);
                 this.playEventCb('livePlay');
             },

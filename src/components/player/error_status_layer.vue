@@ -90,7 +90,7 @@
 
 <script>
     import store from '../../service/player/store';
-    import moment from 'moment';
+    //import moment from 'moment';
 
     var browserLang = $("html").attr("lang");
 

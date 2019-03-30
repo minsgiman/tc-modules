@@ -16,13 +16,15 @@ const store = new Vuex.Store({
         serviceDay: 0,
         currentTime: new Date(),
         timezone: '',
+        timeRange: 60,
         cvrData: [],
         arrEvents: [],
         inoutFilter: false,
         sensorZones: [],
         eventZones: [],
         motionZones: [],
-        currentDomain: null
+        currentDomain: null,
+        isShowTimelineCalendar: false
     },
     getters: {
         isExpiredCloud: state => {
@@ -125,6 +127,12 @@ const store = new Vuex.Store({
         MOTION_ZONES_CHANGE: function(context, state) {
             context.commit('UPDATE_MOTION_ZONES', state);
         },
+        TIME_RANGE_CHANGE: function(context, state) {
+            context.commit('UPDATE_TIME_RANGE', state);
+        },
+        IS_SHOW_CALENDAR_CHANGE: function(context, state) {
+            context.commit('UPDATE_IS_SHOW_CALENDAR', state);
+        },
         INIT_ALL_DATA: function(context, state) {
             context.commit('UPDATE_CAMERA_DATA', {});
             context.commit('UPDATE_CAMERA_CONFIG', {});
@@ -191,6 +199,12 @@ const store = new Vuex.Store({
         },
         UPDATE_MOTION_ZONES: function(state, value) {
             state.motionZones = value;
+        },
+        UPDATE_TIME_RANGE: function(state, value) {
+            state.timeRange = value;
+        },
+        UPDATE_IS_SHOW_CALENDAR: function(state, value) {
+            state.isShowTimelineCalendar = value;
         }
     }
 });

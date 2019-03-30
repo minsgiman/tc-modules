@@ -1,0 +1,124 @@
+<template>
+    <div>
+        <ul v-show="!fullMode" class="time_unit" id="time_units">
+            <li :class="{on: timeRange === 10}">
+                <button type="button" @click="changeTimeRange(10)">
+                    <span>{{$t('TIMELINE_10MIN')}}</span>
+                </button></li>
+            <li :class="{on: timeRange === 60}">
+                <button type="button" @click="changeTimeRange(60)">
+                    <span>{{$t('TIMELINE_1HOUR')}}</span>
+                </button></li>
+            <li :class="{on: timeRange === 360}">
+                <button type="button" @click="changeTimeRange(360)">
+                    <span>{{$t('TIMELINE_6HOUR')}}</span>
+                </button></li>
+            <li :class="{on: timeRange === 1440}">
+                <button type="button" @click="changeTimeRange(1440)">
+                    <span>{{$t('TIMELINE_24HOUR')}}</span>
+                </button>
+            </li>
+            <li class="calendar">
+                <button type="button" :class="{on: isShowTimelineCalendar}" @click="pressedShowTimelineCalendarButton()">
+                    <span>{{$t('CAMERA_DAY_TIME')}}</span>
+                </button>
+            </li>
+        </ul>
+
+        <div class="fs_time" v-show="!isExpiredCloud && isFullScreen && fullMode">
+            <button type="button" @click="changeTimeRange(1440)" v-show="!isExpiredCloud && timeRange == 10">
+                <span class="fs_time_range">{{$t('TIMELINE_10MIN')}}</span>
+            </button>
+            <button type="button" @click="changeTimeRange(10)" v-show="!isExpiredCloud && timeRange == 60">
+                <span class="fs_time_range">{{$t('TIMELINE_1HOUR')}}</span>
+            </button>
+            <button type="button" @click="changeTimeRange(60)" v-show="!isExpiredCloud && timeRange == 360">
+                <span class="fs_time_range">{{$t('TIMELINE_6HOUR')}}</span>
+            </button>
+            <button type="button" @click="changeTimeRange(360)" v-show="!isExpiredCloud && timeRange == 1440">
+                <span class="fs_time_range">{{$t('TIMELINE_24HOUR')}}</span>
+            </button>
+            <button type="button" :class="{on: isShowTimelineCalendar}" @click="pressedShowTimelineCalendarButton()" class="last">
+                <span class="fs_time_range"><div class="calendar"></div>{{$t('CAMERA_DAY_TIME')}}</span>
+            </button>
+        </div>
+    </div>
+</template>
+<script>
+    import store from '../../service/player/store';
+
+    export default {
+        name: 'timelineTimeController',
+        props: ['timeline', 'fullMode'],
+        computed: {
+            timeRange: function () {
+                return store.state.timeRange;
+            },
+            currentTime: function () {
+                return store.state.currentTime;
+            },
+            isShowTimelineCalendar: function () {
+                return store.state.isShowTimelineCalendar;
+            },
+            isExpiredCloud: function () {
+                return store.getters.isExpiredCloud;
+            },
+            isFullScreen: function () {
+                return store.state.isFullScreen;
+            }
+        },
+        data: function () {
+            return {
+                changeTimeRangeFlag: false
+            }
+        },
+        created : function() {
+        },
+        mounted : function() {
+        },
+        beforeDestroy : function() {
+
+        },
+        methods : {
+            changeTimeRange: function (minutes) {
+                this.timeline.setData('newTimelineDragCnt', 0);
+                this.$emit('event', {event: 'dblClickFlagChanged', data: false});
+                this.timeline.setData('lineMoveFlag', true);
+                this.timeline.setData('changeTimeRangeClick', true);
+                this.timeline.setData('dragThumCancle', false);
+                if(this.timeRange == minutes){
+                    return;
+                }
+
+                if(this.changeTimeRangeFlag == true){
+                    this.$emit('event', {event: 'loadingDataAlert'});
+                    return;
+                }
+
+                this.changeTimeRangeFlag = true;
+
+                setTimeout(() => {
+                    this.changeTimeRangeFlag = false;
+                    this.timeline.updateCursor(this.currentTime);
+                    this.timeline.getData('svg').select('.cursor').classed('hide', false);
+                },800);
+                store.dispatch('TIME_RANGE_CHANGE', minutes);
+
+                if (this.timeline.getData('forceDomain')) {
+                    this.timeline.setTimeRange(minutes);
+                } else {
+                    this.timeline.zoomDomain(this.timeline.domainCenterTime(), minutes);
+                }
+            },
+
+            pressedShowTimelineCalendarButton: function () {
+                store.dispatch('IS_SHOW_CALENDAR_CHANGE', !this.isShowTimelineCalendar);
+                this.$emit('event', 'updateCalendarDate');
+
+                //$scope.timelineDatePicker._d = playerObj.control.getData('currentTime'); //TODO: calendar 쪽으로 보낸다.
+                //$scope.timelineDate.date = moment(parseInt($scope.timelineDatePicker._d.getTime())).locale(Util.getBrowserLanguage()).format($translate.instant('CLIP_CREATE_CLIP_DATE_FORMAT')); //TODO:
+                //setTimelineTimeMoment(moment(parseInt($scope.timelineDatePicker._d.getTime())));  //TODO:
+            }
+        }
+    }
+</script>

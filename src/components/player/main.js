@@ -57,6 +57,9 @@ class player {
             case 'motionZones':
                 store.dispatch('MOTION_ZONES_CHANGE', value);
                 break;
+            case 'timeRange':
+                store.dispatch('TIME_RANGE_CHANGE', value);
+                break;
             default:
                 break;
         }

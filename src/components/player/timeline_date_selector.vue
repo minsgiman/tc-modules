@@ -30,7 +30,7 @@
             </li>
         </ul>
         <ul v-show="!isExpiredCloud && serviceDay <= 7 && serviceDay > 0 && (cameraData.recorderType != 'nvr' && cameraData.recorderType != 'recorder')">
-            <li id="'timeline_date_' + item.date" v-for="(item, index) in serviceCalendarDay" class="action" :class="{ 'on': item.date===formattedCalendarDate() }" @click="pressedCalendarDateButton(item.date)">
+            <li :id="'timeline_date_' + item.date" v-for="(item, index) in serviceCalendarDay" class="action" :class="{ 'on': item.date===formattedCalendarDate() }" @click="pressedCalendarDateButton(item.date)">
                 <button type="button">
                     <span>{{item.day}}</span>
                 </button>
