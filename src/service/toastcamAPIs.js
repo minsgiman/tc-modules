@@ -170,7 +170,7 @@ function toastAPICall (api, param, successCb, errorCb) {
                 break;
             case toastcamAPIs.camera.GET_TIMELINE:
                 successCb({
-                    recTimes:[{"startTime":"1551327900000","id":"1551312000000","endTime":"1551334617461"}],
+                    recTimes:[{"startTime":"1553656500000","id":"1551312000000","endTime":"1553662725977"}],
                     events:[{"date":"20190228 03:05:37","playStartTime":"1551333933257","playEndTime":"1551333941790","zoneIdxs":"1","sgid":"AAAAAACHHX:1h:1551333600000:0","startTime":"1551333937257","id":"AAAAAACHHX:1h:1551333600000:0","endTime":"1551333941790"},{"date":"20190228 03:08:37","playStartTime":"1551334113659","playEndTime":"1551334130356","zoneIdxs":"1","sgid":"AAAAAACHHX:1h:1551333600000:1","startTime":"1551334117659","id":"AAAAAACHHX:1h:1551333600000:1","endTime":"1551334130356"},{"date":"20190228 03:09:17","playStartTime":"1551334153490","playEndTime":"1551334197556","zoneIdxs":"1","sgid":"AAAAAACHHX:1h:1551333600000:2","startTime":"1551334157490","id":"AAAAAACHHX:1h:1551333600000:2","endTime":"1551334197556"},{"date":"20190228 03:10:08","playStartTime":"1551334204658","playEndTime":"1551334322691","zoneIdxs":"1,2","sgid":"AAAAAACHHX:1h:1551334200000:0","startTime":"1551334208658","id":"AAAAAACHHX:1h:1551334200000:0","endTime":"1551334322691"},{"date":"20190228 03:12:55","playStartTime":"1551334371592","playEndTime":"1551334396590","zoneIdxs":"1","sgid":"AAAAAACHHX:1h:1551334200000:1","startTime":"1551334375592","id":"AAAAAACHHX:1h:1551334200000:1","endTime":"1551334396590"},{"date":"20190228 03:14:58","playStartTime":"1551334494026","playEndTime":"1551334502027","zoneIdxs":"1","sgid":"AAAAAACHHX:1h:1551334200000:2","startTime":"1551334498026","id":"AAAAAACHHX:1h:1551334200000:2","endTime":"1551334502027"},{"date":"20190228 03:15:35","playStartTime":"1551334531491","playEndTime":"1551334551290","zoneIdxs":"1","sgid":"AAAAAACHHX:1h:1551334200000:3","startTime":"1551334535491","id":"AAAAAACHHX:1h:1551334200000:3","endTime":"1551334551290"}]
                 });
                 break;
@@ -226,5 +226,6 @@ function toastAPICall (api, param, successCb, errorCb) {
 export default {
     call: toastAPICall,
     camera: toastcamAPIs.camera,
+    account: toastcamAPIs.account,
     setConfig: toastcamAPIs.setConfig
 };
