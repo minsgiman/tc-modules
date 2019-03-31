@@ -27,5 +27,12 @@
   "CLIPS_SORT_BY_DATE_TITLE_FORMAT": "MM월DD일",
   "TIMELINE_TODAY": "오늘",
   "EVENT_SOUND_AREA": "소리 이벤트",
-  "EVENT_ETC_AREA": "삭제된 알림존"
+  "EVENT_ETC_AREA": "삭제된 알림존",
+  "CAMERA_DAY_DIRECT": "날짜/시간 바로가기",
+  "CLIP_CREATE_DATE": "날짜",
+  "CALENDAR": "달력",
+  "HOUR": "시간",
+  "CLIP_CREATE_SELECT_CLIP": "시간 선택",
+  "BUTTON_SELECT": "선택",
+  "CLIP_CREATE_CLIP_DATE_FORMAT": "YYYY년 MM월 DD일"
 }

@@ -110,12 +110,11 @@
             },
 
             pressedShowTimelineCalendarButton: function () {
-                store.dispatch('IS_SHOW_CALENDAR_CHANGE', !this.isShowTimelineCalendar);
-                this.$emit('event', 'updateCalendarDate');
-
-                //$scope.timelineDatePicker._d = playerObj.control.getData('currentTime'); //TODO: calendar 쪽으로 보낸다.
-                //$scope.timelineDate.date = moment(parseInt($scope.timelineDatePicker._d.getTime())).locale(Util.getBrowserLanguage()).format($translate.instant('CLIP_CREATE_CLIP_DATE_FORMAT')); //TODO:
-                //setTimelineTimeMoment(moment(parseInt($scope.timelineDatePicker._d.getTime())));  //TODO:
+                const isShowTimelineCalendar = !this.isShowTimelineCalendar;
+                store.dispatch('IS_SHOW_CALENDAR_CHANGE', isShowTimelineCalendar);
+                if (isShowTimelineCalendar) {
+                    this.$emit('event', {event: 'updateCalendarDate'});
+                }
             },
 
             destroy : function() {

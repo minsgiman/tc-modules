@@ -17,9 +17,9 @@
                 </div>
             </div>
         </div>
-        <button type="button" id="prevLineBtn" class="sp prev" @click="prevLine()" style="z-index: 1002;">{{'PREVIOUS' | translate}}</button>
+        <button type="button" id="prevLineBtn" class="sp prev" @click="prevLine()" style="z-index: 1002;"></button>
         <button type="button" id="cursorLeftBtn" class="sp_cursor prev" v-show="isCursorLeft" @click="pressedFindCursorButton('click')" style="z-index: 1000;"></button>
-        <button type="button" id="nextLineBtn" class="sp next" @click="nextLine()" style="z-index: 1002;">{{'NEXT' | translate}}</button>
+        <button type="button" id="nextLineBtn" class="sp next" @click="nextLine()" style="z-index: 1002;"></button>
         <button type="button" id="cursorRightBtn" class="sp_cursor next" v-show="isCursorRight" @click="pressedFindCursorButton()" style="z-index: 1000;"></button>
     </div>
 </template>

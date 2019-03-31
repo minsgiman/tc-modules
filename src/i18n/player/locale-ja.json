@@ -27,5 +27,12 @@
   "CLIPS_SORT_BY_DATE_TITLE_FORMAT": "MM月DD日",
   "TIMELINE_TODAY": "今日",
   "EVENT_SOUND_AREA": "サウンドイベント",
-  "EVENT_ETC_AREA": "削除済みの通知エリア"
+  "EVENT_ETC_AREA": "削除済みの通知エリア",
+  "CAMERA_DAY_DIRECT": "日付/時間へ",
+  "CLIP_CREATE_DATE": "日付",
+  "CALENDAR": "カレンダー",
+  "HOUR": "時間",
+  "CLIP_CREATE_SELECT_CLIP": "時間選択",
+  "BUTTON_SELECT": "選択",
+  "CLIP_CREATE_CLIP_DATE_FORMAT": "YYYY年MM月DD日"
 }

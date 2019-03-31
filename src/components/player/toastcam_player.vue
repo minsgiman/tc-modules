@@ -14,6 +14,7 @@
     import cvrPlaySecureManager from './cvrPlaySecureManager.vue';
     import timelineDateSelector from './timeline_date_selector.vue';
     import timelineTimeController from './timeline_time_controller.vue';
+    import timelineTimeSelector from './timeline_time_selector.vue';
     import eventMoveBtn from './event_move_btn.vue';
     import toastcamAPIs from './../../service/toastcamAPIs';
     import store from '../../service/player/store';
@@ -112,6 +113,7 @@
             this.eventMoveFullBtn = this.createComponent(eventMoveBtn, 'event_move_btn_full_wrap', this.eventMoveBtnEventHandler.bind(this), {fullMode: true});
             this.timelineTimeController = this.createComponent(timelineTimeController, 'timeline_time_controller_wrap', this.timelineTimeControllerEventHandler.bind(this), {timeline: this.timeline, fullMode: false});
             this.timelineTimeFullController = this.createComponent(timelineTimeController, 'timeline_time_controller_full_wrap', this.timelineTimeControllerEventHandler.bind(this), {timeline: this.timeline, fullMode: true});
+            this.timelineTimeSelector = this.createComponent(timelineTimeSelector, 'timeline_time_selector_wrap', this.timelineTimeSelectorEventHandler.bind(this));
         },
         mounted : function() {
         },
@@ -128,6 +130,7 @@
             this.timelineTimeController.destroy();
             this.timelineTimeFullController.destroy();
             this.fullscreenBtn.destroy();
+            this.timelineTimeSelector.destroy();
             //this.playTimer.stopTimer();
             this.stopFullscreenTimer();
             window.onresize = null;
@@ -489,6 +492,20 @@
                     this.timeline.setData('dblClickFlag', param.data);
                 } else if (param.event === 'loadingDataAlert') {
                     this.playEventCb('loadingDataAlert');
+                } else if (param.event === 'updateCalendarDate') {
+                    this.timelineTimeSelector.updateCalendarDate();
+                }
+            },
+
+            timelineTimeSelectorEventHandler: function (param) {
+                if (param.event === 'timeInputError') {
+                    this.playEventCb('timeInputError', param.data);
+                } else if (param.event === 'checkCVRSeucre') {
+                    this.cvrPlaySecureManager.checkCVRSeucre(param.data);
+                } else if (param.event === 'updateCVRSecureStatus') {
+                    this.cvrPlaySecureManager.setCVRSecureCallback(param.data);
+                } else if (param.event === 'playCvr') {
+                    this.play(param.data);
                 }
             },
 
