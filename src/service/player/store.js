@@ -12,7 +12,7 @@ const store = new Vuex.Store({
         dataLoadingStatus: true,
         isPlaying: false,
         isLive: true,
-        playBtnStatus: false,
+        playBtnStatus: true,
         serviceDay: 0,
         currentTime: new Date(),
         timezone: '',

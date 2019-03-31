@@ -19,7 +19,9 @@ class player {
         let vExtendConstructor = Vue.extend(playContainer);
         this.control = new vExtendConstructor({
             propsData: {
-                playEventCb: param.playEventCb
+                playEventCb: param.playEventCb,
+                playTime: param.playTime,
+                elementIdMap: param.elementIdMap
             }
         });
     }

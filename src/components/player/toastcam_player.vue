@@ -28,10 +28,25 @@
         return false;
     };
 
+    const defaultElementIdMap = {
+        timeline: 'view_timeline_area',
+        fullscreenBtn: 'fullscreen_btn_wrap',
+        zoomBtn: 'zoom_btn_wrap',
+        errorStatusLayer: 'error_status_wrap',
+        playInfoBar: 'cam_info',
+        cvrPlaySecureLayer: 'cvr_play_manager_wrap',
+        timelineDateSelector: 'view_timeline_date',
+        eventMoveBtn: 'event_move_btn_wrap',
+        eventMoveFullBtn: 'event_move_btn_full_wrap',
+        timelineTimeController: 'timeline_time_controller_wrap',
+        timelineTimeFullController: 'timeline_time_controller_full_wrap',
+        timelineTimeSelector: 'timeline_time_selector_wrap'
+    };
+
     export default {
         name : 'playContainer',
         components: {},
-        props : ['playEventCb'],
+        props : ['playEventCb', 'playTime', 'elementIdMap'],
         computed : {
             cameraData: function () {
                 return store.state.cameraData;
@@ -100,20 +115,25 @@
             }
         },
         created : function() {
+            const getElementId = (key) => this.elementIdMap[key] ? this.elementIdMap[key] : defaultElementIdMap[key];
+
             this.player = this.createComponent(playContainer, null, this.playStatusChangedHandler.bind(this));
-            this.timeline = this.createComponent(timeline, 'view_timeline_area', this.onTimelineEvent.bind(this), {elementId: 'timebar_area', playEventCallback: this.playEventCb});
-            this.fullscreenBtn = this.createComponent(fullscreenBtn, 'fullscreen_btn_wrap', this.fullscreenEventHandler.bind(this));
-            this.zoomBtn = this.createComponent(zoomBtn, 'zoom_btn_wrap', this.zoomEventHandler.bind(this));
-            this.errorStatusLayer = this.createComponent(errorStatusLayer, 'error_status_wrap', this.errorLayerEventHandler.bind(this));
-            this.playInfoBar = this.createComponent(playInfoBar, 'cam_info', this.playInfoBarEventHandler.bind(this));
+            this.timeline = this.createComponent(timeline, getElementId('timeline'), this.onTimelineEvent.bind(this), {elementId: 'timebar_area', playEventCallback: this.playEventCb});
+            this.fullscreenBtn = this.createComponent(fullscreenBtn, getElementId('fullscreenBtn'), this.fullscreenEventHandler.bind(this));
+            this.zoomBtn = this.createComponent(zoomBtn, getElementId('zoomBtn'), this.zoomEventHandler.bind(this));
+            this.errorStatusLayer = this.createComponent(errorStatusLayer, getElementId('errorStatusLayer'), this.errorLayerEventHandler.bind(this));
+            this.playInfoBar = this.createComponent(playInfoBar, getElementId('playInfoBar'), this.playInfoBarEventHandler.bind(this));
             this.playTimer = this.createComponent(playTimer, null, this.playTimerEventHandler.bind(this));
-            this.cvrPlaySecureManager = this.createComponent(cvrPlaySecureManager, 'cvr_play_manager_wrap', this.cvrPlaySecureEventHandler.bind(this));
-            this.timelineDateSelector = this.createComponent(timelineDateSelector, 'view_timeline_date', this.timlineDateSelectorEventHandler.bind(this));
-            this.eventMoveBtn = this.createComponent(eventMoveBtn, 'event_move_btn_wrap', this.eventMoveBtnEventHandler.bind(this));
-            this.eventMoveFullBtn = this.createComponent(eventMoveBtn, 'event_move_btn_full_wrap', this.eventMoveBtnEventHandler.bind(this), {fullMode: true});
-            this.timelineTimeController = this.createComponent(timelineTimeController, 'timeline_time_controller_wrap', this.timelineTimeControllerEventHandler.bind(this), {timeline: this.timeline, fullMode: false});
-            this.timelineTimeFullController = this.createComponent(timelineTimeController, 'timeline_time_controller_full_wrap', this.timelineTimeControllerEventHandler.bind(this), {timeline: this.timeline, fullMode: true});
-            this.timelineTimeSelector = this.createComponent(timelineTimeSelector, 'timeline_time_selector_wrap', this.timelineTimeSelectorEventHandler.bind(this));
+            this.cvrPlaySecureManager = this.createComponent(cvrPlaySecureManager, getElementId('cvrPlaySecureLayer'), this.cvrPlaySecureEventHandler.bind(this));
+            this.timelineDateSelector = this.createComponent(timelineDateSelector, getElementId('timelineDateSelector'), this.timlineDateSelectorEventHandler.bind(this));
+            this.eventMoveBtn = this.createComponent(eventMoveBtn, getElementId('eventMoveBtn'), this.eventMoveBtnEventHandler.bind(this));
+            this.eventMoveFullBtn = this.createComponent(eventMoveBtn, getElementId('eventMoveFullBtn'), this.eventMoveBtnEventHandler.bind(this), {fullMode: true});
+            this.timelineTimeController = this.createComponent(timelineTimeController, getElementId('timelineTimeController'), this.timelineTimeControllerEventHandler.bind(this), {timeline: this.timeline, fullMode: false});
+            this.timelineTimeFullController = this.createComponent(timelineTimeController, getElementId('timelineTimeFullController'), this.timelineTimeControllerEventHandler.bind(this), {timeline: this.timeline, fullMode: true});
+            this.timelineTimeSelector = this.createComponent(timelineTimeSelector, getElementId('timelineTimeSelector'), this.timelineTimeSelectorEventHandler.bind(this));
+            setTimeout(() => {
+                this.play(this.playTime);
+            },1500);
         },
         mounted : function() {
         },
@@ -233,7 +253,7 @@
                             if (status === "NetConnection.Connect.Closed" && this.config.streamStatus !== "off") {
                                 setTimeout(() => {
                                     if (this.playBtnStatus) {
-                                        this.playEventCb('livePlay', status);
+                                        this.playEventCb('reloadCameraDetail', status);
                                     }
                                 },4000);
                             } else {
@@ -243,7 +263,7 @@
                                         if (this.isLive && this.liveReloadCnt ==0){
                                             this.statusCheck = 0;
                                             this.liveReloadCnt++;
-                                            this.playEventCb('livePlay', status);
+                                            this.playEventCb('reloadCameraDetail', status);
                                         }
                                     },4000);
                                 }
@@ -295,7 +315,7 @@
                                     if (this.isLive && this.liveReloadCnt ==0){
                                         this.statusCheck = 0;
                                         this.liveReloadCnt++;
-                                        this.playEventCb('livePlay', status);
+                                        this.playEventCb('reloadCameraDetail', status);
                                     }
                                 },4000);
                             }
@@ -753,7 +773,7 @@
                 this.timeline.setData('dragThumCancle', false);
                 this.timeline.zoomDomain(Date.now(), this.timeRange);
                 this.playTimer.startLiveTimer(this.timeline);
-                this.playEventCb('livePlay');
+                this.playEventCb('reloadCameraDetail');
             },
 
             pauseBtn : function() {
@@ -769,7 +789,7 @@
                 if(this.isLive == false){
                     this.timeline.clickedCVRArea(new Date(this.timeline.x.invert($(".cursor").children("line").attr("x1")).getTime()));
                 }else{
-                    this.playEventCb('livePlay');
+                    this.playEventCb('reloadCameraDetail');
                 }
             },
 
