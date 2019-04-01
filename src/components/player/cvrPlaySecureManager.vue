@@ -53,7 +53,7 @@
         },
         methods : {
             checkCVRSeucre: function(callback) {
-                toastcamAPIs.call(toastcamAPIs.camera.GET_CAMERA_CONFIG, {cameraId: this.cameraData.id}, (data) => {
+                toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARED_CAMERA_CONFIG : toastcamAPIs.camera.GET_CAMERA_CONFIG, {cameraId: this.cameraData.id}, (data) => {
                     if(data.secureMode == "on"){
                         this.$emit('event', {event: 'stopTimer'});
                         var passCVRSecure = sessionStorage.getItem("passCVRSecureCameraIds");

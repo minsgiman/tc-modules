@@ -285,7 +285,7 @@
 
                 var currentDomain = this.currentDomain;
                 this.setupDomain([currentDomain[0], currentDomain[1]]);
-                if((new Date()).valueOf() < time.valueOf()){
+                if(!time || (new Date()).valueOf() < time.valueOf()){
                     this.$emit('event', {event: 'goLive'});
                     return;
                 }

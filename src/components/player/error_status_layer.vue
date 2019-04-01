@@ -90,6 +90,7 @@
 
 <script>
     import store from '../../service/player/store';
+    import toastcamAPIs from './../../service/toastcamAPIs';
     //import moment from 'moment';
 
     var browserLang = $("html").attr("lang");
