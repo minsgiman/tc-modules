@@ -25,8 +25,8 @@
 </template>
 
 <script>
-    import * as d3 from "d3";
-    import {event as currentEvent} from 'd3';
+    //import * as d3 from "d3";
+    //import {event as currentEvent} from 'd3';
     import toastcamAPIs from './../../service/toastcamAPIs';
     import store from '../../service/player/store';
     //import moment from 'moment';
@@ -546,10 +546,10 @@
                         draging++;
 
                         dragFlag = true;
-                        var x = 0;
-                        if (currentEvent) {
-                            x = currentEvent.dx;
-                        }
+                        var x = d3.event.dx;
+                        // if (currentEvent) {
+                        //     x = currentEvent.dx;
+                        // }
 
                         serivceDayOver = true;
 
