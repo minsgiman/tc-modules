@@ -436,14 +436,22 @@
             },
 
             getTimeline : function() {
+                const timelineParams = {
+                    cameraId: this.cachedTimelineparams.cameraId,
+                    scale: this.cachedTimelineparams.scale,
+                    start: this.cachedTimelineparams.start,
+                    end: this.cachedTimelineparams.end,
+                    shopId: this.cachedTimelineparams.shopId,
+                };
+
                 if(this.isShared == false){
-                    toastcamAPIs.call(toastcamAPIs.camera.GET_TIMELINE, this.cachedTimelineparams, (res) => {
+                    toastcamAPIs.call(toastcamAPIs.camera.GET_TIMELINE, timelineParams, (res) => {
                         this.getRecTimes(res);
                     }, (err) => {
                         this.isLoading = false;
                     });
                 }else{
-                    toastcamAPIs.call(toastcamAPIs.camera.GET_SHARE_CAM_TIMELINE, this.cachedTimelineparams, (res) => {
+                    toastcamAPIs.call(toastcamAPIs.camera.GET_SHARE_CAM_TIMELINE, timelineParams, (res) => {
                         this.getRecTimes(res);
                     }, (err) => {
                         this.isLoading = false;

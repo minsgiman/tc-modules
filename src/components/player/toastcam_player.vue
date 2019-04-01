@@ -109,7 +109,6 @@
                 range : 0,
                 goCvrStatus : false,
                 fullscreenTimer : null,
-                cachedTimelineparams : null,
                 lastRec : 0,
                 lastEvent : 0
             }
@@ -133,7 +132,7 @@
             this.timelineTimeSelector = this.createComponent(timelineTimeSelector, getElementId('timelineTimeSelector'), this.timelineTimeSelectorEventHandler.bind(this));
             setTimeout(() => {
                 this.play(this.playTime);
-            },1500);
+            },100);
         },
         mounted : function() {
         },

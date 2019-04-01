@@ -67,8 +67,7 @@
         data: function () {
             return {
                 fristIndex: 30,
-                lastIndex: 60,
-                serviceCalendarDate: null
+                lastIndex: 60
             }
         },
         created : function() {
