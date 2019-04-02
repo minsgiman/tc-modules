@@ -165,6 +165,9 @@
                 isCursorRight : false,
                 changeTimeRangeFlag: false,
                 timeLineMap: null,
+                lastRec : 0,
+                lastEvent : 0,
+                goCvrStatus : false,
 
                 firstDataLoadingFlag: false,
                 clickDateChange: false,
@@ -286,7 +289,7 @@
                 var currentDomain = this.currentDomain;
                 this.setupDomain([currentDomain[0], currentDomain[1]]);
                 if(!time || (new Date()).valueOf() < time.valueOf()){
-                    this.$emit('event', {event: 'goLive'});
+                    this.goLive();
                     return;
                 }
 
@@ -340,7 +343,7 @@
                 }
                 if(this.cvrCheck == false){
                     if((new Date).valueOf() - time.valueOf() < 8000){
-                        this.$emit('event', {event: 'goLive'});
+                        this.goLive();
                         this.newTimelineDragCnt = 0;
                         return;
                     }
@@ -780,7 +783,7 @@
                 if(dblClicklive == false){
                     this.clickedCVRArea(new Date(dblClickTime));
                 }else{
-                    this.$emit('event', {event: 'goLive'});
+                    this.goLive();
                 }
 
                 return this.changeDomain(newDomain);
@@ -1312,7 +1315,7 @@
                             that.clickedCVRArea(selectedTime);
                             that.updateCursor(selectedTime);
                             if (that.currentTime.getTime() - Date.now() >= 0) { // 미래를 선택한 경우
-                                that.$emit('event', {event: 'goLive'});
+                                that.goLive();
                                 return;
                             }
 
@@ -2107,6 +2110,98 @@
                 this.svg.select('.cursor').classed('hide', false);
             },
 
+            requestPlay : function (time, status) {
+                if (time) {
+                    this.goCvr(time, status);
+                } else {
+                    this.goLive();
+                }
+            },
+
+            goCvr : function(time, status) {
+                this.$emit('event', {event: 'stopPlayTimer'});
+                this.dragThumCancle = false;
+                var tmpX = 9999;
+
+                if(time == undefined){
+                    this.updateCursor(this.currentTime);
+                    var cursorX = parseFloat($(".cursor").children("line").attr("x1"));
+                    for(var i=0; i<this.cvrArray[0].length; i++){
+                        if(cursorX < parseFloat(this.cvrArray[0].eq(i).attr("x"))){
+                            var x = parseFloat(this.cvrArray[0].eq(i).attr("x"));
+                            if(tmpX >= x){
+                                tmpX = x;
+                                time = this.x.invert(x).getTime()+1000;
+                            }
+                        }
+                    }
+                }
+
+                if(time == undefined){
+                    this.updateCursor(this.currentTime);
+                    if(this.cvrArray[0].length-1 > 0){
+                        var x = parseFloat(this.cvrArray[0].eq(this.cvrArray[0].length-1).attr("x"));
+                        if(tmpX >= x){
+                            tmpX = x;
+                            time = this.getData('x').invert(x).getTime()+1000;
+                        }
+                    }
+                }
+
+                if(time == undefined){
+                    time = this.lastRec;
+                    if(time == 0){
+                        time = this.lastEvent;
+                    }
+                }
+
+                var timeRange = this.timeRange;
+                if(time == 0){
+                    toastcamAPIs.call(toastcamAPIs.camera.CHECK_IS_LAST_RECORD, {cameraId: this.cameraData.id}, (data) => {
+                        //this.cameraData.lastEventDate = data.lastEventStartTime;
+                        //this.cameraData.lastRecDate = data.lastRectStartTime;
+
+                        var videoDateFormat = this.$i18n.t('CAMERA_DETAIL_EVENT_DATE_FORMAT');
+                        var videoTimeFormat = this.$i18n.t('CAMERA_DETAIL_EVENT_TIME_FORMAT');
+
+                        var lastRecMoment = moment(this.cameraData.lastRecDate);
+                        //this.cameraData.lastRecDateString = lastRecMoment.locale($("html").attr("lang")).format(videoDateFormat);
+                        //this.cameraData.lastRecTimeString = lastRecMoment.locale($("html").attr("lang")).format(videoTimeFormat);
+
+                        var date = new Date(data.lastRectStartTime);
+                        this.changeTimeRangeClick = true;
+                        this.$emit('event', {event: 'cameraStatusAllOff'});
+                        store.dispatch('CURRENT_TIME_CHANGE', date);
+                        this.zoomDomain(data.lastRectStartTime, timeRange);
+                        this.goCvrStatus = true;
+                        this.clickedCVRArea(date, status);
+                    });
+                }else{
+                    var date = new Date(time);
+                    this.changeTimeRangeClick = true;
+                    this.$emit('event', {event: 'cameraStatusAllOff'});
+                    store.dispatch('CURRENT_TIME_CHANGE', date);
+                    this.zoomDomain(date.getTime(), timeRange);
+                    this.goCvrStatus = true;
+                    this.clickedCVRArea(date, status);
+                }
+            },
+
+            goLive : function() {
+                this.newTimelineDragCnt=0;
+                store.dispatch('IS_LIVE_CHANGE', true);
+                this.$emit('event', {event: 'camInfoBarChange'});
+                this.$emit('event', {event: 'cameraStatusAllOff'});
+                store.dispatch('CURRENT_TIME_CHANGE', new Date());
+                this.changeTimeRangeClick = true;
+
+                this.lineMoveFlag = false;
+                this.dragThumCancle = false;
+                this.zoomDomain(Date.now(), this.timeRange);
+                this.$emit('event', {event: 'startLiveTimer'});
+                this.playEventCallback('reloadCameraDetail');
+            },
+
             jumpToNextRecord : function() {
                 var callbackFunc = function() {
                     if (this.cameraData.recordType == "event") {
@@ -2140,10 +2235,10 @@
                             if (cvrData && cvrData.cvr && cvrData.cvr.start && cvrData.cvr.end) {
                                 this.$emit('event', {event: 'cvrPlayRequest', data: {time : parseInt(cvrData.cvr.start, 10)}});
                             } else {
-                                this.$emit('event', {event: 'goLive'});
+                                this.goLive();
                             }
                         }, (err) => {
-                            this.$emit('event', {event: 'goLive'});
+                            this.goLive();
                         });
                     }
                 };
@@ -2253,7 +2348,7 @@
 
                 this.$emit('event', {event: 'cameraStatusAllOff'});
                 if (this.currentTime.getTime() - Date.now() >= 0) {
-                    this.$emit('event', {event: 'goLive'});
+                    this.goLive();
                     return;
                 }
 

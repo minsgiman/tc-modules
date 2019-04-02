@@ -106,10 +106,7 @@
                 stopStatusCheck : 0,
                 RecTime : null,
                 fixRange : 0,
-                range : 0,
-                goCvrStatus : false,
-                lastRec : 0,
-                lastEvent : 0
+                range : 0
             }
         },
         created : function() {
@@ -130,7 +127,7 @@
             this.timelineTimeFullController = this.createComponent(timelineTimeController, getElementId('timelineTimeFullController'), this.timelineTimeControllerEventHandler.bind(this), {timeline: this.timeline, fullMode: true});
             this.timelineTimeSelector = this.createComponent(timelineTimeSelector, getElementId('timelineTimeSelector'), this.timelineTimeSelectorEventHandler.bind(this));
             setTimeout(() => {
-                this.play(this.playTime);
+                this.timeline.requestPlay(this.playTime);
             },100);
         },
         mounted : function() {
@@ -335,9 +332,6 @@
                         }
                         this.playInfoBar.camInfoBarChange();
                         break;
-                    case 'goLive':
-                        this.play();
-                        break;
                     case 'stopPlayTimer':
                         this.playTimer.stopTimer();
                         break;
@@ -385,10 +379,10 @@
                         }
                         this.playTimer.playerCheck = false;
                         this.playTimer.startRecTimer(time, this.player, this.timeline);
-                        if(this.timeline.cvrCheck == true || this.goCvrStatus == true){
+                        if(this.timeline.cvrCheck == true || this.timeline.goCvrStatus == true){
                             store.dispatch('IS_LIVE_CHANGE', false);
                             this.playInfoBar.camInfoBarChange();
-                            this.goCvrStatus = false;
+                            this.timeline.goCvrStatus = false;
                             this.errorStatusLayer.cameraStatusAllOff();
                             this.player.play(time);
                         }else{
@@ -405,6 +399,9 @@
                             clearTimeout(this.playserStop);
                             this.playserStop = null;
                         }
+                        break;
+                    case 'startLiveTimer':
+                        this.playTimer.startLiveTimer(this.timeline);
                         break;
                     case 'startRecTimer':
                         this.playTimer.startRecTimer(param.data, this.player, this.timeline);
@@ -446,7 +443,7 @@
                         this.playEventCb('reloadCameraDetail');
                     }
                 } else if (param.event === 'goLive') {
-                    this.play();
+                    this.timeline.requestPlay();
                 }
             },
 
@@ -457,7 +454,7 @@
                     this.errorStatusLayer.cameraNoSave();
                 } else if (param.event === 'checkNoCvr') {
                     if(this.errorStatusLayer.showNextPlayLayer == true){
-                        this.play(this.currentTime.valueOf());
+                        this.timeline.requestPlay(this.currentTime.valueOf());
                     }
                 } else if (param.event === 'pressedFindCursorButton') {
                     this.timeline.pressedFindCursorButton();
@@ -469,7 +466,7 @@
                     this.playTimer.stopTimer();
                 } else if (param.event === 'goLiveByCancleCVR') {
                     this.timeline.cursorOn = false;
-                    this.play();
+                    this.timeline.requestPlay();
                 } else if (param.event === 'isIncorrectPlayPasswordChanged') {
                     this.playEventCb('isIncorrectPlayPasswordChanged', param.data);
                 }
@@ -507,7 +504,7 @@
                 } else if (param.event === 'updateCVRSecureStatus') {
                     this.cvrPlaySecureManager.setCVRSecureCallback(param.data);
                 } else if (param.event === 'play') {
-                    this.play(param.data);
+                    this.timeline.requestPlay(param.data);
                 } else if (param.event === 'noPrevEvent') {
                     this.playEventCb('noPrevEvent');
                 } else if (param.event === 'noNextEvent') {
@@ -535,17 +532,17 @@
                 } else if (param.event === 'updateCVRSecureStatus') {
                     this.cvrPlaySecureManager.setCVRSecureCallback(param.data);
                 } else if (param.event === 'playCvr') {
-                    this.play(param.data);
+                    this.timeline.requestPlay(param.data);
                 }
             },
 
             errorLayerEventHandler : function(param) {
                 if (param.event === 'lastEvent') {
-                    this.lastEvent = param.value;
+                    this.timeline.lastEvent = param.value;
                 } else if (param.event === 'lastRec') {
-                    this.lastRec = param.value;
+                    this.timeline.lastRec = param.value;
                 } else if (param.event === 'playCvr') {
-                    this.play(param.value.time, param.value.status);
+                    this.timeline.requestPlay(param.value.time, param.value.status);
                 }
             },
 
@@ -691,98 +688,6 @@
                     $(".cam_info_area").css("top","");
                     $("#cloud_out_small").children("img").css("margin-left","20px");
                 }
-            },
-
-            play : function (time, status) {
-                if (time) {
-                    this.goCvr(time, status);
-                } else {
-                    this.goLive();
-                }
-            },
-
-            goCvr : function(time, status) {
-                this.playTimer.stopTimer();
-                this.timeline.setData('dragThumCancle', false);
-                var tmpX = 9999;
-
-                if(time == undefined){
-                    this.timeline.updateCursor(this.currentTime);
-                    var cursorX = parseFloat($(".cursor").children("line").attr("x1"));
-                    for(var i=0;i<this.timeline.cvrArray[0].length;i++){
-                        if(cursorX < parseFloat(this.timeline.cvrArray[0].eq(i).attr("x"))){
-                            var x = parseFloat(this.timeline.cvrArray[0].eq(i).attr("x"));
-                            if(tmpX >= x){
-                                tmpX = x;
-                                time = this.timeline.getData('x').invert(x).getTime()+1000;
-                            }
-                        }
-                    }
-                }
-
-                if(time == undefined){
-                    this.timeline.updateCursor(this.currentTime);
-                    if(this.timeline.cvrArray[0].length-1 > 0){
-                        var x = parseFloat(this.timeline.cvrArray[0].eq(this.timeline.cvrArray[0].length-1).attr("x"));
-                        if(tmpX >= x){
-                            tmpX = x;
-                            time = this.timeline.getData('x').invert(x).getTime()+1000;
-                        }
-                    }
-                }
-
-                if(time == undefined){
-                    time = this.lastRec;
-                    if(time == 0){
-                        time = this.lastEvent;
-                    }
-                }
-
-                var timeRange = this.timeRange;
-                if(time == 0){
-                    toastcamAPIs.call(toastcamAPIs.camera.CHECK_IS_LAST_RECORD, {cameraId: this.cameraData.id}, (data) => {
-                        this.cameraData.lastEventDate = data.lastEventStartTime;
-                        this.cameraData.lastRecDate = data.lastRectStartTime;
-
-                        var videoDateFormat = 'M월 D일 dddd'; //TODO: $translate.instant('CAMERA_DETAIL_EVENT_DATE_FORMAT');
-                        var videoTimeFormat = 'HH:mm:ss'; //TODO: $translate.instant('CAMERA_DETAIL_EVENT_TIME_FORMAT');
-
-                        var lastRecMoment = moment(this.cameraData.lastRecDate);
-                        this.cameraData.lastRecDateString = lastRecMoment.locale($("html").attr("lang")).format(videoDateFormat);
-                        this.cameraData.lastRecTimeString = lastRecMoment.locale($("html").attr("lang")).format(videoTimeFormat);
-
-                        var date = new Date(data.lastRectStartTime);
-                        this.timeline.setData('changeTimeRangeClick', true);
-                        this.errorStatusLayer.cameraStatusAllOff();
-                        store.dispatch('CURRENT_TIME_CHANGE', date);
-                        this.timeline.zoomDomain(data.lastRectStartTime, timeRange);
-                        this.goCvrStatus = true;
-                        this.timeline.clickedCVRArea(date, status);
-                    });
-                }else{
-                    var date = new Date(time);
-                    this.timeline.setData('changeTimeRangeClick', true);
-                    this.errorStatusLayer.cameraStatusAllOff();
-                    store.dispatch('CURRENT_TIME_CHANGE', date);
-                    this.timeline.zoomDomain(date.getTime(), timeRange);
-                    this.goCvrStatus = true;
-                    this.timeline.clickedCVRArea(date, status);
-                }
-            },
-
-            goLive : function() {
-                this.timeline.newTimelineDragCnt=0;
-                store.dispatch('IS_LIVE_CHANGE', true);
-                this.playInfoBar.camInfoBarChange();
-                this.errorStatusLayer.cameraStatusAllOff();
-                store.dispatch('CURRENT_TIME_CHANGE', new Date());
-                this.timeline.setData('changeTimeRangeClick', true);
-
-                this.timeline.lineMoveFlag = false;
-                this.timeline.setData('dragThumCancle', false);
-                this.timeline.zoomDomain(Date.now(), this.timeRange);
-                this.playTimer.startLiveTimer(this.timeline);
-                this.playEventCb('reloadCameraDetail');
             },
 
             setData : function(key, value) {
