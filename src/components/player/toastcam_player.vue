@@ -108,7 +108,6 @@
                 fixRange : 0,
                 range : 0,
                 goCvrStatus : false,
-                fullscreenTimer : null,
                 lastRec : 0,
                 lastEvent : 0
             }
@@ -150,8 +149,6 @@
             this.timelineTimeFullController.destroy();
             this.fullscreenBtn.destroy();
             this.timelineTimeSelector.destroy();
-            //this.playTimer.stopTimer();
-            this.stopFullscreenTimer();
             window.onresize = null;
         },
         methods : {
@@ -233,7 +230,7 @@
                             }
                             this.playTimer.stopTimer();
                             if (this.cameraData.recordType == "event") {
-                                this.jumpToNextRecord();
+                                this.timeline.jumpToNextRecord();
                             }
                         },3000);
                     }else if(this.flashStatusFlush === false && status === "NetStream.Buffer.Empty"){
@@ -396,12 +393,18 @@
                             this.player.play(time);
                         }else{
                             if (this.cameraData.recordType == "event") {
-                                this.jumpToNextRecord();
+                                this.timeline.jumpToNextRecord();
                             }
                         }
                         this.timeline.updateCursor(new Date(time));
                         this.timeline.isCursorLeft = false;
                         this.timeline.isCursorRight = false;
+                        break;
+                    case 'clearPlayerStop':
+                        if (this.playserStop) {
+                            clearTimeout(this.playserStop);
+                            this.playserStop = null;
+                        }
                         break;
                     case 'startRecTimer':
                         this.playTimer.startRecTimer(param.data, this.player, this.timeline);
@@ -431,9 +434,17 @@
 
             playInfoBarEventHandler : function(param) {
                 if (param.event === 'pause') {
-                    this.pauseBtn();
+                    this.player.pause();
+                    store.dispatch('PLAY_BTN_STATUS_CHANGE', false);
                 } else if (param.event === 'play') {
-                    this.playBtn();
+                    this.player.resume();
+                    store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
+                    this.errorStatusLayer.cameraStatusAllOff();
+                    if(this.isLive == false){
+                        this.timeline.clickedCVRArea(new Date(this.timeline.x.invert($(".cursor").children("line").attr("x1")).getTime()));
+                    }else{
+                        this.playEventCb('reloadCameraDetail');
+                    }
                 } else if (param.event === 'goLive') {
                     this.play();
                 }
@@ -441,7 +452,7 @@
 
             playTimerEventHandler : function(param) {
                 if (param.event === 'jumpToNextRecord') {
-                    this.jumpToNextRecord();
+                    this.timeline.jumpToNextRecord();
                 } else if (param.event === 'noCvrError') {
                     this.errorStatusLayer.cameraNoSave();
                 } else if (param.event === 'checkNoCvr') {
@@ -625,8 +636,7 @@
                     $("#cloud_out_full").hide();
                     this.playEventCb('fullScreenAlertChanged', false);
                     $("#view_timeline_area").removeAttr( 'style' );
-
-                    clearTimeout(this.fullscreenTimer);
+                    this.fullscreenBtn.stopFullscreenTimer();
                     if (this.player) {
                         this.player.zoomZone(350, parseInt($("#player").css("width"))-20);
                     }
@@ -773,90 +783,6 @@
                 this.timeline.zoomDomain(Date.now(), this.timeRange);
                 this.playTimer.startLiveTimer(this.timeline);
                 this.playEventCb('reloadCameraDetail');
-            },
-
-            pauseBtn : function() {
-                this.player.pause();
-                store.dispatch('PLAY_BTN_STATUS_CHANGE', false);
-            },
-
-            playBtn : function() {
-                this.player.resume();
-                store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
-
-                this.errorStatusLayer.cameraStatusAllOff();
-                if(this.isLive == false){
-                    this.timeline.clickedCVRArea(new Date(this.timeline.x.invert($(".cursor").children("line").attr("x1")).getTime()));
-                }else{
-                    this.playEventCb('reloadCameraDetail');
-                }
-            },
-
-            stopFullscreenTimer : function() {
-                if (this.fullscreenTimer) {
-                    clearTimeout(this.fullscreenTimer);
-                    this.fullscreenTimer = null;
-                }
-            },
-
-            startFullscreenTimer : function() {
-                clearTimeout(this.fullscreenTimer);
-                this.fullscreenTimer = setTimeout(() => {
-                    this.playEventCb('timelineVisibleChanged', false);
-                }, 5000);
-            },
-
-            jumpToNextRecord : function() {
-                var callbackFunc = function() {
-                    if (this.cameraData.recordType == "event") {
-                        var curTime = this.currentTime.getTime();
-                        var currentDomain = this.currentDomain;
-                        var cvrData = this.cvrData;
-                        if (!currentDomain || !currentDomain[0] || !currentDomain[1]) {
-                            return;
-                        }
-                        if (!(currentDomain[0] < curTime && curTime < currentDomain[1])) {
-                            return;
-                        }
-                        var findTime = 0;
-                        if (cvrData && cvrData.length) {
-                            var i, len;
-                            len = cvrData.length;
-
-                            for (i = 0; i < len; i+=1) {
-                                if (curTime > parseInt(cvrData[i].startTime, 10) && curTime <= parseInt(cvrData[i].endTime, 10)) {
-                                    findTime = cvrData[i].endTime;
-                                    break;
-                                }
-                            }
-                            if (findTime === 0) {
-                                findTime = this.currentTime.valueOf();
-                            }
-                        } else {
-                            findTime = this.currentTime.valueOf();
-                        }
-                        toastcamAPIs.call(toastcamAPIs.camera.FIND_CVR, {cameraId: this.cameraData.id, cvrId: findTime, findDirection: 'next'}, (cvrData) => {
-                            if (cvrData && cvrData.cvr && cvrData.cvr.start && cvrData.cvr.end) {
-                                this.play(parseInt(cvrData.cvr.start, 10));
-                            } else {
-                                this.play();
-                            }
-                        }, (err) => {
-                            this.play();
-                        });
-                    }
-                };
-                if (this.playserStop) {
-                    clearTimeout(this.playserStop);
-                    this.playserStop = null;
-                }
-                this.cvrPlaySecureManager.checkCVRSeucre((isSecureMode) => {
-                    if(isSecureMode){
-                        this.cvrPlaySecureManager.setCVRSecureCallback(callbackFunc.bind(this));
-                    }else{
-                        callbackFunc();
-                    }
-                });
             },
 
             setData : function(key, value) {

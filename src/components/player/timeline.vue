@@ -2107,7 +2107,56 @@
                 this.svg.select('.cursor').classed('hide', false);
             },
 
-            ////////NEW
+            jumpToNextRecord : function() {
+                var callbackFunc = function() {
+                    if (this.cameraData.recordType == "event") {
+                        var curTime = this.currentTime.getTime();
+                        var currentDomain = this.currentDomain;
+                        var cvrData = this.cvrData;
+                        if (!currentDomain || !currentDomain[0] || !currentDomain[1]) {
+                            return;
+                        }
+                        if (!(currentDomain[0] < curTime && curTime < currentDomain[1])) {
+                            return;
+                        }
+                        var findTime = 0;
+                        if (cvrData && cvrData.length) {
+                            var i, len;
+                            len = cvrData.length;
+
+                            for (i = 0; i < len; i+=1) {
+                                if (curTime > parseInt(cvrData[i].startTime, 10) && curTime <= parseInt(cvrData[i].endTime, 10)) {
+                                    findTime = cvrData[i].endTime;
+                                    break;
+                                }
+                            }
+                            if (findTime === 0) {
+                                findTime = this.currentTime.valueOf();
+                            }
+                        } else {
+                            findTime = this.currentTime.valueOf();
+                        }
+                        toastcamAPIs.call(toastcamAPIs.camera.FIND_CVR, {cameraId: this.cameraData.id, cvrId: findTime, findDirection: 'next'}, (cvrData) => {
+                            if (cvrData && cvrData.cvr && cvrData.cvr.start && cvrData.cvr.end) {
+                                this.$emit('event', {event: 'cvrPlayRequest', data: {time : parseInt(cvrData.cvr.start, 10)}});
+                            } else {
+                                this.$emit('event', {event: 'goLive'});
+                            }
+                        }, (err) => {
+                            this.$emit('event', {event: 'goLive'});
+                        });
+                    }
+                };
+                this.$emit('event', {event: 'clearPlayerStop'});
+                this.$emit('event', {event: 'checkCVRSeucre', data: (isSecureMode) => {
+                    if(isSecureMode){
+                        this.$emit('event', {event: 'updateCVRSecureStatus', data: callbackFunc.bind(this)});
+                    }else{
+                        callbackFunc();
+                    }
+                }});
+            },
+
             cvrMouseoverEventsNew : function (x, mousetime) {
                 if(this.thumnailDraw == false || this.dblClickFlag == true){
                     return;

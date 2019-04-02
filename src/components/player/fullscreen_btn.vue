@@ -27,6 +27,9 @@
             }
         },
         data: function () {
+            return {
+                fullscreenTimer : null
+            }
         },
         created : function() {
             this.bindChangeEventCb = this.fullscreenChangeEvent.bind(this);
@@ -119,12 +122,26 @@
                     }, 100);
                 }
             },
+            stopFullscreenTimer : function() {
+                if (this.fullscreenTimer) {
+                    clearTimeout(this.fullscreenTimer);
+                    this.fullscreenTimer = null;
+                }
+            },
+
+            startFullscreenTimer : function() {
+                clearTimeout(this.fullscreenTimer);
+                this.fullscreenTimer = setTimeout(() => {
+                    this.playEventCb('timelineVisibleChanged', false);
+                }, 5000);
+            },
 
             destroy : function() {
                 document.removeEventListener('webkitfullscreenchange', this.bindFullscreenCb, false);
                 document.removeEventListener('mozfullscreenchange', this.bindFullscreenCb, false);
                 document.removeEventListener('fullscreenchange', this.bindFullscreenCb, false);
                 document.removeEventListener('MSFullscreenChange', this.bindFullscreenCb, false);
+                this.stopFullscreenTimer();
             }
         }
     }
