@@ -168,6 +168,7 @@
                 lastRec : 0,
                 lastEvent : 0,
                 goCvrStatus : false,
+                liveReplayCheck: 0,
 
                 firstDataLoadingFlag: false,
                 clickDateChange: false,
@@ -2199,7 +2200,95 @@
                 this.dragThumCancle = false;
                 this.zoomDomain(Date.now(), this.timeRange);
                 this.$emit('event', {event: 'startLiveTimer'});
-                this.playEventCallback('reloadCameraDetail');
+                this.livePlayDataSet();
+            },
+
+            livePlayDataSet : function(check){
+                this.$emit('event', {event: 'cameraStatusAllOff'});
+                store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
+
+                toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAMERA_DETAIL : toastcamAPIs.camera.GET_CAMERA_DETAIL, {cameraId: this.cameraData.id}, (cameraData) => {
+                    store.dispatch('CAMERA_DATA_CHANGE', cameraData);
+                    this.$emit('event', {event: 'livePlayRequest'});
+                    this.livePlayConfigDataSet(check);
+                });
+            },
+
+            livePlayConfigDataSet : function(check){
+                var cameraStatus = true;
+                this.$emit('event', {event: 'updateErrorStatus'});
+
+                if(this.cameraData.controlStatus === "CS" || this.cameraData.controlStatus === "on") {
+                    if (this.cameraData.recordType != "event") {
+                        if (this.cameraData.streamStatus == "off" && check != 'NetStream.Play.Stop') {
+                            cameraStatus = false;
+                        } else {
+                            cameraStatus = true;
+                        }
+                    }
+                } else if(this.cameraData.controlStatus === "CE" || this.cameraData.controlStatus === "off"){
+                    if(this.cameraData.streamStatus == "off"){
+                        cameraStatus = false;
+                    } else {
+                        cameraStatus = true;
+                    }
+                }
+
+                if(check == 'NetStream.Play.Stop' || check=="changeRec"){
+                    this.liveReplayCheck+=1;
+                    if(check == 'NetStream.Play.Stop'){
+                        setTimeout(() => {
+                            this.$emit('event', {event: 'livePlayRequest'});
+                        }, 2000);
+                    }else{
+                        setTimeout(() => {
+                            if(this.liveReplayCheck < 20 && cameraStatus == false){
+                                this.livePlayDataSet();
+                            }else{
+                                cameraStatus = true;
+                                this.liveReplayCheck = 0;
+                                store.dispatch('IS_PLAYING_CHANGE', true);
+                                this.$emit('event', {event: 'startLiveTimer'});
+                            }
+                        }, 5000);
+                    }
+                }
+            },
+
+            jumpToCvrWithSeconds : function(seconds) {
+                if (seconds > 0 && this.isLive) {
+                    return;
+                }
+
+                var findTime = this.currentTime.valueOf() + seconds * 1000;
+                if (findTime > new Date()) {
+                    this.goLive();
+                } else {
+                    var that = this;
+                    var callbackFunc = function() {
+                        var findTime = that.currentTime.valueOf() + seconds * 1000;
+                        //var direction = seconds > 0 ? 'next' : 'previous';
+                        that.$emit('event', {event: 'cvrPlayRequest', data: {time : new Date(findTime)}});
+
+                        // toastcamAPIs.call(toastcamAPIs.camera.FIND_CVR, {cameraId: that.cameraData.id, cvrId: findTime, findDirection: direction}, (cvrData) => {
+                        //     if (cvrData && cvrData.cvr && cvrData.cvr.start && cvrData.cvr.end) {
+                        //         that.$emit('event', {event: 'cvrPlayRequest', data: {time : parseInt(cvrData.cvr.start, 10)}});
+                        //     } else {
+                        //         return;
+                        //     }
+                        // }, (err) => {
+                        //     return;
+                        // });
+                    };
+                    this.$emit('event', {event: 'clearPlayerStop'});
+                    this.$emit('event', {event: 'checkCVRSeucre', data: (isSecureMode) => {
+                        if(isSecureMode){
+                            that.$emit('event', {event: 'updateCVRSecureStatus', data: callbackFunc});
+                        }else{
+                            callbackFunc();
+                        }
+                    }});
+                }
             },
 
             jumpToNextRecord : function() {

@@ -1,5 +1,5 @@
 <template>
-    <div class="cam_info" id="cam_info" :class="{toggle_on : isShowTimelineToggleArea && isToggleOn , toggle_off : isShowTimelineToggleArea && !isToggleOn }">
+    <div class="cam_info" id="cam_info" :class="{toggle_on : isShowTimelineToggleArea}">  <!--&& isToggleOn , toggle_off : isShowTimelineToggleArea && !isToggleOn-->
         <div class="cam_info_area cam_info_bg cam_info_bg_en_en_en">
             <div class="time_area" id="time_area" style="position: relative;">
                 <button type="button" class="sp pause" v-show="isPlaying" @click="pauseBtn()" id="pause_btn"></button>

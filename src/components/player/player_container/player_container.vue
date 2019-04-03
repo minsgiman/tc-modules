@@ -88,7 +88,8 @@
         },
         data: function () {
             return {
-                player : null
+                player : null,
+                playTimeoutId : null
             }
         },
         created : function() {
@@ -111,19 +112,25 @@
         },
         methods : {
             play : function (time) {
-                if (this.cameraData.recorderType == "nvr") {
-                    this.player.play({url: getNvrServerUrl(this.cameraData.mediaStreamURL), path: this.cameraData.channel + (time ? "?time=" + time.getTime() : '')});
-                } else if (this.cameraData.recorderType == "recorder") {
-                    this.player.play(time ? time.getTime() : 0);
-                } else {
-                    toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAM_TOKEN : toastcamAPIs.camera.GET_TOKEN, {cameraId: this.cameraData.id}, (res) => {
-                        if (time) {
-                            this.player.play({url: getCvrServerUrl(res.cvrHostPort), path: '/token=' + res.token + '&time=' + time.getTime()});
-                        } else {
-                            this.player.play({url: getLiveServerUrl(this.cameraData.mediaStreamURL), path: this.cameraData.id + '?token=' + res.token});
-                        }
-                    });
+                if (this.playTimeoutId) {
+                    clearTimeout(this.playTimeoutId);
+                    this.playTimeoutId = null;
                 }
+                this.playTimeoutId = setTimeout(() => {
+                    if (this.cameraData.recorderType == "nvr") {
+                        this.player.play({url: getNvrServerUrl(this.cameraData.mediaStreamURL), path: this.cameraData.channel + (time ? "?time=" + time.getTime() : '')});
+                    } else if (this.cameraData.recorderType == "recorder") {
+                        this.player.play(time ? time.getTime() : 0);
+                    } else {
+                        toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAM_TOKEN : toastcamAPIs.camera.GET_TOKEN, {cameraId: this.cameraData.id}, (res) => {
+                            if (time) {
+                                this.player.play({url: getCvrServerUrl(res.cvrHostPort), path: '/token=' + res.token + '&time=' + time.getTime()});
+                            } else {
+                                this.player.play({url: getLiveServerUrl(this.cameraData.mediaStreamURL), path: this.cameraData.id + '?token=' + res.token});
+                            }
+                        });
+                    }
+                }, 200);
             },
             resume : function () {
                 if (this.player.resume) {

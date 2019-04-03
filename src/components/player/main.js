@@ -25,6 +25,29 @@ class player {
         });
     }
 
+    // requestPlay(time) {
+    //     this.control.timeline.requestPlay(time);
+    // }
+
+    jumpToCvrWithSeconds(seconds) {
+        if (seconds > 0) {
+            this.control.playIndicator.showIndicator('forward');
+        } else {
+            this.control.playIndicator.showIndicator('backward');
+        }
+        this.control.timeline.jumpToCvrWithSeconds(seconds);
+    }
+
+    togglePlay() {
+        if (store.state.isPlaying) {
+            this.control.playIndicator.showIndicator('pause');
+            this.control.playInfoBar.pauseBtn();
+        } else {
+            this.control.playIndicator.showIndicator('play');
+            this.control.playInfoBar.playBtn();
+        }
+    }
+
     setData(key, value) {
         switch(key) {
             case 'cameraData':

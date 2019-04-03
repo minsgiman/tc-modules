@@ -16,7 +16,7 @@
     import timelineTimeController from './timeline_time_controller.vue';
     import timelineTimeSelector from './timeline_time_selector.vue';
     import eventMoveBtn from './event_move_btn.vue';
-    import toastcamAPIs from './../../service/toastcamAPIs';
+    import playIndicator from './play_indicator.vue';
     import store from '../../service/player/store';
     // import moment from 'moment';
     // import 'moment-timezone';
@@ -40,7 +40,8 @@
         eventMoveFullBtn: 'event_move_btn_full_wrap',
         timelineTimeController: 'timeline_time_controller_wrap',
         timelineTimeFullController: 'timeline_time_controller_full_wrap',
-        timelineTimeSelector: 'timeline_time_selector_wrap'
+        timelineTimeSelector: 'timeline_time_selector_wrap',
+        playIndicator: 'play_indicator'
     };
 
     export default {
@@ -50,6 +51,9 @@
         computed : {
             cameraData: function () {
                 return store.state.cameraData;
+            },
+            cameraConfig: function () {
+                return store.state.cameraConfig;
             },
             shopId: function () {
                 return store.state.shopId;
@@ -126,6 +130,7 @@
             this.timelineTimeController = this.createComponent(timelineTimeController, getElementId('timelineTimeController'), this.timelineTimeControllerEventHandler.bind(this), {timeline: this.timeline, fullMode: false});
             this.timelineTimeFullController = this.createComponent(timelineTimeController, getElementId('timelineTimeFullController'), this.timelineTimeControllerEventHandler.bind(this), {timeline: this.timeline, fullMode: true});
             this.timelineTimeSelector = this.createComponent(timelineTimeSelector, getElementId('timelineTimeSelector'), this.timelineTimeSelectorEventHandler.bind(this));
+            this.playIndicator = this.createComponent(playIndicator, getElementId('playIndicator'));
             setTimeout(() => {
                 this.timeline.requestPlay(this.playTime);
             },100);
@@ -155,7 +160,9 @@
                 if (elementId) {
                     vComponent.$mount('#' + elementId);
                 }
-                vComponent.$on('event', eventHandler);
+                if (eventHandler) {
+                    vComponent.$on('event', eventHandler);
+                }
                 return vComponent;
             },
             playStatusChangedHandler : function(status) {
@@ -246,7 +253,7 @@
                             if (status === "NetConnection.Connect.Closed" && this.config.streamStatus !== "off") {
                                 setTimeout(() => {
                                     if (this.playBtnStatus) {
-                                        this.playEventCb('reloadCameraDetail', status);
+                                        this.timeline.livePlayDataSet(status);
                                     }
                                 },4000);
                             } else {
@@ -256,7 +263,7 @@
                                         if (this.isLive && this.liveReloadCnt ==0){
                                             this.statusCheck = 0;
                                             this.liveReloadCnt++;
-                                            this.playEventCb('reloadCameraDetail', status);
+                                            this.timeline.livePlayDataSet(status);
                                         }
                                     },4000);
                                 }
@@ -308,7 +315,7 @@
                                     if (this.isLive && this.liveReloadCnt ==0){
                                         this.statusCheck = 0;
                                         this.liveReloadCnt++;
-                                        this.playEventCb('reloadCameraDetail', status);
+                                        this.timeline.livePlayDataSet(status);
                                     }
                                 },4000);
                             }
@@ -357,6 +364,11 @@
                                 this.errorStatusLayer.isCameraOffLastRec = true;
                             }
                             return;
+                        }
+                        break;
+                    case 'livePlayRequest':
+                        if (this.cameraConfig.streamStatus != "off") {
+                            this.player.play();
                         }
                         break;
                     case 'cvrPlayRequest':
@@ -424,6 +436,47 @@
                     case 'liveReloadCntUpdate':
                         this.liveReloadCnt = param.data;
                         break;
+                    case 'updateErrorStatus':
+                        var cameraStatus = true;
+                        var cameraStatusNum = 0;
+
+                        if(this.cameraConfig.streamStatus == "off"){
+                            cameraStatusNum = 1;
+                            setTimeout(() => {
+                                this.playInfoBar.pauseBtn();
+                                this.timeline.updateCursor((new Date).valueOf());
+                            }, 500);
+                        }else{
+                            if(this.cameraData.controlStatus === "CS" || this.cameraData.controlStatus === "on"){
+                                if (this.cameraData.recordType != "event") {
+                                    if(this.cameraData.streamStatus == "off" && check != 'NetStream.Play.Stop'){
+                                        cameraStatusNum = 2;
+                                        cameraStatus = false;
+                                        setTimeout(() => {
+                                            this.playInfoBar.pauseBtn();
+                                            this.timeline.updateCursor((new Date).valueOf());
+                                        }, 500);
+                                    }else{
+                                        cameraStatusNum = 0;
+                                        cameraStatus = true;
+                                    }
+                                }
+                            }else if(this.cameraData.controlStatus === "CE" || this.cameraData.controlStatus === "off"){
+                                if(this.cameraData.streamStatus == "off"){
+                                    cameraStatusNum = 4;
+                                    cameraStatus = false;
+                                    setTimeout(() => {
+                                        this.playInfoBar.pauseBtn();
+                                        this.timeline.updateCursor((new Date).valueOf());
+                                    }, 500);
+                                }else{
+                                    cameraStatusNum = 0;
+                                    cameraStatus = true;
+                                }
+                            }
+                        }
+                        this.errorStatusLayer.cameraStatusChange(cameraStatusNum);
+                        break;
                     default:
                         break;
                 }
@@ -440,7 +493,7 @@
                     if(this.isLive == false){
                         this.timeline.clickedCVRArea(new Date(this.timeline.x.invert($(".cursor").children("line").attr("x1")).getTime()));
                     }else{
-                        this.playEventCb('reloadCameraDetail');
+                        this.timeline.livePlayDataSet();
                     }
                 } else if (param.event === 'goLive') {
                     this.timeline.requestPlay();

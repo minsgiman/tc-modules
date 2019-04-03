@@ -102,6 +102,9 @@
             cameraData: function () {
                 return store.state.cameraData;
             },
+            cameraConfig: function () {
+                return store.state.cameraConfig;
+            },
             isFullScreen: function () {
                 return store.state.isFullScreen;
             },

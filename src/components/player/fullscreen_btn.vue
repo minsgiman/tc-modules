@@ -1,7 +1,7 @@
 <template>
     <span>
-        <button type="button" class="sp full" v-show="!isFullScreen" @click="pressedFullScreenButton()"></button>
-        <button type="button" class="sp small" v-show="isFullScreen" @click="pressedExitFullScreenButton()"></button>
+        <button type="button" :title="$t('ENTER_FULLSCREEN')" class="menu_btn fullscreen_btn full" v-show="!isFullScreen" @click="pressedFullScreenButton()"></button>
+        <button type="button" :title="$t('ENTER_FULLSCREEN')" class="menu_btn fullscreen_btn" v-show="isFullScreen" @click="pressedExitFullScreenButton()"></button>
     </span>
 </template>
 
