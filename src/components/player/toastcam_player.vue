@@ -11,7 +11,7 @@
     import playInfoBar from './play_info_bar.vue';
     import playTimer from './play_timer.vue';
     import errorStatusLayer from './error_status_layer.vue';
-    import cvrPlaySecureManager from './cvrPlaySecureManager.vue';
+    import cvrPlaySecureManager from './cvrplay_secure_manager.vue';
     import timelineDateSelector from './timeline_date_selector.vue';
     import timelineTimeController from './timeline_time_controller.vue';
     import timelineTimeSelector from './timeline_time_selector.vue';
