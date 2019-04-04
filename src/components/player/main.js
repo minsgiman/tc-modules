@@ -25,9 +25,13 @@ class player {
         });
     }
 
-    // requestPlay(time) {
-    //     this.control.timeline.requestPlay(time);
-    // }
+    requestPlay(time) {
+        this.control.timeline.requestPlay(time);
+    }
+
+    redrawEvents(events) {
+        this.control.timeline.redrawEvents(events);
+    }
 
     jumpToCvrWithSeconds(seconds) {
         if (seconds > 0) {

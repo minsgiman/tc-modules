@@ -4,28 +4,17 @@
     import Vue from 'vue';
 
     function getBrowserType() {
-        if((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1 )
-        {
+        if((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) {
             return 'opera';
-        }
-        else if(navigator.userAgent.indexOf("Chrome") != -1 )
-        {
+        } else if(navigator.userAgent.indexOf("Chrome") != -1) {
             return 'chrome';
-        }
-        else if(navigator.userAgent.indexOf("Safari") != -1)
-        {
+        } else if(navigator.userAgent.indexOf("Safari") != -1) {
             return 'safari';
-        }
-        else if(navigator.userAgent.indexOf("Firefox") != -1 )
-        {
+        } else if(navigator.userAgent.indexOf("Firefox") != -1) {
             return 'firefox';
-        }
-        else if((navigator.userAgent.indexOf("MSIE") != -1 ) || (!!document.documentMode == true )) //IF IE > 10
-        {
+        } else if((navigator.userAgent.indexOf("MSIE") != -1 ) || (!!document.documentMode == true)) {
             return 'ie';
-        }
-        else
-        {
+        } else {
             return 'unknown';
         }
     }
@@ -80,20 +69,10 @@
                 }
             },
             resume : function () {
-                if ($('#remoteVideosContainer').length) {
-                    if ($('#remoteVideosContainer').children('video').length) {
-                        $('#remoteVideosContainer').children('video')[0].play();
-                    }
-                }
+                this.player.resume();
             },
             pause : function () {
-                if (this.cameraData.recorderType == "recorder") {
-                    if ($('#remoteVideosContainer').length) {
-                        if ($('#remoteVideosContainer').children('video').length) {
-                            $('#remoteVideosContainer').children('video')[0].pause();
-                        }
-                    }
-                }
+                this.player.pause();
             },
             stop : function () {
                 $('#remoteVideosContainer').empty();
@@ -110,21 +89,33 @@
             getStatus : function () {
                 return this.player.getStatus();
             },
-            setPath : function (url, path) {
-                this.player.setPath(url, path);
+            zoomZone: function () {
+                return;
+            },
+            zoomVideo: function () {
+                return;
+            },
+            zoomVideoWithZoomablePoint : function(x, y) {
+                return;
+            },
+            zoomUp : function(zoom) {
+                return;
+            },
+            zoomUpWithZoom : function(zoom) {
+                return;
+            },
+            positionZoomable : function(zoom) {
+                return;
             },
             webRTCEventCallback : function (status) {
                 this.$emit('playerStatusChanged', status);
             },
-
             setData : function(key, value) {
                 this[key] = value;
             },
-
             getData : function(key) {
                 return this[key];
             }
-
         }
     }
 </script>

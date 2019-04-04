@@ -15,6 +15,7 @@
 
 <script>
     import toastcamAPIs from './../../../service/toastcamAPIs';
+    import store from '../../../service/player/store';
 
     // Returns the result of getUserMedia as a Promise.
     function requestUserMedia(constraints) {
@@ -100,9 +101,9 @@
         name : 'webrtcPlayer',
         props : [],
         computed : {
-            // currentCamera: function () {
-            //     return store.state.cameraData;
-            // }
+            cameraData: function () {
+                return store.state.cameraData;
+            }
         },
         data : function() {
             return {
@@ -263,6 +264,24 @@
                     });
                 }, (err) => {
                 });
+            },
+
+            resume : function () {
+                if ($('#remoteVideosContainer').length) {
+                    if ($('#remoteVideosContainer').children('video').length) {
+                        $('#remoteVideosContainer').children('video')[0].play();
+                    }
+                }
+            },
+
+            pause : function () {
+                if (this.cameraData.recorderType == "recorder") {
+                    if ($('#remoteVideosContainer').length) {
+                        if ($('#remoteVideosContainer').children('video').length) {
+                            $('#remoteVideosContainer').children('video')[0].pause();
+                        }
+                    }
+                }
             },
 
             stop : function() {

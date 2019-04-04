@@ -133,77 +133,49 @@
                 }, 200);
             },
             resume : function () {
-                if (this.player.resume) {
-                    this.player.resume();
-                }
+                this.player.resume();
             },
             pause : function () {
-                if (this.player.pause) {
-                    this.player.pause();
-                }
+                this.player.pause();
             },
             stop : function () {
-                if (this.player.stop) {
-                    this.player.stop();
-                }
+                this.player.stop();
             },
             close : function () {
-                if (this.player.close) {
-                    this.player.close();
-                }
+                this.player.close();
             },
             getCurrentTime : function () {
-                if (this.player.getCurrentTime) {
-                    return this.player.getCurrentTime();
-                }
+                return this.player.getCurrentTime();
             },
             getStatus : function () {
-                if (this.player.getStatus) {
-                    return this.player.getStatus();
-                }
+                return this.player.getStatus();
             },
             zoomZone : function (top, left) {
-                if (this.player.zoomZone) {
-                    this.player.zoomZone(top, left);
-                }
+                this.player.zoomZone(top, left);
             },
             zoomVideo : function (ratio) {
-                if (this.player.zoomVideo) {
-                    this.player.zoomVideo(ratio);
-                }
+                this.player.zoomVideo(ratio);
             },
             zoomVideoWithZoomablePoint : function(x, y) {
-                if (this.player.zoomVideoWithZoomablePoint) {
-                    this.player.zoomVideoWithZoomablePoint(x, y);
-                }
+                this.player.zoomVideoWithZoomablePoint(x, y);
             },
             zoomUp : function(zoom) {
-                if (this.player.zoomUp) {
-                    this.player.zoomUp(zoom);
-                }
+                this.player.zoomUp(zoom);
             },
             zoomUpWithZoom : function(zoom) {
-                if (this.player.zoomUpWithZoom) {
-                    this.player.zoomUpWithZoom(zoom);
-                }
+                this.player.zoomUpWithZoom(zoom);
             },
             positionZoomable : function(zoom) {
-                if (this.player.positionZoomable) {
-                    this.player.positionZoomable(zoom);
-                }
+                this.player.positionZoomable(zoom);
             },
             playerStatusChangedHandler : function (status) {
                 this.$emit('event', status);
             },
             setData : function(key, value) {
-                if (this.player.setData) {
-                    this.player.setData(key, value);
-                }
+                this.player.setData(key, value);
             },
             getData : function(key) {
-                if (this.player.getData) {
-                    return this.player.getData(key);
-                }
+                return this.player.getData(key);
             }
         }
     }
