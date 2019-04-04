@@ -3,15 +3,6 @@
         <div class="time_bar" id="view_time_bar">
             <div class="timebar_outer toggle">
                 <div class="timebar">
-                    <div class="thumbnail-container time_info" id="showThumbnailListNew" style="left: 0px; top: 0px; z-index: 800;">
-                        <div id="thumnail_prev" style="float: left; font-size: 10px; display: none; position: absolute; z-index: 1;">
-                            <button type="button" id="thumnail_prev_btn" @click="showThum(-1)" style="background: url(/resources/images/icon_fs_timebar_left_N.png) no-repeat; width: 20px; height: 20px; margin-top: 44px; margin-left: 8px;"></button>
-                        </div>
-                        <div id="thumbnailList"></div>
-                        <div id="thumnail_next" style="float: right; font-size: 10px; display: none; position: absolute; left: 573px;">
-                            <button type="button" id="thumnail_next_btn" @click="showThum(1)" style="background: url(/resources/images/icon_fs_timebar_right_N.png) no-repeat; width: 20px; height: 20px; display: none; margin-top: 44px; margin-left: -4px;"></button>
-                        </div>
-                    </div>
                     <div class="thumbnail-container time_info time_info_tri" id="time_info_tri" style="display: none;"></div>
                     <div class="timebar_area" id="timebar_area" style="z-index: 1000; position: relative;"></div>
                 </div>
@@ -38,7 +29,7 @@
         });
     };
 
-    var nowWitdh = 0, dragX = 0, draging = 0, dblClickTime = 0, timelineClick = false, thumnailViewFlag = false,
+    var nowWitdh = 0, dragX = 0, draging = 0, dblClickTime = 0, timelineClick = false,
         timelineDrawFlag = true, dragFlag = false, dragEndStatus = false, dblClicklive = false, startTimeline = 0,
         serivceDayOver = false, thatEnd, thatStart, browserLang = $("html").attr("lang"), removeWidthStop = true,
         zoneId = 0, timelineSgidMap = new HashMap(), timelineSgidWidthMap = new HashMap(), boundDateFormat = browserLang === 'ja' ? 'M月D日(ddd)' : 'M월 D일(ddd)';
@@ -144,22 +135,11 @@
                 cursorInterval: 1000,
                 serviceDateTime: 0,
 
-                showThumClick: 0,
-                thumnailDraw: true,
                 dblClickFlag: false,
-                thumNailFlag: false,
-                thumNailIntervalId: null,
                 cursorOn: false,
-                eventThumbIndex: 0,
                 sgid: '',
                 beforeSgid: '',
                 beforeCheckedLength: 0,
-                thumPageCnt: 1,
-                thumNailDataList: null,
-                startThumSize: 0,
-                endThumSize: 0,
-                thumTotal: 0,
-                thumname_list: [],
                 lastTimestamp: 0,
                 isCursorLeft : false,
                 isCursorRight : false,
@@ -180,7 +160,6 @@
                 cursorDragStatus : false,
                 isLoading: false,
                 nowScale : "1h",
-                dragThumCancle : false,
                 newTimelineDragCnt : 0,
                 clickTime : 0,
                 cachedTimelineparams : null,
@@ -207,13 +186,13 @@
                 .attr('class', 'no-select');
 
             this.mainContainer = this.svg.append('g').attr({
-                'transform': 'translate(0, -19)'
+                'transform': 'translate(0, -33)'
             });
 
             var cvrBgDrag = this.setDragEvent();
 
             this.accessIcons = this.mainContainer.append('g').attr('class', 'accessIcons');
-            this.motionEvents = this.mainContainer.append('g').attr('class', 'motions');
+            this.motionEvents = this.mainContainer.append('g').attr('class', 'motions').attr("transform", "translate(0, -3)");
             this.audioEvents = this.mainContainer.append('g').attr('class', 'audios');
             this.scaleEvents = this.mainContainer.append('g').attr('class', 'scales');
             this.sensorEvents = this.mainContainer.append('g').attr('class', 'sensors');
@@ -239,7 +218,6 @@
                 this.dblClickFlag = true;
                 this.newTimelineDragCnt = 0;
                 var now = new Date();
-                $("#showThumbnailListNew").hide();
                 $("#time_info_tri").hide();
                 if (now.getTime() - this.previousDblClickTime < 500) return;
                 this.previousDblClickTime = now.getTime();
@@ -298,6 +276,7 @@
                     return;
                 }
 
+                this.playEventCallback('clickedCVRArea', time);
                 setTimeout(() => {
                     this.$emit('event', {event: 'cvrPlayRequest', data: {time, status}});
                 },800);
@@ -363,9 +342,6 @@
             setupDomain : function(domain) {
                 if(this.isShared == true){
                     this.playEventCallback('shareEnd');
-                }
-                if(this.dragThumCancle == true){
-                    return;
                 }
 
                 this.cachedTimelineparams = {
@@ -500,14 +476,13 @@
                 if(this.dragTimeLine == true){
                     this.dragTimeLine = false;
                     if (this.isFullScreen) {
-                        $("#timebar_area").children("svg").children("g").attr("transform","translate(0, -15)");
+                        $("#timebar_area").children("svg").children("g").attr("transform","translate(0, -34)");
                     }else{
-                        $("#timebar_area").children("svg").children("g").attr("transform","translate(0, -19)");
+                        $("#timebar_area").children("svg").children("g").attr("transform","translate(0, -33)");
                     }
                     $(".cvr").attr("transform","");
                     $(".cursor").attr("transform","");
                     this.playEventCallback('changedSelectedZone');
-                    this.thumnailDraw = true;
                 }
                 store.dispatch('EVENTS_CHANGE', data.events);
                 store.dispatch('CVR_DATA_CHANGE', data.recTimes);
@@ -535,9 +510,7 @@
 
                 return d3.behavior.drag()
                     .on('dragstart', () => {
-                        that.dragThumCancle = true;
                         that.changeTimeRangeFlag = true;
-                        that.thumnailDraw = false;
                     })
                     .on('drag', () => {
                         if(timelineDrawFlag == false){
@@ -545,7 +518,6 @@
                         }
                         that.beforeSgid = '';
                         $("#time_info_tri").hide();
-                        $("#showThumbnailListNew").hide();
                         removeWidthStop = true;
                         draging++;
 
@@ -618,7 +590,6 @@
                         $(".cvrBG2").attr("x",dragX*-1);
                     })
                     .on('dragend', () => {
-                        that.dragThumCancle = false;
                         that.beforeSgid = '';
                         that.newTimelineDragCnt = 0;
                         if(dragX < -10){
@@ -749,7 +720,6 @@
             },
 
             zoomDomain : function(time, timeRange) {
-                thumnailViewFlag = false;
                 store.dispatch('TIME_RANGE_CHANGE', timeRange);
 
                 var range = 1000*60 * timeRange;
@@ -793,7 +763,6 @@
             prevDomain : function() {
                 this.$emit('event', {event: 'moveDomain'});
                 this.newTimelineDragCnt = 0;
-                this.dragThumCancle = false;
                 var diff = this.timeRange * 60 * 1000;
                 var newDomain = [this.currentDomain[0] - diff, this.currentDomain[1] - diff];
                 return this.changeDomain(newDomain);
@@ -802,7 +771,6 @@
             nextDomain : function() {
                 this.$emit('event', {event: 'moveDomain'});
                 this.newTimelineDragCnt = 0;
-                this.dragThumCancle = false;
                 var diff = this.timeRange * 60 * 1000;
                 var newDomain = [this.currentDomain[0] + diff, this.currentDomain[1] + diff];
                 return this.changeDomain(newDomain);
@@ -1305,9 +1273,7 @@
                         dblClicklive = that.isLive;
                         dblClickTime = that.currentTime.valueOf();
                         that.lineMoveFlag = false;
-                        that.thumnailDraw = true;
                         store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
-                        that.dragThumCancle = false;
                         timelineClick = true;
                         if ((new Date().getTime()) - that.previousDblClickTime < 500) return; // animating caused by dbl click.
 
@@ -1333,13 +1299,11 @@
                 }).on('mousemove', function () {
                     var mouseLocation = d3.mouse(this);
                     var selectedTime = that.x.invert(mouseLocation[0]);
-                    that.cvrMouseoverEventsNew(mouseLocation[0], selectedTime);
                 }).on('mouseout', function () {
                 });
 
                 cvrBG2.on('mousemove', function () {
                     $("#time_info_tri").hide();
-                    $("#showThumbnailListNew").hide();
                 });
             },
 
@@ -1351,7 +1315,6 @@
                         if(that.firstDataLoadingFlag == false){
                             return;
                         }
-                        $("#showThumbnailListNew").hide();
                         $("#time_info_tri").hide();
                         that.cursorOn = true;
                         that.$emit('event', {event: 'stopPlayTimer'});
@@ -1377,7 +1340,6 @@
                         store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
                         that.cursorDragStatus = false;
                         that.$emit('event', {event: 'liveReloadCntUpdate', data: 0});
-                        that.dragThumCancle = false;
                         that.$emit('event', {event: 'checkCVRSeucre', data: function(isSecureMode){
                                 if(isSecureMode){
                                     that.$emit('event', {event: 'updateCVRSecureStatus', data: function() {that.cursorDragEnd();}});
@@ -1912,7 +1874,6 @@
                         $(".motions").fadeIn(200);
                         this.drawEvents();
                         this.changeTimeRangeClick = false;
-                        thumnailViewFlag = true;
                         removeWidthStop = false;
                     },180);
                 }else{
@@ -1996,10 +1957,6 @@
                         .call(that.getSmallTicks());
 
                     if(dragEndStatus == true){
-                        setTimeout(function(){
-                            that.dragThumCancle = false;
-                        },380);
-
                         dragEndStatus = false;
                     }else{
                         $(".motions").fadeOut(150);
@@ -2121,7 +2078,6 @@
 
             goCvr : function(time, status) {
                 this.$emit('event', {event: 'stopPlayTimer'});
-                this.dragThumCancle = false;
                 var tmpX = 9999;
 
                 if(time == undefined){
@@ -2197,7 +2153,6 @@
                 this.changeTimeRangeClick = true;
 
                 this.lineMoveFlag = false;
-                this.dragThumCancle = false;
                 this.zoomDomain(Date.now(), this.timeRange);
                 this.$emit('event', {event: 'startLiveTimer'});
                 this.livePlayDataSet();
@@ -2341,95 +2296,6 @@
                 }});
             },
 
-            cvrMouseoverEventsNew : function (x, mousetime) {
-                if(this.thumnailDraw == false || this.dblClickFlag == true){
-                    return;
-                }
-                if(this.isFullScreen || this.thumNailFlag == true){
-                    return;
-                }
-
-                if(this.dragThumCancle == true){
-                    return;
-                }
-
-                this.thumNailIntervalId = setInterval(() => {
-                    this.thumNailFlag = false;
-                }, 150);
-
-                if (!this.cursorOn) {
-                    this.thumNailFlag = true;
-                    var timebarWidth = parseInt(d3.select('.timebar').style('width'));
-
-                    if (this.isFullScreen) {
-                        if (x < 0) {
-                            x = 0;
-                        } else if (x > timebarWidth - 180) {
-                        }
-                    }
-                    x = x + 5;
-                    var xFlag = false;
-                    var start = 0;
-                    var end = 0;
-                    var checkMapIdx = 0;
-
-                    for(var i = 0; i < timelineSgidWidthMap.size(); i++){
-                        start = timelineSgidWidthMap.keyArray[i][0];
-                        end = timelineSgidWidthMap.keyArray[i][1];
-                        checkMapIdx = i;
-                        if(start <= x + 1 && end >= x - 5){
-                            xFlag = true;
-                            break;
-                        }
-                    }
-                    var tmp = x;
-
-                    $("#thumTimeInfoTri").css("left",tmp+"px");
-                    if(xFlag == true){
-                        var sgid = timelineSgidWidthMap.get(timelineSgidWidthMap.keyArray[checkMapIdx]);
-
-                        var checkMotionX = timelineSgidWidthMap.keyArray[checkMapIdx][0];
-                        var checkMotionCnt = 0;
-                        for(var i=checkMapIdx-10;i<=checkMapIdx+10;i++){
-                            if($(".motion").eq(i).attr("x") != undefined){
-                                if($(".motion").eq(i).css("display") != "none" && checkMotionX.toFixed(2) == parseFloat($(".motion").eq(i).attr("x")).toFixed(2)){
-                                    checkMotionCnt++;
-                                }
-                            }
-                        }
-
-                        if(checkMotionCnt == 0){
-                            return;
-                        }
-
-                        var currentCheckedLength = store.getters.getAllFilteredZonesIds().length;
-                        if(this.beforeSgid == sgid && this.beforeCheckedLength == currentCheckedLength){
-                            if(this.thumTotal > 0){
-                                if(parseInt($("#showThumbnailListNew").css("left")) > x){
-                                    x = parseInt($("#showThumbnailListNew").css("left"));
-                                }else if(parseInt($("#showThumbnailListNew").css("left"))+parseInt($("#showThumbnailListNew").css("width")) < parseInt($("#time_info_tri").css("width")) + x){
-                                    x = parseInt($("#showThumbnailListNew").css("left"))+parseInt($("#showThumbnailListNew").css("width")) - parseInt($("#time_info_tri").css("width"))+2;
-                                }
-                                $("#time_info_tri").css("left",parseInt(x+3));
-                                $("#time_info_tri").show();
-                                $("#showThumbnailListNew").show();
-                            }
-                            return;
-                        }else{
-                            this.beforeSgid = sgid;
-                            this.beforeCheckedLength = currentCheckedLength;
-                        }
-
-                        this.thumPageCnt = 1;
-                        this.thumNailDataList = new HashMap();
-                        this.thumnailData(sgid, start, end, 0, "N", x);
-                    }else{
-                        $("#time_info_tri").hide();
-                        $("#showThumbnailListNew").hide();
-                    }
-                }
-            },
-
             cursorDragEnd : function () {
                 var curosEmptyData = 0;
                 this.cursorOn = false;
@@ -2464,257 +2330,6 @@
 
                 if(cursorTime > right+curosEmptyData){
                     this.nextDomain();
-                }
-            },
-
-            thumnailData : function(sgid,start,end,lastTimestamp,status,x){
-                this.sgid = sgid;
-                this.startThumSize = start;
-                this.endThumSize = end;
-                var filteredMotionZoneIds = this.motionZones.filter(item => item.filterMark === 'on' && item.id !== '9').map(item => item.uid);
-                var filteredEventZoneIds = this.eventZones.filter(item => item.filterMark === 'on').map(item => item.id);
-                var allFilteredZoneIds = filteredMotionZoneIds.concat(filteredEventZoneIds);
-                var deleteZone = this.motionZones.find(item => item.id === 9);
-                var isCheckedDeleteZoneId = (deleteZone && deleteZone.filterMark === 'on') ? true : false;
-
-                if (isCheckedDeleteZoneId) {
-                    allFilteredZoneIds.push("d");
-                }
-
-                if(!this.isShared){
-                    toastcamAPIs.call(toastcamAPIs.camera.GET_THUMBNAIL, {
-                        cameraId: this.cameraData.id,
-                        sgid: sgid,
-                        scale: this.nowScale,
-                        count:4,
-                        lastTimestamp:lastTimestamp,
-                        zones: allFilteredZoneIds.join(",")
-                    }, (data) => {
-                        this.thumbnailDataSet(data,sgid,start,end,lastTimestamp,status,x);
-                    }, (err) => {
-                    });
-                }else{
-                    toastcamAPIs.call(toastcamAPIs.camera.GET_SHRARE_CAM_THUMBNAIL, {
-                        cameraId: this.cameraData.id,
-                        sgid: sgid,
-                        scale: this.nowScale,
-                        count:4,
-                        lastTimestamp:lastTimestamp,
-                        zones: allFilteredZoneIds.join(",")
-                    }, (data) => {
-                        this.thumbnailDataSet(data,sgid,start,end,lastTimestamp,status,x);
-                    }, (err) => {
-                        this.playEventCallback('shareEnd');
-                    });
-                }
-            },
-
-            setThumEventTime : function (time) {
-                var dateString;
-                var today = moment(new Date());
-                var targetDate = new Date(parseInt(time));
-                var targetMoment = moment(targetDate);
-
-                var dateString = targetMoment.locale(browserLang).format(this.$i18n.t('CLIPS_SORT_BY_DATE_TITLE_FORMAT'));
-                var todayString = today.locale(browserLang).format(this.$i18n.t('CLIPS_SORT_BY_DATE_TITLE_FORMAT'));
-                if (dateString === todayString) {
-                    dateString = this.$i18n.t('TIMELINE_TODAY');
-                }
-
-                var timeformat = d3.time.format("%H:%M");
-                var timeString = timeformat(targetDate);
-
-                return dateString + " " + timeString;
-            },
-
-            thumbnailDataSet : function(data,sgid,start,end,lastTimestamp,status,x){
-                if(data.events == undefined){
-                    $("#showThumbnailListNew").hide();
-                    $("#time_info_tri").hide();
-                    return;
-                }
-
-                if(data.events.length == 0){
-                    $("#showThumbnailListNew").hide();
-                    $("#time_info_tri").hide();
-                    return;
-                }
-
-                this.thumTotal = data.totalCount;
-                var thumname_move = (start + end) / 2;
-                var html = "";
-                this.thumname_list = [];
-                if(data.totalCount == 0){
-                    return;
-                }
-
-                if(data.events == null){
-                    return;
-                }
-
-                for(var i=0;i<data.events.length;i++){
-                    var eventTime = this.setThumEventTime(data.events[i].startTime);
-                    var path = "";
-                    if(location.port != ""){
-                        path = location.protocol+"//"+data.events[i].filePath.replace(".com/",".com:"+location.port+"/");
-                    }else{
-                        path = location.protocol+"//"+data.events[i].filePath;
-                    }
-
-                    html +='<div id="thumnail_'+i+'" style="float:left;font-size:11px;height:103px';
-                    if(i>4){
-                        html+='display:none;';
-                    }
-
-                    if(data.events[i].index == 0){
-                        data.events[i].labelName = this.$i18n.t('EVENT_SOUND_AREA');
-                    }else if(data.events[i].index == 8 || data.events[i].color == ""){
-                        data.events[i].labelName = this.$i18n.t('EVENT_ETC_AREA');
-                        data.events[i].color = "#FFFFFF";
-                    }
-
-                    html +='">';
-                    var motionItem, eventItem, imgIndex = "";
-
-                    if (data.events[i].detectType === "motion") {
-                        motionItem = this.motionZones.find(item => item.uid === data.events[i].uindex && item.id !== '9');
-                        imgIndex = motionItem ? motionItem.id : '';
-                    } else {
-                        eventItem = this.eventZones.find(item => item.id === data.events[i].uindex);
-                        imgIndex = eventItem ? eventItem.id : '';
-                    }
-
-                    if(imgIndex == "" || typeof imgIndex === 'undefined'){
-                        imgIndex = "9";
-                    }
-
-                    html +='<div style="font-size:12px;position:relative;top:2px;z-index:4;color:'+data.events[i].color+';background:rgba(0,0,0,.7);width:147px;left:1px;line-height: 22px;"><img src="/resources/im/ic_area_color0'+imgIndex+'_N.png" style="top: 3px;position: relative;">&nbsp;'+data.events[i].labelName+'<br></div>';
-                    html +='<span style="margin-left: 1px;top:-20px;position: relative;z-index: 0;"><a ng-click="pressedThumNailEventItem('+data.events[i].startTime+',\'timeline\')"><img src="'+path+'" onerror="imgError()" style="width:145px;height:98px; border:1px solid rgba(0,0,0,.7)"></a></span>';
-
-                    var colorId =data.events[i].color;
-
-                    if(colorId == ""){
-                        colorId = "#f0f0f0";
-                    }
-
-                    var eventDate = (new Date(parseInt(data.events[i].startTime))).getYear()+""+(new Date(parseInt(data.events[i].startTime))).getMonth()+""+(new Date(parseInt(data.events[i].startTime))).getDate();
-                    var todayDate = (new Date()).getYear()+""+(new Date()).getMonth()+""+(new Date()).getDate();
-
-                    if(eventDate == todayDate){
-                        html +='<div style="margin:0 auto;width:70px;line-height: 22px;position: relative;top: -44px;z-index:10; background:rgba(0,0,0,.6);"><div style="color:#fff; font-size:12px;"><span>'+eventTime+'</span></div></div></div>';
-                    }else{
-                        html +='<div style="margin:0 auto;width:94px;line-height: 22px;position: relative;top: -44px;z-index:10; background:rgba(0,0,0,.6);"><div style="color:#fff; font-size:12px;"><span>'+eventTime+'</span></div></div></div>';
-                    }
-
-                    this.thumname_list.push('thumnail_'+i);
-                    if(lastTimestamp == 0 && status == "N"){
-                        $("#thumnail_prev_btn").hide();
-                        $("#thumnail_next_btn").hide();
-                        $("#thumnail_prev").css("height","");
-                        $("#thumnail_next").css("height","");
-                    }
-                    if(i == 0){
-                        this.lastTimestamp = data.events[i].startTime;
-                    }
-
-                    if(status == "N"){
-                        this.thumNailDataList.put(i,data.events[i]);
-                    }else{
-                        this.thumNailDataList.put(this.thumPageCnt + 3,data.events[i]);
-                    }
-                }
-
-                $("#thumbnailList").html(html);
-
-                $("#thumbnailList").css("padding","1px");
-                $("#thumbnailList").css("padding-top","0px");
-                for(var i=0;i<data.events.length;i++){
-                    $("#thumnail_"+i).find("img").error(function(){
-                        $(this).attr('src', '/resources/im/@thumb/thmb_none.jpg');
-                    });
-                }
-
-                switch(data.totalCount){
-                    case 1:
-                        $("#showThumbnailListNew").css("width","151px");
-                        break;
-                    case 2:
-                        $("#showThumbnailListNew").css("width","299px");
-                        break;
-                    case 3:
-                        $("#showThumbnailListNew").css("width","447px");
-                        break;
-                    case 4:
-                        $("#showThumbnailListNew").css("width","595px");
-                        break;
-                    default:
-                        $("#showThumbnailListNew").css("width","595px");
-                        $("#thumnail_prev").css("height","103px");
-                        $("#thumnail_next").css("height","103px");
-                        break;
-                }
-
-                $("#showThumbnailListNew").css("height","104px");
-
-                if(status == "N"){
-                    if(data.totalCount > 4){
-                        $("#thumnail_prev_btn").hide();
-                        $("#thumnail_next_btn").show();
-                        $("#thumnail_next").show();
-                        $("#thumnail_prev").show();
-                    }
-
-                    thumname_move = thumname_move - parseInt($("#showThumbnailListNew").width() / 2);
-
-                    if(thumname_move <= 0){
-                        thumname_move = 0;
-                    }
-
-                    if($("#view_timeline_ctrl").width() < thumname_move+ $("#showThumbnailListNew").width()){
-                        thumname_move = parseInt($("#showThumbnailListNew").css("left")) - ($("#showThumbnailListNew").width() - ($("#view_timeline_ctrl").width() - parseInt($("#showThumbnailListNew").css("left"))));
-                    }
-                    var timeInfo = x;
-                    $("#showThumbnailListNew").css("left",parseInt(thumname_move));
-                    $("#time_info_tri").css("left",parseInt(timeInfo+3));
-                    $("#thumbnailList").append('<div class= "timelineafter"></div>');
-                    $("#showThumbnailListNew").css("top","-89px");
-                    if(data.events.length > 0){
-                        $("#time_info_tri").show();
-                        $("#showThumbnailListNew").show();
-                    }
-
-                }
-                this.playEventCallback('thumbItemCompile');
-                this.showThumClick = 0;
-            },
-
-            showThum : function(check){
-
-                if(this.showThumClick == 0){
-                    this.showThumClick++;
-                    $("#thumnail_prev_btn").show();
-                    $("#thumnail_next_btn").show();
-                    if(check == 1){
-                        this.thumnailData(this.sgid, this.startThumSize, this.endThumSize, this.lastTimestamp, "T");
-
-                        if(this.thumPageCnt + 4 == this.thumTotal){
-                            $("#thumnail_next_btn").hide();
-                        }
-                        this.thumPageCnt++;
-                    }else{
-                        this.thumPageCnt--;
-                        if(this.thumPageCnt == 1){
-                            this.lastTimestamp = 0;
-                        }else{
-                            this.lastTimestamp = this.thumNailDataList.get(this.thumPageCnt-2).startTime;
-                        }
-                        this.thumnailData(this.sgid, this.startThumSize, this.endThumSize, this.lastTimestamp, "P");
-
-                        if(this.thumPageCnt == 1){
-                            $("#thumnail_prev_btn").hide();
-                            $("#thumnail_next_btn").show();
-                        }
-                    }
                 }
             },
 
@@ -2785,7 +2400,6 @@
 
             destroy : function() {
                 window.onresize = null;
-                clearInterval(this.thumNailIntervalId);
             }
         }
     }

@@ -1,5 +1,5 @@
 <template>
-    <div id="play_indicator">
+    <div id="play_indicator" @click="togglePlay">
         <div class="btn_wrap"></div>
     </div>
 </template>
@@ -13,6 +13,9 @@
         computed: {
             isFullScreen: function () {
                 return store.state.isFullScreen;
+            },
+            isPlaying: function () {
+                return store.state.isPlaying;
             }
         },
         data: function () {
@@ -23,6 +26,7 @@
         created : function() {
         },
         mounted : function() {
+            this.updateIndicatorSize();
         },
         beforeDestroy : function() {
         },
@@ -47,9 +51,6 @@
                     }
 
                     const $btn = $('<button>', {class: className});
-                    if (this.isFullScreen) {
-                        $btn.addClass('fullscreen_mode');
-                    }
                     $('#play_indicator .btn_wrap').append($btn);
                     setTimeout(function () {
                         $btn.addClass('animate');
@@ -58,6 +59,20 @@
                         $btn.remove();
                     }, 700);
                 }, 200);
+            },
+
+            togglePlay: function() {
+                if (this.isPlaying) {
+                    this.showIndicator('pause');
+                } else {
+                    this.showIndicator('play');
+                }
+                this.$emit('event', {event: 'togglePlay'});
+            },
+
+            updateIndicatorSize: function() {
+                $('#play_indicator').css('width', $("#player").width() - 200);
+                $('#play_indicator').css('height', $("#player").height());
             },
 
             destroy : function() {
@@ -69,14 +84,14 @@
 <style lang="less">
     #play_indicator {
         width: 100%;
-        height: 30vw;
+        height: 100%;
         position: absolute;
         display:table;
         z-index: 1;
         top: 0px;
-        left: 0px;
+        right: 0px;
         .btn_wrap {
-            display:table-cell; text-align:center; vertical-align:middle; width:100%; height:100%;
+            display:table-cell; text-align:center; vertical-align:middle; width:100%; height:100%; padding-right:200px;
             button {
                 position: absolute;
                 width:40px;
@@ -102,9 +117,6 @@
                 &.right_btn {
                     background:url(/resources/img/btn-cvr-forward-white.png) no-repeat;
                     background-size:contain;
-                }
-                &.fullscreen_mode {
-                    margin-top:100px;
                 }
                 &.animate {
                     transition: all 0.7s;

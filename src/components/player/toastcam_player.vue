@@ -130,7 +130,7 @@
             this.timelineTimeController = this.createComponent(timelineTimeController, getElementId('timelineTimeController'), this.timelineTimeControllerEventHandler.bind(this), {timeline: this.timeline, fullMode: false});
             this.timelineTimeFullController = this.createComponent(timelineTimeController, getElementId('timelineTimeFullController'), this.timelineTimeControllerEventHandler.bind(this), {timeline: this.timeline, fullMode: true});
             this.timelineTimeSelector = this.createComponent(timelineTimeSelector, getElementId('timelineTimeSelector'), this.timelineTimeSelectorEventHandler.bind(this));
-            this.playIndicator = this.createComponent(playIndicator, getElementId('playIndicator'));
+            this.playIndicator = this.createComponent(playIndicator, getElementId('playIndicator'), this.playIndicatorEventHandler.bind(this));
             setTimeout(() => {
                 this.timeline.requestPlay(this.playTime);
             },100);
@@ -338,6 +338,7 @@
                             }
                         }
                         this.playInfoBar.camInfoBarChange();
+                        this.playIndicator.updateIndicatorSize();
                         break;
                     case 'stopPlayTimer':
                         this.playTimer.stopTimer();
@@ -589,6 +590,16 @@
                 }
             },
 
+            playIndicatorEventHandler: function (param) {
+                if (param.event === 'togglePlay') {
+                    if (this.isPlaying) {
+                        this.playInfoBar.pauseBtn();
+                    } else {
+                        this.playInfoBar.playBtn();
+                    }
+                }
+            },
+
             errorLayerEventHandler : function(param) {
                 if (param.event === 'lastEvent') {
                     this.timeline.lastEvent = param.value;
@@ -632,10 +643,10 @@
                     $("#footer").hide();
                     $("#header").hide();
                     $("#timelinedesc").css("top",51);
-                    $("#prevLineBtn").css("top",40);
-                    $("#nextLineBtn").css("top",40);
-                    $("#cursorLeftBtn").css("top",35);
-                    $("#cursorRightBtn").css("top",35);
+                    $("#prevLineBtn").css("top",35);
+                    $("#nextLineBtn").css("top",35);
+                    $("#cursorLeftBtn").css("top",30);
+                    $("#cursorRightBtn").css("top",30);
                     // $("#player").css("height","");
                     this.fullScreenMakeViewTimeout = setTimeout(() => {
                         $(".fs_time").show();
@@ -644,7 +655,7 @@
                         // $("#controlNdTimeLine").css("top", $("#player").height() - $("#view_timeline_area").height() -10);
                         $("#showControl").show();
                         // $("#showControl").css("top", $("#player").height() - $("#controlNdTimeLine").height() + 91);
-                        $("#timebar_area").children("svg").children("g").attr("transform", 'translate(0, -15)');
+                        $("#timebar_area").children("svg").children("g").attr("transform", 'translate(0, -34)');
                         // $("#timebar_area").children("svg").height("105");
                         this.timeline.redrawWithWidth(parseInt($("#fullscreen").width()));
                     },1050);
@@ -664,6 +675,7 @@
                 var topDefault = 96;
                 this.timeline.newTimelineDragCnt = 0;
                 this.playEventCb('isFullScreenChanged', fullscreenStatus);
+                this.playIndicator.updateIndicatorSize();
 
                 if (fullscreenStatus) {
                     $("#cloud_out_small").hide();
@@ -728,8 +740,8 @@
 
                     this.playEventCb('timelineHideTimerStop');
                     $("#showControl").hide();
-                    $("#timebar_area").children("svg").children("g").attr("transform", 'translate(0, -19)');
-                    $("#timebar_area").children("svg").height("85");
+                    $("#timebar_area").children("svg").children("g").attr("transform", 'translate(0, -33)');
+                    $("#timebar_area").children("svg").height("76");
                     $("#controlNdTimeLine").css("position","");
                     $("#controlNdTimeLine").css("top", "");
                     $("#timelinedesc").css("top","51px");
