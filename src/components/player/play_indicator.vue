@@ -49,8 +49,13 @@
                     } else if (type === 'backward') {
                         className = 'right_btn';
                     }
-
                     const $btn = $('<button>', {class: className});
+                    if (type === 'forward' || type === 'backward') {
+                        const $num = $('<span>');
+                        $num.text(10);
+                        $num.css('color', 'white').css('font-size', '8px').css('display', 'inline-block').css('margin-top', '2px');
+                        $btn.append($num);
+                    }
                     $('#play_indicator .btn_wrap').append($btn);
                     setTimeout(function () {
                         $btn.addClass('animate');
@@ -94,8 +99,8 @@
             display:table-cell; text-align:center; vertical-align:middle; width:100%; height:100%; padding-right:200px;
             button {
                 position: absolute;
-                width:40px;
-                height:40px;
+                width:52px;
+                height:52px;
                 margin: 0 auto;
                 -webkit-transition: opacity 0.7s ease-in-out;
                 -moz-transition: opacity 0.7s ease-in-out;
@@ -120,7 +125,7 @@
                 }
                 &.animate {
                     transition: all 0.7s;
-                    transform: scale(2);
+                    transform: scale(1.5);
                     opacity: 0;
                 }
             }

@@ -2171,7 +2171,7 @@
 
             livePlayConfigDataSet : function(check){
                 var cameraStatus = true;
-                this.$emit('event', {event: 'updateErrorStatus'});
+                this.$emit('event', {event: 'updateErrorStatus', data: check});
 
                 if(this.cameraData.controlStatus === "CS" || this.cameraData.controlStatus === "on") {
                     if (this.cameraData.recordType != "event") {

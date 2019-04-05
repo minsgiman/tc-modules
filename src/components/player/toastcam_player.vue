@@ -15,6 +15,7 @@
     import timelineDateSelector from './timeline_date_selector.vue';
     import timelineTimeController from './timeline_time_controller.vue';
     import timelineTimeSelector from './timeline_time_selector.vue';
+    import calendarBtn from './calendar_btn.vue';
     import eventMoveBtn from './event_move_btn.vue';
     import playIndicator from './play_indicator.vue';
     import store from '../../service/player/store';
@@ -41,7 +42,8 @@
         timelineTimeController: 'timeline_time_controller_wrap',
         timelineTimeFullController: 'timeline_time_controller_full_wrap',
         timelineTimeSelector: 'timeline_time_selector_wrap',
-        playIndicator: 'play_indicator'
+        playIndicator: 'play_indicator',
+        calendarBtn: 'calendar_btn'
     };
 
     export default {
@@ -131,6 +133,7 @@
             this.timelineTimeFullController = this.createComponent(timelineTimeController, getElementId('timelineTimeFullController'), this.timelineTimeControllerEventHandler.bind(this), {timeline: this.timeline, fullMode: true});
             this.timelineTimeSelector = this.createComponent(timelineTimeSelector, getElementId('timelineTimeSelector'), this.timelineTimeSelectorEventHandler.bind(this));
             this.playIndicator = this.createComponent(playIndicator, getElementId('playIndicator'), this.playIndicatorEventHandler.bind(this));
+            this.calendarBtn = this.createComponent(calendarBtn, getElementId('calendarBtn'), this.calendarBtnEventHandler.bind(this));
             setTimeout(() => {
                 this.timeline.requestPlay(this.playTime);
             },100);
@@ -450,7 +453,7 @@
                         }else{
                             if(this.cameraData.controlStatus === "CS" || this.cameraData.controlStatus === "on"){
                                 if (this.cameraData.recordType != "event") {
-                                    if(this.cameraData.streamStatus == "off" && check != 'NetStream.Play.Stop'){
+                                    if(this.cameraData.streamStatus == "off" && param.data != 'NetStream.Play.Stop'){
                                         cameraStatusNum = 2;
                                         cameraStatus = false;
                                         setTimeout(() => {
@@ -597,6 +600,12 @@
                     } else {
                         this.playInfoBar.playBtn();
                     }
+                }
+            },
+
+            calendarBtnEventHandler: function (param) {
+                if (param.event === 'updateCalendarDate') {
+                    this.timelineTimeSelector.updateCalendarDate();
                 }
             },
 

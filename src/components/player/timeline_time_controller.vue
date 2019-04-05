@@ -18,11 +18,6 @@
                     <span>{{$t('TIMELINE_24HOUR')}}</span>
                 </button>
             </li>
-            <li class="calendar">
-                <button type="button" :class="{on: isShowTimelineCalendar}" @click="pressedShowTimelineCalendarButton()">
-                    <span>{{$t('CAMERA_DAY_TIME')}}</span>
-                </button>
-            </li>
         </ul>
 
         <div class="fs_time" v-show="!isExpiredCloud && isFullScreen && fullMode">
@@ -38,14 +33,16 @@
             <button type="button" @click="changeTimeRange(360)" v-show="!isExpiredCloud && timeRange == 1440">
                 <span class="fs_time_range">{{$t('TIMELINE_24HOUR')}}</span>
             </button>
-            <button type="button" :class="{on: isShowTimelineCalendar}" @click="pressedShowTimelineCalendarButton()" class="last">
-                <span class="fs_time_range"><div class="calendar"></div>{{$t('CAMERA_DAY_TIME')}}</span>
-            </button>
+            <calendar_btn
+                    v-bind:fullMode="fullMode"
+                    v-on:event="updateCalendarDate()">
+            </calendar_btn>
         </div>
     </div>
 </template>
 <script>
     import store from '../../service/player/store';
+    import calendar_btn from './calendar_btn';
 
     export default {
         name: 'timelineTimeController',
@@ -108,17 +105,15 @@
                     this.timeline.zoomDomain(this.timeline.domainCenterTime(), minutes);
                 }
             },
-
-            pressedShowTimelineCalendarButton: function () {
-                const isShowTimelineCalendar = !this.isShowTimelineCalendar;
-                store.dispatch('IS_SHOW_CALENDAR_CHANGE', isShowTimelineCalendar);
-                if (isShowTimelineCalendar) {
-                    this.$emit('event', {event: 'updateCalendarDate'});
-                }
+            updateCalendarDate: function() {
+                this.$emit('event', {event: 'updateCalendarDate'});
             },
 
             destroy : function() {
             }
+        },
+        components : {
+            calendar_btn
         }
     }
 </script>
