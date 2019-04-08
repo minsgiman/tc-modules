@@ -811,7 +811,7 @@
             setTimeRange : function(minutes, callback) {
                 store.dispatch('TIME_RANGE_CHANGE', parseInt(minutes));
 
-                var x = this.svg.select('.cursor').select("line").attr('x1');
+                var x = this.svg.select('.cursor').select(".line").attr('x');
                 var cursorTime = this.x.invert(x).getTime();
 
                 return this.zoomDomain(cursorTime, minutes);
@@ -1330,10 +1330,7 @@
                         if(that.serviceDateTime > time){
                             return;
                         }
-
-                        that.cursor.selectAll('line').attr({x1: x, x2: x});
-                        that.cursor.selectAll('cursor').attr({x1: x, x2: x});
-                        that.cursor.selectAll('circle').attr({cx: x});
+                        that.cursor.selectAll('.line').attr({x: x});
                         store.dispatch('CURRENT_TIME_CHANGE', time);
                     })
                     .on('dragend', () => {
@@ -1348,39 +1345,19 @@
                                 }
                             }});
                     });
-
                 this.cursor = this.mainContainer.append('g').attr('class', 'cursor').call(drag);
                 //$(".cursor").css("width","10px");
                 var currentX = this.x(Date.now())
 
-                this.cursor.append('line')
-                    .attr({
-                        class: 'mainBack',
-                        x1: currentX,
-                        x2: currentX,
-                        y1: 29,
-                        y2: 74,
-                    });
-
-                this.cursor.append('line')
-                    .attr({
-                        class: 'main',
-                        x1: currentX,
-                        x2: currentX,
-                        y1: 29,
-                        y2: 74
-                    });
-                this.cursor.append('circle')
-                    .attr({
-                        class: 'circle',
-                        cx: currentX,
-                        cy: 29,
-                        r: 6,
-                        fill:'white'
-                    });
-                $(".circle").attr("stroke","red");
-                $(".circle").attr("stroke-width","3");
-                $(".circle").attr("z-index","1500");
+                this.cursor.append('svg:image').attr({
+                    class: function(d) { return "line"},
+                    x: currentX,
+                    y: 34,
+                    width : 14,
+                    height : 40
+                }).attr("xlink:href", function (d) {
+                    return "/resources/img/ic-detail-indicator.png";
+                });
                 $(".line").attr("z-index","1500");
             },
 
@@ -1395,24 +1372,10 @@
 
                 if (typeof(this.x) === 'function') {
                     var currentX = parseInt(this.x(now));
-
-                    this.svg.select('.cursor').selectAll("circle")
+                    this.svg.select('.cursor').selectAll(".line")
                         .attr({
-                            cx: currentX
+                            x: currentX
                         });
-
-                    this.svg.select('.cursor').selectAll("line")
-                        .attr({
-                            x1: currentX,
-                            x2: currentX
-                        });
-
-                    this.svg.select('.cursor').selectAll("line")
-                        .attr({
-                            x1: currentX,
-                            x2: currentX
-                        });
-
                     var curosEmptyData = 0;
 
                     if(this.timeRange == 60){
@@ -2082,7 +2045,7 @@
 
                 if(time == undefined){
                     this.updateCursor(this.currentTime);
-                    var cursorX = parseFloat($(".cursor").children("line").attr("x1"));
+                    var cursorX = parseFloat($(".cursor").children(".line").attr("x1"));
                     for(var i=0; i<this.cvrArray[0].length; i++){
                         if(cursorX < parseFloat(this.cvrArray[0].eq(i).attr("x"))){
                             var x = parseFloat(this.cvrArray[0].eq(i).attr("x"));
@@ -2313,7 +2276,7 @@
                 var removedBufferDomain = this.removedBufferDomain;
                 var right = parseInt(removedBufferDomain[1]);
                 var left =  parseInt(removedBufferDomain[0]);
-                var x = this.svg.select('.cursor').select("line").attr('x1');
+                var x = this.svg.select('.cursor').select(".line").attr('x');
                 var cursorTime = this.x.invert(x).getTime();
                 var timeRange = this.timeRange;
                 if(timeRange == 60){
