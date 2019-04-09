@@ -248,6 +248,7 @@
             });
         },
         beforeDestroy : function() {
+            window.onresize = null;
         },
         methods : {
             resizeTimline : function() {
@@ -2359,10 +2360,6 @@
 
             getData : function(key) {
                 return this[key];
-            },
-
-            destroy : function() {
-                window.onresize = null;
             }
         }
     }

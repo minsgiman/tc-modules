@@ -143,7 +143,7 @@ const store = new Vuex.Store({
             context.commit('UPDATE_IS_PLAYING', false);
             context.commit('UPDATE_CURRENT_TIME', null);
             context.commit('UPDATE_IS_LIVE', true);
-            context.commit('UPDATE_PLAY_BTN_STATUS', false);
+            context.commit('UPDATE_PLAY_BTN_STATUS', true);
             context.commit('UPDATE_SERVICE_DAY', 0);
             context.commit('UPDATE_TIME_ZONE', '');
             context.commit('UPDATE_CURRENT_DOMAIN', null);

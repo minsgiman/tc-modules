@@ -403,7 +403,7 @@
                 _object_ += '\n';
                 _object_ += '.ly_flash_player img{border:none;vertical-align:top}\n';
                 _object_ += '\n';
-                _object_ += '.ly_flash_player{display:table-cell;*display:inline-block;overflow:hidden;position:relative;background:#212126;text-align:center}\n';
+                _object_ += '.ly_flash_player{display:table-cell;*display:inline-block;overflow:hidden;position:relative;background:#212126;text-align:left}\n';
                 _object_ += '\n';
                 _object_ += '.ly_flash_player img{position:static;margin:1px 0 0;border:none;vertical-align:middle}\n';
                 _object_ += '\n';
@@ -411,7 +411,7 @@
                 _object_ += '</style>\n';
                 _object_ += ' \n';
                 _object_ += ' <!-- Flash Player 설치 안내 -->\n';
-                _object_ += '<div class="ly_flash_player" style="width:' + this.width + 'px;height:' + this.height + 'px">\n';
+                _object_ += '<div class="ly_flash_player">\n';
                 _object_ += ' <img src=' + imgUrl + ' width=' + imgWidth + ' height="145" title="동영상을 재생하시려면 Adobe Flash Player 10 이상이 설치되어 있어야 합니다." alt="설치 안내 - Adobe Flash Player 10 설치하기, 네이버 동영상을 재생하시려면 Adobe Flash Player 10 이상이 설치되어 있어야 합니다." usemap="#flash_player_install"><span class="aligner"></span>\n';
                 _object_ += '    <map name="flash_player_install" id="flash_player_install">\n';
                 _object_ += '        <area shape="rect" coords=' + coords + ' href="http://get.adobe.com/kr/flashplayer/" target="_blank" alt="최신버전 다운로드">\n';

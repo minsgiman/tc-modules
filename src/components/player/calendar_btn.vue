@@ -41,9 +41,6 @@
                 if (isShowTimelineCalendar) {
                     this.$emit('event', {event: 'updateCalendarDate'});
                 }
-            },
-
-            destroy : function() {
             }
         }
     }

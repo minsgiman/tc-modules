@@ -21,22 +21,28 @@
         </ul>
 
         <div class="fs_time" v-show="!isExpiredCloud && isFullScreen && fullMode">
-            <button type="button" @click="changeTimeRange(1440)" v-show="!isExpiredCloud && timeRange == 10">
-                <span class="fs_time_range">{{$t('TIMELINE_10MIN')}}</span>
-            </button>
-            <button type="button" @click="changeTimeRange(10)" v-show="!isExpiredCloud && timeRange == 60">
-                <span class="fs_time_range">{{$t('TIMELINE_1HOUR')}}</span>
-            </button>
-            <button type="button" @click="changeTimeRange(60)" v-show="!isExpiredCloud && timeRange == 360">
-                <span class="fs_time_range">{{$t('TIMELINE_6HOUR')}}</span>
-            </button>
-            <button type="button" @click="changeTimeRange(360)" v-show="!isExpiredCloud && timeRange == 1440">
-                <span class="fs_time_range">{{$t('TIMELINE_24HOUR')}}</span>
-            </button>
-            <calendar_btn
-                    v-bind:fullMode="fullMode"
-                    v-on:event="updateCalendarDate()">
-            </calendar_btn>
+            <div class="range_select_wrap">
+                <spanly_flash_player class="left_icon"></spanly_flash_player>
+                <button type="button" @click="changeTimeRange(1440)" v-show="!isExpiredCloud && timeRange == 10">
+                    <span class="fs_time_range">{{$t('TIMELINE_10MIN')}}</span>
+                </button>
+                <button type="button" @click="changeTimeRange(10)" v-show="!isExpiredCloud && timeRange == 60">
+                    <span class="fs_time_range">{{$t('TIMELINE_1HOUR')}}</span>
+                </button>
+                <button type="button" @click="changeTimeRange(60)" v-show="!isExpiredCloud && timeRange == 360">
+                    <span class="fs_time_range">{{$t('TIMELINE_6HOUR')}}</span>
+                </button>
+                <button type="button" @click="changeTimeRange(360)" v-show="!isExpiredCloud && timeRange == 1440">
+                    <span class="fs_time_range">{{$t('TIMELINE_24HOUR')}}</span>
+                </button>
+                <span class="right_icon"></span>
+            </div>
+            <div class="calendar_btn_wrap">
+                <calendar_btn
+                        v-bind:fullMode="fullMode"
+                        v-on:event="updateCalendarDate()">
+                </calendar_btn>
+            </div>
         </div>
     </div>
 </template>
@@ -107,9 +113,6 @@
             },
             updateCalendarDate: function() {
                 this.$emit('event', {event: 'updateCalendarDate'});
-            },
-
-            destroy : function() {
             }
         },
         components : {

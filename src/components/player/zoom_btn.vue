@@ -21,6 +21,8 @@
             }
         },
         data: function () {
+            return {
+            }
         },
         created : function() {
         },
@@ -31,9 +33,6 @@
         methods : {
             zoomUp: function (zoom) {
                 this.$emit('event', zoom);
-            },
-
-            destroy : function() {
             }
         }
     }

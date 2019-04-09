@@ -140,6 +140,9 @@
             }
         },
         beforeDestroy : function() {
+            if (this.timelineDatePicker) {
+                this.timelineDatePicker.destroy();
+            }
         },
         methods : {
             setupClipCalendar : function (serviceType) {
@@ -266,12 +269,6 @@
                 var timeString = this.timelineDate.time;
 
                 return moment(dateMoment.format("YYYYMMDD") + " " + timeString, "YYYYMMDD HH : mm : ss");
-            },
-
-            destroy : function() {
-                if (this.timelineDatePicker) {
-                    this.timelineDatePicker.destroy();
-                }
             }
         }
     }

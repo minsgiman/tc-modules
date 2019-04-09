@@ -9,7 +9,7 @@
                 <p v-show="!isShared">{{$t('CAMERA_SHOW_VIDEO_INPUT_PASSWORD')}}</p>
                 <p v-show="isShared">{{$t('CAMERA_INPUT_PASSWORD_SHARE_MAN')}}</p>
                 <div class="ly_in_box">
-                    <input type="password" id="inputPWD" :placeholder="$t('CAMERA_PASSWORD_INPUT')" v-model="securePassword" style="width: 490px;"></input>
+                    <input type="password" :placeholder="$t('CAMERA_PASSWORD_INPUT')" v-model="securePassword" style="width: 490px;"></input>
                 </div>
             </div>
             <div class="btn_box">
@@ -116,9 +116,6 @@
 
             getData : function(key) {
                 return this[key];
-            },
-
-            destroy : function() {
             }
         }
     }

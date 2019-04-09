@@ -44,9 +44,9 @@
                         className = 'play_btn';
                     } else if (type === 'pause') {
                         className = 'pause_btn';
-                    } else if (type === 'forward') {
-                        className = 'left_btn';
                     } else if (type === 'backward') {
+                        className = 'left_btn';
+                    } else if (type === 'forward') {
                         className = 'right_btn';
                     }
                     const $btn = $('<button>', {class: className});
@@ -78,9 +78,6 @@
             updateIndicatorSize: function() {
                 $('#play_indicator').css('width', $("#player").width() - 200);
                 $('#play_indicator').css('height', $("#player").height());
-            },
-
-            destroy : function() {
             }
         }
     }

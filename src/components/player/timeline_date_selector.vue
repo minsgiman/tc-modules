@@ -164,9 +164,6 @@
                 }
 
                 return null;
-            },
-
-            destroy : function() {
             }
         }
     }

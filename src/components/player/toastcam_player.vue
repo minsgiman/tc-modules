@@ -36,6 +36,7 @@
         errorStatusLayer: 'error_status_wrap',
         playInfoBar: 'cam_info',
         cvrPlaySecureLayer: 'cvr_play_manager_wrap',
+        cvrPlaySecureLayerFull: 'cvr_play_manager_wrap_full',
         timelineDateSelector: 'view_timeline_date',
         eventMoveBtn: 'event_move_btn_wrap',
         eventMoveFullBtn: 'event_move_btn_full_wrap',
@@ -126,6 +127,7 @@
             this.playInfoBar = this.createComponent(playInfoBar, getElementId('playInfoBar'), this.playInfoBarEventHandler.bind(this));
             this.playTimer = this.createComponent(playTimer, null, this.playTimerEventHandler.bind(this));
             this.cvrPlaySecureManager = this.createComponent(cvrPlaySecureManager, getElementId('cvrPlaySecureLayer'), this.cvrPlaySecureEventHandler.bind(this));
+            this.cvrPlaySecureManagerFull = this.createComponent(cvrPlaySecureManager, getElementId('cvrPlaySecureLayerFull'), this.cvrPlaySecureEventFullHandler.bind(this));
             this.timelineDateSelector = this.createComponent(timelineDateSelector, getElementId('timelineDateSelector'), this.timlineDateSelectorEventHandler.bind(this));
             this.eventMoveBtn = this.createComponent(eventMoveBtn, getElementId('eventMoveBtn'), this.eventMoveBtnEventHandler.bind(this));
             this.eventMoveFullBtn = this.createComponent(eventMoveBtn, getElementId('eventMoveFullBtn'), this.eventMoveBtnEventHandler.bind(this), {fullMode: true});
@@ -141,20 +143,23 @@
         mounted : function() {
         },
         beforeDestroy : function() {
-            this.timeline.destroy();
-            this.zoomBtn.destroy();
-            this.errorStatusLayer.destroy();
-            this.playInfoBar.destroy();
-            this.playTimer.destroy();
-            this.cvrPlaySecureManager.destroy();
-            this.timelineDateSelector.destroy();
-            this.eventMoveBtn.destroy();
-            this.eventMoveFullBtn.destroy();
-            this.timelineTimeController.destroy();
-            this.timelineTimeFullController.destroy();
-            this.fullscreenBtn.destroy();
-            this.timelineTimeSelector.destroy();
-            window.onresize = null;
+            this.player.$destroy();
+            this.timeline.$destroy();
+            this.fullscreenBtn.$destroy();
+            this.zoomBtn.$destroy();
+            this.errorStatusLayer.$destroy();
+            this.playInfoBar.$destroy();
+            this.playTimer.$destroy();
+            this.cvrPlaySecureManager.$destroy();
+            this.cvrPlaySecureManagerFull.$destroy();
+            this.timelineDateSelector.$destroy();
+            this.eventMoveBtn.$destroy();
+            this.eventMoveFullBtn.$destroy();
+            this.timelineTimeController.$destroy();
+            this.timelineTimeFullController.$destroy();
+            this.timelineTimeSelector.$destroy();
+            this.playIndicator.$destroy();
+            this.calendarBtn.$destroy();
         },
         methods : {
             createComponent : function (constructor, elementId, eventHandler, prop) {
@@ -432,10 +437,18 @@
                         clearTimeout(this.playserStop);
                         break;
                     case 'checkCVRSeucre':
-                        this.cvrPlaySecureManager.checkCVRSeucre(param.data);
+                        if (this.isFullScreen) {
+                            this.cvrPlaySecureManagerFull.checkCVRSeucre(param.data);
+                        } else {
+                            this.cvrPlaySecureManager.checkCVRSeucre(param.data);
+                        }
                         break;
                     case 'updateCVRSecureStatus':
-                        this.cvrPlaySecureManager.setCVRSecureCallback(param.data);
+                        if (this.isFullScreen) {
+                            this.cvrPlaySecureManagerFull.setCVRSecureCallback(param.data);
+                        } else {
+                            this.cvrPlaySecureManager.setCVRSecureCallback(param.data);
+                        }
                         break;
                     case 'liveReloadCntUpdate':
                         this.liveReloadCnt = param.data;
@@ -495,7 +508,7 @@
                     store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
                     this.errorStatusLayer.cameraStatusAllOff();
                     if(this.isLive == false){
-                        this.timeline.clickedCVRArea(new Date(this.timeline.x.invert($(".cursor").children("line").attr("x1")).getTime()));
+                        this.timeline.clickedCVRArea(new Date(this.timeline.x.invert($(".cursor").children(".line").attr("x")).getTime()));
                     }else{
                         this.timeline.livePlayDataSet();
                     }
@@ -519,6 +532,17 @@
             },
 
             cvrPlaySecureEventHandler : function(param) {
+                if (param.event === 'stopTimer') {
+                    this.playTimer.stopTimer();
+                } else if (param.event === 'goLiveByCancleCVR') {
+                    this.timeline.cursorOn = false;
+                    this.timeline.requestPlay();
+                } else if (param.event === 'isIncorrectPlayPasswordChanged') {
+                    this.playEventCb('isIncorrectPlayPasswordChanged', param.data);
+                }
+            },
+
+            cvrPlaySecureEventFullHandler : function(param) {
                 if (param.event === 'stopTimer') {
                     this.playTimer.stopTimer();
                 } else if (param.event === 'goLiveByCancleCVR') {
@@ -557,9 +581,17 @@
 
             eventMoveBtnEventHandler: function (param) {
                 if (param.event === 'checkCVRSeucre') {
-                    this.cvrPlaySecureManager.checkCVRSeucre(param.data);
+                    if (this.isFullScreen) {
+                        this.cvrPlaySecureManagerFull.checkCVRSeucre(param.data);
+                    } else {
+                        this.cvrPlaySecureManager.checkCVRSeucre(param.data);
+                    }
                 } else if (param.event === 'updateCVRSecureStatus') {
-                    this.cvrPlaySecureManager.setCVRSecureCallback(param.data);
+                    if (this.isFullScreen) {
+                        this.cvrPlaySecureManagerFull.setCVRSecureCallback(param.data);
+                    } else {
+                        this.cvrPlaySecureManager.setCVRSecureCallback(param.data);
+                    }
                 } else if (param.event === 'play') {
                     this.timeline.requestPlay(param.data);
                 } else if (param.event === 'noPrevEvent') {
@@ -585,9 +617,17 @@
                 if (param.event === 'timeInputError') {
                     this.playEventCb('timeInputError', param.data);
                 } else if (param.event === 'checkCVRSeucre') {
-                    this.cvrPlaySecureManager.checkCVRSeucre(param.data);
+                    if (this.isFullScreen) {
+                        this.cvrPlaySecureManagerFull.checkCVRSeucre(param.data);
+                    } else {
+                        this.cvrPlaySecureManager.checkCVRSeucre(param.data);
+                    }
                 } else if (param.event === 'updateCVRSecureStatus') {
-                    this.cvrPlaySecureManager.setCVRSecureCallback(param.data);
+                    if (this.isFullScreen) {
+                        this.cvrPlaySecureManagerFull.setCVRSecureCallback(param.data);
+                    } else {
+                        this.cvrPlaySecureManager.setCVRSecureCallback(param.data);
+                    }
                 } else if (param.event === 'playCvr') {
                     this.timeline.requestPlay(param.data);
                 }

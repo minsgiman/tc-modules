@@ -119,9 +119,6 @@
 
             getData : function(key) {
                 return this[key];
-            },
-
-            destroy : function() {
             }
         }
     }

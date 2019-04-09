@@ -254,9 +254,6 @@
                         callbackFunc();
                     }
                 }});
-            },
-
-            destroy : function() {
             }
         }
     }
