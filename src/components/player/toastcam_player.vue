@@ -177,11 +177,6 @@
                 if (status.status) {
                     if (status.status === this.player.getData('webRTCStatusEnum').EVENT_STREAM_CONNECTED) {
                         this.player.setData('dvrConnectFail', false);
-                        if ($('#remoteVideosContainer').children('video').length) {
-                            $('#remoteVideosContainer').children('video').css('height', $('#remoteVideosContainer').height() - $('#timeline_table').height());
-                        }
-                        $('#webrtc_logo').hide();
-                        $('#webrtc_loading').hide();
                         this.playTimer.playerCheck = true;
                         if (this.isLive) {
                             this.playTimer.startLiveTimer(this.timeline);

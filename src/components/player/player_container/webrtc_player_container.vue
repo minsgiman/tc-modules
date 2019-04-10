@@ -35,7 +35,7 @@
         created : function() {
             const vExtendConstructor = Vue.extend(webRTCPlayer);
             this.player = new vExtendConstructor().$mount('#webrtc_player_wrap');
-            this.player.$on('webRTCPlayerStatusChanged', this.webRTCEventCallback.bind(this));
+            this.player.$on('playerStatusChanged', this.webRTCEventCallback.bind(this));
         },
         mounted : function() {
         },

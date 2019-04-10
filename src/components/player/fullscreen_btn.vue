@@ -112,7 +112,7 @@
                         $('#player').css('opacity', 0);
                         setTimeout(() => {
                             if ($('#remoteVideosContainer').children('video').length) {
-                                $('#remoteVideosContainer').children('video').css('height', $('#remoteVideosContainer').height() - 100);
+                                $('#remoteVideosContainer').children('video').css('height', $('#remoteVideosContainer').height() - 78);
                             }
                         }, 500);
                     }

@@ -311,6 +311,8 @@
                     this.videoStreamObj.preview.src = '';
                 }
                 this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_STOPPED;
+                $('#webrtc_logo').hide();
+                $('#webrtc_loading').hide();
             },
 
             getStatus : function () {
@@ -384,6 +386,11 @@
                         attachMediaStream(peer.remoteVideoEl, event.streams[0]);
                         remoteVideosContainer.appendChild(peer.remoteVideoEl);
                         this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_CONNECTED;
+                        if ($('#remoteVideosContainer').children('video').length) {
+                            $('#remoteVideosContainer').children('video').css('height', $('#remoteVideosContainer').height() - $('#timeline_table').height());
+                        }
+                        $('#webrtc_logo').hide();
+                        $('#webrtc_loading').hide();
                         this.$emit('playerStatusChanged', {status : this.webRTCStatus, code : ''});
                     };
                 } else {
@@ -391,6 +398,11 @@
                         attachMediaStream(peer.remoteVideoEl, event.stream);
                         remoteVideosContainer.appendChild(peer.remoteVideoEl);
                         this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_CONNECTED;
+                        if ($('#remoteVideosContainer').children('video').length) {
+                            $('#remoteVideosContainer').children('video').css('height', $('#remoteVideosContainer').height() - $('#timeline_table').height());
+                        }
+                        $('#webrtc_logo').hide();
+                        $('#webrtc_loading').hide();
                         this.$emit('playerStatusChanged', {status : this.webRTCStatus, code : ''});
                     };
                 }
@@ -464,7 +476,7 @@
             },
 
             handleMessageRequest : function (message) {
-                var from = dvrId, pc;
+                var from = this.dvrId, pc;
 
                 if (message.code == 0) {
                     this.webRTCConfig.peerConnectionConfig.iceServers = [];
@@ -497,7 +509,7 @@
                         }
                     }
                     pc = this.addPeer(from).pc;
-                    this.offer(dvrId);
+                    this.offer(this.dvrId);
                 } else {
                     this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_DISCONNECTED;
                     this.$emit('playerStatusChanged', {status : this.webRTCStatus, code : message.code});
@@ -506,7 +518,7 @@
 
             handleMessage : function (message) {
                 var type = message.command,
-                    from = dvrId, pc;
+                    from = this.dvrId, pc;
 
                 switch (type) {
                     case 'offer':
@@ -524,7 +536,7 @@
                         pc.setRemoteDescription(new RTCSessionDescription(payloadJSON), function(){}, error);
                         break;
                     case 'candidate':
-                        pc = peerDatabase[from].pc;
+                        pc = this.peerDatabase[from].pc;
                         if(pc.remoteDescription) {
                             var candidateJSON;
                             if (typeof message.payload === 'string') {

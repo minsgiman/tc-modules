@@ -36,7 +36,7 @@
                     varServerUrl: ''
                 }
             }).$mount('#player');
-            this.player.$on('flashPlayerStatusChanged', this.flashEventCallback.bind(this));
+            this.player.$on('playerStatusChanged', this.flashEventCallback.bind(this));
             this.player.zoomZone(450, 150);
             this.player.displayRMCPlayer();
             setTimeout(() => {

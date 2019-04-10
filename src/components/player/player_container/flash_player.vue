@@ -182,7 +182,7 @@
         },
         methods : {
             onFlashPlayerStatusChanged : function(status) {
-                this.$emit('flashPlayerStatusChanged', status);
+                this.$emit('playerStatusChanged', status);
             },
 
             getCurrentTime : function() {
