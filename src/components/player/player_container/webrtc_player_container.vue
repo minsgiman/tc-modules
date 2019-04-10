@@ -84,7 +84,7 @@
                 this.player.close();
             },
             getCurrentTime : function () {
-                return this.player.getCurrentTime();
+                return;
             },
             getStatus : function () {
                 return this.player.getStatus();

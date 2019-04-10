@@ -77,13 +77,14 @@
                         this.cursorNowTime = this.currentTime.valueOf();
                         this.cursorIdx++;
                     }else{
-                        if (player) {
-                            var addSec = (((player.getCurrentTime()[0] || 0 ) * 1000) - this.beforeServerTime);
+                        let currentTime = player.getCurrentTime();
+                        if (currentTime) {
+                            var addSec = (((currentTime[0] || 0 ) * 1000) - this.beforeServerTime);
                             if(addSec <= 0){
                                 addSec = 1000;
                             }
                             this.cursorNowTime = this.cursorNowTime + addSec;
-                            this.beforeServerTime = (player.getCurrentTime()[0] || 0 ) * 1000;
+                            this.beforeServerTime = (currentTime[0] || 0 ) * 1000;
                             store.dispatch('CURRENT_TIME_CHANGE', new Date(this.cursorNowTime));
                         } else {
                             addSec = 1000;

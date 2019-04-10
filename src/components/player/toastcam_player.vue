@@ -175,7 +175,7 @@
             },
             playStatusChangedHandler : function(status) {
                 if (status.status) {
-                    if (status.status === this.player.getData('webRTCStatusEnum').EVENT_STREAM_CONNECTED) {
+                    if (status.status === 'event_stream_connected') {
                         this.player.setData('dvrConnectFail', false);
                         this.playTimer.playerCheck = true;
                         if (this.isLive) {
@@ -183,7 +183,7 @@
                         } else {
                             this.playTimer.startRecTimer(this.timeline.clickTime, this.player, this.timeline);
                         }
-                    } else if (status.status === this.player.getData('webRTCStatusEnum').EVENT_STREAM_DISCONNECTED) {
+                    } else if (status.status === 'event_stream_disconnected') {
                         //$('#remote_stream').hide();
                         this.player.setData('dvrConnectFail', true);
                         this.playTimer.stopTimer();
