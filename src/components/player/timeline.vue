@@ -2187,6 +2187,7 @@
                     var callbackFunc = function() {
                         var findTime = that.currentTime.valueOf() + seconds * 1000;
                         //var direction = seconds > 0 ? 'next' : 'previous';
+                        that.goCvrStatus = true;
                         that.$emit('event', {event: 'cvrPlayRequest', data: {time : new Date(findTime)}});
 
                         // toastcamAPIs.call(toastcamAPIs.camera.FIND_CVR, {cameraId: that.cameraData.id, cvrId: findTime, findDirection: direction}, (cvrData) => {

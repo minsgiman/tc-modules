@@ -52,6 +52,10 @@ class player {
         }
     }
 
+    reloadPlayer() {
+        this.control.reloadPlayer();
+    }
+
     setData(key, value) {
         switch(key) {
             case 'cameraData':

@@ -173,6 +173,10 @@
                 }
                 return vComponent;
             },
+            reloadPlayer : function () {
+                this.player.$destroy();
+                this.player = this.createComponent(playContainer, null, this.playStatusChangedHandler.bind(this));
+            },
             playStatusChangedHandler : function(status) {
                 if (status.status) {
                     if (status.status === 'event_stream_connected') {
@@ -187,7 +191,7 @@
                         //$('#remote_stream').hide();
                         this.player.setData('dvrConnectFail', true);
                         this.playTimer.stopTimer();
-                        this.player.stop(this.currentCamera.id);
+                        this.player.stop(this.cameraData.id);
                         this.errorStatusLayer.cameraStatusChange(3);
                     }
                     return;
@@ -722,9 +726,6 @@
                 this.playIndicator.updateIndicatorSize();
 
                 if (fullscreenStatus) {
-                    $("#cloud_out_small").hide();
-                    $("#cloud_out_full").show();
-
                     if (isExpiredCloud(this.cameraData)) {
                         if (this.player) {
                             this.player.zoomZone(topDefault, parseInt($("#player").css("width"))-20);
@@ -735,11 +736,6 @@
                         }
                     }
                 } else {
-
-                    $("#cloud_out_small").children("img").css("margin-left","20px");
-
-                    $("#cloud_out_small").show();
-                    $("#cloud_out_full").hide();
                     this.playEventCb('fullScreenAlertChanged', false);
                     $("#view_timeline_area").removeAttr( 'style' );
                     this.fullscreenBtn.stopFullscreenTimer();
@@ -795,7 +791,6 @@
                     $("#cursorRightBtn").css("top","");
                     $(".fs_time").hide();
                     $(".cam_info_area").css("top","");
-                    $("#cloud_out_small").children("img").css("margin-left","20px");
                 }
             },
 
