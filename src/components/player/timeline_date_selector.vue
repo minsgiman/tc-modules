@@ -62,6 +62,9 @@
             },
             timezone: function () {
                 return store.state.timezone;
+            },
+            isExpiredCloud: function () {
+                return store.getters.isExpiredCloud;
             }
         },
         data: function () {

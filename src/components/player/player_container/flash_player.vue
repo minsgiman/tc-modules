@@ -403,7 +403,7 @@
                 _object_ += '\n';
                 _object_ += '.ly_flash_player img{border:none;vertical-align:top}\n';
                 _object_ += '\n';
-                _object_ += '.ly_flash_player{display:table-cell;*display:inline-block;overflow:hidden;position:relative;background:#212126;text-align:left}\n';
+                _object_ += '.ly_flash_player{overflow:hidden;position:relative;background:#212126;text-align:left}\n';
                 _object_ += '\n';
                 _object_ += '.ly_flash_player img{position:static;margin:1px 0 0;border:none;vertical-align:middle}\n';
                 _object_ += '\n';
