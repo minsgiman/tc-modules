@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import { i18n } from '../../i18n/player/i18n';
 import toastcamAPIs from './../../service/toastcamAPIs';
 import store from '../../service/player/store';
 import playContainer from './toastcam_player.vue';
@@ -17,6 +18,7 @@ class player {
 
         let vExtendConstructor = Vue.extend(playContainer);
         this.control = new vExtendConstructor({
+            i18n,
             propsData: {
                 playEventCb: param.playEventCb,
                 playTime: param.playTime,

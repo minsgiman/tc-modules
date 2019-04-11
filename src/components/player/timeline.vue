@@ -987,8 +987,8 @@
             },
 
             getDateTicks : function() {
-                var todayWord = browserLang === 'ja' ? '今日' : '오늘';
-                var yesterdayWord = browserLang === 'ja' ? '昨日' : '어제';
+                var todayWord = this.$i18n.t('TIMELINE_TODAY');
+                var yesterdayWord = this.$i18n.t('EVENT_LIST_DATE_YESTERDAY');
                 var tick = d3.svg.axis().scale(this.x).orient("bottom")
                     .tickSize(11, 0)
                     .tickPadding(3)

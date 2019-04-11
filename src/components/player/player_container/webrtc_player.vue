@@ -151,8 +151,8 @@
                     EVENT_STREAM_STOPPED : 'event_stream_stopped'
                 },
                 userData : null,
-                controlServerJpUrl : 'https://dev-control-jp.toastcam.com:8443',
-                controlServerUrl : 'https://dev.toastcam.com:8443'
+                controlServerJpUrl : location.href.indexOf('dev') == -1 ? 'https://control-jp.toastcam.com:8443' : 'https://dev-control-jp.toastcam.com:8443',
+                controlServerUrl : location.href.indexOf('dev') == -1 ? 'https://control.toastcam.com:8443' : 'https://dev.toastcam.com:8443'
             }
         },
         created : function() {

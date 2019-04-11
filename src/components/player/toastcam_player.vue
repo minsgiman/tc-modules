@@ -129,8 +129,8 @@
             this.cvrPlaySecureManager = this.createComponent(cvrPlaySecureManager, getElementId('cvrPlaySecureLayer'), this.cvrPlaySecureEventHandler.bind(this));
             this.cvrPlaySecureManagerFull = this.createComponent(cvrPlaySecureManager, getElementId('cvrPlaySecureLayerFull'), this.cvrPlaySecureEventFullHandler.bind(this));
             this.timelineDateSelector = this.createComponent(timelineDateSelector, getElementId('timelineDateSelector'), this.timlineDateSelectorEventHandler.bind(this));
-            this.eventMoveBtn = this.createComponent(eventMoveBtn, getElementId('eventMoveBtn'), this.eventMoveBtnEventHandler.bind(this));
-            this.eventMoveFullBtn = this.createComponent(eventMoveBtn, getElementId('eventMoveFullBtn'), this.eventMoveBtnEventHandler.bind(this), {fullMode: true});
+            this.eventMoveBtn = this.createComponent(eventMoveBtn, getElementId('eventMoveBtn'), this.eventMoveBtnEventHandler.bind(this), {timeline: this.timeline});
+            this.eventMoveFullBtn = this.createComponent(eventMoveBtn, getElementId('eventMoveFullBtn'), this.eventMoveBtnEventHandler.bind(this), {timeline: this.timeline, fullMode: true});
             this.timelineTimeController = this.createComponent(timelineTimeController, getElementId('timelineTimeController'), this.timelineTimeControllerEventHandler.bind(this), {timeline: this.timeline, fullMode: false});
             this.timelineTimeFullController = this.createComponent(timelineTimeController, getElementId('timelineTimeFullController'), this.timelineTimeControllerEventHandler.bind(this), {timeline: this.timeline, fullMode: true});
             this.timelineTimeSelector = this.createComponent(timelineTimeSelector, getElementId('timelineTimeSelector'), this.timelineTimeSelectorEventHandler.bind(this));
@@ -359,8 +359,8 @@
                             store.dispatch('IS_PLAYING_CHANGE', false);
                             this.errorStatusLayer.cameraNoSave();
                             this.playTimer.stopTimer();
-                            var videoDateFormat = 'M월 D일 dddd';  //TODO: $translate.instant('CAMERA_DETAIL_EVENT_DATE_FORMAT');
-                            var videoTimeFormat = 'HH:mm:ss';  //TODO: $translate.instant('CAMERA_DETAIL_EVENT_TIME_FORMAT');
+                            var videoDateFormat = this.$i18n.t('CAMERA_DETAIL_EVENT_DATE_FORMAT');
+                            var videoTimeFormat = this.$i18n.t('CAMERA_DETAIL_EVENT_TIME_FORMAT');
                             if(param.data){
                                 var lastRecMoment = moment(param.data);
                                 this.errorStatusLayer.lastRecDateString = lastRecMoment.locale($("html").attr("lang")).format(videoDateFormat);

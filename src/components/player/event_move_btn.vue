@@ -14,7 +14,7 @@
 
     export default {
         name: 'eventMoveBtn',
-        props: ['fullMode'],
+        props: ['timeline', 'fullMode'],
         computed: {
             cameraData: function () {
                 return store.state.cameraData;
@@ -117,7 +117,7 @@
 
                                 toastcamAPIs.call(toastcamAPIs.camera.GET_PREV_EVENT_WITH_RANGE, {
                                     cameraId: that.cameraData.id,
-                                    scale: '1h',  //playerObj.control.timeline.getData('nowScale'), //TODO:
+                                    scale: that.timeline.getData('nowScale'),
                                     queryTime: queryTime,
                                     range: 2,
                                     filters: allFilteredZoneIds.join(",")
@@ -215,7 +215,7 @@
                                 }
                                 toastcamAPIs.call(toastcamAPIs.camera.GET_NEXT_EVENT_WITH_RANGE, {
                                     cameraId: that.cameraData.id,
-                                    scale: '1h', //playerObj.control.timeline.getData('nowScale'), //TODO:
+                                    scale: that.timeline.getData('nowScale'),
                                     queryTime: queryTime,
                                     range: 2,
                                     filters: allFilteredZoneIds.join(",")

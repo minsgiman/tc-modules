@@ -101,7 +101,7 @@
                     var past = now - (i * 24 * 60 * 60 * 1000);
                     var date = { date: this.formattedInternalDate(new Date(past))};
                     if (i === 0) {
-                        date.day = '오늘'; //TODO:
+                        date.day = this.$i18n.t('TIMELINE_TODAY');
                     } else {
                         date.day = moment(new Date(past)).locale($("html").attr("lang")).format("dddd");
                         var md;
@@ -129,7 +129,7 @@
                     var past = now - (i * 24 * 60 * 60 * 1000);
                     var day = { date: this.formattedInternalDate(new Date(past))};
                     if (i === 0) {
-                        day.day = '오늘'; //TODO:
+                        day.day = this.$i18n.t('TIMELINE_TODAY');
                     } else {
                         day.day = moment(new Date(past)).locale($("html").attr("lang")).format("dddd");
                     }
