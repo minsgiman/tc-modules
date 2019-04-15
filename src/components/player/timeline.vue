@@ -1501,7 +1501,7 @@
                             } else {
                                 // 모션존인 경우 uid로 id 찾기
                                 var findZone = that.motionZones.find(item => item.uid === isCheckedEvent[0] && item.id !== '9');
-                                zoneIdx = findZone && findZone.id ? findZone.id : 0;
+                                zoneIdx = findZone && findZone.id ? findZone.id : undefined;
                             }
 
                             if (isCheckedEvent[0] && isCheckedEvent[0].indexOf) {

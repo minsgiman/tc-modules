@@ -38,14 +38,14 @@ const store = new Vuex.Store({
                 var filteredEventZoneIdsArr = state.eventZones.filter(item => item.filterMark === 'on').map(item => item.id);
                 var filteredMotionZoneIdsArr = state.motionZones.filter(item => item.filterMark === 'on' && item.id !== '9').map(item => item.uid);
                 var allFilteredZoneIdsArr = filteredEventZoneIdsArr.concat(filteredMotionZoneIdsArr);	// 체크 처리된 모든 zoneId
-                var deleteZone = state.motionZones.find(item => item.id === 9);
+                var deleteZone = state.motionZones.find(item => item.id === '9');
                 var isCheckedDeleteZoneId = (deleteZone && deleteZone.filterMark === 'on') ? true : false;
 
                 // 삭제된 이벤트가 체크된 경우 이벤트에서 alarmzone으로 설정된 zoneId가 아닌 zoneId 모두를 추출.
                 if (isCheckedDeleteZoneId) {
                     var allZoneIdsArr = state.eventZones.map(item => item.id).concat(state.motionZones.filter(item => item.id !== '9').map(item => item.uid));
-                    var deletedZoneIdsArr = zoneData.filter(item => !allZoneIdsArr.includes(item));
-                    allFilteredZoneIdsArr = allFilteredZoneIdsArr.concat(deletedZoneIdsArr.filter(item => (o !== "ACCESS_ENTER" && o !== "ACCESS_EXIT" && o !== "SENSOR_TEMP" && o !== "SENSOR_HUMID" && o !== "SENSOR_MOTION" && o !== "SENSOR_MAGNETIC" && o !== "SENSOR_SMOKE" && o !== "SENSOR_GAS" && o !== "SENSOR_PLUG" && o !== "DOORLOCK_EVENT")));
+                    var deletedZoneIdsArr = zoneData ? zoneData.filter(item => !allZoneIdsArr.includes(item)) : [];
+                    allFilteredZoneIdsArr = allFilteredZoneIdsArr.concat(deletedZoneIdsArr.filter(item => (item !== "ACCESS_ENTER" && item !== "ACCESS_EXIT" && item !== "SENSOR_TEMP" && item !== "SENSOR_HUMID" && item !== "SENSOR_MOTION" && item !== "SENSOR_MAGNETIC" && item !== "SENSOR_SMOKE" && item !== "SENSOR_GAS" && item !== "SENSOR_PLUG" && item !== "DOORLOCK_EVENT")));
                 }
 
                 if (state.inoutFilter) {

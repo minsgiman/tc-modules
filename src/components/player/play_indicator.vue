@@ -95,7 +95,6 @@
         .btn_wrap {
             display:table-cell; text-align:center; vertical-align:middle; width:100%; height:100%; padding-right:200px;
             button {
-                position: absolute;
                 width:52px;
                 height:52px;
                 margin: 0 auto;

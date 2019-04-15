@@ -3,6 +3,19 @@ import { i18n } from '../../i18n/player/i18n';
 import toastcamAPIs from './../../service/toastcamAPIs';
 import store from '../../service/player/store';
 import playContainer from './toastcam_player.vue';
+import "ie-array-find-polyfill";
+
+if (!Array.prototype.includes) {
+    Object.defineProperty(Array.prototype, "includes", {
+        enumerable: false,
+        value: function(obj) {
+            var newArr = this.filter(function(el) {
+                return el == obj;
+            });
+            return newArr.length > 0;
+        }
+    });
+}
 
 class player {
     constructor(param) {
