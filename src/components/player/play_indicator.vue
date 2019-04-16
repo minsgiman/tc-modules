@@ -35,6 +35,7 @@
                 if (this.indicatorTimeout) {
                     clearTimeout(this.indicatorTimeout);
                     this.indicatorTimeout = null;
+                    $('#play_indicator .btn_wrap').empty();
                 }
 
                 this.indicatorTimeout = setTimeout(() => {
@@ -121,7 +122,7 @@
                 }
                 &.animate {
                     transition: all 0.7s;
-                    transform: scale(1.5);
+                    transform: scale(2.0);
                     opacity: 0;
                 }
             }

@@ -181,6 +181,7 @@
                 if (status.status) {
                     if (status.status === 'event_stream_connected') {
                         this.player.setData('dvrConnectFail', false);
+                        this.errorStatusLayer.setData('dvrConnectFail', false);
                         this.playTimer.playerCheck = true;
                         if (this.isLive) {
                             this.playTimer.startLiveTimer(this.timeline);
@@ -190,6 +191,7 @@
                     } else if (status.status === 'event_stream_disconnected') {
                         //$('#remote_stream').hide();
                         this.player.setData('dvrConnectFail', true);
+                        this.errorStatusLayer.setData('dvrConnectFail', true);
                         this.playTimer.stopTimer();
                         this.player.stop(this.cameraData.id);
                         this.errorStatusLayer.cameraStatusChange(3);
