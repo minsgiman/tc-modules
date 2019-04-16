@@ -394,9 +394,9 @@
                     this.serviceDateTime = 0;
                 }
 
-                if(this.cachedTimelineparams.start < this.serviceDateTime){
-                    this.cachedTimelineparams.start = this.serviceDateTime;
-                }
+                // if(this.cachedTimelineparams.start < this.serviceDateTime){
+                //     this.cachedTimelineparams.start = this.serviceDateTime;
+                // }
 
                 this.playEventCallback('getAlarmZones');
 
@@ -560,11 +560,11 @@
                             serviceTime = (nowTime - (1000*60*60*24*(that.serviceDay+overTime)));
                         }
 
-                        if(serviceTime > that.removedBufferDomain[0]){
-                            serivceDayOver = false;
-                        }else{
+                        // if(serviceTime > that.removedBufferDomain[0]){
+                        //     serivceDayOver = false;
+                        // }else{
                             serivceDayOver = true;
-                        }
+                        //}
 
 
                         dragX += x;
@@ -1268,9 +1268,9 @@
                         that.$emit('event', {event: 'liveReloadCntUpdate', data: 0});
                         var mouseLocation = d3.mouse(this);
                         var selectedTime = that.x.invert(mouseLocation[0]);
-                        if(that.serviceDateTime > selectedTime.valueOf()){
-                            return;
-                        }
+                        // if(that.serviceDateTime > selectedTime.valueOf()){
+                        //     return;
+                        // }
                         dblClicklive = that.isLive;
                         dblClickTime = that.currentTime.valueOf();
                         that.lineMoveFlag = false;
@@ -1328,9 +1328,9 @@
                         }
                         var x = d3.event.x;
                         var time = that.x.invert(x);
-                        if(that.serviceDateTime > time){
-                            return;
-                        }
+                        // if(that.serviceDateTime > time){
+                        //     return;
+                        // }
                         that.cursor.selectAll('.line').attr({x: x});
                         store.dispatch('CURRENT_TIME_CHANGE', time);
                     })
@@ -1419,13 +1419,9 @@
 
                                 }
 
-                                if(parseInt(d.startTime) < that.serviceDateTime){
-                                    d.startTime = that.serviceDateTime;
-                                }
-
-                                if(parseInt(d.startTime) < that.serviceDateTime){
-                                    d.startTime = that.serviceDateTime;
-                                }
+                                // if(parseInt(d.startTime) < that.serviceDateTime){
+                                //     d.startTime = that.serviceDateTime;
+                                // }
 
                                 var thatX = that.x(d.startTime);
                                 //serviceDateTime
@@ -1552,9 +1548,9 @@
                             if(that.x(d.startTime).toString == "NaN"){
 
                             }
-                            if(parseInt(d.startTime) < that.serviceDateTime){
-                                d.startTime = that.serviceDateTime;
-                            }
+                            // if(parseInt(d.startTime) < that.serviceDateTime){
+                            //     d.startTime = that.serviceDateTime;
+                            // }
                             return that.x(d.startTime);
                         },
                         y: 40,
@@ -1600,9 +1596,9 @@
                             if(that.x(d.startTime).toString == "NaN"){
 
                             }
-                            if(parseInt(d.startTime) < that.serviceDateTime){
-                                d.startTime = that.serviceDateTime;
-                            }
+                            // if(parseInt(d.startTime) < that.serviceDateTime){
+                            //     d.startTime = that.serviceDateTime;
+                            // }
                             if(that.x(d.startTime) < 40){
                                 return 40;
                             }
@@ -1634,9 +1630,9 @@
                             if(that.x(d.startTime).toString == "NaN"){
 
                             }
-                            if(parseInt(d.startTime) < that.serviceDateTime){
-                                d.startTime = that.serviceDateTime;
-                            }
+                            // if(parseInt(d.startTime) < that.serviceDateTime){
+                            //     d.startTime = that.serviceDateTime;
+                            // }
                             return that.x(d.startTime) - 16;
                         },
                         y: 68,
@@ -1659,9 +1655,9 @@
                             if(that.x(d.startTime).toString == "NaN"){
 
                             }
-                            if(parseInt(d.startTime) < that.serviceDateTime){
-                                d.startTime = that.serviceDateTime;
-                            }
+                            // if(parseInt(d.startTime) < that.serviceDateTime){
+                            //     d.startTime = that.serviceDateTime;
+                            // }
                             return that.x(d.startTime) - 12;
                         },
                         y: 42,
@@ -1696,9 +1692,9 @@
                             if(that.x(d.startTime).toString == "NaN"){
 
                             }
-                            if(parseInt(d.startTime) < that.serviceDateTime){
-                                d.startTime = that.serviceDateTime;
-                            }
+                            // if(parseInt(d.startTime) < that.serviceDateTime){
+                            //     d.startTime = that.serviceDateTime;
+                            // }
 
                             if (d.count  < that.scaleAvg * 0.5) {
                                 return that.x(d.startTime) + 3;
@@ -1781,9 +1777,9 @@
 
                             }
 
-                            if(parseInt(d.startTime) < that.serviceDateTime){
-                                d.startTime = that.serviceDateTime;
-                            }
+                            // if(parseInt(d.startTime) < that.serviceDateTime){
+                            //     d.startTime = that.serviceDateTime;
+                            // }
 
                             return that.x(d.startTime);
                         },
@@ -1999,9 +1995,9 @@
 
                             }
 
-                            if(parseInt(d.startTime) < that.serviceDateTime){
-                                d.startTime = that.serviceDateTime;
-                            }
+                            // if(parseInt(d.startTime) < that.serviceDateTime){
+                            //     d.startTime = that.serviceDateTime;
+                            // }
 
                             var thatX = that.x(d.startTime);
 
@@ -2324,10 +2320,10 @@
                 }else if(timeRange == 1440){
                     overTime = 0.9;
                 }
-                var serviceTime = (nowTime - (1000*60*60*24*(this.serviceDay+overTime)));
-                if(serviceTime > this.removedBufferDomain[0]){
-                    return;
-                }
+                // var serviceTime = (nowTime - (1000*60*60*24*(this.serviceDay+overTime)));
+                // if(serviceTime > this.removedBufferDomain[0]){
+                //     return;
+                // }
                 this.dblClickFlag = false;
                 this.changeTimeRangeClick = true;
                 this.lineMoveFlag = true;

@@ -382,10 +382,10 @@
                     case 'cvrPlayRequest':
                         var time = param.data.time, status = param.data.status;
                         this.timeline.serviceDateTime = ((new Date()).valueOf() - (1000*60*60*24*(this.serviceDay)));
-                        if(this.timeline.serviceDateTime > time){
+                        //if(this.timeline.serviceDateTime > time){
                             //return;
-                            time = new Date(this.timeline.serviceDateTime + 3000);
-                        }
+                            //time = new Date(this.timeline.serviceDateTime + 3000);
+                        //}
 
                         this.timeline.clickTime = time;
                         this.errorStatusLayer.cameraStatusAllOff();
