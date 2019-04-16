@@ -179,6 +179,7 @@
         },
         beforeDestroy : function() {
             window.onPlayerStatusChangeFlash = null;
+            this.destroy();
         },
         methods : {
             onFlashPlayerStatusChanged : function(status) {
@@ -309,6 +310,15 @@
                     var videoObj = document.getElementById(this.flashConfig.objId);
                     if (videoObj && videoObj.mute) {
                         videoObj.mute();
+                    }
+                }
+            },
+
+            destroy : function () {
+                if (this.varPlayerId) {
+                    var playerNode = document.getElementById(this.varPlayerId);
+                    if (playerNode) {
+                        playerNode.removeChild(playerNode.firstChild);
                     }
                 }
             },

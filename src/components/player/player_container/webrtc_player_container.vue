@@ -41,6 +41,9 @@
         },
         beforeDestroy : function() {
             this.stop();
+            if (this.player) {
+                this.player.$destroy();
+            }
         },
         methods : {
             play : function (time) {

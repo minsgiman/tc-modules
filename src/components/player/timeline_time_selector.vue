@@ -5,8 +5,8 @@
         <ul>
             <li>
                 <span class="inp_box calendar" @click="toggleTimelineCalendar()" style="width: 140px;">
-                    <input type="text" v-model="timelineDate.date" id="timelineDate" title="{{$t('CLIP_CREATE_DATE')}}" disabled="disabled">
-                    <button type="button" style="right:4px;">{{$t('CALENDAR')}}</button>
+                    <input type="text" v-model="timelineDate.date" id="timelineDate" disabled="disabled">
+                    <button type="button" id="cal_select_btn" style="right:4px;">{{$t('CALENDAR')}}</button>
                 </span>
                 <div id="calendarContainer" class="calendar_open_area"></div>
             </li>
@@ -138,6 +138,10 @@
             } else {
                 this.setupClipCalendar(this.cameraData.serviceType);
             }
+            $('#cal_select_btn').on('click', () => {
+                this.toggleTimelineCalendar();
+                return false;
+            });
         },
         beforeDestroy : function() {
             if (this.timelineDatePicker) {

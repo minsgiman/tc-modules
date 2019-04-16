@@ -1352,7 +1352,7 @@
 
                 this.cursor.append('svg:image').attr({
                     class: function(d) { return "line"},
-                    x: currentX,
+                    x: currentX - 7,
                     y: 34,
                     width : 14,
                     height : 40
@@ -1375,7 +1375,7 @@
                     var currentX = parseInt(this.x(now));
                     this.svg.select('.cursor').selectAll(".line")
                         .attr({
-                            x: currentX
+                            x: currentX - 7
                         });
                     var curosEmptyData = 0;
 
@@ -2046,7 +2046,7 @@
 
                 if(time == undefined){
                     this.updateCursor(this.currentTime);
-                    var cursorX = parseFloat($(".cursor").children(".line").attr("x1"));
+                    var cursorX = parseFloat($(".cursor").children(".line").attr("x"));
                     for(var i=0; i<this.cvrArray[0].length; i++){
                         if(cursorX < parseFloat(this.cvrArray[0].eq(i).attr("x"))){
                             var x = parseFloat(this.cvrArray[0].eq(i).attr("x"));

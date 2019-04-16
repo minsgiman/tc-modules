@@ -46,6 +46,9 @@
         mounted : function() {
         },
         beforeDestroy : function() {
+            if (this.player) {
+                this.player.$destroy();
+            }
         },
         methods : {
             play : function (param) {

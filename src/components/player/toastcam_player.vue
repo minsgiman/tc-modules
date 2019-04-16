@@ -667,6 +667,7 @@
                 if (param.event === 'changed') {
                     this.onFullscreenChanged(param.state);
                 } else if (param.event === 'beforeChange') {
+                    this.player.zoomUp(-5);
                     this.onBeforeFullscreenChange(param.state);
                 } else if (param.event === 'dataLoading') {
                     this.playEventCb('loadingAlert');
