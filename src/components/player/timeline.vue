@@ -482,7 +482,7 @@
                         $("#timebar_area").children("svg").children("g").attr("transform","translate(0, -33)");
                     }
                     $(".cvr").attr("transform","");
-                    $(".cursor").attr("transform","");
+                    $(".cursor").attr("transform","translate(-7, 0)");
                     this.playEventCallback('changedSelectedZone');
                 }
                 store.dispatch('EVENTS_CHANGE', data.events);
@@ -586,7 +586,7 @@
                         $(".audios").attr("transform","translate("+dragX+", 0)");
                         $(".cvr").attr("transform","translate("+dragX+", 0)");
                         $(".axis").attr("transform","translate("+dragX+", 75)");
-                        $(".cursor").attr("transform","translate("+dragX+", 0)");
+                        $(".cursor").attr("transform","translate("+ (dragX - 7) +", 0)");
                         $(".cvrBG").attr("x",dragX*-1);
                         $(".cvrBG2").attr("x",dragX*-1);
                     })
@@ -608,7 +608,7 @@
                                 that.dragDomain();
                                 $(".axis").attr("transform","translate(0, 75)");
                                 $(".cvr").attr("transform","translate(0, 0)");
-                                $(".cursor").attr("transform","translate(0, 0)");
+                                $(".cursor").attr("transform","translate(-7, 0)");
                                 $(".cvrBG").attr("x","0");
                                 $(".cvrBG2").attr("x","0");
                                 if(that.isPlaying == false){
@@ -1346,13 +1346,13 @@
                                 }
                             }});
                     });
-                this.cursor = this.mainContainer.append('g').attr('class', 'cursor').call(drag);
+                this.cursor = this.mainContainer.append('g').attr('class', 'cursor').attr({'transform': 'translate(-7, 0)'}).call(drag);
                 //$(".cursor").css("width","10px");
                 var currentX = this.x(Date.now())
 
                 this.cursor.append('svg:image').attr({
                     class: function(d) { return "line"},
-                    x: currentX - 7,
+                    x: currentX,
                     y: 34,
                     width : 14,
                     height : 40
@@ -1375,7 +1375,7 @@
                     var currentX = parseInt(this.x(now));
                     this.svg.select('.cursor').selectAll(".line")
                         .attr({
-                            x: currentX - 7
+                            x: currentX
                         });
                     var curosEmptyData = 0;
 
@@ -2177,6 +2177,7 @@
 
                 var findTime = this.currentTime.valueOf() + seconds * 1000;
                 if (findTime > new Date()) {
+                    store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
                     this.goLive();
                 } else {
                     var that = this;
@@ -2184,6 +2185,7 @@
                         var findTime = that.currentTime.valueOf() + seconds * 1000;
                         //var direction = seconds > 0 ? 'next' : 'previous';
                         that.goCvrStatus = true;
+                        store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
                         that.$emit('event', {event: 'cvrPlayRequest', data: {time : new Date(findTime)}});
                     };
                     this.$emit('event', {event: 'clearPlayerStop'});
