@@ -73,7 +73,7 @@
                         } else {
                             findTime = that.currentTime.valueOf();
                         }
-                        toastcamAPIs.call(toastcamAPIs.camera.FIND_CVR, {cameraId: that.cameraData.id, cvrId: findTime, findDirection: 'previous'}, (cvrData) => {
+                        toastcamAPIs.call(toastcamAPIs.camera.FIND_CVR, {cameraId: that.cameraData.id, cvrId: findTime, find: 'previous'}, (cvrData) => {
                             if (cvrData && cvrData.cvr && cvrData.cvr.start && cvrData.cvr.end) {
                                 that.$emit('event', {event: 'play', data: parseInt(cvrData.cvr.start, 10)});
                             } else {
@@ -175,7 +175,7 @@
                             findTime = that.currentTime.valueOf();
                         }
 
-                        toastcamAPIs.call(toastcamAPIs.camera.FIND_CVR, {cameraId: that.cameraData.id, cvrId: findTime, findDirection: 'next'}, (cvrData) => {
+                        toastcamAPIs.call(toastcamAPIs.camera.FIND_CVR, {cameraId: that.cameraData.id, cvrId: findTime, find: 'next'}, (cvrData) => {
                             if (cvrData && cvrData.cvr && cvrData.cvr.start && cvrData.cvr.end) {
                                 that.$emit('event', {event: 'play', data: parseInt(cvrData.cvr.start, 10)});
                             } else {

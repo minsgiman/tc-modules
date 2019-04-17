@@ -2185,16 +2185,6 @@
                         //var direction = seconds > 0 ? 'next' : 'previous';
                         that.goCvrStatus = true;
                         that.$emit('event', {event: 'cvrPlayRequest', data: {time : new Date(findTime)}});
-
-                        // toastcamAPIs.call(toastcamAPIs.camera.FIND_CVR, {cameraId: that.cameraData.id, cvrId: findTime, findDirection: direction}, (cvrData) => {
-                        //     if (cvrData && cvrData.cvr && cvrData.cvr.start && cvrData.cvr.end) {
-                        //         that.$emit('event', {event: 'cvrPlayRequest', data: {time : parseInt(cvrData.cvr.start, 10)}});
-                        //     } else {
-                        //         return;
-                        //     }
-                        // }, (err) => {
-                        //     return;
-                        // });
                     };
                     this.$emit('event', {event: 'clearPlayerStop'});
                     this.$emit('event', {event: 'checkCVRSeucre', data: (isSecureMode) => {
@@ -2236,9 +2226,9 @@
                         } else {
                             findTime = this.currentTime.valueOf();
                         }
-                        toastcamAPIs.call(toastcamAPIs.camera.FIND_CVR, {cameraId: this.cameraData.id, cvrId: findTime, findDirection: 'next'}, (cvrData) => {
+                        toastcamAPIs.call(toastcamAPIs.camera.FIND_CVR, {cameraId: this.cameraData.id, cvrId: findTime, find: 'next'}, (cvrData) => {
                             if (cvrData && cvrData.cvr && cvrData.cvr.start && cvrData.cvr.end) {
-                                this.$emit('event', {event: 'cvrPlayRequest', data: {time : parseInt(cvrData.cvr.start, 10)}});
+                                this.goCvr(parseInt(cvrData.cvr.start, 10));
                             } else {
                                 this.goLive();
                             }
@@ -2252,7 +2242,7 @@
                     if(isSecureMode){
                         this.$emit('event', {event: 'updateCVRSecureStatus', data: callbackFunc.bind(this)});
                     }else{
-                        callbackFunc();
+                        callbackFunc.call(this);
                     }
                 }});
             },
