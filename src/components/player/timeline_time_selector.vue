@@ -1,6 +1,6 @@
 <template>
     <div id="timeline_time_selector_wrap" class="calendar_select" :class="{calendar_select_full: isFullScreen}" v-show="isShowTimelineCalendar">
-        <button type="button" class="sp btn_close" @click="toggleShowSelector()"></button>
+        <button type="button" class="sp btn_close" @click="hideSelector()"></button>
         <h3>{{$t('CAMERA_DAY_DIRECT')}}</h3>
         <ul>
             <li>
@@ -176,11 +176,9 @@
                 this.timelineDate.second = token[2];
             },
 
-            toggleShowSelector : function () {
-                store.dispatch('IS_SHOW_CALENDAR_CHANGE', !this.isShowTimelineCalendar);
-                if (this.isShowTimelineCalendar) {
-                    this.isShowingTimelineTimePicker = false;
-                }
+            hideSelector : function () {
+                this.isShowingTimelineTimePicker = false;
+                store.dispatch('IS_SHOW_CALENDAR_CHANGE', false);
             },
 
             updateCalendarDate : function () {
@@ -198,10 +196,10 @@
             },
 
             toggleTimelineTimePicker : function () {
-                if (this.isShowingTimelineTimePicker) {
-                    var timelineMoment = moment(this.timelineDate.time, 'HH : mm : ss');
-                    this.setTimelineTimeMoment(timelineMoment);
-                }
+                // if (this.isShowingTimelineTimePicker) {
+                //     var timelineMoment = moment(this.timelineDate.time, 'HH : mm : ss');
+                //     this.setTimelineTimeMoment(timelineMoment);
+                // }
                 this.isShowingTimelineTimePicker = !this.isShowingTimelineTimePicker;
             },
 
