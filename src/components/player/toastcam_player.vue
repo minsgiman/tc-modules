@@ -509,7 +509,7 @@
                     store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
                     this.errorStatusLayer.cameraStatusAllOff();
                     if(this.isLive == false){
-                        this.timeline.clickedCVRArea(new Date(this.timeline.x.invert($(".cursor").children(".line").attr("x")).getTime()));
+                        this.timeline.clickedCVRArea(this.currentTime ? this.currentTime : new Date(this.timeline.x.invert($(".cursor").children(".line").attr("x")).getTime()));
                     }else{
                         this.timeline.livePlayDataSet();
                     }

@@ -178,6 +178,9 @@
 
             toggleShowSelector : function () {
                 store.dispatch('IS_SHOW_CALENDAR_CHANGE', !this.isShowTimelineCalendar);
+                if (this.isShowTimelineCalendar) {
+                    this.isShowingTimelineTimePicker = false;
+                }
             },
 
             updateCalendarDate : function () {
@@ -255,10 +258,12 @@
                         that.$emit('event', {event: 'updateCVRSecureStatus', data: () => {
                             that.$emit('event', {event: 'playCvr', data: that.getTimelineMoment().toDate()});
                             store.dispatch('IS_SHOW_CALENDAR_CHANGE', false);
+                            that.isShowingTimelineTimePicker = false;
                         }});
                     }else{
                         that.$emit('event', {event: 'playCvr', data: that.getTimelineMoment().toDate()});
                         store.dispatch('IS_SHOW_CALENDAR_CHANGE', false);
+                        that.isShowingTimelineTimePicker = false;
                     }
                 }});
             },

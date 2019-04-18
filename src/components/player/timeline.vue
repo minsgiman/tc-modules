@@ -1017,32 +1017,10 @@
                             dateFormat = boundDateFormat;
                         }
 
-                        if(this.timeRange == 10){
-                            if (parseInt(md.minutes()) % 10 == 0) {
-                                return md.format(dateFormat);
-                            }else{
-                                return "";
-                            }
-                        }else if(this.timeRange == 60){
-                            if (md.minutes() == "00") {
-                                return md.format(dateFormat);
-                            }else{
-                                return "";
-                            }
-                        }else if(this.timeRange == 360){
-                            var formatArr = [2,6,10,14,18,22];
-                            if (formatArr.indexOf(md.hours()) > -1)  {
-                                return md.format(dateFormat);
-                            }else{
-                                return "";
-                            }
-                        }else if(this.timeRange == 1440){
-                            var formatArr = [4,16];
-                            if (formatArr.indexOf(md.hours()) > -1)  {
-                                return md.format(dateFormat);
-                            }else{
-                                return "";
-                            }
+                        if (parseInt(md.minutes()) == 0 && parseInt(md.hours()) == 0) {
+                            return md.format(dateFormat);
+                        } else {
+                            return "";
                         }
                     });
 
