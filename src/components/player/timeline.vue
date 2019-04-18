@@ -49,7 +49,7 @@
         var currentTranslateX = this.x(d.getTime());
         var textWidth = getDateTickWidth(index);
         var margin = 27;
-        var adjustedTranslateX = currentTranslateX - (textWidth/2) - margin;
+        var adjustedTranslateX = currentTranslateX + (textWidth/2) + margin;
         return 'translate(' + adjustedTranslateX + ', 0)';
     };
 

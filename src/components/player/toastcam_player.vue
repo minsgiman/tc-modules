@@ -686,6 +686,7 @@
                         this.playInfoBar.setData('isShowTimelineToggleArea', true);
                     }
                     this.playInfoBar.setData('isToggleOn', true);
+                    $(".thum_full_area").show();
                     $("#controlNdTimeLine").hide();
                     $("#view_timeline_ctrl").hide();
                     $("#view_timeline_date").hide();
@@ -713,6 +714,7 @@
                 } else {
                     this.playInfoBar.setData('isShowTimelineToggleArea', true);
                     this.playInfoBar.setData('isToggleOn', false);
+                    $(".thum_full_area").hide();
                     $("#view_timeline_ctrl").show();
                     $("#view_timeline_date").show();
                     $("#view_btn_area").show();
