@@ -23,16 +23,16 @@
         <div class="fs_time" v-show="isFullScreen && fullMode">
             <div class="range_select_wrap">
                 <spanly_flash_player class="left_icon"></spanly_flash_player>
-                <button type="button" @click="changeTimeRange(1440)" v-show="timeRange == 10">
+                <button type="button" @click="changeTimeRange(60)" v-show="timeRange == 10">
                     <span class="fs_time_range">{{$t('TIMELINE_10MIN')}}</span>
                 </button>
-                <button type="button" @click="changeTimeRange(10)" v-show="timeRange == 60">
+                <button type="button" @click="changeTimeRange(360)" v-show="timeRange == 60">
                     <span class="fs_time_range">{{$t('TIMELINE_1HOUR')}}</span>
                 </button>
-                <button type="button" @click="changeTimeRange(60)" v-show="timeRange == 360">
+                <button type="button" @click="changeTimeRange(1440)" v-show="timeRange == 360">
                     <span class="fs_time_range">{{$t('TIMELINE_6HOUR')}}</span>
                 </button>
-                <button type="button" @click="changeTimeRange(360)" v-show="timeRange == 1440">
+                <button type="button" @click="changeTimeRange(10)" v-show="timeRange == 1440">
                     <span class="fs_time_range">{{$t('TIMELINE_24HOUR')}}</span>
                 </button>
                 <span class="right_icon"></span>
