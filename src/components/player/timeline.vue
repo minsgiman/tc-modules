@@ -1202,21 +1202,23 @@
                     .call(this.getDateTicks())
                     .call(function(){
                         var ticks = this.selectAll(".tick")[0];
-                        ticks.forEach(function (tick) {
-                            var textNode = $(tick).find('text');
-                            var text = textNode.text();
-                            var textWidth, locationX;
-                            if (textNode && textNode[0]) {
-                                textWidth = textNode[0].getBoundingClientRect().width + 6;
-                            } else {
-                                textWidth = 0;
-                            }
-                            locationX = -(textWidth / 2);
+                        if (ticks) {
+                            ticks.forEach(function (tick) {
+                                var textNode = $(tick).find('text');
+                                var text = textNode.text();
+                                var textWidth, locationX;
+                                if (textNode && textNode[0]) {
+                                    textWidth = textNode[0].getBoundingClientRect().width + 6;
+                                } else {
+                                    textWidth = 0;
+                                }
+                                locationX = -(textWidth / 2);
 
-                            if(text.length > 0){
-                                d3.select(tick).insert('rect', 'text').attr({ x: locationX, y: 12, width: textWidth, height: 14, fill: "#555"});
-                            }
-                        });
+                                if(text.length > 0){
+                                    d3.select(tick).insert('rect', 'text').attr({ x: locationX, y: 12, width: textWidth, height: 14, fill: "#555"});
+                                }
+                            });
+                        }
                     });
 
                 this.axisContainer.selectAll(".date-tick-axis .tick")
@@ -1859,21 +1861,22 @@
                         .call(that.getDateTicks())
                         .call(function(){
                             var ticks = this.selectAll(".tick")[0];
-                            ticks.forEach(function (tick) {
-                                var textNode = $(tick).find('text');
-                                var text = textNode.text();
-                                var textWidth, locationX;
-                                if (textNode && textNode[0]) {
-                                    textWidth = textNode[0].getBoundingClientRect().width + 6;
-                                } else {
-                                    textWidth = 0;
-                                }
-                                locationX = -(textWidth / 2);
-                                if(text.length > 0){
-                                    d3.select(tick).insert('rect', 'text').attr({ x: locationX, y: 12, width: textWidth, height: 14, fill: "#555"});
-                                }
-                            });
-
+                            if (ticks) {
+                                ticks.forEach(function (tick) {
+                                    var textNode = $(tick).find('text');
+                                    var text = textNode.text();
+                                    var textWidth, locationX;
+                                    if (textNode && textNode[0]) {
+                                        textWidth = textNode[0].getBoundingClientRect().width + 6;
+                                    } else {
+                                        textWidth = 0;
+                                    }
+                                    locationX = -(textWidth / 2);
+                                    if(text.length > 0){
+                                        d3.select(tick).insert('rect', 'text').attr({ x: locationX, y: 12, width: textWidth, height: 14, fill: "#555"});
+                                    }
+                                });
+                            }
                             this.selectAll(".date-tick-axis .tick").attr('transform', adjustDateLocation.bind(that));
                         });
 
@@ -1919,20 +1922,22 @@
                         .call(that.getDateTicks())
                         .call(function(){
                             var ticks = this.selectAll(".tick")[0];
-                            ticks.forEach(function (tick) {
-                                var textNode = $(tick).find('text');
-                                var text = textNode.text();
-                                var textWidth, locationX;
-                                if (textNode && textNode[0]) {
-                                    textWidth = textNode[0].getBoundingClientRect().width + 6;
-                                } else {
-                                    textWidth = 0;
-                                }
-                                locationX = -(textWidth / 2);
-                                if(text.length > 0){
-                                    d3.select(tick).insert('rect', 'text').attr({ x: locationX, y: 12, width: textWidth, height: 14, fill: "#555"});
-                                }
-                            });
+                            if (ticks) {
+                                ticks.forEach(function (tick) {
+                                    var textNode = $(tick).find('text');
+                                    var text = textNode.text();
+                                    var textWidth, locationX;
+                                    if (textNode && textNode[0]) {
+                                        textWidth = textNode[0].getBoundingClientRect().width + 6;
+                                    } else {
+                                        textWidth = 0;
+                                    }
+                                    locationX = -(textWidth / 2);
+                                    if(text.length > 0){
+                                        d3.select(tick).insert('rect', 'text').attr({ x: locationX, y: 12, width: textWidth, height: 14, fill: "#555"});
+                                    }
+                                });
+                            }
                             this.selectAll(".date-tick-axis .tick").attr('transform', adjustDateLocation.bind(that));
                         });
 
