@@ -2,13 +2,13 @@
     <span>
         <span v-show="!fullMode" class="calendar">
             <button type="button" :class="{on: isShowTimelineCalendar}" @click="pressedShowTimelineCalendarButton()">
-                <span>{{$t('CAMERA_DAY_TIME')}}</span>
+                <span>{{$t('CAMERA_DAY_DIRECT')}}</span>
             </button>
         </span>
 
         <span v-show="fullMode">
             <button type="button" :class="{on: isShowTimelineCalendar}" @click="pressedShowTimelineCalendarButton()" class="last">
-                <span class="fs_time_range"><div class="calendar"></div>{{$t('CAMERA_DAY_TIME')}}</span>
+                <span class="fs_time_range"><div class="calendar"></div>{{$t('CAMERA_DAY_DIRECT')}}</span>
             </button>
         </span>
     </span>
