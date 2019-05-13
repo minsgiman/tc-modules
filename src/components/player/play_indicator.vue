@@ -27,6 +27,9 @@
         },
         mounted : function() {
             this.updateIndicatorSize();
+            $('#play_indicator').on("hover mousemove", () => {
+                this.$emit('event', {event: 'indicatorHover'});
+            });
         },
         beforeDestroy : function() {
         },
