@@ -641,8 +641,10 @@
                     } else {
                         this.playInfoBar.playBtn();
                     }
-                } else if (param.event === 'indicatorHover') {
-                    this.playEventCb('indicatorHover');
+                } else if (param.event === 'indicatorHoverIn') {
+                    this.playEventCb('indicatorHoverIn');
+                } else if (param.event === 'indicatorHoverOut') {
+                    this.playEventCb('indicatorHoverOut');
                 }
             },
 

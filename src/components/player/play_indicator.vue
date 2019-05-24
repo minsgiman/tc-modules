@@ -27,8 +27,13 @@
         },
         mounted : function() {
             this.updateIndicatorSize();
-            $('#play_indicator').on("hover mousemove", () => {
-                this.$emit('event', {event: 'indicatorHover'});
+            $('#play_indicator').hover(() => {
+                this.$emit('event', {event: 'indicatorHoverIn'});
+            }, () => {
+                this.$emit('event', {event: 'indicatorHoverOut'});
+            });
+            $('#play_indicator').mousemove(() => {
+                this.$emit('event', {event: 'indicatorHoverIn'});
             });
         },
         beforeDestroy : function() {

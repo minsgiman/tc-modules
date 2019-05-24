@@ -94,13 +94,13 @@
                     }
                 }else{
                     if(parseInt(window.innerWidth) < 1900){
-                        $(".cam_info_bg").css("width","206px");
+                        $(".cam_info_bg").css("width","198px");
                         $(".cam_info_bg").css("margin-left"," -103px");
 
                         $(".cam_info_bg_en").css("width","216px");
                         $(".cam_info_bg_en").css("margin-left"," -108px");
                     }else{
-                        $(".cam_info_bg").css("width","206px");
+                        $(".cam_info_bg").css("width","198px");
                         $(".cam_info_bg").css("margin-left"," -103px");
 
                         $(".cam_info_bg_en").css("width","216px");
