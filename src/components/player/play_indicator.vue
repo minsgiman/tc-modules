@@ -1,5 +1,6 @@
 <template>
     <div id="play_indicator" @click="togglePlay">
+        <div style="width:210px; height:65%; position:absolute; left:-200px; top:0px;"></div>
         <div class="btn_wrap"></div>
     </div>
 </template>
