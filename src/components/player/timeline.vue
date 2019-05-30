@@ -76,6 +76,9 @@
         name : 'timeline',
         props : ['elementId', 'playEventCallback'],
         computed : {
+            category: function () {
+                return store.state.category;
+            },
             cameraData: function () {
                 return store.state.cameraData;
             },
@@ -191,7 +194,6 @@
 
             var cvrBgDrag = this.setDragEvent();
 
-            this.accessIcons = this.mainContainer.append('g').attr('class', 'accessIcons');
             this.motionEvents = this.mainContainer.append('g').attr('class', 'motions').attr("transform", "translate(0, -3)");
             this.audioEvents = this.mainContainer.append('g').attr('class', 'audios');
             this.scaleEvents = this.mainContainer.append('g').attr('class', 'scales');
@@ -206,6 +208,7 @@
             }).call(cvrBgDrag);
 
             this.cvrs = this.mainContainer.append('g').attr('class', 'cvr');
+            this.accessIcons = this.mainContainer.append('g').attr('class', 'accessIcons');
             this.inoutEvents = this.mainContainer.append('g').attr('class', 'inouts');
             this.isDblZooming = false;
             this.previousDblClickTime = 0;
@@ -579,7 +582,7 @@
                         }
 
                         that.updateCursor(that.currentTime);
-                        $(".accessIcons").children("image.accessIcons").attr("transform", "translate(" + dragX + ", 0)");
+                        $(".accessIcons").children("image").attr("transform", "translate(" + dragX + ", 0)");
                         $(".motion").attr("transform","translate("+dragX+", 0)");
                         $(".inout").attr("transform","translate("+dragX+", 0)");
                         $(".sensor").attr("transform","translate("+dragX+", 0)");
@@ -1190,10 +1193,14 @@
                         .attr('transform', 'translate(0, 75)')
                         .attr('class', 'axis');
 
-                    var $parentEl, $inoutEl = $(".inouts");
+                    var $parentEl, $inoutEl = $(".inouts"), $accessEl = $(".accessIcons");
                     if ($inoutEl.length) {
                         $parentEl = $inoutEl.parent();
                         $parentEl.append($inoutEl.detach());
+                    }
+                    if ($accessEl.length) {
+                        $parentEl = $accessEl.parent();
+                        $parentEl.append($accessEl.detach());
                     }
                 }
 
@@ -1493,14 +1500,16 @@
                             obj.index = isCheckedEvent[0];
                             // obj.index = d.zoneIdxs[0];
                             obj.idx = "zone" + zoneId + " num" + zoneIdx;
-
-                            // if (isCheckedEvent.indexOf("10000") > -1 || isCheckedEvent.indexOf("20000") > -1) {
-                            // 	accessData.push(obj);
-                            // }
-                            var thatXCheck = that.x(d.startTime);
-                            var thatWidthCheck = that.x(d.endTime) - that.x(d.startTime);
-                            if(thatWidthCheck >= 0 ){
-                                filteredData.push(obj);
+                            if (isCheckedEvent.indexOf("10000") > -1 || isCheckedEvent.indexOf("20000") > -1) {
+                                if (that.category === 'b2c') {
+                                    accessData.push(obj);
+                                }
+                            } else {
+                                var thatXCheck = that.x(d.startTime);
+                                var thatWidthCheck = that.x(d.endTime) - that.x(d.startTime);
+                                if(thatWidthCheck >= 0 ){
+                                    filteredData.push(obj);
+                                }
                             }
                             zoneId++;
                         }
@@ -1509,14 +1518,20 @@
 
                 this.accessIcons.selectAll("image.accessIcons").data(accessData).enter()
                     .append("svg:image")
-                    .attr("xlink:href", "/resources/im/ic_timeline_color07_N.png")
+                    .attr("xlink:href", function(d) {
+                        if (d.index === '10000') {
+                            return "/resources/img/ic-timeline-in.png";
+                        } else {
+                            return "/resources/img/ic-event-out.png";
+                        }
+                    })
                     .attr({
                         x: function(d) {
-                            return (that.x(d.startTime) + that.x(d.endTime)) / 2 - 7;
+                            return that.x(d.startTime) - 16; //(that.x(d.startTime) + that.x(d.endTime)) / 2 - 16;
                         },
-                        y: 20,
-                        width: 14,
-                        height: 18
+                        y: 68,
+                        width : 32,
+                        height : 15
                     });
 
                 var motions = this.motionEvents.selectAll('.event-bar').data(filteredData.filter(function (d){

@@ -24,6 +24,7 @@ class player {
                 prefix: '/json/biz/'
             });
         }
+        this.setData('category', param.category);
         this.setData('cameraConfig', param.cameraConfig);
         this.setData('cameraData', param.cameraData);
         this.setData('shopId', param.shopId ? param.shopId : '');
@@ -108,6 +109,9 @@ class player {
                 break;
             case 'timeRange':
                 store.dispatch('TIME_RANGE_CHANGE', value);
+                break;
+            case 'category':
+                store.dispatch('CATEGORY_CHANGE', value);
                 break;
             default:
                 break;

@@ -4,6 +4,7 @@ import Vuex from 'vuex';
 Vue.use(Vuex);
 const store = new Vuex.Store({
     state: {
+        category: '',
         cameraData: {},
         cameraConfig: {},
         shopId: '',
@@ -64,6 +65,9 @@ const store = new Vuex.Store({
         }
     },
     actions: {
+        CATEGORY_CHANGE: function(context, state) {
+            context.commit('UPDATE_CATEGORY', state);
+        },
         CAMERA_DATA_CHANGE: function(context, state) {
             context.commit('UPDATE_CAMERA_DATA', state);
         },
@@ -158,6 +162,9 @@ const store = new Vuex.Store({
         }
     },
     mutations: {
+        UPDATE_CATEGORY: function(state, value) {
+            state.category = value;
+        },
         UPDATE_CAMERA_DATA: function(state, value) {
             state.cameraData = value;
         },

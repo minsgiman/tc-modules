@@ -35,6 +35,9 @@
             },
             isShared: function () {
                 return store.state.isShared;
+            },
+            category: function () {
+                return store.state.category;
             }
         },
         data: function () {
@@ -53,7 +56,7 @@
         },
         methods : {
             checkCVRSeucre: function(callback) {
-                toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARED_CAMERA_CONFIG : toastcamAPIs.camera.GET_CAMERA_CONFIG, {cameraId: this.cameraData.id}, (data) => {
+                toastcamAPIs.call(this.isShared && this.category === 'b2b' ? toastcamAPIs.camera.GET_SHARED_CAMERA_CONFIG : toastcamAPIs.camera.GET_CAMERA_CONFIG, {cameraId: this.cameraData.id}, (data) => {
                     if(data.secureMode == "on"){
                         this.$emit('event', {event: 'stopTimer'});
                         var passCVRSecure = sessionStorage.getItem("passCVRSecureCameraIds");
