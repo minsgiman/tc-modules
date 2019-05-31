@@ -23,6 +23,14 @@ class player {
             toastcamAPIs.setConfig({
                 prefix: '/json/biz/'
             });
+        } else if (param.category === 'demo') {
+            toastcamAPIs.setConfig({
+                prefix: '/json/demo/'
+            });
+        } else {
+            toastcamAPIs.setConfig({
+                prefix: '/json/'
+            });
         }
         this.setData('category', param.category);
         this.setData('cameraConfig', param.cameraConfig);

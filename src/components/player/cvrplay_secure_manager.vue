@@ -56,25 +56,29 @@
         },
         methods : {
             checkCVRSeucre: function(callback) {
-                toastcamAPIs.call(this.isShared && this.category === 'b2b' ? toastcamAPIs.camera.GET_SHARED_CAMERA_CONFIG : toastcamAPIs.camera.GET_CAMERA_CONFIG, {cameraId: this.cameraData.id}, (data) => {
-                    if(data.secureMode == "on"){
-                        this.$emit('event', {event: 'stopTimer'});
-                        var passCVRSecure = sessionStorage.getItem("passCVRSecureCameraIds");
-                        if (passCVRSecure == null || passCVRSecure === "undefined"){
-                            callback(true);
-                        } else {
-                            if(passCVRSecure.indexOf(this.cameraData.id) > -1){
-                                callback(false);
-                            }else{
+                if (this.category === 'demo') {
+                    callback(false);
+                } else {
+                    toastcamAPIs.call(this.isShared && this.category === 'b2b' ? toastcamAPIs.camera.GET_SHARED_CAMERA_CONFIG : toastcamAPIs.camera.GET_CAMERA_CONFIG, {cameraId: this.cameraData.id}, (data) => {
+                        if(data.secureMode == "on"){
+                            this.$emit('event', {event: 'stopTimer'});
+                            var passCVRSecure = sessionStorage.getItem("passCVRSecureCameraIds");
+                            if (passCVRSecure == null || passCVRSecure === "undefined"){
                                 callback(true);
+                            } else {
+                                if(passCVRSecure.indexOf(this.cameraData.id) > -1){
+                                    callback(false);
+                                }else{
+                                    callback(true);
+                                }
                             }
+                        } else {
+                            callback(false);
                         }
-                    } else {
+                    }, (err) => {
                         callback(false);
-                    }
-                }, (err) => {
-                   callback(false);
-                });
+                    });
+                }
             },
 
             showCVRPlayPasswordConfirm: function() {
