@@ -47,7 +47,7 @@
                         <button type="button" class="btn" v-show="isCameraOffLastShowRec" @click="requestPlayCvr(lastRecDate,'f')">
                             <img src="/resources/im/ic_video_error_arrow_L.png">{{$t('CAMERA_DETAIL_LAST_REC')}}
                         </button>
-                        <p class="txt" ng-show="isCameraOffLastRec">{{$t('MY_CAMERA_LAST_NO_REC')}}</p>
+                        <p class="txt" v-show="isCameraOffLastRec">{{$t('MY_CAMERA_LAST_NO_REC')}}</p>
                     </li>
                     <li>
                         <p class="txt">
@@ -127,6 +127,8 @@
                 lastRecDate: 0,
                 lastEventDateString: '',
                 lastEventTimeString: '',
+                lastRecDateString : '',
+                lastRecTimeString : '',
                 lastCameraStatus : 0
             }
         },
@@ -190,6 +192,9 @@
                 this.showCameraOffLayer = false;
                 this.showCameraStreamLayer = true;
                 this.showNextPlayLayer = false;
+                toastcamAPIs.call(toastcamAPIs.camera.CHECK_IS_LAST_RECORD, {cameraId: this.cameraData.id}, (data) => {
+                    this.currentCameraIsLastRecordDataSet(data);
+                });
             },
 
             cameraStatusAllOff : function() { //정상 플레이

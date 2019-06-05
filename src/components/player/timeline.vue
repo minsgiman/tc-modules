@@ -1502,6 +1502,11 @@
                             obj.idx = "zone" + zoneId + " num" + zoneIdx;
                             if (isCheckedEvent.indexOf("10000") > -1 || isCheckedEvent.indexOf("20000") > -1) {
                                 if (that.category === 'b2c') {
+                                    if (isCheckedEvent.indexOf("10000") > -1) {
+                                        obj.index = "10000";
+                                    } else {
+                                        obj.index = "20000";
+                                    }
                                     accessData.push(obj);
                                 }
                             } else {
