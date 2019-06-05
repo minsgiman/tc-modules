@@ -57,6 +57,9 @@
             resume : function () {
                 this.player.play();
             },
+            mute : function () {
+                this.player.mute();
+            },
             pause : function () {
                 this.player.pause();
             },

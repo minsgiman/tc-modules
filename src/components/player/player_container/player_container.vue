@@ -135,6 +135,9 @@
             resume : function () {
                 this.player.resume();
             },
+            mute : function () {
+                this.player.mute();
+            },
             pause : function () {
                 this.player.pause();
             },

@@ -74,6 +74,9 @@
             resume : function () {
                 this.player.resume();
             },
+            mute : function () {
+                return;
+            },
             pause : function () {
                 this.player.pause();
             },
