@@ -1,12 +1,13 @@
 <template>
-    <div class="confirm_dialog">
+    <div class="select_dialog">
         <modal_dlg @close="fireEvent('close')" :dlgStyle="dlgStyle">
             <template slot="content">
                 <div class="content_wrap">
                     <h2>{{title}}</h2>
                     <p v-html="message"></p>
                     <div class="btn_wrap">
-                        <button @click="fireEvent('confirm')">{{confirmBtn ? confirmBtn : $t('BUTTON_CONFIRM')}}</button>
+                        <button class="cancel" @click="fireEvent('cancel')">{{cancelBtn ? cancelBtn : $t('BUTTON_CANCEL')}}</button>
+                        <button class="confirm" @click="fireEvent('confirm')">{{confirmBtn ? confirmBtn : $t('BUTTON_CONFIRM')}}</button>
                     </div>
                 </div>
             </template>
@@ -17,7 +18,7 @@
     import modal_dlg from './modal_dlg';
 
     export default {
-        props: ['title', 'message', 'confirmBtn'],
+        props: ['title', 'message', 'confirmBtn', 'cancelBtn'],
         name: 'confirmDlg',
         data: function() {
             return {
@@ -42,15 +43,15 @@
     }
 </script>
 <style lang="less">
-    .confirm_dialog {
+    .select_dialog {
         .content_wrap {
             text-align:left;
             h2 {
-               display:inline-block;
-               font-size:20px;
-               color:#333;
-               line-height:22px;
-               font-weight:400;
+                display:inline-block;
+                font-size:20px;
+                color:#333;
+                line-height:22px;
+                font-weight:400;
             }
             p {
                 font-size:16px;
@@ -66,10 +67,16 @@
                     height: 50px;
                     width: 150px;
                     font-size: 16px;
-                    color: #fff;
-                    background: #4b96e6;
                     border-radius: 25px;
                     margin: 0 5px;
+                    &.confirm {
+                        color: #fff;
+                        background: #4b96e6;
+                    }
+                    &.cancel {
+                        color: #fff;
+                        background: #777777;
+                    }
                 }
             }
         }

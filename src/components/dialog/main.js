@@ -1,13 +1,22 @@
 import Vue from 'vue';
 import { i18n } from '../../i18n/dialog/i18n';
 import confirmDlg from './confirm_dlg.vue';
+import selectDlg from './select_dlg.vue';
 
 class dialog {
     constructor(param) {
         if (param.type === 'confirm') {
             this.control = this.createComponent(confirmDlg, param.elId, param.eventHandler, {
                 title: param.title,
-                message: param.message
+                message: param.message,
+                confirmBtn: param.confirmBtn
+            });
+        } else if (param.type === 'select') {
+            this.control = this.createComponent(selectDlg, param.elId, param.eventHandler, {
+                title: param.title,
+                message: param.message,
+                confirmBtn: param.confirmBtn,
+                cancelBtn: param.cancelBtn
             });
         }
     }
