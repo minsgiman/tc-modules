@@ -466,7 +466,7 @@
                             }, 500);
                         }else{
                             if(this.cameraData.controlStatus === "CS" || this.cameraData.controlStatus === "on"){
-                                if (this.cameraData.recordType != "event") {
+                                if (this.cameraData.recordType != "event" && this.cameraData.recordType != "live") {
                                     if(this.cameraData.streamStatus == "off" && param.data != 'NetStream.Play.Stop'){
                                         cameraStatusNum = 2;
                                         cameraStatus = false;
