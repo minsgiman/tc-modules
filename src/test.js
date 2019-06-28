@@ -1,18 +1,42 @@
-import player from './../test/player/player_main';
+import dlg from './components/dialog/main';
 
-let playerObj = new player({
-    cameraId : 'AAAAAACHHX',
-    shopId : '',  //optional
-    groupId : '', //optional
-    isShared : false,
-    elementId : 'videoWrap'
+let mydlg = dlg({
+    elId: 'dlgID',
+    theme: 'toast',
+    header: '<span>title</span>',
+    contents: '<p>CONTENTS</p>',
+    footer: '',
+    btn: {
+        items: [
+            {id: 'confirm', name: 'OK', type: 'confirm'},
+            {id: 'close', name: 'NO', type: 'cancel'}
+        ],
+        align: 'bottom'
+    },
+    eventHandler: function (event) {
+        alert('event : ' + event.event);
+    }
 });
-playerObj.initialize(() => {
-    playerObj.play();
+
+let mydlg2 = dlg({
+    elId: 'dlgID2',
+    theme: 'toast',
+    header: '<span>title2</span>',
+    contents: '<p>CONTENTS2</p>',
+    footer: '',
+    btn: {
+        items: [
+            {id: 'confirm', name: 'OK', type: 'confirm'},
+            {id: 'close', name: 'NO', type: 'cancel'}
+        ],
+        align: 'bottom'
+    },
+    eventHandler: function (event) {
+        alert('event : ' + event.event);
+    }
 });
 
-// setTimeout(function() {
-//     playerObj.destroy();
-//     playerObj = null;
-// }, 10 * 1000);
-
+setTimeout(function() {
+    mydlg.destroy();
+    mydlg = null;
+}, 4000);

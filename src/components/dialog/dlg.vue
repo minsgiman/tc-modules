@@ -1,13 +1,13 @@
 <template>
-    <div class="select_dialog">
+    <div class="tc_dlg">
         <modal_dlg @close="fireEvent('close')" :dlgStyle="dlgStyle">
             <template slot="content">
                 <div class="content_wrap">
-                    <h2>{{title}}</h2>
-                    <p v-html="message"></p>
-                    <div class="btn_wrap">
-                        <button class="cancel" @click="fireEvent('cancel')">{{cancelBtn ? cancelBtn : $t('BUTTON_CANCEL')}}</button>
-                        <button class="confirm" @click="fireEvent('confirm')">{{confirmBtn ? confirmBtn : $t('BUTTON_CONFIRM')}}</button>
+                    <header v-html="header"></header>
+                    <div class="contents" v-html="contents"></div>
+                    <footer v-html="footer"></footer>
+                    <div ng-show="btns" class="btn_wrap">
+                        <button v-for="(item, index) in btns" @click="fireEvent(item.id)" :class="item.type">{{item.name}}</button>
                     </div>
                 </div>
             </template>
@@ -16,10 +16,16 @@
 </template>
 <script>
     import modal_dlg from './modal_dlg';
+    import dlgManager from './dlg_manager';
 
     export default {
-        props: ['title', 'message', 'confirmBtn', 'cancelBtn'],
+        props: ['theme', 'header', 'contents', 'footer', 'btn'],
         name: 'confirmDlg',
+        computed : {
+            btns: function () {
+                return (this.btn && this.btn.items && this.btn.items.length) ? this.btn.items : null;
+            }
+        },
         data: function() {
             return {
                 dlgStyle: {
@@ -29,12 +35,19 @@
         },
         created : function() {
         },
+        mounted : function() {
+        },
         beforeDestroy : function() {
-            $(this.$el).detach();
+            if (this.$el.parentNode) {
+                this.$el.parentNode.removeChild(this.$el);
+            }
         },
         methods: {
             fireEvent: function(type) {
                 this.$emit('event', {event: type});
+            },
+            destroy: function() {
+                dlgManager.destroyDlg(this._uid);
             }
         },
         components : {
@@ -43,17 +56,17 @@
     }
 </script>
 <style lang="less">
-    .select_dialog {
+    .tc_dlg {
         .content_wrap {
             text-align:left;
-            h2 {
+            header {
                 display:inline-block;
                 font-size:20px;
                 color:#333;
                 line-height:22px;
                 font-weight:400;
             }
-            p {
+            .contents {
                 font-size:16px;
                 word-break:break-all;
                 color:#777;
@@ -69,6 +82,10 @@
                     font-size: 16px;
                     border-radius: 25px;
                     margin: 0 5px;
+                    overflow:visible;
+                    border:0;
+                    cursor:pointer;
+                    outline:none;
                     &.confirm {
                         color: #fff;
                         background: #4b96e6;
