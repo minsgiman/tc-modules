@@ -11,7 +11,8 @@ module.exports = {
     entry: {
         "api.min" : './../src/api.js',
         "api.common.min" : './../src/api.common.js',
-        "api.esm.min" : './../src/api.esm.js'
+        "api.esm.min" : './../src/api.esm.js',
+        //"test.min" : './../src/test.js'
     },
     module: {
         rules: [
@@ -91,7 +92,7 @@ if (process.env.NODE_ENV === 'production') {
             minimize: true
         }),
         new CopyWebpackPlugin([
-            {from: './../src/components/player/resources', to: './../dist/resources'}
+            {from: './../resources', to: './../dist/resources'}
         ])
     ])
 }

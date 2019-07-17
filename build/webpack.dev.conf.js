@@ -32,8 +32,8 @@ module.exports = merge(baseWebpackConfig, {
       inject: true
     }),
     new FriendlyErrorsPlugin(),
-    // new CopyWebpackPlugin([
-    //     {from: './src/components/player/resources', to: './../dist/resources'}
-    // ])
+    new CopyWebpackPlugin([
+        {from: './resources', to: './../dist/resources'}
+    ])
   ]
 })
