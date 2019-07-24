@@ -1,3 +1,3 @@
 module.exports = {
-    player : {}//require('./components/player/player_main')
+    lPlayer : require('./components/player/light_main')
 };

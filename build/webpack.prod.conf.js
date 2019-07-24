@@ -9,10 +9,9 @@ function resolve (dir) {
 
 module.exports = {
     entry: {
-        "api.min" : './../src/api.js',
-        "api.common.min" : './../src/api.common.js',
-        "api.esm.min" : './../src/api.esm.js',
-        //"test.min" : './../src/main.js'
+        "tc.player.min" : './../src/api.js',
+        "tc.player.common.min" : './../src/api.common.js',
+        "tc.player.esm.min" : './../src/api.esm.js'
     },
     module: {
         rules: [

@@ -1,4 +1,3 @@
-//import player from './components/player/player_main';
+import lPlayer from './components/player/light_main';
 
-export { };
-export default { };
+export default { lPlayer };

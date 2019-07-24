@@ -50,6 +50,23 @@
         return returnUrl;
     };
 
+    var setPathParams = function(url, params) {
+        const pathParamReg = /\/:\w+/gi;
+        let pathParams = url.match(pathParamReg);
+
+        if (pathParams) {
+            pathParams = pathParams.map(function(item) {
+                return item.replace(/\/:/g, '');
+            });
+            pathParams.forEach(function(item) {
+                if (params[item]) {
+                    url = url.replace(':' + item, params[item]);
+                }
+            });
+        }
+        return url;
+    };
+
     export default {
         name: 'playerContainer',
         props: ['serialNo', 'elementId', 'startTime', 'endTime', 'loop', 'coreSwfPath', 'skinSwfPath', 'getTokenUrl', 'playEventHandler'],
@@ -73,14 +90,17 @@
                 playIntervalId : null,
                 playTime : 0,
                 timeInterval : 200,
-                playStatus : 0
+                playStatus : 0,
+                defCoreSwfPath : '/resources/vendor/nvp_web_player/LCP_web_player2016082601.swf',
+                defSkinPath : '/resources/vendor/nvp_web_player/NVP_web_player_skin_tvcast_white.swf',
+                defGetTokenUrl : '/biz/cameras/token/:serialNo'
             }
         },
         created : function() {
             const vExtendConstructor = Vue.extend(flashPlayer);
             this.player = new vExtendConstructor({
                 propsData : {
-                    varPlayerId: 'player',
+                    varPlayerId: 'tc_player_light',
                     varName: 'rmcPlayer_flash',
                     videoId: '',
                     inKey: '',
@@ -89,8 +109,8 @@
                     width: '100%',
                     height: '100%',
                     serviceId: '',
-                    varCoreSwf: this.coreSwfPath ? this.coreSwfPath : '/resources/vendor/nvp_web_player/LCP_web_player2016082601.swf',
-                    varSkinPath: this.skinSwfPath ? this.skinSwfPath : '/resources/vendor/nvp_web_player/NVP_web_player_skin_tvcast_white.swf',
+                    varCoreSwf: this.coreSwfPath ? this.coreSwfPath : this.defCoreSwfPath,
+                    varSkinPath: this.skinSwfPath ? this.skinSwfPath : this.defSkinPath,
                     varServerUrl: ''
                 }
             }).$mount(this.elementId ? '#' + this.elementId : '#player');
@@ -143,7 +163,7 @@
                             }
                         }
                     };
-                    httpRequest.open('GET', 'http://10.161.240.93:10000' + (that.getTokenUrl ? that.getTokenUrl : '/biz/cameras/token/') + that.serialNo);
+                    httpRequest.open('GET', 'http://10.161.240.93:10000' + setPathParams((that.getTokenUrl ? that.getTokenUrl : that.defGetTokenUrl), {serialNo : that.serialNo}));
                     httpRequest.send();
                 }, 200);
             },

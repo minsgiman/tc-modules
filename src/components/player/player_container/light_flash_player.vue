@@ -1,5 +1,5 @@
 <template>
-    <div class="player_cam" id="player" :style="{width: width, height: height}"></div>
+    <div class="player_cam" :id="varPlayerId" :style="{width: width, height: height}"></div>
 </template>
 
 <script>

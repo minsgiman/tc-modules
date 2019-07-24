@@ -1,7 +1,7 @@
 {
-  "name": "toastcam-components",
+  "name": "toastcam-player-light",
   "version": "1.0.0",
-  "description": "Toastcam Components",
+  "description": "Toastcam Player Light",
   "main": "dist/api.common.min.js",
   "module": "dist/api.esm.min.js",
   "author": "mskang",
