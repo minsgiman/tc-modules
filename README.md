@@ -56,15 +56,15 @@ import tcPlayer from 'toastcam-player-light'; /* ES6 */
 
 The TOASTCAM Light Player needs following parameters
 
- - serialNo: Camera serial number (***<span style="color:red">mandatory</span>***)
- - elementId: elementId where TOASTCAM Light Player will be created (***<span style="color:red">mandatory</span>***)
- - startTime: CVR start timestamp - 13 digits (***<span style="color:red">mandatory</span>***)  
- - endTime: CVR end timestamp - 13 digits (***<span style="color:red">mandatory</span>***)
- - loop: repeat video (<span style="color:blue">default: false</span>)
- - coreSwfPath: downloaded flash core swf file path (<span style="color:blue">default: '/resources/vendor/nvp_web_player/LCP_web_player2016082601.swf'</span>)
- - skinSwfPath: downloaded flash skin swf file path (<span style="color:blue">default: '/resources/vendor/nvp_web_player/NVP_web_player_skin_tvcast_white.swf'</span>)
- - getTokenUrl : Get Token API Url (<span style="color:blue">default: '/biz/cameras/token/'</span>)
- - playEventHandler: Player Event Handler (<span style="color:blue">not mandatory</span>)
+ - serialNo: Camera serial number (***mandatory***)
+ - elementId: elementId where TOASTCAM Light Player will be created (***mandatory***)
+ - startTime: CVR start timestamp - 13 digits (***mandatory***)  
+ - endTime: CVR end timestamp - 13 digits (***mandatory***)
+ - loop: repeat video (default: true)
+ - coreSwfPath: downloaded flash core swf file path (default: '/resources/vendor/nvp_web_player/LCP_web_player2016082601.swf')
+ - skinSwfPath: downloaded flash skin swf file path (default: '/resources/vendor/nvp_web_player/NVP_web_player_skin_tvcast_white.swf')
+ - getTokenUrl : Get Token API Url (default: '/biz/cameras/token/')
+ - playEventHandler: Player Event Handler (not mandatory)
 
 ```javascript
 var data = {

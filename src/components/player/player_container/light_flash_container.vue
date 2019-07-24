@@ -201,7 +201,7 @@
                             if (that.playEventHandler) {
                                 that.playEventHandler({status: that.E_PLAY_EVENT.finish});
                             }
-                            if (that.loop) {
+                            if (that.loop != false) {
                                 that.play(that.startTime);
                             }
                         }
