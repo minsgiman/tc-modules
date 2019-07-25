@@ -2,6 +2,7 @@ import dlg from './components/dialog/main';
 import toggle from './components/toggle/main';
 import timeselect from './components/timeselect/main';
 import daycheck from './components/daycheck/main';
+import radiobtn from './components/radiobtn/main';
 
 let timeselect1 = timeselect({
     elId: 'timeselectId',
@@ -25,6 +26,35 @@ let daycheckObj = daycheck({
     }
 });
 
+let radiobtnObj = radiobtn({
+    elId: 'radiobtnId',
+    name: 'radiotest',
+    items: [
+        {
+            value: 'qq1',
+            text: 'radio1'
+        },
+        {
+            value: 'qq2',
+            text: 'radio2'
+        },
+        {
+            value: 'qq3',
+            text: 'radio3'
+        },
+        {
+            value: 'qq4',
+            text: 'radio4'
+        }
+    ],
+    eventHandler: function (event) {
+        debugger;
+    }
+});
+
+radiobtnObj.setValue('qq2');
+console.log('getValue: ' + radiobtnObj.getValue());
+/*
 let mydlg = dlg({
     elId: 'dlgId',
     theme: 'toast',
@@ -43,3 +73,4 @@ let mydlg = dlg({
         mydlg = null;
     }
 });
+*/
