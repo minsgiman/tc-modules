@@ -56,14 +56,14 @@ import tcPlayer from 'toastcam-player-light'; /* ES6 */
 
 The TOASTCAM Light Player needs following parameters
 
- - serialNo: Camera serial number (***mandatory***)
+ - serialNo: Camera serial number
  - elementId: elementId where TOASTCAM Light Player will be created (***mandatory***)
- - startTime: CVR start timestamp - 13 digits (***mandatory***)  
- - endTime: CVR end timestamp - 13 digits (***mandatory***)
+ - startTime: CVR start timestamp - 13 digits (if not set this param, play live mode)  
+ - endTime: CVR end timestamp - 13 digits
  - loop: repeat video (default: true)
  - coreSwfPath: downloaded flash core swf file path (default: '/resources/vendor/nvp_web_player/LCP_web_player2016082601.swf')
  - skinSwfPath: downloaded flash skin swf file path (default: '/resources/vendor/nvp_web_player/NVP_web_player_skin_tvcast_white.swf')
- - getTokenUrl : Get Token API Url (default: '/biz/cameras/token/')
+ - getTokenUrl : Get Token API Url (default: '/biz/cameras/token/:serialNo')
  - playEventHandler: Player Event Handler (not mandatory)
 
 ```javascript

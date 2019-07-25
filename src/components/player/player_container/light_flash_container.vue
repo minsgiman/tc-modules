@@ -21,35 +21,6 @@
         return returnUrl;
     };
 
-    var getLiveServerUrl = function(data){
-
-        var returnUrl = "";
-        if(data == "" || data == undefined){
-            return "";
-        }
-
-        var rtIdx = data.indexOf("//");
-        var rt = "";
-        if(rtIdx != -1){
-            rt = data.substring(0,rtIdx+2);
-        }
-
-        var tmp = data.substring(rtIdx+2,data.length);
-
-        if(tmp.indexOf("/") != -1){
-            returnUrl = rt+tmp.substring(0,tmp.indexOf("/"));
-        }
-
-        tmp = returnUrl.replace("://","");
-
-        var getPort = parseInt(tmp.substring(tmp.indexOf(":")+1,tmp.length));
-        var iePort = getPort+1
-        if (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0) {
-            returnUrl = returnUrl.replace(getPort,iePort);
-        }
-        return returnUrl;
-    };
-
     var setPathParams = function(url, params) {
         const pathParamReg = /\/:\w+/gi;
         let pathParams = url.match(pathParamReg);
@@ -156,8 +127,12 @@
                         if (httpRequest.readyState === XMLHttpRequest.DONE) {
                             if (httpRequest.status === 200) {
                                 const resObj = JSON.parse(httpRequest.responseText);
-                                that.player.setPath(getCvrServerUrl(resObj.cvrHostPort), '/token=' + resObj.token + '&time=' + time);
-                                that.startPlayTimer();
+                                if (time) {
+                                    that.player.setPath(getCvrServerUrl(resObj.cvrHostPort), '/token=' + resObj.token + '&time=' + time);
+                                    that.startPlayTimer();
+                                } else {
+                                    that.player.setPath(getCvrServerUrl(resObj.cvrHostPort), resObj.cameraId + '?token=' + resObj.token);
+                                }
                             } else {
                                 //TODO: ERROR
                             }
