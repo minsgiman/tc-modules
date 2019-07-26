@@ -12,7 +12,7 @@ module.exports = {
         "api.min" : './../src/api.js',
         "api.common.min" : './../src/api.common.js',
         "api.esm.min" : './../src/api.esm.js',
-        //"test.min" : './../src/main.js'
+        //"test.min" : './../src/comp_test.js'
     },
     module: {
         rules: [

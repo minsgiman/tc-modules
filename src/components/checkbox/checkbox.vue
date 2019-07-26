@@ -1,15 +1,15 @@
 <template>
-    <div class="tc_radiobtn">
-        <span v-for="(item, index) in items">
-            <input type="radio" :name="name" :id="item.value" :value="item.value" v-model="radioValue" @change="changeValue">
-            <label :for="item.value" v-html="item.text"></label>
+    <div class="tc_checkbox">
+        <span>
+            <input type="checkbox" :id="name">
+            <label :for="name" class="ng-binding" v-html="text"></label>
         </span>
     </div>
 </template>
 <script>
     export default {
-        props: ['theme', 'name', 'items'],
-        name: 'timeselect',
+        props: ['theme', 'name', 'text'],
+        name: 'checkbox',
         computed : {
         },
         data: function() {
@@ -45,18 +45,12 @@
     }
 </script>
 <style lang="less">
-    .tc_radiobtn {
-        margin-right:8px;
+    .tc_checkbox {
         span {
-            display:inline-block;
-            margin-right:28px;
-            &:last-child {
-                margin-right:0;
-            }
-            input[type="radio"] {
+            input[type='checkbox'] {
+                border:none;
                 appearance: none;
                 -webkit-appearance: none;
-                border:none;
                 vertical-align:top;
             }
             label {
@@ -66,16 +60,16 @@
             label:before {
                 display:inline-block;
                 overflow:hidden;
-                background:url(/resources/img/sp.png) no-repeat;
-                width:24px;
-                height:24px;
-                margin-right:8px;
-                background-position:-521px -416px;
-                content: '' ;
                 vertical-align:middle;
+                width:18px;
+                height:18px;
+                background:url(/resources/img/sp.png) no-repeat;
+                background-position:0 -95px;
+                content: '';
+                float: left;
             }
             input:checked+label:before {
-                background-position:-491px -416px;
+                background-position:-20px -95px;
             }
         }
     }

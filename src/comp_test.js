@@ -3,6 +3,7 @@ import toggle from './components/toggle/main';
 import timeselect from './components/timeselect/main';
 import daycheck from './components/daycheck/main';
 import radiobtn from './components/radiobtn/main';
+import checkbox from './components/checkbox/main';
 
 let timeselect1 = timeselect({
     elId: 'timeselectId',
@@ -51,9 +52,18 @@ let radiobtnObj = radiobtn({
         debugger;
     }
 });
-
 radiobtnObj.setValue('qq2');
 console.log('getValue: ' + radiobtnObj.getValue());
+
+let checkboxObj = checkbox({
+    elId: 'checkboxId',
+    name: 'checkboxtest',
+    text: 'checklabel',
+    eventHandler: function (event) {
+        debugger;
+    }
+});
+
 /*
 let mydlg = dlg({
     elId: 'dlgId',
