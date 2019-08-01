@@ -25,7 +25,8 @@ const store = new Vuex.Store({
         eventZones: [],
         motionZones: [],
         currentDomain: null,
-        isShowTimelineCalendar: false
+        isShowTimelineCalendar: false,
+        ptzControlMode: false
     },
     getters: {
         isExpiredCloud: state => {
@@ -137,6 +138,9 @@ const store = new Vuex.Store({
         IS_SHOW_CALENDAR_CHANGE: function(context, state) {
             context.commit('UPDATE_IS_SHOW_CALENDAR', state);
         },
+        PTZ_CONTROL_CHANGE: function(context, state) {
+            context.commit('UPDATE_PTZ_CONTROL', state);
+        },
         INIT_ALL_DATA: function(context, state) {
             context.commit('UPDATE_CAMERA_DATA', {});
             context.commit('UPDATE_CAMERA_CONFIG', {});
@@ -159,6 +163,7 @@ const store = new Vuex.Store({
             context.commit('UPDATE_MOTION_ZONES', []);
             context.commit('UPDATE_TIME_RANGE', 60);
             context.commit('UPDATE_IS_SHOW_CALENDAR', false);
+            context.commit('UPDATE_PTZ_CONTROL', false);
         }
     },
     mutations: {
@@ -227,6 +232,9 @@ const store = new Vuex.Store({
         },
         UPDATE_IS_SHOW_CALENDAR: function(state, value) {
             state.isShowTimelineCalendar = value;
+        },
+        UPDATE_PTZ_CONTROL: function(state, value) {
+            state.ptzControlMode = value;
         }
     }
 });

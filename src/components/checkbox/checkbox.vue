@@ -61,15 +61,14 @@
                 display:inline-block;
                 overflow:hidden;
                 vertical-align:middle;
-                width:18px;
-                height:18px;
-                background:url(/resources/img/sp.png) no-repeat;
-                background-position:0 -95px;
+                width:20px;
+                height:20px;
+                background:url(/resources/img/btn-checkbox-unchecked.svg) no-repeat;
                 content: '';
                 float: left;
             }
             input:checked+label:before {
-                background-position:-20px -95px;
+                background-image:url(/resources/img/btn-checkbox-checked.svg);
             }
         }
     }

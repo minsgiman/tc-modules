@@ -39,14 +39,14 @@
 </script>
 <style lang="less">
     .tc_toggle {
-        width:56px;
-        height:38px;
+        width:42px;
+        height:24px;
         border:0;
         cursor:pointer;
         outline:none;
-        background: url(/resources/img/btn-alarm-off.png) no-repeat;
+        background: url(/resources/img/btn-alarm-off.svg) no-repeat;
         &.isOn {
-            background: url(/resources/img/btn-alarm-on.png) no-repeat;
+            background: url(/resources/img/btn-alarm-on.svg) no-repeat;
         }
     }
 </style>

@@ -121,6 +121,9 @@ class player {
             case 'category':
                 store.dispatch('CATEGORY_CHANGE', value);
                 break;
+            case 'ptzControlMode':
+                store.dispatch('PTZ_CONTROL_CHANGE', value);
+                break;
             default:
                 break;
         }

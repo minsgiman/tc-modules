@@ -9,6 +9,9 @@
         computed: {
             isFullScreen: function () {
                 return store.state.isFullScreen;
+            },
+            ptzControlMode: function () {
+                return store.state.ptzControlMode;
             }
         },
         data: function () {
@@ -95,7 +98,7 @@
             zoomUp : function(zoom) {
                 if(this.isFullScreen == true){
                     if (this.player) {
-                        this.player.zoomZone(260, parseInt($("#player").css("width"))-20);
+                        this.player.zoomZone(this.ptzControlMode ? 320 : 260, parseInt($("#player").css("width"))-20);
                     }
                 }else{
                     if (this.player) {

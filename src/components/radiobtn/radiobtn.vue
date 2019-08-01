@@ -66,16 +66,15 @@
             label:before {
                 display:inline-block;
                 overflow:hidden;
-                background:url(/resources/img/sp.png) no-repeat;
-                width:24px;
-                height:24px;
+                background:url(/resources/img/btn-radio-unchecked.svg) no-repeat;
+                width:20px;
+                height:20px;
                 margin-right:8px;
-                background-position:-521px -416px;
                 content: '' ;
                 vertical-align:middle;
             }
             input:checked+label:before {
-                background-position:-491px -416px;
+                background-image:url(/resources/img/btn-radio-checked.svg);
             }
         }
     }
