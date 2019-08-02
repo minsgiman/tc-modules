@@ -17,6 +17,9 @@
             },
             isPlaying: function () {
                 return store.state.isPlaying;
+            },
+            ptzControlMode: function () {
+                return store.state.ptzControlMode;
             }
         },
         data: function () {
@@ -77,6 +80,9 @@
             },
 
             togglePlay: function() {
+                if (this.ptzControlMode) {
+                    return;
+                }
                 if (this.isPlaying) {
                     this.showIndicator('pause');
                 } else {
