@@ -8,9 +8,10 @@ import toggle from './components/toggle/main';
 import timeselect from './components/timeselect/main';
 import daycheck from './components/daycheck/main';
 import radiobtn from './components/radiobtn/main';
+import checkbox from './components/checkbox/main';
 
 (function (window) {
-    const tCam = { player, dialog, toggle, timeselect, daycheck, radiobtn };
+    const tCam = { player, dialog, toggle, timeselect, daycheck, radiobtn, checkbox };
     if ( typeof window === "object" ) {
         window.tCam = tCam;
     }

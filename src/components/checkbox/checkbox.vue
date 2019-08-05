@@ -1,7 +1,7 @@
 <template>
     <div class="tc_checkbox">
         <span>
-            <input type="checkbox" :id="name">
+            <input type="checkbox" :id="name" v-model="checked" @change="changeValue">
             <label :for="name" class="ng-binding" v-html="text"></label>
         </span>
     </div>
@@ -14,7 +14,7 @@
         },
         data: function() {
             return {
-                radioValue: null
+                checked: false
             }
         },
         created : function() {
@@ -28,13 +28,13 @@
         },
         methods: {
             changeValue: function() {
-                this.$emit('event', {event: 'changed', value: this.radioValue});
+                this.$emit('event', {event: 'changed', value: this.checked});
             },
             getValue: function() {
-                return this.radioValue;
+                return this.checked;
             },
             setValue: function(value) {
-                this.radioValue = value;
+                this.checked = value;
             },
             destroy: function() {
                 this.$destroy();
@@ -52,10 +52,14 @@
                 appearance: none;
                 -webkit-appearance: none;
                 vertical-align:top;
+                margin:0;
+                padding:0;
             }
             label {
                 cursor:pointer;
                 font-size:14px;
+                margin-left:10px;
+                line-height:23px;
             }
             label:before {
                 display:inline-block;
