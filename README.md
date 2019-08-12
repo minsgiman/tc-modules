@@ -78,7 +78,8 @@ var data = {
     getTokenUrl : '/biz/cameras/token/:serialNo',
     playEventHandler : function (event) {
         console.log('playEventHandler - event.status : ' + event.status); 
-        //event.status : 'start', 'finish', 'error'
+        //event.status : 'NetStream.Play.Start', 'NetConnection.Connect.Closed', 'finish'
+        //except 'finish', event.status is same as flash player event status
     }
 }
 

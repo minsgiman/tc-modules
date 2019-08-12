@@ -10,7 +10,7 @@ let playerObj = new player({
     skinSwfPath : '/resources/vendor/nvp_web_player/NVP_web_player_skin_tvcast_white.swf',    //default : '/resources/vendor/nvp_web_player/NVP_web_player_skin_tvcast_white.swf'
     getTokenUrl : '/biz/cameras/token/:serialNo',    //default : '/biz/cameras/token/:serialNo',
     playEventHandler : function (event) {
-        console.log('playEventHandler - event.status : ' + event.status); //event.status : 'start', 'finish', 'error'
+        console.log('playEventHandler - event.status : ' + event.status); //event.status : 'NetStream.Play.Start', 'NetConnection.Connect.Closed', 'finish'
     }
 });
 // setTimeout(function() {
