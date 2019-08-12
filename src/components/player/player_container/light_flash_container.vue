@@ -193,12 +193,12 @@
                 if (status === 'NetStream.Play.Start' && this.playStatus != this.E_PLAY_STATUS.play) {
                     this.playStatus = this.E_PLAY_STATUS.play;
                     if (this.playEventHandler) {
-                        this.playEventHandler({status: this.E_PLAY_EVENT.start});
+                        this.playEventHandler({status: status});
                     }
                 } else if (status === 'NetConnection.Connect.Closed' || status === 'NetStream.Play.Stop') {
                     this.playStatus = this.E_PLAY_STATUS.error;
                     if (this.playEventHandler) {
-                        this.playEventHandler({status: this.E_PLAY_EVENT.error});
+                        this.playEventHandler({status: status});
                     }
                 }
             },
