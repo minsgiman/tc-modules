@@ -5,7 +5,8 @@ function createDlg(param) {
     const vConstructor = Vue.extend(dropdown);
     const vComponent = new vConstructor({propsData: {
             theme: param.theme,
-            name: param.name
+            position: param.position,
+            dropElId: param.dropElId
         }});
     if (param.elId) {
         vComponent.$mount('#' + param.elId);

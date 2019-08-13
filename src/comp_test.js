@@ -5,11 +5,12 @@ import daycheck from './components/daycheck/main';
 import radiobtn from './components/radiobtn/main';
 import checkbox from './components/checkbox/main';
 import search from './components/search/main';
+import dropdown from './components/dropdown/main';
 
 let timeselect1 = timeselect({
     elId: 'timeselectId',
     eventHandler: function (event) {
-      debugger;
+        console.log('timeselect - event.event : ' + event.event + ', event.value : ' + event.value);
     }
 });
 
@@ -17,14 +18,14 @@ let timeselect1 = timeselect({
 let toggleObj = toggle({
   elId: 'toggleId',
   eventHandler: function (event) {
-      debugger;
+      console.log('toggle - event.event : ' + event.event + ', event.value : ' + event.value);
   }
 });
 
 let daycheckObj = daycheck({
     elId: 'daycheckId',
     eventHandler: function (event) {
-        debugger;
+        console.log('daycheck - event.event : ' + event.event + ', event.value : ' + event.value);
     }
 });
 
@@ -50,7 +51,7 @@ let radiobtnObj = radiobtn({
         }
     ],
     eventHandler: function (event) {
-        debugger;
+        console.log('radiobtn - event.event : ' + event.event + ', event.value : ' + event.value);
     }
 });
 radiobtnObj.setValue('qq2');
@@ -61,7 +62,7 @@ let checkboxObj = checkbox({
     name: 'checkboxtest',
     text: 'checklabel',
     eventHandler: function (event) {
-        debugger;
+        console.log('checkbox - event.event : ' + event.event + ', event.value : ' + event.value);
     }
 });
 
@@ -70,6 +71,15 @@ let searchObj = search({
     placeholder: '검색',
     eventHandler: function (event) {
         console.log('search - event.event : ' + event.event + ', event.value : ' + event.value);
+    }
+});
+
+let dropdownObj = dropdown({
+    elId: 'dropdownId',
+    dropElId: 'dropitem',
+    position: 'right',
+    eventHandler: function (event) {
+        console.log('dropdown - event.event : ' + event.event + ', event.value : ' + event.value);
     }
 });
 
