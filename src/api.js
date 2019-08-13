@@ -9,9 +9,10 @@ import timeselect from './components/timeselect/main';
 import daycheck from './components/daycheck/main';
 import radiobtn from './components/radiobtn/main';
 import checkbox from './components/checkbox/main';
+import search from './components/search/main';
 
 (function (window) {
-    const tCam = { player, dialog, toggle, timeselect, daycheck, radiobtn, checkbox };
+    const tCam = { player, dialog, toggle, timeselect, daycheck, radiobtn, checkbox, search };
     if ( typeof window === "object" ) {
         window.tCam = tCam;
     }

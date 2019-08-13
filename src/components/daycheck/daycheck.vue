@@ -73,19 +73,12 @@
     }
 </script>
 <style lang="less">
+    @import './../comp_common';
     .tc_daycheck {
-        margin:0px;
-        padding:0px;
         input {
-            border: none;
-            -webkit-appearance: none;
-            appearance: none;
-            background: transparent;
             opacity: 0;
-            vertical-align: top;
         }
         li {
-            list-style: none;
             display:inline-block;
             position:relative;
             width:40px;

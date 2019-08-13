@@ -56,6 +56,7 @@
     }
 </script>
 <style lang="less">
+    @import './../comp_common';
     .tc_dlg {
         .content_wrap {
             text-align:left;
@@ -83,9 +84,6 @@
                     border-radius: 25px;
                     margin: 0 5px;
                     overflow:visible;
-                    border:0;
-                    cursor:pointer;
-                    outline:none;
                     &.confirm {
                         color: #fff;
                         background: #4b96e6;

@@ -45,16 +45,9 @@
     }
 </script>
 <style lang="less">
+    @import './../comp_common';
     .tc_checkbox {
         span {
-            input[type='checkbox'] {
-                border:none;
-                appearance: none;
-                -webkit-appearance: none;
-                vertical-align:top;
-                margin:0;
-                padding:0;
-            }
             label {
                 cursor:pointer;
                 font-size:14px;

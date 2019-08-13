@@ -45,6 +45,7 @@
     }
 </script>
 <style lang="less">
+    @import "./../comp_common";
     .tc_radiobtn {
         margin-right:8px;
         span {
@@ -52,12 +53,6 @@
             margin-right:28px;
             &:last-child {
                 margin-right:0;
-            }
-            input[type="radio"] {
-                appearance: none;
-                -webkit-appearance: none;
-                border:none;
-                vertical-align:top;
             }
             label {
                 cursor:pointer;
