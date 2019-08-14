@@ -11,12 +11,13 @@ class lightPlayer {
                 startTime: param.startTime,
                 endTime: param.endTime,
                 loop: param.loop,
+                showTime: param.showTime,
                 coreSwfPath: param.coreSwfPath,
                 skinSwfPath: param.skinSwfPath,
                 getTokenUrl: param.getTokenUrl,
                 playEventHandler: param.playEventHandler
             }
-        });
+        }).$mount(param.elementId ? '#' + param.elementId : '#player');
     }
 
     destroy() {

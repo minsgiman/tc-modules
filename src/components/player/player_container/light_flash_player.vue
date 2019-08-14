@@ -1,7 +1,3 @@
-<template>
-    <div class="player_cam" :id="varPlayerId" :style="{width: width, height: height}"></div>
-</template>
-
 <script>
     var host = "";
     var swfHost = "";

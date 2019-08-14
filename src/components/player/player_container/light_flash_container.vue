@@ -1,3 +1,16 @@
+<template>
+    <div style="width:100%; height:100%; position:relative;">
+        <div class="player_cam" :id="varPlayerId" style="width:100%; height:100%;"></div>
+        <div style="position:absolute; bottom:10px; width:100%;" v-if="showTime">
+            <div class="cam_info_area cam_info_bg" style="width:142px;border:1px solid; margin:0 auto; text-align:center; box-sizing:border-box; background:rgba(0,0,0,.8);">
+                <div id="time_area" class="time_area" style="position:relative; padding:2px 0;">
+                    <span class="date" style="display:inline-block; color:#fff;font-size:13px;margin-right:6px;line-height: 14px;">{{getDateStr(playTime)}}</span>
+                    <span class="time" style="display:inline-block; padding:4px 9px; background:#e60012; color:#fff; font-size:13px; line-height: 14px; width:51px;">{{getTimeStr(playTime)}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
 <script>
     import flashPlayer from './light_flash_player';
     import Vue from 'vue';
@@ -38,9 +51,13 @@
         return url;
     };
 
+    function addZero(data){
+        return (data<10) ? "0"+data : data;
+    }
+
     export default {
         name: 'playerContainer',
-        props: ['serialNo', 'elementId', 'startTime', 'endTime', 'loop', 'coreSwfPath', 'skinSwfPath', 'getTokenUrl', 'playEventHandler'],
+        props: ['serialNo', 'elementId', 'startTime', 'endTime', 'loop', 'showTime', 'coreSwfPath', 'skinSwfPath', 'getTokenUrl', 'playEventHandler'],
         computed: {
         },
         data: function () {
@@ -59,6 +76,8 @@
                 player : null,
                 playTimeoutId : null,
                 playIntervalId : null,
+                varPlayerId : 'tc_player_light',
+                varName : 'rmcPlayer_flash',
                 playTime : 0,
                 timeInterval : 200,
                 playStatus : 0,
@@ -68,11 +87,13 @@
             }
         },
         created : function() {
+        },
+        mounted : function() {
             const vExtendConstructor = Vue.extend(flashPlayer);
             this.player = new vExtendConstructor({
                 propsData : {
-                    varPlayerId: 'tc_player_light',
-                    varName: 'rmcPlayer_flash',
+                    varPlayerId: this.varPlayerId,
+                    varName: this.varName,
                     videoId: '',
                     inKey: '',
                     outKey: '',
@@ -84,14 +105,11 @@
                     varSkinPath: this.skinSwfPath ? this.skinSwfPath : this.defSkinPath,
                     varServerUrl: ''
                 }
-            }).$mount(this.elementId ? '#' + this.elementId : '#player');
+            });
             this.player.$on('playerStatusChanged', this.playerStatusChangedHandler.bind(this));
             this.player.zoomZone(450, 150);
             this.player.displayRMCPlayer();
             this.play(this.startTime);
-        },
-        mounted : function() {
-            console.log('mounted Player');
 
         },
         beforeDestroy : function() {
@@ -105,6 +123,9 @@
             }
             if (this.player) {
                 this.player.$destroy();
+            }
+            if (this.$el.parentNode) {
+                this.$el.parentNode.removeChild(this.$el);
             }
         },
         methods : {
@@ -138,7 +159,7 @@
                             }
                         }
                     };
-                    httpRequest.open('GET', 'http://10.161.240.93:10000' + setPathParams((that.getTokenUrl ? that.getTokenUrl : that.defGetTokenUrl), {serialNo : that.serialNo}));
+                    httpRequest.open('GET', setPathParams((that.getTokenUrl ? that.getTokenUrl : that.defGetTokenUrl), {serialNo : that.serialNo}));
                     httpRequest.send();
                 }, 200);
             },
@@ -162,6 +183,14 @@
             },
             getStatus : function () {
                 return this.player.getStatus();
+            },
+            getDateStr : function (timestamp) {
+                const date = new Date(timestamp);
+                return addZero(date.getMonth()+1) + '. ' + addZero(date.getDate().toString());
+            },
+            getTimeStr : function (timestamp) {
+                const date = new Date(timestamp);
+                return addZero(date.getHours().toString()) + ':' + addZero(date.getMinutes().toString()) + ':' + addZero(date.getSeconds().toString())
             },
             startPlayTimer : function () {
                 const that = this;

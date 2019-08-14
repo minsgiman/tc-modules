@@ -61,6 +61,7 @@ The TOASTCAM Light Player needs following parameters
  - startTime: CVR start timestamp - 13 digits (if not set this param, play live mode)  
  - endTime: CVR end timestamp - 13 digits
  - loop: repeat video (default: true)
+ - showTime: show timer (default : false)
  - coreSwfPath: downloaded flash core swf file path (default: '/resources/vendor/nvp_web_player/LCP_web_player2016082601.swf')
  - skinSwfPath: downloaded flash skin swf file path (default: '/resources/vendor/nvp_web_player/NVP_web_player_skin_tvcast_white.swf')
  - getTokenUrl : Get Token API Url (default: '/biz/cameras/token/:serialNo')
@@ -73,13 +74,15 @@ var data = {
     startTime : 1563837900000,
     endTime : 1563837903000,
     loop : true,
+    showTime : true,
     coreSwfPath : '/nvp_web_player/LCP_web_player2016082601.swf',
     skinSwfPath : '/nvp_web_player/NVP_web_player_skin_tvcast_white.swf',
     getTokenUrl : '/biz/cameras/token/:serialNo',
     playEventHandler : function (event) {
         console.log('playEventHandler - event.status : ' + event.status); 
         //event.status : 'NetStream.Play.Start', 'NetConnection.Connect.Closed', 'finish'
-        //except 'finish', event.status is same as flash player event status
+        //except 'finish' status, event.status is same as flash player NetStatusEvent. 
+        //refer to here (https://help.adobe.com/en_US/air/reference/html/flash/events/NetStatusEvent.html)
     }
 }
 
