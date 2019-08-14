@@ -131,7 +131,9 @@
         methods : {
             play : function (time) {
                 const that = this;
-                this.playTime = time;
+                if (time) {
+                    this.playTime = time;
+                }
 
                 this.playStatus = that.E_PLAY_STATUS.none;
                 this.stopPlayTimer();
@@ -153,6 +155,8 @@
                                     that.startPlayTimer();
                                 } else {
                                     that.player.setPath(getCvrServerUrl(resObj.cvrHostPort), resObj.cameraId + '?token=' + resObj.token);
+                                    that.playTime = new Date().valueOf();
+                                    that.startLiveTimer();
                                 }
                             } else {
                                 //TODO: ERROR
@@ -191,6 +195,16 @@
             getTimeStr : function (timestamp) {
                 const date = new Date(timestamp);
                 return addZero(date.getHours().toString()) + ':' + addZero(date.getMinutes().toString()) + ':' + addZero(date.getSeconds().toString())
+            },
+            startLiveTimer : function () {
+                const that = this;
+
+                this.stopPlayTimer();
+                this.playIntervalId = setInterval(function() {
+                    if (that.playStatus === that.E_PLAY_STATUS.play) {
+                        that.playTime += that.timeInterval;
+                    }
+                }, this.timeInterval);
             },
             startPlayTimer : function () {
                 const that = this;

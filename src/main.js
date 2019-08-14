@@ -14,7 +14,7 @@ let playerObj = new player({
         console.log('playEventHandler - event.status : ' + event.status); //event.status : 'NetStream.Play.Start', 'NetConnection.Connect.Closed', 'finish'
     }
 });
-setTimeout(function() {
-    playerObj.destroy();
-    playerObj = null;
-}, 5000);
+// setTimeout(function() {
+//     playerObj.destroy();
+//     playerObj = null;
+// }, 5000);
