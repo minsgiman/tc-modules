@@ -11,9 +11,10 @@ import radiobtn from './components/radiobtn/main';
 import checkbox from './components/checkbox/main';
 import search from './components/search/main';
 import dropdown from './components/dropdown/main';
+import clipplayer from './components/clipplayer/main';
 
 (function (window) {
-    const tCam = { player, dialog, toggle, timeselect, daycheck, radiobtn, checkbox, search, dropdown };
+    const tCam = { player, dialog, toggle, timeselect, daycheck, radiobtn, checkbox, search, dropdown, clipplayer };
     if ( typeof window === "object" ) {
         window.tCam = tCam;
     }
