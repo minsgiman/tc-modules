@@ -6,12 +6,17 @@
                     <button><img src="/resources/im/btn_clip_re.png"></button>
                   </span>
             </div>
-            <div class="clip_play" :class="{clip_fade: isShowAnimate}" @click="togglePlay()" v-show="isPlayed && !replaceShow" v-if="clipDetail.origin && (clipDetail.origin.status == '4' || clipDetail.origin.status == '5')">
+            <div class="clip_play" v-show="!metaLoaded">
+                <span style="margin-left:-23px;margin-top:-23px;">
+                    <img src="/resources/img/loading.svg" style="width:45px; height:45px;">
+                </span>
+            </div>
+            <div class="clip_play" :class="{clip_fade: isShowAnimate && metaLoaded}" @click="togglePlay()" v-show="isPlayed && !replaceShow && metaLoaded" v-if="clipDetail.origin && (clipDetail.origin.status == '4' || clipDetail.origin.status == '5')">
                   <span>
                     <button></button>
                   </span>
             </div>
-            <div class="clip_stop" :class="{clip_fade: !isShowAnimate}" @click="togglePlay()" v-show="!isPlayed && !replaceShow" v-if="clipDetail.origin && (clipDetail.origin.status == '4' || clipDetail.origin.status == '5')">
+            <div class="clip_stop" :class="{clip_fade: !isShowAnimate && metaLoaded}" @click="togglePlay()" v-show="!isPlayed && !replaceShow && metaLoaded" v-if="clipDetail.origin && (clipDetail.origin.status == '4' || clipDetail.origin.status == '5')">
                   <span>
                     <button></button>
                   </span>
@@ -22,8 +27,8 @@
         </div>
         <div class="screen" id="clip_screen">
             <div class="zoom" id="player_bar_area" style="bottom:53px; z-index:999; width:650px; border-bottom:1px solid #f4f4f4;">
-                <button type="button" class="sp full" @click="pressedFullScreenButton()" v-show="!clipFullScreen" style="bottom:104px;">{{ 'ENTER_FULLSCREEN' | translate }}</button>
-                <button type="button" class="sp small" @click="pressedExitFullScreenButton()" v-show="clipFullScreen" style="bottom:136px;">{{'CAMERA_MINIFY' | translate}}</button>
+                <button type="button" class="sp full" @click="pressedFullScreenButton()" v-show="!clipFullScreen" style="bottom:104px;"></button>
+                <button type="button" class="sp small" @click="pressedExitFullScreenButton()" v-show="clipFullScreen" style="bottom:136px;"></button>
                 <div class="zoom_bg" id="zoom_bg" style="position:absolute;height:4px; cursor: pointer; margin-top: -1px;">
                     <div>
                         <div id="videoBar" style="position:absolute; width: 100%; z-index:999; bottom:3px; background: rgba(255,255,255,.6);">
@@ -57,6 +62,35 @@
 <script>
     // import $ from 'jquery';
     // import * as d3 from "d3";
+    // import moment from 'moment';
+
+    function getBrowserLanguage () {
+        var nav = window.navigator, browserLanguagePropertyKeys = [ 'language',
+            'browserLanguage', 'systemLanguage', 'userLanguage' ], i, language;
+
+        // support for HTML 5.1 "navigator.languages"
+        if (nav.languages && nav.languages.length) {
+            for (i = 0; i < nav.languages.length; i++) {
+                language = nav.languages[i];
+                /*if (language && language.length) {
+                    return language;
+                }*/
+                if($("html").attr("lang") == nav.languages[i]){
+                    return language;
+                }
+            }
+        }
+
+        // support for other well known properties in browsers
+        for (i = 0; i < browserLanguagePropertyKeys.length; i++) {
+            language = nav[browserLanguagePropertyKeys[i]];
+            if (language && language.length) {
+                return language;
+            }
+        }
+
+        return null;
+    }
 
     export default {
         props: ['theme', 'videoUrl', 'clipDetail'],
@@ -67,6 +101,7 @@
             return {
                 replaceShow: false,
                 isShowAnimate: false,
+                metaLoaded: false,
                 isPlayed: true,
                 clipFullScreen: false,
                 firstPlay: true,
@@ -105,7 +140,7 @@
                 var min = parseInt(absTimeSec / 60);
                 var sec = parseInt(absTimeSec % 60);
 
-                return (timeSec < 0 ? "-" : "") + min + ":" + (sec < 10 ? "0" : "") + (absTimeSec < 0 ? 1 : sec);
+                return min + ":" + (sec < 10 ? "0" : "") + (absTimeSec < 0 ? 1 : sec);
             },
             setDragControl: function() {
                 var that = this;
@@ -122,7 +157,7 @@
                     }
                     var newTime = that.video.duration * (that.videoCursorPosition / that.barWidth);
                     that.video.currentTime = newTime;
-                    that.clipDetail.remainTime = "-" + that.timeCalcul(Math.floor(that.video.duration - that.video.currentTime));
+                    that.clipDetail.remainTime = that.timeCalcul(Math.floor(that.video.duration - that.video.currentTime));
                     if (that.firstPlay) {
                         that.firstPlay = false;
                         that.timeMsg = that.lang === 'ja' ? '残り時間' : '남은 시간';
@@ -164,13 +199,14 @@
                 }
 
                 this.video.addEventListener('loadedmetadata', function() {
+                    that.metaLoaded = true;
                     that.clipDetail.remainTime = that.timeCalcul(that.video.duration);
                 });
 
                 // 플레이시간 업데이트 이벤트에 따라 cusor 위치 업데이트
                 this.video.addEventListener("timeupdate", function () {
                     var minusPrefix = (Math.floor(that.video.duration - that.video.currentTime) > 0) ? "-" : "";
-                    that.clipDetail.remainTime = minusPrefix + that.timeCalcul(Math.floor(that.video.duration - that.video.currentTime));
+                    that.clipDetail.remainTime = that.timeCalcul(Math.floor(that.video.duration - that.video.currentTime));
                     that.videoCursorPosition =   parseInt((that.video.currentTime / that.video.duration) * that.barWidth);
                 });
 
@@ -285,10 +321,10 @@
                 }
             },
             formattedDetailDate: function (time) {
-                return moment(new Date(time)).locale(Util.getBrowserLanguage()).format('YYYY.MM.DD (ddd)');
+                return moment(new Date(time)).locale(getBrowserLanguage()).format('YYYY.MM.DD (ddd)');
             },
             formattedDetailTime: function (time) {
-                return moment(new Date(time)).locale(Util.getBrowserLanguage()).format('HH:mm:ss');
+                return moment(new Date(time)).locale(getBrowserLanguage()).format('HH:mm:ss');
             },
             destroy: function() {
                 this.$destroy();
@@ -327,6 +363,5 @@
                 }
             }
         }
-
     }
 </style>

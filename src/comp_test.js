@@ -6,6 +6,7 @@ import radiobtn from './components/radiobtn/main';
 import checkbox from './components/checkbox/main';
 import search from './components/search/main';
 import dropdown from './components/dropdown/main';
+import clipplayer from './components/clipplayer/main';
 
 let timeselect1 = timeselect({
     elId: 'timeselectId',
@@ -82,6 +83,23 @@ let dropdownObj = dropdown({
         console.log('dropdown - event.event : ' + event.event + ', event.value : ' + event.value);
     }
 });
+
+/*
+let clipplayerObj = clipplayer({
+   elId: 'clipplayerId',
+   videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+   clipDetail: {
+       status: "4",
+       duration: "4:09",
+       origin: {
+           thumbnailPath: "",
+           start: 1564470720000,
+           end: 1564470960000,
+           status: "4"
+       }
+   }
+});
+*/
 
 /*
 let mydlg = dlg({
