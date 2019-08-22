@@ -76,7 +76,7 @@
                 player : null,
                 playTimeoutId : null,
                 playIntervalId : null,
-                varPlayerId : 'tc_player_light',
+                varPlayerId : this.elementId,
                 varName : 'rmcPlayer_flash',
                 playTime : 0,
                 timeInterval : 200,
