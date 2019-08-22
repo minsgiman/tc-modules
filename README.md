@@ -33,9 +33,7 @@ download ***dist/tc.player.min.js*** from git repository and copy to your publis
 Add the element where TOASTCAM Light Player will be created
 
 ``` html
-<div style="width:540px;height:303px;">
-    <div id="player"></div>
-</div>
+<div id="player" style="width:540px;height:303px;"></div>
 ```
 
 ### Javascript
