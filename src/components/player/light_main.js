@@ -5,19 +5,15 @@ class lightPlayer {
     constructor(param) {
         let vExtendConstructor = Vue.extend(playContainer);
         this.wrapBaseId = 'toastcam_player_wrap';
-        const wrapEl = document.createElement("div");
-        wrapEl.id = this.getEmptyWrapId();
 
         const parentEl = document.getElementById(param.elementId);
         if (!parentEl) {
             return;
         }
-        parentEl.appendChild(wrapEl);
-
         this.control = new vExtendConstructor({
             propsData: {
                 serialNo: param.serialNo,
-                elementId: wrapEl.id,
+                elementId: this.getEmptyWrapId(this.wrapBaseId),
                 startTime: param.startTime,
                 endTime: param.endTime,
                 loop: param.loop,
@@ -27,15 +23,17 @@ class lightPlayer {
                 getTokenUrl: param.getTokenUrl,
                 playEventHandler: param.playEventHandler
             }
-        }).$mount('#' + wrapEl.id);
+        }).$mount();
+        parentEl.appendChild(this.control.$el);
+        this.control.initPlayer();
     }
 
-    getEmptyWrapId() {
+    getEmptyWrapId(baseId) {
         let subfixNum = 0;
-        while(document.getElementById(this.wrapBaseId + subfixNum)) {
+        while(document.getElementById(baseId + subfixNum)) {
             subfixNum += 1;
         }
-        return this.wrapBaseId + subfixNum;
+        return baseId + subfixNum;
     }
 
     destroy() {

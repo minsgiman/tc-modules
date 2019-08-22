@@ -89,28 +89,6 @@
         created : function() {
         },
         mounted : function() {
-            const vExtendConstructor = Vue.extend(flashPlayer);
-            this.player = new vExtendConstructor({
-                propsData : {
-                    varPlayerId: this.varPlayerId,
-                    varName: this.varName,
-                    videoId: '',
-                    inKey: '',
-                    outKey: '',
-                    player: 'flash',
-                    width: '100%',
-                    height: '100%',
-                    serviceId: '',
-                    varCoreSwf: this.coreSwfPath ? this.coreSwfPath : this.defCoreSwfPath,
-                    varSkinPath: this.skinSwfPath ? this.skinSwfPath : this.defSkinPath,
-                    varServerUrl: ''
-                }
-            });
-            this.player.$on('playerStatusChanged', this.playerStatusChangedHandler.bind(this));
-            this.player.zoomZone(450, 150);
-            this.player.displayRMCPlayer();
-            this.play(this.startTime);
-
         },
         beforeDestroy : function() {
             if (this.playTimeoutId) {
@@ -129,6 +107,29 @@
             }
         },
         methods : {
+            initPlayer : function () {
+                const vExtendConstructor = Vue.extend(flashPlayer);
+                this.player = new vExtendConstructor({
+                    propsData : {
+                        varPlayerId: this.varPlayerId,
+                        varName: this.varName,
+                        videoId: '',
+                        inKey: '',
+                        outKey: '',
+                        player: 'flash',
+                        width: '100%',
+                        height: '100%',
+                        serviceId: '',
+                        varCoreSwf: this.coreSwfPath ? this.coreSwfPath : this.defCoreSwfPath,
+                        varSkinPath: this.skinSwfPath ? this.skinSwfPath : this.defSkinPath,
+                        varServerUrl: ''
+                    }
+                });
+                this.player.$on('playerStatusChanged', this.playerStatusChangedHandler.bind(this));
+                this.player.zoomZone(450, 150);
+                this.player.displayRMCPlayer();
+                this.play(this.startTime);
+            },
             play : function (time) {
                 const that = this;
                 if (time) {
