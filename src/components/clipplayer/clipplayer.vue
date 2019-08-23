@@ -120,14 +120,6 @@
             this.clipDetail.remainTime = this.clipDetail.duration;
         },
         mounted : function() {
-            this.barWidth = parseInt(d3.select('#videoCursor').style('width'));//  커서가 bar 밖으로 나가지 않도록 보정
-            const fullscreenCb = this.fullscreenChangeEvent.bind(this);
-            d3.select('#fullscreen').on('fullscreenchange', fullscreenCb);
-            d3.select('#fullscreen').on('webkitfullscreenchange', fullscreenCb);
-            d3.select('#fullscreen').on('mozfullscreenchange', fullscreenCb);
-            d3.select(document).on('MSFullscreenChange', fullscreenCb);
-            this.setDragControl();
-            this.startVideoTimer();
         },
         beforeDestroy : function() {
             if (this.$el.parentNode) {
@@ -135,6 +127,16 @@
             }
         },
         methods: {
+            initialize: function() {
+                this.barWidth = parseInt(d3.select('#videoCursor').style('width'));//  커서가 bar 밖으로 나가지 않도록 보정
+                const fullscreenCb = this.fullscreenChangeEvent.bind(this);
+                d3.select('#fullscreen').on('fullscreenchange', fullscreenCb);
+                d3.select('#fullscreen').on('webkitfullscreenchange', fullscreenCb);
+                d3.select('#fullscreen').on('mozfullscreenchange', fullscreenCb);
+                d3.select(document).on('MSFullscreenChange', fullscreenCb);
+                this.setDragControl();
+                this.startVideoTimer();
+            },
             timeCalcul: function(timeSec){
                 var absTimeSec = Math.abs(timeSec);
                 var min = parseInt(absTimeSec / 60);

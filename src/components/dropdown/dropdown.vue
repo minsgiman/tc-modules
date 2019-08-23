@@ -19,19 +19,6 @@
         created : function() {
         },
         mounted : function() {
-            this.$el.parentElement.style.position = 'relative';
-            this.$el.parentElement.style.display = 'inline-block';
-            const dropEl = document.getElementById(this.dropElId);
-            if (dropEl) {
-                dropEl.style.display = 'none';
-                dropEl.style.position = 'absolute';
-                dropEl.style.top = (this.btnHeight + 10) + 'px';
-                if (this.position === 'left') {
-                    dropEl.style.right = '0px';
-                } else {
-                    dropEl.style.left = '0px';
-                }
-            }
         },
         beforeDestroy : function() {
             if (this.$el.parentNode) {
@@ -39,6 +26,23 @@
             }
         },
         methods: {
+            initialize: function() {
+                if (this.$el.parentElement.parentElement) {
+                    this.$el.parentElement.parentElement.style.position = 'relative';
+                    this.$el.parentElement.parentElement.style.display = 'inline-block';
+                }
+                const dropEl = document.getElementById(this.dropElId);
+                if (dropEl) {
+                    dropEl.style.display = 'none';
+                    dropEl.style.position = 'absolute';
+                    dropEl.style.top = (this.btnHeight + 10) + 'px';
+                    if (this.position === 'left') {
+                        dropEl.style.right = '0px';
+                    } else {
+                        dropEl.style.left = '0px';
+                    }
+                }
+            },
             itemDropToggle: function() {
                 this.isDrop = !this.isDrop;
                 const dropEl = document.getElementById(this.dropElId);
