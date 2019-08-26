@@ -11,23 +11,23 @@
                     <img src="/resources/img/loading.svg" style="width:45px; height:45px;">
                 </span>
             </div>
-            <div class="clip_play" :class="{clip_fade: isShowAnimate && metaLoaded}" @click="togglePlay()" v-show="isPlayed && !replaceShow && metaLoaded" v-if="clipDetail.origin && (clipDetail.origin.status == '4' || clipDetail.origin.status == '5')">
+            <div class="clip_play" :class="{clip_fade: isShowAnimate && metaLoaded}" @click="togglePlay()" v-show="isPlayed && !replaceShow && metaLoaded" v-if="clipStatus == '4' || clipStatus == '5'">
                   <span>
                     <button></button>
                   </span>
             </div>
-            <div class="clip_stop" :class="{clip_fade: !isShowAnimate && metaLoaded}" @click="togglePlay()" v-show="!isPlayed && !replaceShow && metaLoaded" v-if="clipDetail.origin && (clipDetail.origin.status == '4' || clipDetail.origin.status == '5')">
+            <div class="clip_stop" :class="{clip_fade: !isShowAnimate && metaLoaded}" @click="togglePlay()" v-show="!isPlayed && !replaceShow && metaLoaded" v-if="clipStatus == '4' || clipStatus == '5'">
                   <span>
                     <button></button>
                   </span>
             </div>
-            <video id="video" style="height:366px;" :poster="'https://' + (clipDetail.origin ? clipDetail.origin.thumbnailPath : '')">
+            <video id="video" style="height:366px;" :poster="'https://' + thumbnailPath">
                 <source :src="videoUrl" type='video/mp4'>
             </video>
         </div>
         <div class="screen" id="clip_screen">
             <div class="zoom" id="player_bar_area" style="bottom:53px; z-index:999; width:650px; border-bottom:1px solid #f4f4f4;">
-                <button type="button" class="sp full" @click="pressedFullScreenButton()" v-show="!clipFullScreen" style="bottom:104px;"></button>
+                <button type="button" class="sp full" @click="pressedFullScreenButton()" v-show="!clipFullScreen" :style="{bottom: fullBottom}"></button>
                 <button type="button" class="sp small" @click="pressedExitFullScreenButton()" v-show="clipFullScreen" style="bottom:136px;"></button>
                 <div class="zoom_bg" id="zoom_bg" style="position:absolute;height:4px; cursor: pointer; margin-top: -1px;">
                     <div>
@@ -37,21 +37,21 @@
                     </div>
                 </div>
                 <div class="time_box" id="timebox" v-show="clipFullScreen == false">
-                    <span class="time"><em>{{ formattedDetailDate(clipDetail.origin ? clipDetail.origin.start : 0) }}</em>{{ formattedDetailTime(clipDetail.origin ? clipDetail.origin.start : 0) }}</span>
+                    <span class="time"><em>{{ formattedDetailDate(startTime ? startTime : 0) }}</em>{{ formattedDetailTime(startTime ? startTime : 0) }}</span>
                     <span class="time_mg"> ~ </span>
-                    <span class="time"><em>{{ formattedDetailDate(clipDetail.origin ? clipDetail.origin.end : 0) }}</em>{{ formattedDetailTime(clipDetail.origin ? clipDetail.origin.end : 0) }}</span>
-                    <span class="long" v-if="clipDetail.status == '4' || clipDetail.status == '5' "><em>{{timeMsg}}</em>{{ clipDetail.remainTime }}</span>
+                    <span class="time"><em>{{ formattedDetailDate(endTime ? endTime : 0) }}</em>{{ formattedDetailTime(endTime ? endTime : 0) }}</span>
+                    <span class="long" v-if="clipStatus == '4' || clipStatus == '5' "><em>{{timeMsg}}</em>{{ remainTimeStr }}</span>
                 </div>
                 <div class="time_box time_box_full" id="timeboxfull" v-show="clipFullScreen == true" style="border-top:2px solid #262626; height:104px;">
                     <div style="position:relative; width:100%; text-align:center; margin-top:-15px;">
                         <li>
-                            <span style="font-size:22px; color:#777; letter-spacing: -0.5px; margin-right: 5px; top: 53px;">{{ formattedDetailDate(clipDetail.origin ? clipDetail.origin.start : 0) }}</span>
-                            <span style="font-size:22px; color:#fff; letter-spacing: -0.5px; top: 53px;">{{ formattedDetailTime(clipDetail.origin ? clipDetail.origin.start : 0) }}</span>
+                            <span style="font-size:22px; color:#777; letter-spacing: -0.5px; margin-right: 5px; top: 53px;">{{ formattedDetailDate(startTime ? startTime : 0) }}</span>
+                            <span style="font-size:22px; color:#fff; letter-spacing: -0.5px; top: 53px;">{{ formattedDetailTime(startTime ? startTime : 0) }}</span>
                             <span style="font-size:22px; color:#fff; letter-spacing: -0.5px; margin-left:10px; margin-right:10px; top: 53px;"> ~ </span>
-                            <span style="font-size:22px; color:#777; letter-spacing: -0.5px; margin-right: 5px; top: 53px;">{{ formattedDetailDate(clipDetail.origin ? clipDetail.origin.end : 0) }}</span>
-                            <span style="font-size:22px; color:#fff; letter-spacing: -0.5px; top: 53px;">{{ formattedDetailTime(clipDetail.origin ? clipDetail.origin.end : 0) }}</span>
+                            <span style="font-size:22px; color:#777; letter-spacing: -0.5px; margin-right: 5px; top: 53px;">{{ formattedDetailDate(endTime ? endTime : 0) }}</span>
+                            <span style="font-size:22px; color:#fff; letter-spacing: -0.5px; top: 53px;">{{ formattedDetailTime(endTime ? endTime : 0) }}</span>
                             <span style="font-size:22px; color:#777; letter-spacing: -0.5px; margin-left:30px; top: 53px;">{{timeMsg}}</span>
-                            <span style="font-size:22px; color:#4b96e6; letter-spacing: -0.5px; margin-left:10px; top: 53px;">{{ clipDetail.remainTime }}</span>
+                            <span style="font-size:22px; color:#4b96e6; letter-spacing: -0.5px; margin-left:10px; top: 53px;">{{ remainTimeStr }}</span>
                         </li>
                     </div>
                 </div>
@@ -93,12 +93,13 @@
     }
 
     export default {
-        props: ['theme', 'videoUrl', 'clipDetail'],
+        props: ['theme', 'videoUrl', 'durationStr', 'clipStatus', 'thumbnailPath', 'startTime', 'endTime'],
         name: 'clipplayer',
         computed : {
         },
         data: function() {
             return {
+                remainTimeStr: "",
                 replaceShow: false,
                 isShowAnimate: false,
                 metaLoaded: false,
@@ -111,13 +112,15 @@
                 barWidth: 0,
                 timeMsg: '',
                 lang: 'ko',
-                video: null
+                video: null,
+                fullBottom: '104px'
             }
         },
         created : function() {
             this.lang = document.documentElement.getAttribute('lang');
             this.timeMsg = this.lang === 'ja' ? '合計時間' : '총 시간';
-            this.clipDetail.remainTime = this.clipDetail.duration;
+            this.remainTimeStr = this.durationStr;
+            this.fullBottom = location.href.indexOf('biz') === -1 ? '128px' : '104px';
         },
         mounted : function() {
         },
@@ -159,7 +162,7 @@
                     }
                     var newTime = that.video.duration * (that.videoCursorPosition / that.barWidth);
                     that.video.currentTime = newTime;
-                    that.clipDetail.remainTime = that.timeCalcul(Math.floor(that.video.duration - that.video.currentTime));
+                    that.remainTimeStr = that.timeCalcul(Math.floor(that.video.duration - that.video.currentTime));
                     if (that.firstPlay) {
                         that.firstPlay = false;
                         that.timeMsg = that.lang === 'ja' ? '残り時間' : '남은 시간';
@@ -202,19 +205,19 @@
 
                 this.video.addEventListener('loadedmetadata', function() {
                     that.metaLoaded = true;
-                    that.clipDetail.remainTime = that.timeCalcul(that.video.duration);
+                    that.remainTimeStr = that.timeCalcul(that.video.duration);
                 });
 
                 // 플레이시간 업데이트 이벤트에 따라 cusor 위치 업데이트
                 this.video.addEventListener("timeupdate", function () {
                     var minusPrefix = (Math.floor(that.video.duration - that.video.currentTime) > 0) ? "-" : "";
-                    that.clipDetail.remainTime = that.timeCalcul(Math.floor(that.video.duration - that.video.currentTime));
+                    that.remainTimeStr = that.timeCalcul(Math.floor(that.video.duration - that.video.currentTime));
                     that.videoCursorPosition =   parseInt((that.video.currentTime / that.video.duration) * that.barWidth);
                 });
 
                 // play 끝났을때 replay layer show
                 this.video.addEventListener("ended", function () {
-                    that.clipDetail.remainTime = that.timeCalcul(Math.floor(that.video.duration - that.video.currentTime));
+                    that.remainTimeStr = that.timeCalcul(Math.floor(that.video.duration - that.video.currentTime));
                     that.replaceShow = true;
                 });
             },
@@ -256,7 +259,7 @@
                         $("#video").css("height","366px");
                         $("#player_bar_area").css("width","650px");
                         $("#timeboxfull").css("height",that.smallTimeboxHeight);
-                        if (that.clipDetail.status == '4' || that.clipDetail.status == '5') {
+                        if (that.clipStatus == '4' || that.clipStatus == '5') {
                             that.barWidth = parseInt(d3.select('#videoBar').style('width'));
 
                             that.videoCursorPosition = parseInt((that.video.currentTime / that.video.duration) * that.barWidth);
@@ -295,7 +298,7 @@
                     $("#zoom_bg").css("bottom","");
                     that.smallTimeboxHeight = $("#timebox").height();
 
-                    if (that.clipDetail.status == '4' || that.clipDetail.status == '5') {
+                    if (that.clipStatus == '4' || that.clipStatus == '5') {
                         that.barWidth = parseInt(d3.select('#videoBar').style('width'));
                         that.videoCursorPosition =   parseInt((that.video.currentTime / that.video.duration) * that.barWidth);
                         var newTime = that.video.duration * (that.videoCursorPosition / that.barWidth);

@@ -88,16 +88,11 @@ let dropdownObj = dropdown({
 let clipplayerObj = clipplayer({
    elId: 'clipplayerId',
    videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
-   clipDetail: {
-       status: "4",
-       duration: "4:09",
-       origin: {
-           thumbnailPath: "",
-           start: 1564470720000,
-           end: 1564470960000,
-           status: "4"
-       }
-   }
+   durationStr: "4:09",
+   clipStatus: "4",
+   thumbnailPath: "",
+   startTime: 1564470720000,
+   endTime: 1564470960000
 });
 */
 

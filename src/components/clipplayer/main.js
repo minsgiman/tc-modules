@@ -10,7 +10,11 @@ function createDlg(param) {
     const vComponent = new vConstructor({propsData: {
             theme: param.theme,
             videoUrl: param.videoUrl,
-            clipDetail: param.clipDetail
+            durationStr: param.durationStr,
+            clipStatus: param.clipStatus,
+            thumbnailPath: param.thumbnailPath,
+            startTime: param.startTime,
+            endTime: param.endTime
         }}).$mount();
     parentEl.appendChild(vComponent.$el);
 
