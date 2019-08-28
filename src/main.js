@@ -3,8 +3,9 @@ import player from './components/player/light_main';
 let playerObj = new player({
     serialNo: 'AZZDSF21312A',
     elementId : 'playerwrap',
-    startTime : 1563837900000,
-    endTime : 1563837903000,
+    startTime : 1566960900000,
+    endTime : 1566960910000,
+    usePauseResume: true,  //default: false
     loop : true,    //default : true
     showTime : true,  //default : false
     coreSwfPath : '/resources/vendor/nvp_web_player/LCP_web_player2016082601.swf',    //default : '/resources/vendor/nvp_web_player/LCP_web_player2016082601.swf'

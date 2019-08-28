@@ -60,6 +60,7 @@ The TOASTCAM Light Player needs following parameters
  - endTime: CVR end timestamp - 13 digits
  - loop: repeat video (default: true)
  - showTime: show timer (default : false)
+ - usePauseResume: show Pause Resume Button. if want to use it, showTime should be set to true (default : false)
  - coreSwfPath: downloaded flash core swf file path (default: '/resources/vendor/nvp_web_player/LCP_web_player2016082601.swf')
  - skinSwfPath: downloaded flash skin swf file path (default: '/resources/vendor/nvp_web_player/NVP_web_player_skin_tvcast_white.swf')
  - getTokenUrl : Get Token API Url (default: '/biz/cameras/token/:serialNo')
@@ -73,6 +74,7 @@ var data = {
     endTime : 1563837903000,
     loop : true,
     showTime : true,
+    usePauseResume: true,
     coreSwfPath : '/nvp_web_player/LCP_web_player2016082601.swf',
     skinSwfPath : '/nvp_web_player/NVP_web_player_skin_tvcast_white.swf',
     getTokenUrl : '/biz/cameras/token/:serialNo',

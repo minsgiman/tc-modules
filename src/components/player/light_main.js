@@ -18,6 +18,7 @@ class lightPlayer {
                 endTime: param.endTime,
                 loop: param.loop,
                 showTime: param.showTime,
+                usePauseResume: param.usePauseResume,
                 coreSwfPath: param.coreSwfPath,
                 skinSwfPath: param.skinSwfPath,
                 getTokenUrl: param.getTokenUrl,
