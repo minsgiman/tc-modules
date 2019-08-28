@@ -1,8 +1,8 @@
 <template>
     <div class="tc_radiobtn">
         <span v-for="(item, index) in items">
-            <input type="radio" :name="name" :id="item.value" :value="item.value" v-model="radioValue" @change="changeValue">
-            <label :for="item.value" v-html="item.text"></label>
+            <input type="radio" :name="name" :id="name + item.value" :value="item.value" v-model="radioValue" @change="changeValue">
+            <label :for="name + item.value" v-html="item.text"></label>
         </span>
     </div>
 </template>

@@ -2,8 +2,8 @@
     <ul class="tc_daycheck">
         <li v-for="(item, index) in dayList">
             <span>
-                <input type="checkbox" v-model="item.check" :id="item.id" :key="item.id" @change="checkChange">
-                <label :class="{on: item.check}" :for="item.id">
+                <input type="checkbox" v-model="item.check" :id="name + item.id" :key="name + item.id" @change="checkChange">
+                <label :class="{on: item.check}" :for="name + item.id">
                     <span class="label_icon"></span>
                     <span class="label_txt">{{item.str}}</span>
                 </label>
@@ -13,7 +13,7 @@
 </template>
 <script>
     export default {
-        props: ['theme'],
+        props: ['theme', 'name'],
         name: 'daycheck',
         computed : {
         },

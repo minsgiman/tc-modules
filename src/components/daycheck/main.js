@@ -8,7 +8,8 @@ function createDlg(param) {
     }
     const vConstructor = Vue.extend(daycheck);
     const vComponent = new vConstructor({propsData: {
-            theme: param.theme
+            theme: param.theme,
+            name: param.name
         }}).$mount();
     parentEl.appendChild(vComponent.$el);
 
