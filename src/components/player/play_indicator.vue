@@ -94,6 +94,7 @@
             updateIndicatorSize: function() {
                 $('#play_indicator').css('width', $("#player").width() - 200);
                 $('#play_indicator').css('height', $("#player").height());
+                $('#play_indicator').css('display', 'table');
             }
         }
     }
@@ -104,7 +105,6 @@
         width: 100%;
         height: 100%;
         position: absolute;
-        display:table;
         z-index: 1;
         top: 0px;
         right: 0px;
