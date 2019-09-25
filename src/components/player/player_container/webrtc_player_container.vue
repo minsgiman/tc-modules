@@ -52,9 +52,9 @@
                 if (browserType === 'ie') {
                     isBrowserSupport = false;
                 }
-                if (browserType === 'safari' && navigator.userAgent.indexOf('Version/11') == -1) {
-                    isBrowserSupport = false;
-                }
+                // if (browserType === 'safari' && navigator.userAgent.indexOf('Version/11') == -1) {
+                //     isBrowserSupport = false;
+                // }
 
                 if (isBrowserSupport) {
                     this.player.webRTCStatus = this.player.webRTCStatusEnum.EVENT_STREAM_CONNECTING;
