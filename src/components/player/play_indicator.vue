@@ -92,6 +92,7 @@
             },
 
             updateIndicatorSize: function() {
+                $('#play_indicator').css('display', 'block');
                 $('#play_indicator').css('width', $("#player").width() - 200);
                 $('#play_indicator').css('height', $("#player").height());
                 $('#play_indicator').css('display', 'table');
