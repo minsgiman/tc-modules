@@ -308,11 +308,19 @@
 
                     if(timeRange == 10){
                         if(parseInt(cvrData[cvrData.length-1].endTime) <= time.valueOf()+3000){
-                            this.setupDomain([currentDomain[0], currentDomain[1]]);
+                            if (!this.isLoading) {
+                                if (!(this.cachedTimelineparams && this.cachedTimelineparams.start === (currentDomain[0] - 100000) && this.cachedTimelineparams.end === currentDomain[1])) {
+                                    this.setupDomain([currentDomain[0], currentDomain[1]]);
+                                }
+                            }
                         }
                     }else{
                         if(parseInt(cvrData[cvrData.length-1].endTime) <= time.valueOf()+30000){
-                            this.setupDomain([currentDomain[0],currentDomain[1]]);
+                            if (!this.isLoading) {
+                                if (!(this.cachedTimelineparams && this.cachedTimelineparams.start === currentDomain[0] && this.cachedTimelineparams.end === currentDomain[1])) {
+                                    this.setupDomain([currentDomain[0],currentDomain[1]]);
+                                }
+                            }
                         }
                     }
 
@@ -400,7 +408,6 @@
                 // if(this.cachedTimelineparams.start < this.serviceDateTime){
                 //     this.cachedTimelineparams.start = this.serviceDateTime;
                 // }
-
                 this.playEventCallback('getAlarmZones');
 
                 var removedBufferDomain = this.removeBufferCursorCheckDomain(domain , this.timeRange);
@@ -1275,7 +1282,6 @@
                             }
 
                         };
-
                         that.$emit('event', {event: 'checkCVRSeucre', data: (isSecureMode) => {
                             if(isSecureMode){
                                 that.$emit('event', {event: 'updateCVRSecureStatus', data: callbackFunc});

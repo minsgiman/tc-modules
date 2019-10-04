@@ -56,7 +56,9 @@
 
                     if(timeline.cvrCheck == false){
                         if (this.cameraData.recordType == "event") {
-                            this.$emit('event', {event: 'jumpToNextRecord'});
+                            if (!timeline.isCursorLeft && !timeline.isCursorRight) {
+                                this.$emit('event', {event: 'jumpToNextRecord'});
+                            }
                         } else {
                             if(timeline.lineMoveFlag == false){
                                 store.dispatch('IS_PLAYING_CHANGE', false);
