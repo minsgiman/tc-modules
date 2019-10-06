@@ -43,7 +43,7 @@
         },
         methods: {
             checkChange: function() {
-                this.$emit('event', {event: 'timechange', checkMap: this.getCheckMap()});
+                this.$emit('event', {event: 'checkchange', checkMap: this.getCheckMap()});
             },
             addZero: function(n) {
                 return n < 10 ? '0' + n : '' + n
