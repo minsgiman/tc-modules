@@ -2,6 +2,7 @@
     import store from '../../../service/player/store';
     import flashPlayerContainer from './flash_player_container';
     import webRTCPlayerContainer from './webrtc_player_container';
+    import webRTCV2PlayerContainer from './webrtcv2_player_container';
     import toastcamAPIs from './../../../service/toastcamAPIs';
     import Vue from 'vue';
 
@@ -84,6 +85,12 @@
             },
             isShared: function () {
                 return store.state.isShared;
+            },
+            browserInfo: function () {
+                return store.state.browserInfo;
+            },
+            userId: function () {
+                return store.state.userId;
             }
         },
         data: function () {
@@ -94,12 +101,19 @@
         },
         created : function() {
             let vExtendConstructor;
+
             if (this.cameraData.recorderType == "recorder") {
                 vExtendConstructor = Vue.extend(webRTCPlayerContainer);
                 this.player = new vExtendConstructor();
             } else {
-                vExtendConstructor = Vue.extend(flashPlayerContainer);
-                this.player = new vExtendConstructor();
+                if (this.browserInfo.supportWebRTC && this.userId === 'e0c7dbd0-47c2-11e5-b793-fa163e9a396d') {
+                    vExtendConstructor = Vue.extend(webRTCV2PlayerContainer);
+                    this.player = new vExtendConstructor();
+                } else {
+                    store.dispatch('SUPPORT_WEBRTC', false); //TODO: Temp Code..will be removed
+                    vExtendConstructor = Vue.extend(flashPlayerContainer);
+                    this.player = new vExtendConstructor();
+                }
             }
             this.player.$on('playerStatusChanged', this.playerStatusChangedHandler.bind(this));
         },
@@ -123,10 +137,18 @@
                         this.player.play(time ? time.getTime() : 0);
                     } else {
                         toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAM_TOKEN : toastcamAPIs.camera.GET_TOKEN, {cameraId: this.cameraData.id}, (res) => {
-                            if (time) {
-                                this.player.play({url: getCvrServerUrl(res.cvrHostPort), path: '/token=' + res.token + '&time=' + time.getTime()});
+                            if (this.browserInfo.supportWebRTC) {
+                                if (time) {
+                                    this.player.play(res.cvrHostPort + '/token=' + res.token + '&time=' + time.getTime());
+                                } else {
+                                    this.player.play(this.cameraData.mediaStreamURL + '?token=' + res.token);
+                                }
                             } else {
-                                this.player.play({url: getLiveServerUrl(this.cameraData.mediaStreamURL), path: this.cameraData.id + '?token=' + res.token});
+                                if (time) {
+                                    this.player.play({url: getCvrServerUrl(res.cvrHostPort), path: '/token=' + res.token + '&time=' + time.getTime()});
+                                } else {
+                                    this.player.play({url: getLiveServerUrl(this.cameraData.mediaStreamURL), path: this.cameraData.id + '?token=' + res.token});
+                                }
                             }
                         });
                     }

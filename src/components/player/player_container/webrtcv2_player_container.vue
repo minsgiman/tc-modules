@@ -1,17 +1,14 @@
 <script>
     import store from '../../../service/player/store';
-    import webRTCPlayer from './webrtc_player';
+    import webRTCV2Player from './webrtcv2_player';
     import Vue from 'vue';
 
     export default {
-        name: 'webrtcPlayerContainer',
+        name: 'webrtcV2PlayerContainer',
         props: [],
         computed: {
             cameraData: function () {
                 return store.state.cameraData;
-            },
-            browserInfo: function () {
-                return store.state.browserInfo;
             }
         },
         data: function () {
@@ -20,7 +17,7 @@
             }
         },
         created : function() {
-            const vExtendConstructor = Vue.extend(webRTCPlayer);
+            const vExtendConstructor = Vue.extend(webRTCV2Player);
             this.player = new vExtendConstructor().$mount('#webrtc_player_wrap');
             this.player.$on('playerStatusChanged', this.webRTCEventCallback.bind(this));
         },
@@ -33,23 +30,17 @@
             }
         },
         methods : {
-            play : function (time) {
+            play : function (url) {
                 this.player.dvrConnectFail = false;
 
-                if (this.browserInfo.supportWebRTC) {
-                    this.player.webRTCStatus = this.player.webRTCStatusEnum.EVENT_STREAM_CONNECTING;
-                    if (this.player.currentWebRTCPeerId) {
-                        this.stop(this.player.currentWebRTCPeerId);
-                    }
-                    this.player.currentWebRTCPeerId = this.cameraData.id;
-                    this.player.play(this.cameraData.id, time);
-                    $('#webrtc_logo').show();
-                    $('#webrtc_loading').show();
-                } else {
-                    $('#webrtc_logo').hide();
-                    $('#webrtc_loading').hide();
-                    //$scope.isShowNoSupportBrowser = true; //TODO:
+                this.player.webRTCStatus = this.player.webRTCStatusEnum.EVENT_STREAM_CONNECTING;
+                if (this.player.currentWebRTCPeerId) {
+                    this.stop(this.player.currentWebRTCPeerId);
                 }
+                this.player.currentWebRTCPeerId = this.cameraData.id;
+                this.player.play(this.cameraData.id, url);
+                $('#webrtc_logo').show();
+                $('#webrtc_loading').show();
             },
             resume : function () {
                 this.player.resume();

@@ -17,6 +17,43 @@ if (!Array.prototype.includes) {
     });
 }
 
+function browserCheck() {
+    var userAgent = navigator.userAgent,
+        match = userAgent.match(/(opera|chrome|crios|safari|ucbrowser|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [],
+        result = {},
+        tem;
+
+    if (/trident/i.test(match[1])) {
+        tem = /\brv[ :]+(\d+)/g.exec(userAgent) || [];
+        result.name = "Internet Explorer";
+    } else if (match[1] === "Chrome") {
+        tem = userAgent.match(/\b(OPR|Edge)\/(\d+)/);
+
+        if (tem && tem[1]) {
+            result.name = tem[0].indexOf("Edge") === 0 ? "Edge" : "Opera";
+        }
+    }
+    if (!result.name) {
+        tem = userAgent.match(/version\/(\d+)/i); // iOS support
+        result.name = match[0].replace(/\/.*/, "");
+
+        if (result.name.indexOf("MSIE") === 0) {
+            result.name = "Internet Explorer";
+        }
+        if (userAgent.match("CriOS")) {
+            result.name = "Chrome";
+        }
+
+    }
+    if (tem && tem.length) {
+        match[match.length - 1] = tem[tem.length - 1];
+    }
+
+    result.version = Number(match[match.length - 1]);
+
+    return result;
+}
+
 class player {
     constructor(param) {
         if (param.category === 'b2b') {
@@ -37,6 +74,8 @@ class player {
         this.setData('cameraData', param.cameraData);
         this.setData('shopId', param.shopId ? param.shopId : '');
         this.setData('isShared', param.isShared);
+        this.setData('browserInfo', browserCheck());
+        this.setData('userId', param.userId);
 
         let vExtendConstructor = Vue.extend(playContainer);
         this.control = new vExtendConstructor({
@@ -123,6 +162,12 @@ class player {
                 break;
             case 'ptzControlMode':
                 store.dispatch('PTZ_CONTROL_CHANGE', value);
+                break;
+            case 'browserInfo':
+                store.dispatch('BROWSER_INFO', value);
+                break;
+            case 'userId':
+                store.dispatch('USER_ID_CHANGE', value);
                 break;
             default:
                 break;

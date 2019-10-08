@@ -1,5 +1,5 @@
 <template>
-    <div class="zoom" v-show="cameraData.recorderType !== 'recorder'">
+    <div class="zoom" v-show="cameraData.recorderType !== 'recorder' && !browserInfo.supportWebRTC">
         <button type="button" class="sp zoomout" @click="zoomUp(-1)"></button>
         <button type="button" class="sp zoomin" @click="zoomUp(1)"></button>
         <span class="zoom_bg">
@@ -18,6 +18,9 @@
         computed: {
             cameraData: function () {
                 return store.state.cameraData;
+            },
+            browserInfo: function () {
+                return store.state.browserInfo;
             }
         },
         data: function () {

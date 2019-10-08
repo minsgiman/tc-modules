@@ -26,7 +26,9 @@ const store = new Vuex.Store({
         motionZones: [],
         currentDomain: null,
         isShowTimelineCalendar: false,
-        ptzControlMode: false
+        ptzControlMode: false,
+        browserInfo: {},
+        userId: ''
     },
     getters: {
         isExpiredCloud: state => {
@@ -141,6 +143,27 @@ const store = new Vuex.Store({
         PTZ_CONTROL_CHANGE: function(context, state) {
             context.commit('UPDATE_PTZ_CONTROL', state);
         },
+        BROWSER_INFO: function(context, state) {
+            const checkSupportWebRTC = (browserInfo) => {
+                if (!browserInfo || !browserInfo.name) {
+                    return false;
+                }
+                if (browserInfo.name === "Internet Explorer" || browserInfo.name === "Edge") {
+                    return false;
+                }
+                if (browserInfo.name === "Safari" && browserInfo.version < 11) {
+                    return false;
+                }
+                return true;
+            };
+            context.commit('UPDATE_BROWSER_INFO', {name: state.name, version: state.version, supportWebRTC: checkSupportWebRTC(state)});
+        },
+        SUPPORT_WEBRTC: function(context, state) {
+            context.commit('UPDATE_SUPPORT_WEBRTC', state);
+        },
+        USER_ID_CHANGE: function(context, state) {
+            context.commit('UPDATE_USER_ID', state);
+        },
         INIT_ALL_DATA: function(context, state) {
             context.commit('UPDATE_CAMERA_DATA', {});
             context.commit('UPDATE_CAMERA_CONFIG', {});
@@ -235,6 +258,15 @@ const store = new Vuex.Store({
         },
         UPDATE_PTZ_CONTROL: function(state, value) {
             state.ptzControlMode = value;
+        },
+        UPDATE_BROWSER_INFO: function(state, value) {
+            state.browserInfo = value;
+        },
+        UPDATE_SUPPORT_WEBRTC: function(state, value) {
+            state.browserInfo.supportWebRTC = value;
+        },
+        UPDATE_USER_ID: function(state, value) {
+            state.userId = value;
         }
     }
 });
