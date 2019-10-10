@@ -139,7 +139,7 @@
                         toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAM_TOKEN : toastcamAPIs.camera.GET_TOKEN, {cameraId: this.cameraData.id}, (res) => {
                             if (this.browserInfo.supportWebRTC) {
                                 if (time) {
-                                    this.player.play(res.cvrHostPort + '/token=' + res.token + '&time=' + time.getTime());
+                                    this.player.play(this.cameraData.mediaStreamURL + '?token=' + res.token + '&time=' + time.getTime());
                                 } else {
                                     this.player.play(this.cameraData.mediaStreamURL + '?token=' + res.token);
                                 }

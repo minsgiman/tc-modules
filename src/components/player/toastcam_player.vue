@@ -195,6 +195,40 @@
                         this.playTimer.stopTimer();
                         this.player.stop(this.cameraData.id);
                         this.errorStatusLayer.cameraStatusChange(3);
+                    } else if (status.status === 'v2_event_stream_connected') {
+                        store.dispatch('IS_PLAYING_CHANGE', true);
+                        this.playEventCb('isShowMikeChanged', true);
+                        this.errorStatusLayer.cameraStatusAllOff();
+
+                        if (this.isLive) {
+                            this.playTimer.startLiveTimer(this.timeline);
+                        } else {
+                            this.playTimer.startRecTimer(this.timeline.clickTime, this.player, this.timeline);
+                        }
+                    } else if (status.status === 'v2_event_stream_disconnected') {
+                        if (this.isLive){
+                            setTimeout(() => {
+                                if (this.playBtnStatus) {
+                                    this.timeline.livePlayDataSet('NetStream.Play.Stop');
+                                }
+                            },4000);
+                        } else {
+                            var i, len, curTime, cvrData = this.cvrData;
+                            if (this.currentTime && cvrData && cvrData.length) {
+                                len = cvrData.length;
+                                curTime = this.currentTime.getTime();
+                                for (i = 0; i < len; i+=1) {
+                                    if (curTime > parseInt(cvrData[i].startTime, 10) && curTime <= parseInt(cvrData[i].endTime, 10)) {
+                                        if (cvrData[i+1]) {
+                                            if ((parseInt(cvrData[i+1].startTime) - parseInt(cvrData[i].endTime)) < 1000) {
+                                                this.timeline.clickedCVRArea(new Date(parseInt(cvrData[i+1].startTime, 10) + 1000));
+                                            }
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     }
                     return;
                 }

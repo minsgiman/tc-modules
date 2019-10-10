@@ -89,10 +89,10 @@
                 timeoutId : null,
                 remoteVideoContainer : null,
                 webRTCStatusEnum : {
-                    EVENT_STREAM_CONNECTING : 'event_stream_connecting',
-                    EVENT_STREAM_CONNECTED : 'event_stream_connected',
-                    EVENT_STREAM_DISCONNECTED : 'event_stream_disconnected',
-                    EVENT_STREAM_STOPPED : 'event_stream_stopped'
+                    EVENT_STREAM_CONNECTING : 'v2_event_stream_connecting',
+                    EVENT_STREAM_CONNECTED : 'v2_event_stream_connected',
+                    EVENT_STREAM_DISCONNECTED : 'v2_event_stream_disconnected',
+                    EVENT_STREAM_STOPPED : 'v2_event_stream_stopped'
                 }
             }
         },
@@ -115,8 +115,6 @@
                 this.addPeer(this.currentWebRTCPeerId); //new RTCPeerConnection with Turn Server
                 this.offer(this.currentWebRTCPeerId, url, this.sessionId);
                 console.log('webRTC Media url : ' + url);
-                //this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_DISCONNECTED;
-                //this.$emit('playerStatusChanged', {status : this.webRTCStatus, code: 'nosocket'});
 
                 /*
                 1. Get Turn Server
@@ -217,7 +215,7 @@
                             || event.target   ) // Firefox
                             .iceConnectionState) {
                         case 'disconnected':
-                        case 'closed':
+                        //case 'closed':
                             $('#remoteVideosContainer').empty();
                             this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_DISCONNECTED;
                             this.$emit('playerStatusChanged', {status : this.webRTCStatus, code : ''});
