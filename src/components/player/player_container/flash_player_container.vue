@@ -15,7 +15,8 @@
             return {
                 player : null,
                 currentZoom : 1.0,
-                zoomZoneBottom : 149
+                zoomZoneBottom : 149,
+                type : 'flash'
             }
         },
         created : function() {

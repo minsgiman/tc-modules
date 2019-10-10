@@ -13,7 +13,8 @@
         },
         data: function () {
             return {
-                player : null
+                player : null,
+                type : 'webrtcv2'
             }
         },
         created : function() {

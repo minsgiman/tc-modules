@@ -229,6 +229,7 @@
 
             offer : function (remoteId, url, sessionId) {
                 var pc = this.peerDatabase[remoteId].pc;
+                var that = this;
                 var constraints;
                 if (this.browserInfo.name === 'Firefox') {
                     constraints = { offerToReceiveVideo: 1, offerToReceiveAudio: 1 }
@@ -250,7 +251,7 @@
                 pc.createOffer((sessionDescription) => {
                         pc.setLocalDescription(sessionDescription);
 
-                        var apiUrl = 'http://10.77.29.91:8080/rtc/offer?id=' + sessionId + '&url=' + encodeURI(url)+ '&sdp=' + encodeURI(sessionDescription.sdp);
+                        var apiUrl = 'http://10.77.29.91:8080/rtc/offer?id=' + sessionId + '&url=' + encodeURIComponent(url)+ '&sdp=' + encodeURI(sessionDescription.sdp);
                         var httpRequest = new XMLHttpRequest();
                         httpRequest.onreadystatechange = function() {
                             if (httpRequest.readyState === XMLHttpRequest.DONE) {
@@ -262,7 +263,8 @@
                                     });
                                     pc.setRemoteDescription(answerObj, () => {}, error);
                                 } else {
-                                    //TODO: ERROR
+                                    that.webRTCStatus = that.webRTCStatusEnum.EVENT_STREAM_DISCONNECTED;
+                                    that.$emit('playerStatusChanged', {status : that.webRTCStatus, code : ''});
                                 }
                             }
                         };

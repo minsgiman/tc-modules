@@ -16,7 +16,8 @@
         },
         data: function () {
             return {
-                player : null
+                player : null,
+                type : 'webrtc'
             }
         },
         created : function() {
