@@ -71,8 +71,9 @@
                             // {"url": "stun:devmedia012.toastcam.com:10088"},
                             // {"url": "turn:devmedia012.toastcam.com:10088?transport=udp", "username": "test", "credential": "test"},
                             // {"url": "turn:devmedia012.toastcam.com:10088?transport=tcp", "username": "test", "credential": "test"}
+                            {"url": "turn:devmedia011.toastcam.com:10088", "username": "OOlRzsfIqOhZU0RN7gn0IwBV", "credential": "1mNCqGVGW06EHtwEfStkpHTXaUuNyUC98CsC"}
                         ],
-                        //iceTransportPolicy: 'relay'
+                        iceTransportPolicy: 'relay'
                     },
                     peerConnectionConstraints: {
                         optional: [
@@ -250,26 +251,36 @@
 
                 pc.createOffer((sessionDescription) => {
                         pc.setLocalDescription(sessionDescription);
-
-                        var apiUrl = 'http://10.77.29.91:8080/rtc/offer?id=' + sessionId + '&url=' + encodeURIComponent(url)+ '&sdp=' + encodeURI(sessionDescription.sdp);
-                        var httpRequest = new XMLHttpRequest();
-                        httpRequest.onreadystatechange = function() {
-                            if (httpRequest.readyState === XMLHttpRequest.DONE) {
-                                if (httpRequest.status === 200) {
-                                    var resObj = JSON.parse(httpRequest.responseText);
-                                    var answerObj = new RTCSessionDescription({
-                                        type: 'answer',
-                                        sdp: resObj.sdp
-                                    });
-                                    pc.setRemoteDescription(answerObj, () => {}, error);
-                                } else {
-                                    that.webRTCStatus = that.webRTCStatusEnum.EVENT_STREAM_DISCONNECTED;
-                                    that.$emit('playerStatusChanged', {status : that.webRTCStatus, code : ''});
-                                }
+                        var sendData = {
+                            "offer": {
+                                "id": sessionId,
+                                "url": encodeURIComponent(url),
+                                "relay": {
+                                    "username": that.webRTCConfig.peerConnectionConfig.iceServers[0].username,
+                                    "credential": that.webRTCConfig.peerConnectionConfig.iceServers[0].credential,
+                                    "url": encodeURIComponent(that.webRTCConfig.peerConnectionConfig.iceServers[0].url)
+                                },
+                                "sdp": encodeURI(sessionDescription.sdp)
                             }
                         };
-                        httpRequest.open('GET', apiUrl);
-                        httpRequest.send();
+
+                        $.ajax({
+                            type: "POST",
+                            url: "http://10.77.29.91:8080/rtc/offer",
+                            data: sendData,
+                            success:function(dataStr){
+                                var resObj = JSON.parse(dataStr);
+                                var answerObj = new RTCSessionDescription({
+                                    type: 'answer',
+                                    sdp: resObj.sdp
+                                });
+                                pc.setRemoteDescription(answerObj, () => {}, error);
+                            },
+                            error:function(e){
+                                that.webRTCStatus = that.webRTCStatusEnum.EVENT_STREAM_DISCONNECTED;
+                                that.$emit('playerStatusChanged', {status : that.webRTCStatus, code : ''});
+                            }
+                        });
                     },
                     error,
                     constraints
