@@ -71,7 +71,7 @@
                             // {"url": "stun:devmedia012.toastcam.com:10088"},
                             // {"url": "turn:devmedia012.toastcam.com:10088?transport=udp", "username": "test", "credential": "test"},
                             // {"url": "turn:devmedia012.toastcam.com:10088?transport=tcp", "username": "test", "credential": "test"}
-                            {"url": "turn:devmedia011.toastcam.com:10088", "username": "OOlRzsfIqOhZU0RN7gn0IwBV", "credential": "1mNCqGVGW06EHtwEfStkpHTXaUuNyUC98CsC"}
+                            //{"url": "turn:10.77.29.91:10088?transport=udp", "username": "test", "credential": "test"}
                         ],
                         iceTransportPolicy: 'relay'
                     },
@@ -94,7 +94,8 @@
                     EVENT_STREAM_CONNECTED : 'v2_event_stream_connected',
                     EVENT_STREAM_DISCONNECTED : 'v2_event_stream_disconnected',
                     EVENT_STREAM_STOPPED : 'v2_event_stream_stopped'
-                }
+                },
+                url : ''
             }
         },
         created : function() {
@@ -108,15 +109,24 @@
         },
         methods : {
             play : function(cameraIdValue, url) {
+                const that = this;
                 this.currentWebRTCPeerId = cameraIdValue;
                 this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_CONNECTING;
                 this.sessionId = getCookie("toastcam");
-
-                //TODO: Get TURN Server
-                this.addPeer(this.currentWebRTCPeerId); //new RTCPeerConnection with Turn Server
-                this.offer(this.currentWebRTCPeerId, url, this.sessionId);
-                console.log('webRTC Media url : ' + url);
-
+                this.url = url;
+                $.ajax({
+                    type: "GET",
+                    url: "http://10.77.29.91:8080/rtc/credential",
+                    success:function(dataStr){
+                        var resObj = JSON.parse(dataStr);
+                        that.webRTCConfig.peerConnectionConfig.iceServers.push({url: resObj.urls, username: resObj.username, credential: resObj.credential});
+                        that.addPeer(that.currentWebRTCPeerId); //new RTCPeerConnection with Turn Server
+                        that.offer(cameraIdValue);
+                        console.log('Get TurnServer - webRTC Media url : ' + url);
+                    },
+                    error:function(e){
+                    }
+                });
                 /*
                 1. Get Turn Server
                 2. new RTCPeerConnection with Turn Server
@@ -223,12 +233,32 @@
                             break;
                     }
                 };
+                peer.pc.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        console.log('onicecandidate candidate : ' + event.candidate.candidate);
+                        $.ajax({
+                            type: "PUT",
+                            url: "http://10.77.29.91:8080/rtc/candidate",
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                "id":this.sessionId,
+                                "candidate":encodeURIComponent(event.candidate.candidate)
+                            }),
+                            success:function(){
+                                console.log('send candidate : ' + event.candidate.candidate);
+                            },
+                            error:function(e){
+                                console.log('send candidate error!');
+                            }
+                        });
+                    }
+                };
                 this.peerDatabase[remoteId] = peer;
 
                 return peer;
             },
 
-            offer : function (remoteId, url, sessionId) {
+            offer : function (remoteId) {
                 var pc = this.peerDatabase[remoteId].pc;
                 var that = this;
                 var constraints;
@@ -253,14 +283,14 @@
                         pc.setLocalDescription(sessionDescription);
                         var sendData = {
                             "offer": {
-                                "id": sessionId,
-                                "url": encodeURIComponent(url),
+                                "id": that.sessionId,
+                                "url": encodeURIComponent(that.url),
                                 "relay": {
                                     "username": that.webRTCConfig.peerConnectionConfig.iceServers[0].username,
                                     "credential": that.webRTCConfig.peerConnectionConfig.iceServers[0].credential,
                                     "url": encodeURIComponent(that.webRTCConfig.peerConnectionConfig.iceServers[0].url)
                                 },
-                                "sdp": encodeURI(sessionDescription.sdp)
+                                "sdp": encodeURIComponent(sessionDescription.sdp)
                             }
                         };
 
