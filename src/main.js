@@ -3,8 +3,8 @@ import player from './components/player/light_main';
 let playerObj = new player({
     serialNo: 'AZZDSF21312A',
     elementId : 'playerwrap',
-    startTime : 1566960900000,
-    endTime : 1566960910000,
+    startTime : 1571289300000,
+    endTime : 1571289330000,
     usePauseResume: true,  //default: false
     loop : true,    //default : true
     showTime : true,  //default : false
