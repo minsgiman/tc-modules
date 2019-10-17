@@ -237,13 +237,12 @@
                     if (event.candidate) {
                         console.log('onicecandidate candidate : ' + event.candidate.candidate);
                         $.ajax({
-                            type: "PUT",
+                            type: "POST",
                             url: "http://10.77.29.91:8080/rtc/candidate",
-                            contentType: 'application/json',
-                            data: JSON.stringify({
+                            data: {
                                 "id":this.sessionId,
                                 "candidate":encodeURIComponent(event.candidate.candidate)
-                            }),
+                            },
                             success:function(){
                                 console.log('send candidate : ' + event.candidate.candidate);
                             },
