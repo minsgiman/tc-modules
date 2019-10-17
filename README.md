@@ -47,41 +47,36 @@ import { toggle as toggleConstructor } from 'toastcam-components'; /* ES6 */
 
 ```javascript
 /* Toggle */
-function toggleHandler (data) {
-    console.log('event : ' + data.event); //event : toggle
-    console.log('isOn : ' + data.isOn); //isOn : true
-}
+const toggleComponent = tCam.toggle("#componentId");
 
-const toggleComponent = tCam.toggle({
-    elId: "componentId",
-    eventHandler: toggleHandler
-});
-component.setData('isOn', true);
+toggleComponent.on('changed', function (event) {
+    console.log('event : ' + event.type); //event : changed
+    console.log('value : ' + event.value); //value : true
+})
+
+toggleComponent.value = true;
 ```
 
 ```javascript
 /* Timeselect */
-function timeselectHandler (data) {
-    console.log('event : ' + data.event); //event : timechange
-    console.log('hour : ' + data.hour); //hour : 8
-    console.log('min : ' + data.min); //min : 35
-}
+const timeselectComponent = tCam.timeselect('#componentId');
 
-const timeselectComponent = tCam.timeselect({
-    elId: "componentId",
-    eventHandler: timeselectHandler
-});
-timeselectComponent.setTime(6, 38);
-const timeObj = timeselectComponent.getTime(); //timeObj = {hour: 6, min: 38}
-const timeStr = timeselectComponent.getTimeStr(); //timeStr = "06:38"
+timeselectComponent.on('changed', function (event) {
+    console.log('event : ' + event.type); //event : changed
+    console.log('hour : ' + event.value.getHours()); //hour : 10 (event.value is Date)
+})
+
+timeselectComponent.value = new Date();
 ```
 
 ```javascript
 /* Daycheck */
-function daycheckHandler (data) {
-    console.log('event : ' + data.event); //event : checkchange
-    console.log('checkMap : ' + data.checkMap); 
-    /* checkMap : {
+const daycheckComponent = tCam.daycheck('#componentId');
+
+daycheckComponent.on('changed', function (event) {
+    console.log('event : ' + event.type); //event : changed
+    console.log('value : ' + JSON.stringify(event.value));
+    /* value : {
           'MON' : true,
           'TUE' : false,
           'WED' : false,
@@ -91,13 +86,9 @@ function daycheckHandler (data) {
           'SUN' : false
       }
     */
-}
+})
 
-const daycheckComponent = tCam.daycheck({
-    elId: "componentId",
-    eventHandler: daycheckHandler
-});
-daycheckComponent.setCheckMap({
+daycheckComponent.value = {
     'MON' : true,
     'TUE' : false,
     'WED' : false,
@@ -105,96 +96,74 @@ daycheckComponent.setCheckMap({
     'FRI' : false,
     'SAT' : false,
     'SUN' : false
-});
-const checkMap = daycheckComponent.getCheckMap();
-/* checkMap : {
-      'MON' : true,
-      'TUE' : false,
-      'WED' : false,
-      'THU' : false,
-      'FRI' : false,
-      'SAT' : false,
-      'SUN' : false
-  }
-*/
+};
+```
+
+```javascript
+/* RadioGroup */
+const radioComponent = tCam.radiogroup('#componentId');
+
+radioComponent.on('changed', function(event) {
+    console.log('event : ' + event.type); //event : changed
+    console.log('value : ' + event.value); //value : value1
+})
+
+radioComponent.name = 'radioname';
+radioComponent.items = [{value: 'value1', text: 'No.1'}, {value: 'value2', text: 'No.2'}];
+radioComponent.value = 'value1';
 ```
 
 ```javascript
 /* RadioButton */
-function radioHandler (data) {
-    console.log('event : ' + data.event); //event : changed
-    console.log('value : ' + data.value); //value : value1
-}
-
-const radioComponent = tCam.radiobtn({
-    elId: 'componentId',
-    name: 'radioname',
-    items: [{value: 'value1', text: 'No.1'}, {value: 'value2', text: 'No.2'}],
-    eventHandler: radioHandler
-});
-radioComponent.setValue('value1');
-const radioValue = radioComponent.getValue(); //radioValue = value1
-```
-
-```javascript
-/* ClipPlayer */
-const clipPlayer = tCam.clipplayer({
-    elId: "componentId",
-    videoUrl: "https://bizcam.toast.com/AAADEGI/clip/2d642597-66fa-457e-bd96-92e543e4ee25.mp4?category=b2b",
-    durationStr: "10:20", //min:second
-    clipStatus: "4", //clip detail status
-    thumbnailPath: "bizcam.toast.com/AAADEGI/clip/2d642597-66fa-457e-bd96-92e543e4ee25.jpg?category=b2b",
-    startTime: 1567733734000, //clip detail start
-    endTime: 1567734334000 //clip detail end
-});
+//RadioGroup Component 내부에서만 사용하는 Vue Component
+<radio-btn 
+    :name="name" 
+    :id="name + item.value" 
+    :value="item.value" 
+    :text="item.text" 
+    @selected="radioBtnSelected">
+</radio-btn>
 ```
 
 ```javascript
 /* Checkbox */
-function checkHandler (data) {
-    console.log('event : ' + data.event); //event : changed
-    console.log('value : ' + data.value); //value : true
-}
+const checkboxComponent = tCam.checkbox('#componentId');
 
-const checkboxComponent = tCam.checkbox({
-    elId: "componentId",
-    name: "componentName",
-    text: "Checkbox Lable",
-    eventHandler: checkHandler
+checkboxComponent.on('changed', function(event) {
+    console.log('event : ' + event.type); //event : changed
+    console.log('value : ' + event.value); //value : true
 });
-checkboxComponent.setValue(true);
-const checkValue = checkboxComponent.getValue(); //checkValue = true
+
+checkboxComponent.name = 'componentName';
+checkboxComponent.text = 'Checkbox Lable';
+checkboxComponent.value = true;
 ```
 
 ```javascript
 /* Search */
-function searchHandler (data) {
-    console.log('event : ' + data.event); //event : changed
-    console.log('value : ' + data.value); //value : 검색어
-}
+const searchComponent = tCam.search('#componentId');
 
-const searchComponent = tCam.search({
-    elId: "componentId",
-    placeholder: "이름을 입력하세요",
-    eventHandler: searchHandler
+searchComponent.on('changed', function(event) {
+    console.log('event : ' + event.type); //event : changed
+    console.log('value : ' + event.value); //value : '검색어'
 });
-searchComponent.setValue("검색어");
+
+searchComponent.placeholder = "이름을 입력하세요";
+searchComponent.value = '검색어';
 ```
 
 ```javascript
 /* Dropdown */
-function dropHandler (data) {
-    console.log('event : ' + data.event); //event : changed
-    console.log('value : ' + data.value); //value : true
-}
+const dropdownComponent = tCam.dropdown('#componentId');
 
-const dropdownComponent = tCam.dropdown({
-    elId: "componentId",
-    dropElId: "dropElementId",
-    position: "left",
-    eventHandler: dropHandler
+dropdownComponent.on('changed', function(event) {
+    console.log('event : ' + event.type); //event : changed
+    console.log('value : ' + event.value); //value : true
 });
-dropdownComponent.setValue(true);
+
+dropdownComponent.position = 'left';
+dropdownComponent.dropElId = 'dropElementId';
+dropdownComponent.value = true;
 /* Dropdown Element
 <div id="dropdownId"></div>
 <ul id="dropElementId">
@@ -223,6 +192,19 @@ const mydlg = dlg({
     },
     eventHandler: function (event) {
     }
+});
+```
+
+```javascript
+/* ClipPlayer */
+const clipPlayer = tCam.clipplayer({
+    elId: "componentId",
+    videoUrl: "https://bizcam.toast.com/AAADEGI/clip/2d642597-66fa-457e-bd96-92e543e4ee25.mp4?category=b2b",
+    durationStr: "10:20", //min:second
+    clipStatus: "4", //clip detail status
+    thumbnailPath: "bizcam.toast.com/AAADEGI/clip/2d642597-66fa-457e-bd96-92e543e4ee25.jpg?category=b2b",
+    startTime: 1567733734000, //clip detail start
+    endTime: 1567734334000 //clip detail end
 });
 ```
 
