@@ -47,14 +47,23 @@ import { toggle as toggleConstructor } from 'toastcam-components'; /* ES6 */
 
 ```javascript
 /* Toggle */
+ // Create Instance
 const toggleComponent = tCam.toggle("#componentId");
 
+ // EventHandler
 toggleComponent.on('changed', function (event) {
     console.log('event : ' + event.type); //event : changed
     console.log('value : ' + event.value); //value : true
-})
+});
+toggleComponent.off('changed');
 
+ // Setter, Getter
 toggleComponent.value = true;
+console.log('value : ' + toggleComponent.value);
+
+ // Destroy Instance
+component.destroy();
+component = null;
 ```
 
 ```javascript
