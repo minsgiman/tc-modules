@@ -83,12 +83,14 @@
                 timeoutId : null,
                 remoteVideoContainer : null,
                 webRTCStatusEnum : {
-                    EVENT_STREAM_CONNECTING : 'v2_event_stream_connecting',
-                    EVENT_STREAM_CONNECTED : 'v2_event_stream_connected',
-                    EVENT_STREAM_DISCONNECTED : 'v2_event_stream_disconnected',
-                    EVENT_STREAM_STOPPED : 'v2_event_stream_stopped'
+                    EVENT_STREAM_CONNECTING : 'stream_connecting',
+                    EVENT_STREAM_CONNECTED : 'stream_connected',
+                    EVENT_STREAM_DISCONNECTED : 'stream_disconnected',
+                    EVENT_STREAM_STOPPED : 'stream_stopped',
+                    EVENT_ERROR_WEBRTC_SERVER : 'webrtc_server_error'
                 },
-                url : ''
+                url : '',
+                webrtcServer : 'https://mediartc.toast.com:8080'
             }
         },
         created : function() {
@@ -109,7 +111,7 @@
                 this.url = url;
                 $.ajax({
                     type: "GET",
-                    url: "https://10.77.29.91:8080/rtc/credential",
+                    url: this.webrtcServer + "/rtc/credential",
                     success:function(dataStr){
                         var resObj = JSON.parse(dataStr);
                         that.webRTCConfig.peerConnectionConfig.iceServers.push({url: resObj.urls, username: resObj.username, credential: resObj.credential});
@@ -118,6 +120,8 @@
                         console.log('Get TurnServer - webRTC Media url : ' + url);
                     },
                     error:function(e){
+                        that.webRTCStatus = that.webRTCStatusEnum.EVENT_ERROR_WEBRTC_SERVER;
+                        that.$emit('playerStatusChanged', that.webRTCStatus);
                     }
                 });
             },
@@ -165,6 +169,7 @@
             },
 
             addPeer : function (remoteId) {
+                const that = this;
                 const peer = new Peer(this.webRTCConfig.peerConnectionConfig, this.webRTCConfig.peerConnectionConstraints);
 
                 if (browserInfo.name === 'Firefox') {
@@ -179,7 +184,7 @@
                         }
                         $('#webrtc_logo').hide();
                         $('#webrtc_loading').hide();
-                        this.$emit('playerStatusChanged', {status : this.webRTCStatus, code : ''});
+                        this.$emit('playerStatusChanged', this.webRTCStatus);
                     };
                 } else {
                     peer.pc.onaddstream = (event) => {
@@ -193,7 +198,7 @@
                         }
                         $('#webrtc_logo').hide();
                         $('#webrtc_loading').hide();
-                        this.$emit('playerStatusChanged', {status : this.webRTCStatus, code : ''});
+                        this.$emit('playerStatusChanged', this.webRTCStatus);
                     };
                 }
                 peer.pc.onremovestream = (event) => {
@@ -210,10 +215,14 @@
                             || event.target   ) // Firefox
                             .iceConnectionState) {
                         case 'disconnected':
-                            //case 'closed':
                             $('#remoteVideosContainer').empty();
                             this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_DISCONNECTED;
-                            this.$emit('playerStatusChanged', {status : this.webRTCStatus, code : ''});
+                            this.$emit('playerStatusChanged', this.webRTCStatus);
+                            break;
+                        case 'closed':
+                            $('#remoteVideosContainer').empty();
+                            this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_STOPPED;
+                            this.$emit('playerStatusChanged', this.webRTCStatus);
                             break;
                     }
                 };
@@ -222,7 +231,7 @@
                         console.log('onicecandidate candidate : ' + event.candidate.candidate);
                         $.ajax({
                             type: "POST",
-                            url: "https://10.77.29.91:8080/rtc/candidate",
+                            url: this.webrtcServer + "/rtc/candidate",
                             data: {
                                 "id":this.sessionId,
                                 "candidate":encodeURIComponent(event.candidate.candidate)
@@ -231,7 +240,8 @@
                                 console.log('send candidate : ' + event.candidate.candidate);
                             },
                             error:function(e){
-                                console.log('send candidate error!');
+                                that.webRTCStatus = that.webRTCStatusEnum.EVENT_ERROR_WEBRTC_SERVER;
+                                that.$emit('playerStatusChanged', that.webRTCStatus);
                             }
                         });
                     }
@@ -279,7 +289,7 @@
 
                         $.ajax({
                             type: "POST",
-                            url: "https://10.77.29.91:8080/rtc/offer",
+                            url: this.webrtcServer + "/rtc/offer",
                             data: sendData,
                             success:function(dataStr){
                                 var resObj = JSON.parse(dataStr);
@@ -290,8 +300,8 @@
                                 pc.setRemoteDescription(answerObj, () => {}, error);
                             },
                             error:function(e){
-                                that.webRTCStatus = that.webRTCStatusEnum.EVENT_STREAM_DISCONNECTED;
-                                that.$emit('playerStatusChanged', {status : that.webRTCStatus, code : ''});
+                                that.webRTCStatus = that.webRTCStatusEnum.EVENT_ERROR_WEBRTC_SERVER;
+                                that.$emit('playerStatusChanged', that.webRTCStatus);
                             }
                         });
                     },
@@ -317,4 +327,5 @@
 
 <style lang="less">
     .player_cam{position:absolute;top:0;left:0;right:0;bottom:178px;background:#222;content:'';width: 100%;margin-bottom:-14px;overflow: hidden;}
+    #remoteVideosContainer video {width:100%; height:100%;}
 </style>

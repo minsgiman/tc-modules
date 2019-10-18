@@ -209,12 +209,14 @@
             },
             playerStatusChangedHandler : function (status) {
                 console.log('status : ' + status);
-                if (status === 'NetStream.Play.Start' && this.playStatus != this.E_PLAY_STATUS.play) {
+                const statusEnum = this.player.getData('webRTCStatusEnum');
+
+                if (status === statusEnum.EVENT_STREAM_CONNECTED && this.playStatus != this.E_PLAY_STATUS.play) {
                     this.playStatus = this.E_PLAY_STATUS.play;
                     if (this.playEventHandler) {
                         this.playEventHandler({status: status});
                     }
-                } else if (status === 'NetConnection.Connect.Closed' || status === 'NetStream.Play.Stop') {
+                } else if (status === statusEnum.EVENT_ERROR_WEBRTC_SERVER || status === statusEnum.EVENT_STREAM_DISCONNECTED) {
                     this.playStatus = this.E_PLAY_STATUS.error;
                     if (this.playEventHandler) {
                         this.playEventHandler({status: status});

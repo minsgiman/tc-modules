@@ -1,4 +1,4 @@
-import lPlayer from './components/player/light_main';
+import lPlayer from './components/player/light_webrtc_main';
 
 (function (window) {
     const toastcam = { lPlayer };
