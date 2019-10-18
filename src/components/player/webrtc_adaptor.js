@@ -79,23 +79,23 @@ if (navigator.mozGetUserMedia) {
     };
 } else if (browser.name !== 'Internet Explorer' && browser.name !== 'Edge') {
     if (browser.name === 'Safari' && browser.version < 11) {
-        return;
+        console.log('webrtc not support safari version');
+    } else {
+        // Attach a media stream to an element.
+        window.attachMediaStream = function(element, stream) {
+            if (typeof element.srcObject !== 'undefined') {
+                element.srcObject = stream;
+            } else if (typeof element.mozSrcObject !== 'undefined') {
+                element.mozSrcObject = stream;
+            } else if (typeof element.src !== 'undefined') {
+                element.src = URL.createObjectURL(stream);
+            } else {
+                console.log('Error attaching stream to element.');
+            }
+        };
+
+        window.reattachMediaStream = function(to, from) {
+            to.src = from.src;
+        };
     }
-
-    // Attach a media stream to an element.
-    window.attachMediaStream = function(element, stream) {
-        if (typeof element.srcObject !== 'undefined') {
-            element.srcObject = stream;
-        } else if (typeof element.mozSrcObject !== 'undefined') {
-            element.mozSrcObject = stream;
-        } else if (typeof element.src !== 'undefined') {
-            element.src = URL.createObjectURL(stream);
-        } else {
-            console.log('Error attaching stream to element.');
-        }
-    };
-
-    window.reattachMediaStream = function(to, from) {
-        to.src = from.src;
-    };
 }

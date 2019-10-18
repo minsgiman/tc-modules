@@ -14,27 +14,8 @@
     </div>
 </template>
 <script>
-    import flashPlayer from './light_flash_player';
+    import webRTCPlayer from './light_webrtc_player';
     import Vue from 'vue';
-
-    var getCvrServerUrl = function(data){
-
-        var returnUrl = "";
-        if(data == "" || data == undefined){
-            return "";
-        }
-
-        returnUrl = data;
-        var tmp = returnUrl.replace("://","");
-
-        var getPort = parseInt(tmp.substring(tmp.indexOf(":")+1,tmp.length));
-        var iePort = getPort+1
-        if (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0) {
-            returnUrl = returnUrl.replace(getPort,iePort);
-        }
-
-        return returnUrl;
-    };
 
     var setPathParams = function(url, params) {
         const pathParamReg = /\/:\w+/gi;
@@ -59,7 +40,7 @@
 
     export default {
         name: 'playerContainer',
-        props: ['serialNo', 'elementId', 'startTime', 'endTime', 'loop', 'showTime', 'coreSwfPath', 'skinSwfPath', 'getTokenUrl', 'usePauseResume', 'playEventHandler'],
+        props: ['serialNo', 'elementId', 'startTime', 'endTime', 'loop', 'showTime', 'getTokenUrl', 'usePauseResume', 'playEventHandler'],
         computed: {
         },
         data: function () {
@@ -80,12 +61,9 @@
                 playTimeoutId : null,
                 playIntervalId : null,
                 varPlayerId : this.elementId,
-                varName : 'rmcPlayer_flash',
                 playTime : 0,
                 timeInterval : 100,
                 playStatus : 0,
-                defCoreSwfPath : '/resources/vendor/nvp_web_player/LCP_web_player2016082601.swf',
-                defSkinPath : '/resources/vendor/nvp_web_player/NVP_web_player_skin_tvcast_white.swf',
                 defGetTokenUrl : '/biz/cameras/token/:serialNo'
             }
         },
@@ -111,26 +89,9 @@
         },
         methods : {
             initPlayer : function () {
-                const vExtendConstructor = Vue.extend(flashPlayer);
-                this.player = new vExtendConstructor({
-                    propsData : {
-                        varPlayerId: this.varPlayerId,
-                        varName: this.varName,
-                        videoId: '',
-                        inKey: '',
-                        outKey: '',
-                        player: 'flash',
-                        width: '100%',
-                        height: '100%',
-                        serviceId: '',
-                        varCoreSwf: this.coreSwfPath ? this.coreSwfPath : this.defCoreSwfPath,
-                        varSkinPath: this.skinSwfPath ? this.skinSwfPath : this.defSkinPath,
-                        varServerUrl: ''
-                    }
-                });
+                const vExtendConstructor = Vue.extend(webRTCPlayer);
+                this.player = new vExtendConstructor().$mount('#' + this.varPlayerId);
                 this.player.$on('playerStatusChanged', this.playerStatusChangedHandler.bind(this));
-                this.player.zoomZone(450, 150);
-                this.player.displayRMCPlayer();
                 this.play(this.startTime);
             },
             play : function (time) {
@@ -155,10 +116,10 @@
                             if (httpRequest.status === 200) {
                                 const resObj = JSON.parse(httpRequest.responseText);
                                 if (time) {
-                                    that.player.setPath(getCvrServerUrl(resObj.cvrHostPort), '/token=' + resObj.token + '&time=' + time);
+                                    that.player.play(resObj.cameraId, resObj.cvrHostPort + '/flvplayback/' + resObj.cameraId + '?token=' + resObj.token + '&time=' + time);
                                     that.startPlayTimer();
                                 } else {
-                                    that.player.setPath(getCvrServerUrl(resObj.cvrHostPort), resObj.cameraId + '?token=' + resObj.token);
+                                    that.player.play(resObj.cameraId, resObj.cvrHostPort + '/flvplayback/' + resObj.cameraId + '?token=' + resObj.token);
                                     that.playTime = new Date().valueOf();
                                     that.startLiveTimer();
                                 }

@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import './webrtc_adaptor';
-import playContainer from './player_container/light_flash_container.vue';
+import playContainer from './player_container/light_webrtc_container.vue';
 
 class lightPlayer {
     constructor(param) {
@@ -20,8 +20,6 @@ class lightPlayer {
                 loop: param.loop,
                 showTime: param.showTime,
                 usePauseResume: param.usePauseResume,
-                coreSwfPath: param.coreSwfPath,
-                skinSwfPath: param.skinSwfPath,
                 getTokenUrl: param.getTokenUrl,
                 playEventHandler: param.playEventHandler
             }

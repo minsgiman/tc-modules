@@ -1,4 +1,4 @@
-import player from './components/player/light_main';
+import player from './components/player/light_webrtc_main';
 
 let playerObj = new player({
     serialNo: 'AZZDSF21312A',
@@ -8,8 +8,6 @@ let playerObj = new player({
     usePauseResume: true,  //default: false
     loop : true,    //default : true
     showTime : true,  //default : false
-    coreSwfPath : '/resources/vendor/nvp_web_player/LCP_web_player2016082601.swf',    //default : '/resources/vendor/nvp_web_player/LCP_web_player2016082601.swf'
-    skinSwfPath : '/resources/vendor/nvp_web_player/NVP_web_player_skin_tvcast_white.swf',    //default : '/resources/vendor/nvp_web_player/NVP_web_player_skin_tvcast_white.swf'
     getTokenUrl : 'http://10.161.240.93:10000/biz/cameras/token/:serialNo',    //default : '/biz/cameras/token/:serialNo',
     playEventHandler : function (event) {
         console.log('playEventHandler - event.status : ' + event.status); //event.status : 'NetStream.Play.Start', 'NetConnection.Connect.Closed', 'finish'
