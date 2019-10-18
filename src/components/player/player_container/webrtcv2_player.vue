@@ -116,7 +116,7 @@
                 this.url = url;
                 $.ajax({
                     type: "GET",
-                    url: "http://10.77.29.91:8080/rtc/credential",
+                    url: "https://10.77.29.91:8080/rtc/credential",
                     success:function(dataStr){
                         var resObj = JSON.parse(dataStr);
                         that.webRTCConfig.peerConnectionConfig.iceServers.push({url: resObj.urls, username: resObj.username, credential: resObj.credential});
@@ -238,7 +238,7 @@
                         console.log('onicecandidate candidate : ' + event.candidate.candidate);
                         $.ajax({
                             type: "POST",
-                            url: "http://10.77.29.91:8080/rtc/candidate",
+                            url: "https://10.77.29.91:8080/rtc/candidate",
                             data: {
                                 "id":this.sessionId,
                                 "candidate":encodeURIComponent(event.candidate.candidate)
@@ -295,7 +295,7 @@
 
                         $.ajax({
                             type: "POST",
-                            url: "http://10.77.29.91:8080/rtc/offer",
+                            url: "https://10.77.29.91:8080/rtc/offer",
                             data: sendData,
                             success:function(dataStr){
                                 var resObj = JSON.parse(dataStr);
