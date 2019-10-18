@@ -95,7 +95,8 @@
                     EVENT_STREAM_DISCONNECTED : 'v2_event_stream_disconnected',
                     EVENT_STREAM_STOPPED : 'v2_event_stream_stopped'
                 },
-                url : ''
+                url : '',
+                webrtcServer : 'https://mediartc.toast.com:8080'
             }
         },
         created : function() {
@@ -116,7 +117,7 @@
                 this.url = url;
                 $.ajax({
                     type: "GET",
-                    url: "https://10.77.29.91:8080/rtc/credential",
+                    url: that.webrtcServer + "/rtc/credential",
                     success:function(dataStr){
                         var resObj = JSON.parse(dataStr);
                         that.webRTCConfig.peerConnectionConfig.iceServers.push({url: resObj.urls, username: resObj.username, credential: resObj.credential});
@@ -238,7 +239,7 @@
                         console.log('onicecandidate candidate : ' + event.candidate.candidate);
                         $.ajax({
                             type: "POST",
-                            url: "https://10.77.29.91:8080/rtc/candidate",
+                            url: this.webrtcServer + "/rtc/candidate",
                             data: {
                                 "id":this.sessionId,
                                 "candidate":encodeURIComponent(event.candidate.candidate)
@@ -295,7 +296,7 @@
 
                         $.ajax({
                             type: "POST",
-                            url: "https://10.77.29.91:8080/rtc/offer",
+                            url: that.webrtcServer + "/rtc/offer",
                             data: sendData,
                             success:function(dataStr){
                                 var resObj = JSON.parse(dataStr);
