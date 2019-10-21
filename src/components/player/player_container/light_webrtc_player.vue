@@ -30,6 +30,16 @@
         return unescape(cValue);
     }
 
+    function makeMsgId() {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        for (var i = 0; i < 30; i++)
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+        return text;
+    }
+
     function Peer (pcConfig, pcConstraints) {
         this.pc = new RTCPeerConnection(pcConfig, pcConstraints);
         this.remoteVideoEl = document.createElement('video');
@@ -107,7 +117,7 @@
                 const that = this;
                 this.currentWebRTCPeerId = cameraIdValue;
                 this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_CONNECTING;
-                this.sessionId = getCookie("toastcam");
+                this.sessionId = makeMsgId() + '_' + new Date().getTime();
                 this.url = url;
                 $.ajax({
                     type: "GET",
