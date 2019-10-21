@@ -16,6 +16,7 @@
 <script>
     import webRTCPlayer from './light_webrtc_player';
     import Vue from 'vue';
+    import browser from './../browser_checker';
 
     var setPathParams = function(url, params) {
         const pathParamReg = /\/:\w+/gi;
@@ -40,7 +41,7 @@
 
     export default {
         name: 'playerContainer',
-        props: ['serialNo', 'elementId', 'startTime', 'endTime', 'loop', 'showTime', 'getTokenUrl', 'usePauseResume', 'playEventHandler'],
+        props: ['serialNo', 'elementId', 'startTime', 'endTime', 'loop', 'showTime', 'getTokenUrl', 'usePauseResume', 'credentialUrl', 'candidateUrl', 'offerUrl', 'playEventHandler'],
         computed: {
         },
         data: function () {
@@ -55,7 +56,8 @@
                 E_PLAY_EVENT : {
                     start : 'start',
                     finish : 'finish',
-                    error : 'error'
+                    error : 'error',
+                    webrtc_not_support_browser : 'webrtc_not_support_browser'
                 },
                 player : null,
                 playTimeoutId : null,
@@ -64,7 +66,11 @@
                 playTime : 0,
                 timeInterval : 100,
                 playStatus : 0,
-                defGetTokenUrl : '/biz/cameras/token/:serialNo'
+                retryTimeout : null,
+                defGetTokenUrl : '/biz/cameras/token/:serialNo',
+                defCredentialUrl : '/rtc/credential',
+                defCandidateUrl : '/rtc/candidate',
+                defOfferUrl : '/rtc/offer'
             }
         },
         created : function() {
@@ -80,6 +86,9 @@
                 clearInterval(this.playIntervalId);
                 this.playIntervalId = null;
             }
+            if (this.retryTimeout) {
+                clearTimeout(this.retryTimeout);
+            }
             if (this.player) {
                 this.player.$destroy();
             }
@@ -89,10 +98,23 @@
         },
         methods : {
             initPlayer : function () {
-                const vExtendConstructor = Vue.extend(webRTCPlayer);
-                this.player = new vExtendConstructor().$mount('#' + this.varPlayerId);
-                this.player.$on('playerStatusChanged', this.playerStatusChangedHandler.bind(this));
-                this.play(this.startTime);
+                if (browser.name === 'Internet Explorer' || browser.name === 'Edge' || (browser.name === 'Safari' && browser.version < 11)) {
+                    if (this.playEventHandler) {
+                        this.playEventHandler({status: this.E_PLAY_EVENT.webrtc_not_support_browser});
+                    }
+                } else {
+                    const vExtendConstructor = Vue.extend(webRTCPlayer);
+                    this.player = new vExtendConstructor({
+                        propsData : {
+                            credentialUrl : this.credentialUrl ? this.credentialUrl : this.defCredentialUrl,
+                            candidateUrl : this.candidateUrl ? this.candidateUrl : this.defCandidateUrl,
+                            offerUrl : this.offerUrl ? this.offerUrl : this.defOfferUrl
+                        }
+                    }).$mount('#' + this.varPlayerId);
+
+                    this.player.$on('playerStatusChanged', this.playerStatusChangedHandler.bind(this));
+                    this.play(this.startTime);
+                }
             },
             play : function (time) {
                 const that = this;
@@ -134,6 +156,7 @@
             },
             resume : function () {
                 if (this.playStatus === this.E_PLAY_STATUS.pause || this.playStatus === this.E_PLAY_STATUS.error) {
+                    this.stop();
                     if (this.startTime) { //CVR
                         this.playStatus = this.E_PLAY_STATUS.play;
                         this.play(this.playTime ? this.playTime : this.startTime);
@@ -189,7 +212,7 @@
                     if (that.playStatus === that.E_PLAY_STATUS.play) {
                         that.playTime += that.timeInterval;
                         if (that.playTime >= that.endTime) {
-                            that.pause();
+                            that.stop();
                             that.playStatus = that.E_PLAY_STATUS.finish;
                             if (that.playEventHandler) {
                                 that.playEventHandler({status: that.E_PLAY_EVENT.finish});
@@ -208,7 +231,6 @@
                 }
             },
             playerStatusChangedHandler : function (status) {
-                console.log('status : ' + status);
                 const statusEnum = this.player.getData('webRTCStatusEnum');
 
                 if (status === statusEnum.EVENT_STREAM_CONNECTED && this.playStatus != this.E_PLAY_STATUS.play) {
@@ -221,6 +243,12 @@
                     if (this.playEventHandler) {
                         this.playEventHandler({status: status});
                     }
+                    if (this.retryTimeout) {
+                        clearTimeout(this.retryTimeout);
+                    }
+                    this.retryTimeout = setTimeout(() => {
+                        this.resume();
+                    }, 4000);
                 }
             },
             setData : function(key, value) {

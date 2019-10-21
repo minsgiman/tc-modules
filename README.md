@@ -15,12 +15,6 @@ download ***dist/tc.player.min.js*** from git repository and copy to your publis
 ```sh
 <script src="tc.player.min.js"></script>
 ```
-
-### swf
-
- - download ***dist/resources/vendor/nvp_web_player*** from git repository and copy to your publish directory
-
- - when create player instance, pass parameter ***coreSwfPath*** and ***skinSwfPath*** according to swf file path
  
 
 <br>
@@ -33,7 +27,7 @@ download ***dist/tc.player.min.js*** from git repository and copy to your publis
 Add the element where TOASTCAM Light Player will be created
 
 ``` html
-<div id="player" style="width:540px;height:303px;"></div>
+<div id="player" style="width:640px; height:360px;"></div>
 ```
 
 ### Javascript
@@ -61,8 +55,9 @@ The TOASTCAM Light Player needs following parameters
  - loop: repeat video (default: true)
  - showTime: show timer (default : false)
  - usePauseResume: show Pause Resume Button. if want to use it, showTime should be set to true (default : false)
- - coreSwfPath: downloaded flash core swf file path (default: '/resources/vendor/nvp_web_player/LCP_web_player2016082601.swf')
- - skinSwfPath: downloaded flash skin swf file path (default: '/resources/vendor/nvp_web_player/NVP_web_player_skin_tvcast_white.swf')
+ - credentialUrl: WebRTC credential API Url (default : '/rtc/credential')
+ - candidateUrl: WebRTC candidate API Url (default : '/rtc/candidate') 
+ - offerUrl: WebRTC offer API Url (default: '/rtc/offer') 
  - getTokenUrl : Get Token API Url (default: '/biz/cameras/token/:serialNo')
  - playEventHandler: Player Event Handler (not mandatory)
 
@@ -75,14 +70,17 @@ var data = {
     loop : true,
     showTime : true,
     usePauseResume: true,
-    coreSwfPath : '/nvp_web_player/LCP_web_player2016082601.swf',
-    skinSwfPath : '/nvp_web_player/NVP_web_player_skin_tvcast_white.swf',
+    credentialUrl: '/rtc/credential',
+    candidateUrl: '/rtc/candidate',
+    offerUrl: '/rtc/offer',
     getTokenUrl : '/biz/cameras/token/:serialNo',
     playEventHandler : function (event) {
-        console.log('playEventHandler - event.status : ' + event.status); 
-        //event.status : 'NetStream.Play.Start', 'NetConnection.Connect.Closed', 'finish'
-        //except 'finish' status, event.status is same as flash player NetStatusEvent. 
-        //refer to here (https://help.adobe.com/en_US/air/reference/html/flash/events/NetStatusEvent.html)
+        console.log('playEventHandler - event.status : ' + event.status);
+        //event.status : 'stream_connected', 'webrtc_server_error', 'finish', 'webrtc_not_support_browser'
+        // 'stream_connected' -> webRTC connected. play will start
+        // 'webrtc_server_error' -> webRTC API error
+        // 'finish' -> play end
+        // 'webrtc_not_support_browser' -> browser does not support webrtc
     }
 }
 

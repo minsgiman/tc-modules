@@ -5,8 +5,8 @@
         </div>
 
         <div id="remote_stream" style="display:none; height:100%;" class="player_cam remoteStreams">
-            <img id="webrtc_logo" src="/resources/img/toast_cam_logo.png" style="position:absolute; left:12%; top:5%; width:75%;">
-            <img id="webrtc_loading" src="/resources/img/loading_2.gif" style="position:absolute; left:48%; top:43%;">
+            <!--img id="webrtc_logo" src="/resources/img/toast_cam_logo.png" style="position:absolute; left:12%; top:5%; width:75%;"-->
+            <img id="webrtc_loading" src="data:image/gif;base64,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" style="position:absolute; left:48%; top:43%;">
             <div id="remoteVideosContainer" style="height:100%;"></div>
         </div>
     </div>
@@ -14,21 +14,6 @@
 
 <script>
     import browserInfo from './../browser_checker';
-    import $ from 'jquery';
-
-    function getCookie (cName) {
-        cName = cName + '=';
-        var cookieData = document.cookie;
-        var start = cookieData.indexOf(cName);
-        var cValue = '';
-        if(start != -1){
-            start += cName.length;
-            var end = cookieData.indexOf(';', start);
-            if(end == -1)end = cookieData.length;
-            cValue = cookieData.substring(start, end);
-        }
-        return unescape(cValue);
-    }
 
     function makeMsgId() {
         var text = "";
@@ -40,6 +25,23 @@
         return text;
     }
 
+    function jsonArrayToUrl(obj, prefix) {
+        var urlString = "";
+
+        for (var key in obj) {
+            if (obj[key] !== null && typeof obj[key] == "object") {
+                urlString += jsonArrayToUrl(obj[key], prefix ? prefix + "[" + key + "]" : key);
+            }else{
+                if (prefix) {
+                    urlString += (prefix + "[" + key + "]" + '=' + encodeURIComponent(obj[key]) + "&");
+                } else {
+                    urlString += (key + '=' + encodeURIComponent(obj[key]) + "&");
+                }
+            }
+        }
+        return urlString;
+    }
+
     function Peer (pcConfig, pcConstraints) {
         this.pc = new RTCPeerConnection(pcConfig, pcConstraints);
         this.remoteVideoEl = document.createElement('video');
@@ -48,12 +50,12 @@
     }
 
     function error(err){
-        console.log(err);
+        //console.log(err);
     }
 
     export default {
         name : 'webrtcPlayer',
-        props : [],
+        props : ['credentialUrl', 'candidateUrl', 'offerUrl'],
         computed : {
         },
         data : function() {
@@ -99,8 +101,7 @@
                     EVENT_STREAM_STOPPED : 'stream_stopped',
                     EVENT_ERROR_WEBRTC_SERVER : 'webrtc_server_error'
                 },
-                url : '',
-                webrtcServer : 'https://mediartc.toast.com:8080'
+                url : ''
             }
         },
         created : function() {
@@ -119,36 +120,39 @@
                 this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_CONNECTING;
                 this.sessionId = makeMsgId() + '_' + new Date().getTime();
                 this.url = url;
-                $.ajax({
-                    type: "GET",
-                    url: this.webrtcServer + "/rtc/credential",
-                    success:function(dataStr){
-                        var resObj = JSON.parse(dataStr);
-                        that.webRTCConfig.peerConnectionConfig.iceServers.push({url: resObj.urls, username: resObj.username, credential: resObj.credential});
-                        that.addPeer(that.currentWebRTCPeerId); //new RTCPeerConnection with Turn Server
-                        that.offer(cameraIdValue);
-                        console.log('Get TurnServer - webRTC Media url : ' + url);
-                    },
-                    error:function(e){
-                        that.webRTCStatus = that.webRTCStatusEnum.EVENT_ERROR_WEBRTC_SERVER;
-                        that.$emit('playerStatusChanged', that.webRTCStatus);
+
+                //document.getElementById('webrtc_logo').style.display = 'block';
+                document.getElementById('webrtc_loading').style.display = 'block';
+
+                const httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = function() {
+                    if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                        if (httpRequest.status === 200) {
+                            const resObj = JSON.parse(httpRequest.responseText);
+                            that.webRTCConfig.peerConnectionConfig.iceServers.push({urls: resObj.urls, username: resObj.username, credential: resObj.credential});
+                            that.addPeer(that.currentWebRTCPeerId); //new RTCPeerConnection with Turn Server
+                            that.offer(cameraIdValue);
+                        } else {
+                            that.webRTCStatus = that.webRTCStatusEnum.EVENT_ERROR_WEBRTC_SERVER;
+                            that.$emit('playerStatusChanged', that.webRTCStatus);
+                        }
                     }
-                });
+                };
+                httpRequest.open('GET', this.credentialUrl);
+                httpRequest.send();
             },
 
             resume : function () {
-                if ($('#remoteVideosContainer').length) {
-                    if ($('#remoteVideosContainer').children('video').length) {
-                        $('#remoteVideosContainer').children('video')[0].play();
-                    }
+                const videoEl = document.querySelector('#remoteVideosContainer video');
+                if (videoEl) {
+                    videoEl.play();
                 }
             },
 
             pause : function () {
-                if ($('#remoteVideosContainer').length) {
-                    if ($('#remoteVideosContainer').children('video').length) {
-                        $('#remoteVideosContainer').children('video')[0].pause();
-                    }
+                const videoEl = document.querySelector('#remoteVideosContainer video');
+                if (videoEl) {
+                    videoEl.pause();
                 }
             },
 
@@ -174,8 +178,8 @@
                     this.videoStreamObj.preview.src = '';
                 }
                 this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_STOPPED;
-                $('#webrtc_logo').hide();
-                $('#webrtc_loading').hide();
+                //document.getElementById('webrtc_logo').style.display = 'none';
+                document.getElementById('webrtc_loading').style.display = 'none';
             },
 
             addPeer : function (remoteId) {
@@ -184,53 +188,49 @@
 
                 if (browserInfo.name === 'Firefox') {
                     peer.pc.ontrack = (event) => {
-                        console.log('peer.pc.ontrack!');
-
                         attachMediaStream(peer.remoteVideoEl, event.streams[0]);
-                        $('#remoteVideosContainer')[0].appendChild(peer.remoteVideoEl);
-                        this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_CONNECTED;
-                        if ($('#remoteVideosContainer').children('video').length) {
-                            $('#remoteVideosContainer').children('video').css('height', $('#remoteVideosContainer').height() - $('#timeline_table').height());
+                        const contEl = document.getElementById('remoteVideosContainer');
+                        if (contEl) {
+                            contEl.appendChild(peer.remoteVideoEl);
                         }
-                        $('#webrtc_logo').hide();
-                        $('#webrtc_loading').hide();
+                        this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_CONNECTED;
+                        //document.getElementById('webrtc_logo').style.display = 'none';
+                        document.getElementById('webrtc_loading').style.display = 'none';
                         this.$emit('playerStatusChanged', this.webRTCStatus);
                     };
                 } else {
                     peer.pc.onaddstream = (event) => {
-                        console.log('peer.pc.onaddstream!');
-
                         attachMediaStream(peer.remoteVideoEl, event.stream);
-                        $('#remoteVideosContainer')[0].appendChild(peer.remoteVideoEl);
-                        this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_CONNECTED;
-                        if ($('#remoteVideosContainer').children('video').length) {
-                            $('#remoteVideosContainer').children('video').css('height', $('#remoteVideosContainer').height() - $('#timeline_table').height());
+                        const contEl = document.getElementById('remoteVideosContainer');
+                        if (contEl) {
+                            contEl.appendChild(peer.remoteVideoEl);
                         }
-                        $('#webrtc_logo').hide();
-                        $('#webrtc_loading').hide();
+                        this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_CONNECTED;
+                        //document.getElementById('webrtc_logo').style.display = 'none';
+                        document.getElementById('webrtc_loading').style.display = 'none';
                         this.$emit('playerStatusChanged', this.webRTCStatus);
                     };
                 }
                 peer.pc.onremovestream = (event) => {
-                    console.log('peer.pc.onremovestream!');
-
                     peer.remoteVideoEl.src = '';
-                    $('#remoteVideosContainer').empty();
+
+                    const contEl = document.getElementById('remoteVideosContainer');
+                    while (contEl && contEl.firstChild) contEl.removeChild(contEl.firstChild);
                 };
                 peer.pc.oniceconnectionstatechange = (event) => {
-                    console.log('oniceconnectionstatechange - ' + (event.srcElement || event.target).iceConnectionState);
+                    const contEl = document.getElementById('remoteVideosContainer');
 
                     switch(
                         (  event.srcElement // Chrome
                             || event.target   ) // Firefox
                             .iceConnectionState) {
                         case 'disconnected':
-                            $('#remoteVideosContainer').empty();
+                            while (contEl && contEl.firstChild) contEl.removeChild(contEl.firstChild);
                             this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_DISCONNECTED;
                             this.$emit('playerStatusChanged', this.webRTCStatus);
                             break;
                         case 'closed':
-                            $('#remoteVideosContainer').empty();
+                            while (contEl && contEl.firstChild) contEl.removeChild(contEl.firstChild);
                             this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_STOPPED;
                             this.$emit('playerStatusChanged', this.webRTCStatus);
                             break;
@@ -238,22 +238,27 @@
                 };
                 peer.pc.onicecandidate = (event) => {
                     if (event.candidate) {
-                        console.log('onicecandidate candidate : ' + event.candidate.candidate);
-                        $.ajax({
-                            type: "POST",
-                            url: this.webrtcServer + "/rtc/candidate",
-                            data: {
-                                "id":this.sessionId,
-                                "candidate":encodeURIComponent(event.candidate.candidate)
-                            },
-                            success:function(){
-                                console.log('send candidate : ' + event.candidate.candidate);
-                            },
-                            error:function(e){
-                                that.webRTCStatus = that.webRTCStatusEnum.EVENT_ERROR_WEBRTC_SERVER;
-                                that.$emit('playerStatusChanged', that.webRTCStatus);
-                            }
+                        var bodyStr = jsonArrayToUrl({
+                            "id":this.sessionId,
+                            "candidate": encodeURIComponent(event.candidate.candidate)
                         });
+                        if (bodyStr[bodyStr.length - 1] === '&') {
+                            bodyStr = bodyStr.substring(0, bodyStr.length - 1);
+                        }
+                        fetch(this.candidateUrl, {
+                            method: 'POST',
+                            mode: 'cors',
+                            body: bodyStr,
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                        })
+                        .then(response => response.json())
+                        .catch(error => {
+                            that.webRTCStatus = that.webRTCStatusEnum.EVENT_ERROR_WEBRTC_SERVER;
+                            that.$emit('playerStatusChanged', that.webRTCStatus);
+                        })
+                        .then(response => {});
                     }
                 };
                 this.peerDatabase[remoteId] = peer;
@@ -296,23 +301,29 @@
                                 "sdp": encodeURIComponent(sessionDescription.sdp)
                             }
                         };
-
-                        $.ajax({
-                            type: "POST",
-                            url: this.webrtcServer + "/rtc/offer",
-                            data: sendData,
-                            success:function(dataStr){
-                                var resObj = JSON.parse(dataStr);
-                                var answerObj = new RTCSessionDescription({
-                                    type: 'answer',
-                                    sdp: resObj.sdp
-                                });
-                                pc.setRemoteDescription(answerObj, () => {}, error);
+                        var bodyStr = jsonArrayToUrl(sendData);
+                        if (bodyStr[bodyStr.length - 1] === '&') {
+                            bodyStr = bodyStr.substring(0, bodyStr.length - 1);
+                        }
+                        fetch(this.offerUrl, {
+                            method: 'POST',
+                            mode: 'cors',
+                            body: bodyStr,
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
                             },
-                            error:function(e){
-                                that.webRTCStatus = that.webRTCStatusEnum.EVENT_ERROR_WEBRTC_SERVER;
-                                that.$emit('playerStatusChanged', that.webRTCStatus);
-                            }
+                        })
+                        .then(response => response.json())
+                        .catch(error => {
+                            that.webRTCStatus = that.webRTCStatusEnum.EVENT_ERROR_WEBRTC_SERVER;
+                            that.$emit('playerStatusChanged', that.webRTCStatus);
+                        })
+                        .then(response => {
+                            var answerObj = new RTCSessionDescription({
+                                type: 'answer',
+                                sdp: response.sdp
+                            });
+                            pc.setRemoteDescription(answerObj, () => {}, error);
                         });
                     },
                     error,

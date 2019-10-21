@@ -21,6 +21,9 @@ class lightPlayer {
                 showTime: param.showTime,
                 usePauseResume: param.usePauseResume,
                 getTokenUrl: param.getTokenUrl,
+                credentialUrl: param.credentialUrl,
+                candidateUrl: param.candidateUrl,
+                offerUrl: param.offerUrl,
                 playEventHandler: param.playEventHandler
             }
         }).$mount();
