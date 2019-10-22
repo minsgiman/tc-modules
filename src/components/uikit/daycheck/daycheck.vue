@@ -12,13 +12,36 @@
     </ul>
 </template>
 <script>
+    import baseComponent from './../base';
+
     export default {
-        props: ['theme', 'name'],
+        extends: baseComponent,
         name: 'daycheck',
         computed : {
+            value: {
+                get: function() {
+                    const valueList = [];
+                    this.dayList.forEach((value) => {
+                        valueList.push(value.check);
+                    });
+                    return valueList;
+                },
+                set: function(newValues) {
+                    if (!newValues) {
+                        return;
+                    }
+                    let i, len = newValues.length;
+                    for (i = 0; i < len; i+=1) {
+                        if (this.dayList[i]) {
+                            this.dayList[i].check = newValues[i];
+                        }
+                    }
+                }
+            }
         },
         data: function() {
             return {
+                name: '',
                 dayList: []
             }
         },
@@ -34,46 +57,18 @@
                 {id: 'SUN', str: lang === 'ja' ? '日' : '일', check: false}
             ];
         },
-        mounted : function() {
-        },
-        beforeDestroy : function() {
-            if (this.$el.parentNode) {
-                this.$el.parentNode.removeChild(this.$el);
-            }
-        },
         methods: {
             checkChange: function() {
-                this.$emit('event', {event: 'checkchange', checkMap: this.getCheckMap()});
-            },
-            addZero: function(n) {
-                return n < 10 ? '0' + n : '' + n
-            },
-            getCheckMap: function() {
-                const valueMap = {};
+                const valueList = [];
                 this.dayList.forEach((value) => {
-                    valueMap[value.id] = value.check;
+                    valueList.push(value.check);
                 });
-                return valueMap;
-            },
-            setCheckMap: function(map) {
-                this.dayList.forEach(function(item) {
-                    if (map[item.id]) {
-                        item.check = true;
-                    } else {
-                        item.check = false;
-                    }
-                });
-            },
-            destroy: function() {
-                this.$destroy();
+                this.emitEvent('changed', valueList);
             }
-        },
-        components : {
         }
     }
 </script>
 <style lang="less">
-    @import './../comp_common';
     .tc_daycheck {
         input {
             opacity: 0;

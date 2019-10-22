@@ -48,7 +48,7 @@ import { toggle as toggleConstructor } from 'toastcam-components'; /* ES6 */
 ```javascript
 /* Toggle */
  // Create Instance
-const toggleComponent = tCam.toggle("#componentId");
+const toggleComponent = tCam.toggle("componentId"); //elementId
 
  // EventHandler
 toggleComponent.on('changed', function (event) {
@@ -68,7 +68,7 @@ component = null;
 
 ```javascript
 /* Timeselect */
-const timeselectComponent = tCam.timeselect('#componentId');
+const timeselectComponent = tCam.timeselect('componentId');
 
 timeselectComponent.on('changed', function (event) {
     console.log('event : ' + event.type); //event : changed
@@ -96,21 +96,13 @@ daycheckComponent.on('changed', function (event) {
       }
     */
 })
-
-daycheckComponent.value = {
-    'MON' : true,
-    'TUE' : false,
-    'WED' : false,
-    'THU' : false,
-    'FRI' : false,
-    'SAT' : false,
-    'SUN' : false
-};
+daycheckComponent.name = 'namevalue';
+daycheckComponent.value = [true, false, true, false, true, false, true];
 ```
 
 ```javascript
-/* RadioGroup */
-const radioComponent = tCam.radiogroup('#componentId');
+/* radiobtn */
+const radioComponent = tCam.radiobtn('componentId');
 
 radioComponent.on('changed', function(event) {
     console.log('event : ' + event.type); //event : changed
@@ -123,20 +115,8 @@ radioComponent.value = 'value1';
 ```
 
 ```javascript
-/* RadioButton */
-//RadioGroup Component 내부에서만 사용하는 Vue Component
-<radio-btn 
-    :name="name" 
-    :id="name + item.value" 
-    :value="item.value" 
-    :text="item.text" 
-    @selected="radioBtnSelected">
-</radio-btn>
-```
-
-```javascript
 /* Checkbox */
-const checkboxComponent = tCam.checkbox('#componentId');
+const checkboxComponent = tCam.checkbox('componentId');
 
 checkboxComponent.on('changed', function(event) {
     console.log('event : ' + event.type); //event : changed
@@ -163,15 +143,15 @@ searchComponent.value = '검색어';
 
 ```javascript
 /* Dropdown */
-const dropdownComponent = tCam.dropdown('#componentId');
+const dropdownComponent = tCam.dropdown('componentId');
 
 dropdownComponent.on('changed', function(event) {
     console.log('event : ' + event.type); //event : changed
     console.log('value : ' + event.value); //value : true
 });
 
+dropdownComponent.dropElementId = 'dropElementId';
 dropdownComponent.position = 'left';
-dropdownComponent.dropElId = 'dropElementId';
 dropdownComponent.value = true;
 /* Dropdown Element
 <div id="dropdownId"></div>

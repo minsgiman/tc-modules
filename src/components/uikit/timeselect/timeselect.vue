@@ -17,13 +17,31 @@
     </div>
 </template>
 <script>
+    import baseComponent from './../base';
+
     export default {
-        props: ['theme'],
+        extends: baseComponent,
         name: 'timeselect',
         computed : {
+            value: {
+                get: function() {
+                    return this.date;
+                },
+                set: function(newValue) {
+                    this.date = newValue;
+                    if (this.date && this.date instanceof Date) {
+                        this.hour = this.addZero(this.date.getHours());
+                        this.min = this.addZero(this.date.getMinutes());
+                    } else {
+                        this.hour = '00';
+                        this.min = '00';
+                    }
+                }
+            }
         },
         data: function() {
             return {
+                date: null,
                 hour: '00',
                 min: '00',
                 hourStr: '',
@@ -39,35 +57,21 @@
                 this.minStr = '분';
             }
         },
-        mounted : function() {
-        },
-        beforeDestroy : function() {
-            if (this.$el.parentNode) {
-                this.$el.parentNode.removeChild(this.$el);
-            }
-        },
         methods: {
             timeChange: function() {
-                this.$emit('event', {event: 'timechange', hour: parseInt(this.hour), min: parseInt(this.min)});
+                if (!(this.date && this.date instanceof Date)) {
+                    this.date = new Date();
+                }
+                this.date.setHours(parseInt(this.hour));
+                this.date.setMinutes(parseInt(this.min));
+                this.emitEvent('changed', this.date);
             },
             addZero: function(n) {
                 return n < 10 ? '0' + n : '' + n
             },
-            getTime: function() {
-                return {hour: parseInt(this.hour), min: parseInt(this.min)};
-            },
             getTimeStr: function() {
                 return this.hour + ':' + this.min;
-            },
-            setTime: function(hour, min) {
-                this.hour = this.addZero(parseInt(hour));
-                this.min = this.addZero(parseInt(min));
-            },
-            destroy: function() {
-                this.$destroy();
             }
-        },
-        components : {
         }
     }
 </script>

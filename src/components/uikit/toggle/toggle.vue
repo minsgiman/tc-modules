@@ -2,10 +2,20 @@
     <button class="tc_toggle" :class="{isOn: isOn}" @click="toggleBtn()"></button>
 </template>
 <script>
+    import baseComponent from './../base';
+
     export default {
-        props: ['theme'],
+        extends: baseComponent,
         name: 'toggle',
         computed : {
+            value: {
+                get: function() {
+                    return this.isOn;
+                },
+                set: function(newValue) {
+                    this.isOn = newValue;
+                }
+            }
         },
         data: function() {
             return {
@@ -16,29 +26,15 @@
         },
         mounted : function() {
         },
-        beforeDestroy : function() {
-            if (this.$el.parentNode) {
-                this.$el.parentNode.removeChild(this.$el);
-            }
-        },
         methods: {
             toggleBtn: function() {
                 this.isOn = !this.isOn;
-                this.$emit('event', {event: 'toggle', isOn: this.isOn});
-            },
-            setData: function(key, value) {
-                this[key] = value;
-            },
-            destroy: function() {
-                this.$destroy();
+                this.emitEvent('changed', this.isOn);
             }
-        },
-        components : {
         }
     }
 </script>
 <style lang="less">
-    @import './../comp_common';
     .tc_toggle {
         width:42px;
         height:24px;

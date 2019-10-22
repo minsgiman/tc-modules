@@ -7,37 +7,34 @@
     </div>
 </template>
 <script>
+    import baseComponent from './../base';
+
     export default {
-        props: ['theme', 'name', 'items'],
-        name: 'timeselect',
+        extends: baseComponent,
+        name: 'radiobtn',
         computed : {
+            value: {
+                get: function() {
+                    return this.radioValue;
+                },
+                set: function(newValue) {
+                    this.radioValue = newValue;
+                }
+            }
         },
         data: function() {
             return {
-                radioValue: null
+                name: '',
+                items: []
             }
         },
         created : function() {
         },
         mounted : function() {
         },
-        beforeDestroy : function() {
-            if (this.$el.parentNode) {
-                this.$el.parentNode.removeChild(this.$el);
-            }
-        },
         methods: {
             changeValue: function() {
-                this.$emit('event', {event: 'changed', value: this.radioValue});
-            },
-            getValue: function() {
-                return this.radioValue;
-            },
-            setValue: function(value) {
-                this.radioValue = value;
-            },
-            destroy: function() {
-                this.$destroy();
+                this.emitEvent('changed', this.radioValue);
             }
         },
         components : {
@@ -45,7 +42,6 @@
     }
 </script>
 <style lang="less">
-    @import "./../comp_common";
     .tc_radiobtn {
         margin-right:8px;
         span {

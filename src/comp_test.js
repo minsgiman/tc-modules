@@ -1,88 +1,84 @@
-import dlg from './components/dialog/main';
-import toggle from './components/toggle/main';
-import timeselect from './components/timeselect/main';
-import daycheck from './components/daycheck/main';
-import radiobtn from './components/radiobtn/main';
-import checkbox from './components/checkbox/main';
-import search from './components/search/main';
-import dropdown from './components/dropdown/main';
-import clipplayer from './components/clipplayer/main';
+import clipplayer from './components/clipplayer';
+import { checkbox, daycheck, dialog, dropdown, radiobtn, search, timeselect, toggle } from './components/uikit';
 
-let timeselect1 = timeselect({
-    elId: 'timeselectId',
-    eventHandler: function (event) {
-        console.log('timeselect - event.event : ' + event.event + ', event.value : ' + event.value);
-    }
+/* timeselect */
+let timeselect1 = timeselect("timeselectId");
+timeselect1.on("changed", function (event) {
+    console.log('event : ' + event.type); //event : changed
+    console.log('value : ' + event.value); //value : true
+});
+const date = new Date();
+date.setHours(12);
+date.setMinutes(24);
+timeselect1.value = date;
+/////////////////
+
+/* toggle */
+let toggleObj = toggle("toggleId");
+toggleObj.on('changed', function (event) {
+    console.log('event : ' + event.type); //event : changed
+    console.log('value : ' + event.value); //value : true
+});
+toggleObj.value = false;
+/////////////////
+
+/* search */
+let searchObj = search("searchId");
+searchObj.on('changed', function (event) {
+    console.log('event : ' + event.type); //event : changed
+    console.log('value : ' + event.value); //value : true
+});
+searchObj.placeholder = '검색어를 입력하세요.';
+/////////////////
+
+/* radiogroup */
+let radiobtnObj = radiobtn("radiobtnId");
+radiobtnObj.on('changed', function (event) {
+    console.log('event : ' + event.type); //event : changed
+    console.log('value : ' + event.value); //value : true
 });
 
+radiobtnObj.name = 'radioname';
+radiobtnObj.items = [
+    { value: 'qq1', text: 'radio1' },
+    { value: 'qq2', text: 'radio2' },
+    { value: 'qq3', text: 'radio3' },
+    { value: 'qq4', text: 'radio4' }
+];
+radiobtnObj.value = 'qq2';
+/////////////////
 
-let toggleObj = toggle({
-  elId: 'toggleId',
-  eventHandler: function (event) {
-      console.log('toggle - event.event : ' + event.event + ', event.value : ' + event.value);
-  }
+/* dropdown */
+let dropdownObj = dropdown("dropdownId");
+dropdownObj.on('changed', function (event) {
+    console.log('event : ' + event.type); //event : changed
+    console.log('value : ' + event.value); //value : true
 });
 
-let daycheckObj = daycheck({
-    elId: 'daycheckId',
-    eventHandler: function (event) {
-        console.log('daycheck - event.event : ' + event.event + ', event.value : ' + event.value);
-    }
-});
+dropdownObj.dropElementId = 'dropitem';
+dropdownObj.position = 'right';
+dropdownObj.value = true;
+/////////////////
 
-let radiobtnObj = radiobtn({
-    elId: 'radiobtnId',
-    name: 'radiotest',
-    items: [
-        {
-            value: 'qq1',
-            text: 'radio1'
-        },
-        {
-            value: 'qq2',
-            text: 'radio2'
-        },
-        {
-            value: 'qq3',
-            text: 'radio3'
-        },
-        {
-            value: 'qq4',
-            text: 'radio4'
-        }
-    ],
-    eventHandler: function (event) {
-        console.log('radiobtn - event.event : ' + event.event + ', event.value : ' + event.value);
-    }
+/* daycheck */
+let daycheckObj = daycheck("daycheckId");
+daycheckObj.on('changed', function (event) {
+    console.log('event : ' + event.type); //event : changed
+    console.log('value : ' + event.value); //value : true
 });
-radiobtnObj.setValue('qq2');
-console.log('getValue: ' + radiobtnObj.getValue());
+daycheckObj.name = 'gggg';
+daycheckObj.value = [true, false, true, false, true, false, true];
+/////////////////
 
-let checkboxObj = checkbox({
-    elId: 'checkboxId',
-    name: 'checkboxtest',
-    text: 'checklabel',
-    eventHandler: function (event) {
-        console.log('checkbox - event.event : ' + event.event + ', event.value : ' + event.value);
-    }
+/* checkbox */
+let checkboxObj = checkbox("checkboxId");
+checkboxObj.on('changed', function (event) {
+    console.log('event : ' + event.type); //event : changed
+    console.log('value : ' + event.value); //value : true
 });
-
-let searchObj = search({
-    elId: 'searchId',
-    placeholder: '검색',
-    eventHandler: function (event) {
-        console.log('search - event.event : ' + event.event + ', event.value : ' + event.value);
-    }
-});
-
-let dropdownObj = dropdown({
-    elId: 'dropdownId',
-    dropElId: 'dropitem',
-    position: 'right',
-    eventHandler: function (event) {
-        console.log('dropdown - event.event : ' + event.event + ', event.value : ' + event.value);
-    }
-});
+checkboxObj.name = 'checkboxtest';
+checkboxObj.text = 'checklabel';
+/////////////////
 
 /*
 let clipplayerObj = clipplayer({

@@ -56,7 +56,7 @@
     }
 </script>
 <style lang="less">
-    @import './../comp_common';
+    @import './../common';
     .tc_dlg {
         .content_wrap {
             text-align:left;

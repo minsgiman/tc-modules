@@ -7,45 +7,37 @@
     </div>
 </template>
 <script>
+    import baseComponent from './../base';
+
     export default {
-        props: ['theme', 'name', 'text'],
+        extends: baseComponent,
+        props: [],
         name: 'checkbox',
         computed : {
+            value: {
+                get: function () {
+                    return this.checked;
+                },
+                set: function (newValue) {
+                    this.checked = newValue;
+                }
+            }
         },
         data: function() {
             return {
+                name: '',
+                text: '',
                 checked: false
-            }
-        },
-        created : function() {
-        },
-        mounted : function() {
-        },
-        beforeDestroy : function() {
-            if (this.$el.parentNode) {
-                this.$el.parentNode.removeChild(this.$el);
             }
         },
         methods: {
             changeValue: function() {
-                this.$emit('event', {event: 'changed', value: this.checked});
-            },
-            getValue: function() {
-                return this.checked;
-            },
-            setValue: function(value) {
-                this.checked = value;
-            },
-            destroy: function() {
-                this.$destroy();
+                this.emitEvent('changed', this.checked);
             }
-        },
-        components : {
         }
     }
 </script>
 <style lang="less">
-    @import './../comp_common';
     .tc_checkbox {
         span {
             label {

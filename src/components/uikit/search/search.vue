@@ -7,41 +7,33 @@
     </div>
 </template>
 <script>
+    import baseComponent from './../base';
+
     export default {
-        props: ['theme', 'placeholder'],
+        extends: baseComponent,
         name: 'search',
         computed : {
+            value: {
+                get: function() {
+                    return this.$refs.searchInput.value;
+                },
+                set: function(newValue) {
+                    this.$refs.searchInput.value = newValue;
+                }
+            }
         },
         data: function() {
             return {
-            }
-        },
-        created : function() {
-        },
-        mounted : function() {
-        },
-        beforeDestroy : function() {
-            if (this.$el.parentNode) {
-                this.$el.parentNode.removeChild(this.$el);
+                placeholder: ''
             }
         },
         methods: {
             searchStrUpdate: function(event) {
-                this.$emit('event', {event: 'changed', value: event.currentTarget.value});
-            },
-            getValue: function() {
-                return this.$refs.searchInput.value;
-            },
-            setValue: function(value) {
-                this.$refs.searchInput.value = value;
-                this.$emit('event', {event: 'changed', value: this.$refs.searchInput.value});
+                this.emitEvent('changed', this.$refs.searchInput.value);
             },
             deleteSearchStr: function() {
                 this.$refs.searchInput.value = '';
-                this.$emit('event', {event: 'changed', value: this.$refs.searchInput.value});
-            },
-            destroy: function() {
-                this.$destroy();
+                this.emitEvent('changed', this.$refs.searchInput.value);
             }
         },
         components : {
@@ -49,7 +41,6 @@
     }
 </script>
 <style lang="less">
-    @import "./../comp_common";
     .tc_search {
         .search_box {
             display: block;

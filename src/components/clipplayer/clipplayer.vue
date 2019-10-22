@@ -340,7 +340,7 @@
     }
 </script>
 <style lang="less">
-    @import './../comp_common';
+    @import './../uikit/common';
     .tc_clipplayer {
         .video_area {
             .replay_show_area {
