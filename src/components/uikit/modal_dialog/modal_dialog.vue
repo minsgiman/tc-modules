@@ -3,7 +3,7 @@
         <div class="dlg_wrap">
             <div class="content" :style="dlgStyle">
                 <slot name="content"></slot>
-                <a class="btn_close" @click="closeDialog"></a>
+                <button class="btn_close" @click="closeDialog"></button>
             </div>
         </div>
     </div>
@@ -45,6 +45,7 @@
             width:100%;
             height:100%;
             .content {
+                max-height:100vh;
                 position:relative;
                 background-color:#fff;
                 padding:0px;

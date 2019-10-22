@@ -1,5 +1,6 @@
 import clipplayer from './components/clipplayer';
-import { checkbox, daycheck, dialog, dropdown, radiobtn, search, timeselect, toggle } from './components/uikit';
+import playerTipDlg from './components/player_tip_dialog';
+import { checkbox, daycheck, dropdown, radiobtn, search, timeselect, toggle } from './components/uikit';
 
 /* timeselect */
 let timeselect1 = timeselect("timeselectId");
@@ -80,6 +81,22 @@ checkboxObj.name = 'checkboxtest';
 checkboxObj.text = 'checklabel';
 /////////////////
 
+let dlgObj = playerTipDlg({
+    elId: 'dlgId',
+    dlgStyle : {
+        width: '500px', height: '610px', padding: '24px', boxSizing: 'border-box', overflow: 'auto'
+    },
+    txtMap : {
+        title : 'title',
+        guideKeyFb : 'guideKeyFb',
+        guideKeySpace : 'guideKeySpace',
+        confirm : 'confirm'
+    },
+    eventHandler: function(event) {
+        console.log(event);
+    }
+});
+
 /*
 let clipplayerObj = clipplayer({
    elId: 'clipplayerId',
@@ -89,26 +106,5 @@ let clipplayerObj = clipplayer({
    thumbnailPath: "",
    startTime: 1564470720000,
    endTime: 1564470960000
-});
-*/
-
-/*
-let mydlg = dlg({
-    elId: 'dlgId',
-    theme: 'toast',
-    header: '<span>title</span>',
-    contents: '<p>CONTENTS</p>',
-    footer: '',
-    btn: {
-        items: [
-            {id: 'confirm', name: 'OK', type: 'confirm'},
-            {id: 'close', name: 'NO', type: 'cancel'}
-        ],
-        align: 'bottom'
-    },
-    eventHandler: function (event) {
-        mydlg.destroy();
-        mydlg = null;
-    }
 });
 */
