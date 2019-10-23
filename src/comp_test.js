@@ -57,7 +57,7 @@ dropdownObj.on('changed', function (event) {
 });
 
 dropdownObj.dropElementId = 'dropitem';
-dropdownObj.position = 'right';
+dropdownObj.dropPosition = 'right';
 dropdownObj.value = true;
 /////////////////
 

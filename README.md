@@ -151,7 +151,7 @@ dropdownComponent.on('changed', function(event) {
 });
 
 dropdownComponent.dropElementId = 'dropElementId';
-dropdownComponent.position = 'left';
+dropdownComponent.dropPosition = 'left';
 dropdownComponent.value = true;
 /* Dropdown Element
 <div id="dropdownId"></div>

@@ -48,54 +48,51 @@
 <style lang="less">
     @import './../uikit/common';
 
-    .tip_area h4 {
-        font-size:20px; color:#262626; text-align:left; margin-bottom:22px;
+    .tip_area {
+        h4 {
+            font-size:20px; color:#262626; text-align:left; margin-bottom:22px;
+            img {
+                margin: 1px 8px 0 0;
+            }
+        }
+        .tip_img {
+            margin-bottom:20px;
+        }
+        .tip_btn_wrap {
+            border-bottom: 1px solid #d8d8d8; padding-bottom:6px; text-align:left;
+            .tip_btn_cont_wrap {
+                display: inline-block;
+                width: 196px;
+                text-align: left;
+                margin-bottom: 14px;
+                &:lang(ja) {
+                    width:200px;
+                }
+            }
+            .tip_txt {
+                font-size:14px; color:#262626; display:inline-block; padding:11px 0 0 12px;
+                &:lang(ja) {
+                    padding-left:6px; font-size:11px;
+                }
+            }
+        }
+        .tip_key_fb {
+            border-bottom: 1px solid #d8d8d8; padding-bottom:13px; text-align:left;
+            span {
+                display: inline-block; line-height:18px; padding: 10px 0 0 6px;
+                &:lang(ja) {
+                    font-size:11px;
+                }
+            }
+        }
+        .tip_space {
+            border-bottom: 1px solid #d8d8d8; margin-top:13px; padding-bottom:13px; text-align:left; margin-bottom:36px;
+            span {
+                display: inline-block; padding: 20px 0 0 6px;
+            }
+        }
+        .confirm_btn {
+            width:150px; height:50px; border-radius:25px; background-color:#4b96e6; color:#ffffff; font-size:16px;
+        }
     }
-    .tip_area h4 img {
-        margin: 1px 8px 0 0;
-    }
-    .tip_area .tip_img {
-        margin-bottom:20px;
-    }
-    .tip_area .tip_btn_wrap {
-        border-bottom: 1px solid #d8d8d8; padding-bottom:6px; text-align:left;
-    }
-    .tip_area .tip_btn_wrap .tip_btn_cont_wrap {
-        display: inline-block;
-        width: 196px;
-        text-align: left;
-        margin-bottom: 14px;
-    }
-    .tip_area .tip_btn_wrap .tip_btn_cont_wrap:lang(ja) {
-        width:200px;
-    }
-    .tip_area .tip_btn_wrap .tip_txt {
-        font-size:14px; color:#262626; display:inline-block; padding:11px 0 0 12px;
-    }
-    .tip_area .tip_btn_wrap .tip_txt:lang(ja) {
-        padding-left:6px; font-size:11px;
-    }
-    .tip_area .tip_key_fb {
-        border-bottom: 1px solid #d8d8d8; padding-bottom:13px; text-align:left;
-    }
-    .tip_area .tip_key_fb span {
-        display: inline-block; line-height:18px; padding: 10px 0 0 6px;
-    }
-    .tip_area .tip_key_fb span:lang(ja) {
-        font-size:11px;
-    }
-    .tip_area .tip_space {
-        border-bottom: 1px solid #d8d8d8; margin-top:13px; padding-bottom:13px; text-align:left; margin-bottom:36px;
-    }
-    .tip_area .tip_space span {
-        display: inline-block; padding: 20px 0 0 6px;
-    }
-    .tip_area .confirm_btn {
-        width:150px; height:50px; border-radius:25px; background-color:#4b96e6; color:#ffffff; font-size:16px;
-    }
-    .play_tips_icon {
-        position:absolute; width:40px; height:40px; right:12px; top:9px; background:url(/resources/img/btn-player-tips.png) no-repeat; background-position:center; z-index:9999; cursor:pointer;
-    }
-    .play_tips_icon:hover {background-color:rgba(0,0,0,0.2); border-radius:40px;}
-
 </style>
