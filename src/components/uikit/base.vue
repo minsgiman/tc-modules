@@ -1,5 +1,6 @@
 <script>
     export default {
+        props: ['parentId'],
         data: function() {
             return {
                 eventCallback: {}

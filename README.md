@@ -96,7 +96,6 @@ daycheckComponent.on('changed', function (event) {
       }
     */
 })
-daycheckComponent.name = 'namevalue';
 daycheckComponent.value = [true, false, true, false, true, false, true];
 ```
 
@@ -109,7 +108,6 @@ radioComponent.on('changed', function(event) {
     console.log('value : ' + event.value); //value : value1
 })
 
-radioComponent.name = 'radioname';
 radioComponent.items = [{value: 'value1', text: 'No.1'}, {value: 'value2', text: 'No.2'}];
 radioComponent.value = 'value1';
 ```
@@ -123,7 +121,6 @@ checkboxComponent.on('changed', function(event) {
     console.log('value : ' + event.value); //value : true
 });
 
-checkboxComponent.name = 'componentName';
 checkboxComponent.text = 'Checkbox Lable';
 checkboxComponent.value = true;
 ```

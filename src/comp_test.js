@@ -39,7 +39,6 @@ radiobtnObj.on('changed', function (event) {
     console.log('value : ' + event.value); //value : true
 });
 
-radiobtnObj.name = 'radioname';
 radiobtnObj.items = [
     { value: 'qq1', text: 'radio1' },
     { value: 'qq2', text: 'radio2' },
@@ -67,7 +66,6 @@ daycheckObj.on('changed', function (event) {
     console.log('event : ' + event.type); //event : changed
     console.log('value : ' + event.value); //value : true
 });
-daycheckObj.name = 'gggg';
 daycheckObj.value = [true, false, true, false, true, false, true];
 /////////////////
 
@@ -77,7 +75,6 @@ checkboxObj.on('changed', function (event) {
     console.log('event : ' + event.type); //event : changed
     console.log('value : ' + event.value); //value : true
 });
-checkboxObj.name = 'checkboxtest';
 checkboxObj.text = 'checklabel';
 /////////////////
 

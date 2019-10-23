@@ -6,7 +6,7 @@ function createComponent(parentId, vueComp) {
         return null;
     }
     const vConstructor = Vue.extend(vueComp);
-    const vComponent = new vConstructor().$mount();
+    const vComponent = new vConstructor({propsData: {parentId}}).$mount();
     parentEl.appendChild(vComponent.$el);
 
     return vComponent;

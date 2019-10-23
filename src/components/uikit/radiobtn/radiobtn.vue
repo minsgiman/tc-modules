@@ -24,7 +24,8 @@
         },
         data: function() {
             return {
-                name: '',
+                name: 'name_' + this.parentId,
+                radioValue: '',
                 items: []
             }
         },
