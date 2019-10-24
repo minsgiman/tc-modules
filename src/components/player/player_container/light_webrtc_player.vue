@@ -249,9 +249,13 @@
                         fetch(this.candidateUrl, {
                             method: 'POST',
                             mode: 'cors',
-                            body: bodyStr,
+                            body: JSON.stringify({
+                                "id":this.sessionId,
+                                "candidate": encodeURIComponent(event.candidate.candidate)
+                            }),
                             headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'Content-Type': 'application/json'
+                                //'Content-Type': 'application/x-www-form-urlencoded',
                             },
                         })
                         .then(response => response.json())
@@ -291,16 +295,14 @@
                 pc.createOffer((sessionDescription) => {
                         pc.setLocalDescription(sessionDescription);
                         var sendData = {
-                            "offer": {
-                                "id": that.sessionId,
-                                "url": encodeURIComponent(that.url),
-                                "relay": {
-                                    "username": that.webRTCConfig.peerConnectionConfig.iceServers[0].username,
-                                    "credential": that.webRTCConfig.peerConnectionConfig.iceServers[0].credential,
-                                    "url": encodeURIComponent(that.webRTCConfig.peerConnectionConfig.iceServers[0].urls)
-                                },
-                                "sdp": encodeURIComponent(sessionDescription.sdp)
-                            }
+                            "id": that.sessionId,
+                            "url": encodeURIComponent(that.url),
+                            "relay": {
+                                "username": that.webRTCConfig.peerConnectionConfig.iceServers[0].username,
+                                "credential": that.webRTCConfig.peerConnectionConfig.iceServers[0].credential,
+                                "url": encodeURIComponent(that.webRTCConfig.peerConnectionConfig.iceServers[0].urls)
+                            },
+                            "sdp": encodeURIComponent(sessionDescription.sdp)
                         };
                         var bodyStr = jsonArrayToUrl(sendData);
                         if (bodyStr[bodyStr.length - 1] === '&') {
@@ -309,9 +311,10 @@
                         fetch(this.offerUrl, {
                             method: 'POST',
                             mode: 'cors',
-                            body: bodyStr,
+                            body: JSON.stringify(sendData),
                             headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'Content-Type': 'application/json'
+                                //'Content-Type': 'application/x-www-form-urlencoded',
                             },
                         })
                         .then(response => response.json())
