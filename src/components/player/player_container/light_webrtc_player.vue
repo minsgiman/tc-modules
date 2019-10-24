@@ -296,7 +296,7 @@
                                 "relay": {
                                     "username": that.webRTCConfig.peerConnectionConfig.iceServers[0].username,
                                     "credential": that.webRTCConfig.peerConnectionConfig.iceServers[0].credential,
-                                    "url": encodeURIComponent(that.webRTCConfig.peerConnectionConfig.iceServers[0].url)
+                                    "url": encodeURIComponent(that.webRTCConfig.peerConnectionConfig.iceServers[0].urls)
                                 },
                                 "sdp": encodeURIComponent(sessionDescription.sdp)
                             }
