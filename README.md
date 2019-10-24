@@ -87,10 +87,11 @@ var data = {
 var playerObj = new tcPlayer(data);
 ```
 
+<br>
 
-#### Replay
+#### Replay Method
 
-replay cvr video. if not set startTime and endTime, replay original startTime and endTime 
+replay cvr video method. if not set startTime and endTime, replay original startTime and endTime 
 
  - method : replay(startTime, endTime)
 
@@ -110,6 +111,7 @@ var data = {
 var playerObj = new tcPlayer(data);
 ```
 
+<br>
 
 #### Destroy Instance
 
