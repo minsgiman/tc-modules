@@ -45,6 +45,7 @@
     function Peer (pcConfig, pcConstraints) {
         this.pc = new RTCPeerConnection(pcConfig, pcConstraints);
         this.remoteVideoEl = document.createElement('video');
+        this.remoteVideoEl.muted = "muted";
         this.remoteVideoEl.controls = false;
         this.remoteVideoEl.autoplay = true;
     }
