@@ -31,6 +31,12 @@ class lightPlayer {
         this.control.initPlayer();
     }
 
+    replay(startTime, endTime) {
+        if (this.control) {
+            this.control.replay(startTime, endTime);
+        }
+    }
+
     getEmptyWrapId(baseId) {
         let subfixNum = 0;
         while(document.getElementById(baseId + subfixNum)) {

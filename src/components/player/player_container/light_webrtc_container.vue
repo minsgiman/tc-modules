@@ -108,7 +108,8 @@
                         propsData : {
                             credentialUrl : this.credentialUrl ? this.credentialUrl : this.defCredentialUrl,
                             candidateUrl : this.candidateUrl ? this.candidateUrl : this.defCandidateUrl,
-                            offerUrl : this.offerUrl ? this.offerUrl : this.defOfferUrl
+                            offerUrl : this.offerUrl ? this.offerUrl : this.defOfferUrl,
+                            varPlayerId : this.varPlayerId
                         }
                     }).$mount('#' + this.varPlayerId);
 
@@ -163,6 +164,21 @@
                     } else { //Live
                         this.play();
                     }
+                } else if (this.playStatus === this.E_PLAY_STATUS.finish) {
+                    this.replay();
+                }
+            },
+            replay : function (startTime, endTime) {
+                if (startTime && endTime) {
+                    this.startTime = startTime;
+                    this.endTime = endTime;
+                }
+                this.stop();
+                if (this.startTime) { //CVR
+                    this.playStatus = this.E_PLAY_STATUS.play;
+                    this.play(this.startTime);
+                } else { //Live
+                    this.play();
                 }
             },
             mute : function () {

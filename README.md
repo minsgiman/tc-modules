@@ -87,6 +87,30 @@ var data = {
 var playerObj = new tcPlayer(data);
 ```
 
+
+#### Replay
+
+replay cvr video. if not set startTime and endTime, replay original startTime and endTime 
+
+ - method : replay(startTime, endTime)
+
+```javascript
+/* Example */
+var data = {
+    ...
+    ...
+    playEventHandler : function (event) {
+        if (event.status === 'finish') {
+            playerObj.replay(1563837910000, 1563837923000);
+            //playerObj.replay();
+        }
+    }
+}
+
+var playerObj = new tcPlayer(data);
+```
+
+
 #### Destroy Instance
 
 ```javascript
@@ -94,3 +118,5 @@ var playerObj = new tcPlayer(data);
 playerObj.destroy();
 playerObj = null;
 ```
+
+

@@ -6,7 +6,7 @@ let playerObj = new player({
     startTime : 1571289300000,
     endTime : 1571289306000,
     usePauseResume: true,  //default: false
-    loop : true,    //default : true
+    loop : false,    //default : true
     showTime : true,  //default : false
     credentialUrl: 'https://mediartc.toast.com:10090/rtc/credential', //default : /rtc/credential
     candidateUrl: 'https://mediartc.toast.com:10090/rtc/candidate',  //default : /rtc/candidate
@@ -14,8 +14,13 @@ let playerObj = new player({
     getTokenUrl : 'http://10.161.240.93:10000/biz/cameras/token/:serialNo',    //default : '/biz/cameras/token/:serialNo',
     playEventHandler : function (event) {
         console.log('playEventHandler - event.status : ' + event.status); //event.status : 'stream_connected', 'webrtc_server_error', 'finish', 'webrtc_not_support_browser'
+        if (event.status === 'finish') {
+            //playerObj.replay(1571289306000, 1571289316000);
+        }
     }
 });
+
+
 // setTimeout(function() {
 //     playerObj.destroy();
 //     playerObj = null;
