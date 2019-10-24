@@ -78,6 +78,9 @@
         }
         .tip_key_fb {
             border-bottom: 1px solid #d8d8d8; padding-bottom:13px; text-align:left;
+            img {
+                vertical-align: top;
+            }
             span {
                 display: inline-block; line-height:18px; padding: 10px 0 0 6px;
                 &:lang(ja) {
@@ -87,6 +90,9 @@
         }
         .tip_space {
             border-bottom: 1px solid #d8d8d8; margin-top:13px; padding-bottom:13px; text-align:left; margin-bottom:36px;
+            img {
+                vertical-align: top;
+            }
             span {
                 display: inline-block; padding: 20px 0 0 6px;
             }
