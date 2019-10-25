@@ -195,6 +195,12 @@
                 if (browserInfo.name === 'Firefox') {
                     peer.pc.ontrack = (event) => {
                         attachMediaStream(peer.remoteVideoEl, event.streams[0]);
+                        // const tracks = event.stream.getTracks();
+                        // if (tracks) {
+                        //     tracks.forEach(function(track) {
+                        //         console.log('track - ' + JSON.stringify(track));
+                        //     });
+                        // }
                         const contEl = document.getElementById(that.elementIdMap.remoteVideosContainer);
                         if (contEl) {
                             contEl.appendChild(peer.remoteVideoEl);
@@ -206,6 +212,12 @@
                 } else {
                     peer.pc.onaddstream = (event) => {
                         attachMediaStream(peer.remoteVideoEl, event.stream);
+                        // const tracks = event.stream.getTracks();
+                        // if (tracks) {
+                        //     tracks.forEach(function(track) {
+                        //         console.log('track - ' + JSON.stringify(track));
+                        //     });
+                        // }
                         const contEl = document.getElementById(that.elementIdMap.remoteVideosContainer);
                         if (contEl) {
                             contEl.appendChild(peer.remoteVideoEl);
