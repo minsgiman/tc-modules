@@ -1,36 +1,24 @@
 <template>
     <button class="tc_toggle" :class="{isOn: isOn}" @click="toggleBtn()"></button>
 </template>
-<script>
-    import baseComponent from './../base';
+<script lang="ts">
+    import { Component } from 'vue-property-decorator';
+    import Base from './../base.vue';
 
-    export default {
-        extends: baseComponent,
-        name: 'toggle',
-        computed : {
-            value: {
-                get: function() {
-                    return this.isOn;
-                },
-                set: function(newValue) {
-                    this.isOn = newValue;
-                }
-            }
-        },
-        data: function() {
-            return {
-                isOn: true
-            }
-        },
-        created : function() {
-        },
-        mounted : function() {
-        },
-        methods: {
-            toggleBtn: function() {
-                this.isOn = !this.isOn;
-                this.emitEvent('changed', this.isOn);
-            }
+    @Component
+    export default class Toggle extends Base {
+        isOn: boolean = true;
+
+        get value() {
+            return this.isOn;
+        }
+        set value(newValue) {
+            this.isOn = newValue;
+        }
+
+        toggleBtn(): void {
+            this.isOn = !this.isOn;
+            this.emitEvent('changed', this.isOn);
         }
     }
 </script>

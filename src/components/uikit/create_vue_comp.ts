@@ -1,6 +1,6 @@
 import Vue from 'vue';
 
-function createComponent(parentId, vueComp) {
+function createComponent(parentId: string, vueComp: any): any {
     const parentEl = document.getElementById(parentId);
     if (!parentEl) {
         return null;

@@ -16,39 +16,33 @@
         </span>
     </div>
 </template>
-<script>
-    import baseComponent from './../base';
+<script lang="ts">
+    import { Component } from 'vue-property-decorator';
+    import Base from './../base.vue';
 
-    export default {
-        extends: baseComponent,
-        name: 'timeselect',
-        computed : {
-            value: {
-                get: function() {
-                    return this.date;
-                },
-                set: function(newValue) {
-                    this.date = newValue;
-                    if (this.date && this.date instanceof Date) {
-                        this.hour = this.addZero(this.date.getHours());
-                        this.min = this.addZero(this.date.getMinutes());
-                    } else {
-                        this.hour = '00';
-                        this.min = '00';
-                    }
-                }
+    @Component
+    export default class Timeselect extends Base {
+        date = null;
+        hour = '00';
+        min = '00';
+        hourStr = '';
+        minStr = '';
+
+        get value() {
+            return this.date;
+        }
+        set value(newValue) {
+            this.date = newValue;
+            if (this.date && this.date instanceof Date) {
+                this.hour = this.addZero(this.date.getHours());
+                this.min = this.addZero(this.date.getMinutes());
+            } else {
+                this.hour = '00';
+                this.min = '00';
             }
-        },
-        data: function() {
-            return {
-                date: null,
-                hour: '00',
-                min: '00',
-                hourStr: '',
-                minStr: ''
-            }
-        },
-        created : function() {
+        }
+
+        private created() {
             if (document.documentElement.getAttribute('lang') === 'ja') {
                 this.hourStr = '時';
                 this.minStr = '分';
@@ -56,22 +50,23 @@
                 this.hourStr = '시';
                 this.minStr = '분';
             }
-        },
-        methods: {
-            timeChange: function() {
-                if (!(this.date && this.date instanceof Date)) {
-                    this.date = new Date();
-                }
-                this.date.setHours(parseInt(this.hour));
-                this.date.setMinutes(parseInt(this.min));
-                this.emitEvent('changed', this.date);
-            },
-            addZero: function(n) {
-                return n < 10 ? '0' + n : '' + n
-            },
-            getTimeStr: function() {
-                return this.hour + ':' + this.min;
+        }
+
+        timeChange() {
+            if (!(this.date && this.date instanceof Date)) {
+                this.date = new Date();
             }
+            this.date.setHours(parseInt(this.hour));
+            this.date.setMinutes(parseInt(this.min));
+            this.emitEvent('changed', this.date);
+        }
+
+        addZero(n) {
+            return n < 10 ? '0' + n : '' + n
+        }
+
+        getTimeStr() {
+            return this.hour + ':' + this.min;
         }
     }
 </script>

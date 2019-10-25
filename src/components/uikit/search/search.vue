@@ -6,37 +6,28 @@
         </span>
     </div>
 </template>
-<script>
-    import baseComponent from './../base';
+<script lang="ts">
+    import { Component } from 'vue-property-decorator';
+    import Base from './../base.vue';
 
-    export default {
-        extends: baseComponent,
-        name: 'search',
-        computed : {
-            value: {
-                get: function() {
-                    return this.$refs.searchInput.value;
-                },
-                set: function(newValue) {
-                    this.$refs.searchInput.value = newValue;
-                }
-            }
-        },
-        data: function() {
-            return {
-                placeholder: ''
-            }
-        },
-        methods: {
-            searchStrUpdate: function(event) {
-                this.emitEvent('changed', this.$refs.searchInput.value);
-            },
-            deleteSearchStr: function() {
-                this.$refs.searchInput.value = '';
-                this.emitEvent('changed', this.$refs.searchInput.value);
-            }
-        },
-        components : {
+    @Component
+    export default class Search extends Base {
+        placeholder: string = '';
+
+        get value() {
+            return this.$refs.searchInput.value;
+        }
+        set value(newValue) {
+            this.$refs.searchInput.value = newValue;
+        }
+
+        searchStrUpdate(event) {
+            this.emitEvent('changed', this.$refs.searchInput.value);
+        }
+
+        deleteSearchStr() {
+            this.$refs.searchInput.value = '';
+            this.emitEvent('changed', this.$refs.searchInput.value);
         }
     }
 </script>

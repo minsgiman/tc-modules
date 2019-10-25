@@ -6,39 +6,25 @@
         </span>
     </div>
 </template>
-<script>
-    import baseComponent from './../base';
+<script lang="ts">
+    import { Component } from 'vue-property-decorator';
+    import Base from './../base.vue';
 
-    export default {
-        extends: baseComponent,
-        name: 'radiobtn',
-        computed : {
-            value: {
-                get: function() {
-                    return this.radioValue;
-                },
-                set: function(newValue) {
-                    this.radioValue = newValue;
-                }
-            }
-        },
-        data: function() {
-            return {
-                name: 'name_' + this.parentId,
-                radioValue: '',
-                items: []
-            }
-        },
-        created : function() {
-        },
-        mounted : function() {
-        },
-        methods: {
-            changeValue: function() {
-                this.emitEvent('changed', this.radioValue);
-            }
-        },
-        components : {
+    @Component
+    export default class Radiobtn extends Base {
+        name: string = 'name_' + this.parentId;
+        radioValue: string = '';
+        items: any = [];
+
+        get value() {
+            return this.radioValue;
+        }
+        set value(newValue) {
+            this.radioValue = newValue;
+        }
+
+        changeValue() {
+            this.emitEvent('changed', this.radioValue);
         }
     }
 </script>

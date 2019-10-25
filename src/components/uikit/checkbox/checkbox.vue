@@ -6,34 +6,25 @@
         </span>
     </div>
 </template>
-<script>
-    import baseComponent from './../base';
+<script lang="ts">
+    import { Component } from 'vue-property-decorator';
+    import Base from './../base.vue';
 
-    export default {
-        extends: baseComponent,
-        props: [],
-        name: 'checkbox',
-        computed : {
-            value: {
-                get: function () {
-                    return this.checked;
-                },
-                set: function (newValue) {
-                    this.checked = newValue;
-                }
-            }
-        },
-        data: function() {
-            return {
-                name: 'name_' + this.parentId,
-                text: '',
-                checked: false
-            }
-        },
-        methods: {
-            changeValue: function() {
-                this.emitEvent('changed', this.checked);
-            }
+    @Component()
+    export default class Checkbox extends Base {
+        name: string = 'name_' + this.parentId;
+        text: string = '';
+        checked: boolean = false;
+
+        get value() {
+            return this.checked;
+        }
+        set value(newValue: boolean) {
+            this.checked = newValue;
+        }
+
+        changeValue() {
+            this.emitEvent('changed', this.checked);
         }
     }
 </script>

@@ -8,22 +8,23 @@
         </div>
     </div>
 </template>
-<script>
-    export default {
-        props: ['dlgStyle'],
-        name: 'modalDlg',
-        created : function() {
+<script lang="ts">
+    import Vue from 'vue';
+    import { Component, Prop } from 'vue-property-decorator';
+
+    @Component
+    export default class ModalDialog extends Vue {
+        @Prop() dlgStyle: any;
+
+        private created() {
             document.body.className = 'blockScroll';
-        },
-        beforeDestroy : function() {
+        }
+        private beforeDestroy() {
             document.body.className = '';
-        },
-        methods: {
-            closeDialog: function() {
-                this.$emit('close');
-            }
-        },
-        components : {
+        }
+
+        closeDialog() {
+            this.$emit('close');
         }
     }
 </script>

@@ -1,51 +1,51 @@
-<script>
-    export default {
-        props: ['parentId'],
-        data: function() {
-            return {
-                eventCallback: {}
-            }
-        },
-        created : function() {
-        },
-        mounted : function() {
-        },
-        beforeDestroy : function() {
+<script lang="ts">
+    import Vue from 'vue';
+    import { Component, Prop } from 'vue-property-decorator';
+
+    @Component
+    export default class Base extends Vue {
+        @Prop() parentId: string;
+
+        eventCallback: any = {};
+
+        private beforeDestroy () {
             if (this.$el.parentNode) {
                 this.$el.parentNode.removeChild(this.$el);
             }
-        },
-        methods: {
-            on: function(events, callback) {
-                if (!events || !callback) {
-                    return;
-                }
-                const eventList = events.split(" ");
-                eventList.forEach((event) => {
-                    this.eventCallback[event] = callback;
-                });
-            },
-            off: function(events) {
-                if (!events) {
-                    return;
-                }
-                const eventList = events.split(" ");
-                eventList.forEach((event) => {
-                    this.eventCallback[event] = null;
-                });
-            },
-            emitEvent: function (event, value) {
-                if (!event || !this.eventCallback[event]) {
-                    return;
-                }
-                this.eventCallback[event]({
-                    type: event,
-                    value: value
-                });
-            },
-            destroy: function() {
-                this.$destroy();
+        }
+
+        on(events, callback) {
+            if (!events || !callback) {
+                return;
             }
+            const eventList = events.split(" ");
+            eventList.forEach((event) => {
+                this.eventCallback[event] = callback;
+            });
+        }
+
+        off(events) {
+            if (!events) {
+                return;
+            }
+            const eventList = events.split(" ");
+            eventList.forEach((event) => {
+                this.eventCallback[event] = null;
+            });
+        }
+
+        emitEvent(event, value) {
+            if (!event || !this.eventCallback[event]) {
+                return;
+            }
+            this.eventCallback[event]({
+                type: event,
+                value: value
+            });
+        }
+
+        destroy() {
+            this.$destroy();
         }
     }
 </script>
