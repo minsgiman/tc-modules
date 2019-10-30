@@ -22,18 +22,18 @@
 
     @Component
     export default class Timeselect extends Base {
-        date = null;
-        hour = '00';
-        min = '00';
-        hourStr = '';
-        minStr = '';
+        date: any = null;
+        hour: string = '00';
+        min: string = '00';
+        hourStr: string = '';
+        minStr: string = '';
 
         get value() {
             return this.date;
         }
         set value(newValue) {
             this.date = newValue;
-            if (this.date && this.date instanceof Date) {
+            if (this.date) {
                 this.hour = this.addZero(this.date.getHours());
                 this.min = this.addZero(this.date.getMinutes());
             } else {
@@ -53,7 +53,7 @@
         }
 
         timeChange() {
-            if (!(this.date && this.date instanceof Date)) {
+            if (!(this.date)) {
                 this.date = new Date();
             }
             this.date.setHours(parseInt(this.hour));
@@ -61,7 +61,7 @@
             this.emitEvent('changed', this.date);
         }
 
-        addZero(n) {
+        addZero(n: number) {
             return n < 10 ? '0' + n : '' + n
         }
 

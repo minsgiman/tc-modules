@@ -4,7 +4,7 @@
 
     @Component
     export default class Base extends Vue {
-        @Prop() parentId: string;
+        @Prop() parentId: string = '';
 
         eventCallback: any = {};
 
@@ -14,27 +14,27 @@
             }
         }
 
-        on(events, callback) {
+        on(events: any, callback: any) {
             if (!events || !callback) {
                 return;
             }
             const eventList = events.split(" ");
-            eventList.forEach((event) => {
+            eventList.forEach((event: string) => {
                 this.eventCallback[event] = callback;
             });
         }
 
-        off(events) {
+        off(events: any) {
             if (!events) {
                 return;
             }
             const eventList = events.split(" ");
-            eventList.forEach((event) => {
+            eventList.forEach((event: string) => {
                 this.eventCallback[event] = null;
             });
         }
 
-        emitEvent(event, value) {
+        emitEvent(event: any, value: any) {
             if (!event || !this.eventCallback[event]) {
                 return;
             }
