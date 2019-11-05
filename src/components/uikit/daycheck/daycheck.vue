@@ -11,41 +11,35 @@
         </li>
     </ul>
 </template>
-<script>
-    import baseComponent from './../base';
+<script lang="ts">
+    import { Component } from 'vue-property-decorator';
+    import Base from './../base.vue';
 
-    export default {
-        extends: baseComponent,
-        name: 'daycheck',
-        computed : {
-            value: {
-                get: function() {
-                    const valueList = [];
-                    this.dayList.forEach((value) => {
-                        valueList.push(value.check);
-                    });
-                    return valueList;
-                },
-                set: function(newValues) {
-                    if (!newValues) {
-                        return;
-                    }
-                    let i, len = newValues.length;
-                    for (i = 0; i < len; i+=1) {
-                        if (this.dayList[i]) {
-                            this.dayList[i].check = newValues[i];
-                        }
-                    }
+    @Component
+    export default class Daycheck extends Base {
+        name: string = 'name_' + this.parentId;
+        dayList: any = [];
+
+        get value() {
+            const valueList: boolean[] = [];
+            this.dayList.forEach((value: any) => {
+                valueList.push(value.check);
+            });
+            return valueList;
+        }
+        set value(newValues: boolean[]) {
+            if (!newValues) {
+                return;
+            }
+            let i, len = newValues.length;
+            for (i = 0; i < len; i+=1) {
+                if (this.dayList[i]) {
+                    this.dayList[i].check = newValues[i];
                 }
             }
-        },
-        data: function() {
-            return {
-                name: 'name_' + this.parentId,
-                dayList: []
-            }
-        },
-        created : function() {
+        }
+
+        private created() {
             const lang = document.documentElement.getAttribute('lang');
             this.dayList = [
                 {id: 'MON', str: lang === 'ja' ? '月' : '월', check: false},
@@ -56,15 +50,14 @@
                 {id: 'SAT', str: lang === 'ja' ? '土' : '토', check: false},
                 {id: 'SUN', str: lang === 'ja' ? '日' : '일', check: false}
             ];
-        },
-        methods: {
-            checkChange: function() {
-                const valueList = [];
-                this.dayList.forEach((value) => {
-                    valueList.push(value.check);
-                });
-                this.emitEvent('changed', valueList);
-            }
+        }
+
+        checkChange() {
+            const valueList: boolean[] = [];
+            this.dayList.forEach((value: any) => {
+                valueList.push(value.check);
+            });
+            this.emitEvent('changed', valueList);
         }
     }
 </script>

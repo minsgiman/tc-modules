@@ -7,49 +7,46 @@
         </span>
     </div>
 </template>
-<script>
-    import baseComponent from './../base';
+<script lang="ts">
+    import { Component } from 'vue-property-decorator';
+    import Base from './../base.vue';
 
-    export default {
-        extends: baseComponent,
-        name: 'search',
-        computed : {
-            value: {
-                get: function() {
-                    return this.$refs.searchInput.value;
-                },
-                set: function(newValue) {
-                    this.$refs.searchInput.value = newValue;
-                    this.showDeleteBtn();
-                }
+    @Component
+    export default class Search extends Base {
+        placeholder: string = '';
+        design: string = '';
+        isShowDeleteBtn: boolean = false;
+
+        get value() {
+            const sInput: any = this.$refs.searchInput;
+            return sInput.value;
+        }
+        set value(newValue) {
+            const sInput: any = this.$refs.searchInput;
+            sInput.value = newValue;
+            this.showDeleteBtn();
+        }
+
+        searchStrUpdate() {
+            const sInput: any = this.$refs.searchInput;
+            this.emitEvent('changed', sInput.value);
+            this.showDeleteBtn();
+        }
+
+        deleteSearchStr() {
+            const sInput: any = this.$refs.searchInput;
+            sInput.value = '';
+            this.emitEvent('changed', sInput.value);
+            this.showDeleteBtn();
+        }
+
+        showDeleteBtn() {
+            const sInput: any = this.$refs.searchInput;
+            if (sInput.value) {
+                this.isShowDeleteBtn = true;
+            } else {
+                this.isShowDeleteBtn = false;
             }
-        },
-        data: function() {
-            return {
-                placeholder: '',
-                design: '',
-                isShowDeleteBtn: false
-            }
-        },
-        methods: {
-            searchStrUpdate: function(event) {
-                this.showDeleteBtn();
-                this.emitEvent('changed', this.$refs.searchInput.value);
-            },
-            deleteSearchStr: function() {
-                this.$refs.searchInput.value = '';
-                this.showDeleteBtn();
-                this.emitEvent('changed', this.$refs.searchInput.value);
-            },
-            showDeleteBtn: function() {
-                if (this.$refs.searchInput.value) {
-                    this.isShowDeleteBtn = true;
-                } else {
-                    this.isShowDeleteBtn = false;
-                }
-            }
-        },
-        components : {
         }
     }
 </script>

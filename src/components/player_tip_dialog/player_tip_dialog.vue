@@ -19,29 +19,35 @@
         </modal_dialog>
     </div>
 </template>
-<script>
-    import modal_dialog from './../uikit/modal_dialog';
+<script lang="ts">
+    import { Component, Prop, Vue } from 'vue-property-decorator';
+    import modal_dialog from './../uikit/modal_dialog/modal_dialog.vue';
 
-    export default {
-        props: ['dlgStyle', 'txtMap'],
-        created : function () {
-        },
-        beforeDestroy : function() {
+    @Component({
+        components: {
+            modal_dialog
+        }
+    })
+    export default class PlayerTipDialog extends Vue {
+        @Prop() private dlgStyle!: any;
+        @Prop() private txtMap!: any;
+
+        private created () {
+        }
+
+        private beforeDestroy () {
             this.$emit('event', {event: 'close'});
             if (this.$el.parentNode) {
                 this.$el.parentNode.removeChild(this.$el);
             }
-        },
-        methods: {
-            onCloseDialog: function() {
-                this.$destroy();
-            },
-            destroy: function() {
-                this.$destroy();
-            }
-        },
-        components : {
-            modal_dialog
+        }
+
+        onCloseDialog () {
+            this.$destroy();
+        }
+
+        destroy () {
+            this.$destroy();
         }
     }
 </script>

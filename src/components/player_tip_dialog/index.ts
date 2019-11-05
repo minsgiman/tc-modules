@@ -1,7 +1,7 @@
 import Vue from 'vue';
-import playerTipDialog from './player_tip_dialog';
+import playerTipDialog from './player_tip_dialog.vue';
 
-function createDlg(param) {
+function createDlg(param: any) {
     const parentEl = document.getElementById(param.elId);
     if (!parentEl) {
         return;
