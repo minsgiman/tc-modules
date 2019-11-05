@@ -10,7 +10,7 @@
     import { Component } from 'vue-property-decorator';
     import Base from './../base.vue';
 
-    @Component()
+    @Component
     export default class Checkbox extends Base {
         name: string = 'name_' + this.parentId;
         text: string = '';

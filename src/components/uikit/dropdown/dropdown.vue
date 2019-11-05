@@ -34,9 +34,10 @@
             return this.dropId;
         }
         set dropElementId(elId) {
-            if (this.$el.parentElement.parentElement) {
-                this.$el.parentElement.parentElement.style.position = 'relative';
-                this.$el.parentElement.parentElement.style.display = 'inline-block';
+            const el: any = this.$el;
+            if (el.parentElement.parentElement) {
+                el.parentElement.parentElement.style.position = 'relative';
+                el.parentElement.parentElement.style.display = 'inline-block';
             }
             const dropEl = document.getElementById(elId);
             if (dropEl) {

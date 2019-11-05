@@ -21,13 +21,15 @@
             this.$refs.searchInput.value = newValue;
         }
 
-        searchStrUpdate(event) {
-            this.emitEvent('changed', this.$refs.searchInput.value);
+        searchStrUpdate() {
+            const sInput: any = this.$refs.searchInput;
+            this.emitEvent('changed', sInput.value);
         }
 
         deleteSearchStr() {
-            this.$refs.searchInput.value = '';
-            this.emitEvent('changed', this.$refs.searchInput.value);
+            const sInput: any = this.$refs.searchInput;
+            sInput.value = '';
+            this.emitEvent('changed', sInput.value);
         }
     }
 </script>

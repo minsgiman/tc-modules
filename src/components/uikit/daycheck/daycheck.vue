@@ -21,13 +21,13 @@
         dayList: any = [];
 
         get value() {
-            const valueList = [];
+            const valueList: boolean[] = [];
             this.dayList.forEach((value) => {
                 valueList.push(value.check);
             });
             return valueList;
         }
-        set value(newValue: boolean) {
+        set value(newValues: boolean[]) {
             if (!newValues) {
                 return;
             }
@@ -53,7 +53,7 @@
         }
 
         checkChange() {
-            const valueList = [];
+            const valueList: boolean[] = [];
             this.dayList.forEach((value) => {
                 valueList.push(value.check);
             });
