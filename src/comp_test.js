@@ -30,6 +30,7 @@ searchObj.on('changed', function (event) {
     console.log('value : ' + event.value); //value : true
 });
 searchObj.placeholder = '검색어를 입력하세요.';
+searchObj.design = 'search';
 /////////////////
 
 /* radiogroup */
