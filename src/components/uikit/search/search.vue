@@ -15,10 +15,12 @@
         placeholder: string = '';
 
         get value() {
-            return this.$refs.searchInput.value;
+            const sInput: any = this.$refs.searchInput;
+            return sInput.value;
         }
         set value(newValue) {
-            this.$refs.searchInput.value = newValue;
+            const sInput: any = this.$refs.searchInput;
+            sInput.value = newValue;
         }
 
         searchStrUpdate() {

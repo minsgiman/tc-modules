@@ -9,6 +9,8 @@ import radiobtn from './components/uikit/radiobtn';
 import search from './components/uikit/search';
 import timeselect from './components/uikit/timeselect';
 import toggle from './components/uikit/toggle';
+import playerTipDlg from './components/player_tip_dialog';
+import videoPlayDlg from './components/videoplay_dialog';
 
 /* timeselect */
 let timeselect1 = timeselect("timeselectId");
@@ -86,21 +88,33 @@ checkboxObj.on('changed', function (event: any) {
 checkboxObj.text = 'checklabel';
 /////////////////
 
-// let dlgObj = playerTipDlg({
-//     elId: 'dlgId',
-//     dlgStyle : {
-//         width: '500px', height: '610px', padding: '24px', boxSizing: 'border-box', overflow: 'auto'
-//     },
-//     txtMap : {
-//         title : 'title',
-//         guideKeyFb : 'guideKeyFb',
-//         guideKeySpace : 'guideKeySpace',
-//         confirm : 'confirm'
-//     },
-//     eventHandler: function(event) {
-//         console.log(event);
-//     }
-// });
+let dlgObj = playerTipDlg({
+    elId: 'dlgId',
+    dlgStyle : {
+        width: '500px', height: '610px', padding: '24px', boxSizing: 'border-box', overflow: 'auto'
+    },
+    txtMap : {
+        title : 'title',
+        guideKeyFb : 'guideKeyFb',
+        guideKeySpace : 'guideKeySpace',
+        confirm : 'confirm'
+    },
+    eventHandler: function(event : any) {
+        console.log(event);
+    }
+});
+
+(window as any).playVideo = function () {
+    let videoObj = videoPlayDlg({
+        elId: 'dlgId2',
+        dlgStyle : {
+            width: '1180px', height: '730px', padding: '60px', boxSizing: 'border-box', overflow: 'auto'
+        },
+        webmUrl : "",
+        mp4Url : "http://10.161.240.93:10000/3.mp4"
+    });
+}
+
 /*
 let clipplayerObj = clipplayer({
    elId: 'clipplayerId',

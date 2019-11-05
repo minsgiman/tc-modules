@@ -22,7 +22,7 @@
 
         get value() {
             const valueList: boolean[] = [];
-            this.dayList.forEach((value) => {
+            this.dayList.forEach((value: any) => {
                 valueList.push(value.check);
             });
             return valueList;
@@ -54,7 +54,7 @@
 
         checkChange() {
             const valueList: boolean[] = [];
-            this.dayList.forEach((value) => {
+            this.dayList.forEach((value: any) => {
                 valueList.push(value.check);
             });
             this.emitEvent('changed', valueList);

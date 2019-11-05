@@ -1,5 +1,6 @@
 var path = require('path');
 var CopyWebpackPlugin = require('copy-webpack-plugin');
+var VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 function resolve (dir) {
     return path.join(__dirname, '..', dir)
@@ -39,11 +40,6 @@ module.exports = {
                 }
             },
             {
-                test: /\.ts$/,
-                exclude: /node_modules/,
-                loader: 'ts-loader'
-            },
-            {
                 test: /\.tsx?$/,
                 loader: 'ts-loader',
                 exclude: /node_modules/,
@@ -59,6 +55,9 @@ module.exports = {
             '@': resolve('src')
         }
     },
+    plugins: [
+        new VueLoaderPlugin()
+    ],
     context: __dirname
 }
 
