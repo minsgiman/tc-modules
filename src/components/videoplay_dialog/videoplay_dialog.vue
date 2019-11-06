@@ -14,7 +14,7 @@
 </template>
 <script lang="ts">
     import { Component, Prop, Vue } from 'vue-property-decorator';
-    import modal_dialog from './../uikit/modal_dialog/modal_dialog.vue';
+    import { modal_dialog } from './../uikit';
 
     @Component({
         components: {
@@ -25,9 +25,6 @@
         @Prop() dlgStyle!: any;
         @Prop({ default: '' }) webmUrl!: string;
         @Prop({ default: '' }) mp4Url!: string;
-
-        private created () {
-        }
 
         private beforeDestroy () {
             this.$emit('event', {event: 'close'});

@@ -16,7 +16,7 @@
         text: string = '';
         checked: boolean = false;
 
-        get value() {
+        get value(): boolean {
             return this.checked;
         }
         set value(newValue: boolean) {

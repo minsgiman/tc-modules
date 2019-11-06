@@ -15,9 +15,10 @@
         btnHeight: number = 24;
         isDrop: boolean = false;
 
-        get value() {
+        get value(): boolean {
             return this.isDrop;
         }
+
         set value(newValue: boolean) {
             this.isDrop = newValue;
             const dropEl = document.getElementById(this.dropId);
@@ -30,16 +31,17 @@
             }
         }
 
-        get dropElementId() {
+        get dropElementId(): string {
             return this.dropId;
         }
-        set dropElementId(elId) {
+
+        set dropElementId(elId: string) {
             const el: any = this.$el;
             if (el.parentElement.parentElement) {
                 el.parentElement.parentElement.style.position = 'relative';
                 el.parentElement.parentElement.style.display = 'inline-block';
             }
-            const dropEl = document.getElementById(elId);
+            const dropEl: HTMLElement | null = document.getElementById(elId);
             if (dropEl) {
                 dropEl.style.display = 'none';
                 dropEl.style.position = 'absolute';
@@ -48,11 +50,12 @@
             this.dropId = elId;
         }
 
-        get dropPosition() {
+        get dropPosition(): string {
             return this.position;
         }
-        set dropPosition(position) {
-            const dropEl = document.getElementById(this.dropId);
+
+        set dropPosition(position: string) {
+            const dropEl: HTMLElement | null = document.getElementById(this.dropId);
             if (dropEl) {
                 if (position === 'left') {
                     dropEl.style.right = '0px';
@@ -65,7 +68,7 @@
 
         itemDropToggle() {
             this.isDrop = !this.isDrop;
-            const dropEl = document.getElementById(this.dropId);
+            const dropEl: HTMLElement | null = document.getElementById(this.dropId);
             if (dropEl) {
                 if (this.isDrop) {
                     dropEl.style.display = 'block';

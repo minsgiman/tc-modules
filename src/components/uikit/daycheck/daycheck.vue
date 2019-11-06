@@ -14,19 +14,21 @@
 <script lang="ts">
     import { Component } from 'vue-property-decorator';
     import Base from './../base.vue';
+    import { IDayChecking } from "../interface";
 
     @Component
     export default class Daycheck extends Base {
         name: string = 'name_' + this.parentId;
-        dayList: any = [];
+        dayList: IDayChecking[] = [];
 
-        get value() {
+        get value(): boolean[] {
             const valueList: boolean[] = [];
-            this.dayList.forEach((value: any) => {
-                valueList.push(value.check);
+            this.dayList.forEach((day: IDayChecking) => {
+                valueList.push(day.check);
             });
             return valueList;
         }
+
         set value(newValues: boolean[]) {
             if (!newValues) {
                 return;
@@ -54,8 +56,8 @@
 
         checkChange() {
             const valueList: boolean[] = [];
-            this.dayList.forEach((value: any) => {
-                valueList.push(value.check);
+            this.dayList.forEach((day: IDayChecking) => {
+                valueList.push(day.check);
             });
             this.emitEvent('changed', valueList);
         }

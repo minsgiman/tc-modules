@@ -13,7 +13,7 @@
             }
         }
 
-        on(events: any, callback: any) {
+        on(events: string, callback: Function) {
             if (!events || !callback) {
                 return;
             }
@@ -23,7 +23,7 @@
             });
         }
 
-        off(events: any) {
+        off(events: string) {
             if (!events) {
                 return;
             }
@@ -33,7 +33,7 @@
             });
         }
 
-        emitEvent(event: any, value: any) {
+        emitEvent(event: string, value: any) {
             if (!event || !this.eventCallback[event]) {
                 return;
             }

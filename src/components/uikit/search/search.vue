@@ -17,31 +17,31 @@
         design: string = '';
         isShowDeleteBtn: boolean = false;
 
-        get value() {
-            const sInput: any = this.$refs.searchInput;
+        get value(): string {
+            const sInput = this.$refs.searchInput as HTMLInputElement;
             return sInput.value;
         }
-        set value(newValue) {
-            const sInput: any = this.$refs.searchInput;
+        set value(newValue: string) {
+            const sInput: any = this.$refs.searchInput as HTMLInputElement;
             sInput.value = newValue;
             this.showDeleteBtn();
         }
 
         searchStrUpdate() {
-            const sInput: any = this.$refs.searchInput;
+            const sInput: any = this.$refs.searchInput as HTMLInputElement;
             this.emitEvent('changed', sInput.value);
             this.showDeleteBtn();
         }
 
         deleteSearchStr() {
-            const sInput: any = this.$refs.searchInput;
+            const sInput: any = this.$refs.searchInput as HTMLInputElement;
             sInput.value = '';
             this.emitEvent('changed', sInput.value);
             this.showDeleteBtn();
         }
 
         showDeleteBtn() {
-            const sInput: any = this.$refs.searchInput;
+            const sInput: any = this.$refs.searchInput as HTMLInputElement;
             if (sInput.value) {
                 this.isShowDeleteBtn = true;
             } else {

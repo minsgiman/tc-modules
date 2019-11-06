@@ -21,7 +21,7 @@
 </template>
 <script lang="ts">
     import { Component, Prop, Vue } from 'vue-property-decorator';
-    import modal_dialog from './../uikit/modal_dialog/modal_dialog.vue';
+    import { modal_dialog } from './../uikit';
 
     @Component({
         components: {

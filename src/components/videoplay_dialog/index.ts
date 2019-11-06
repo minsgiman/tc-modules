@@ -1,8 +1,9 @@
 import Vue from 'vue';
 import videoPlayDialog from './videoplay_dialog.vue';
+import { IDlgParam } from "./interface";
 
-function createDlg(param: any) {
-    const parentEl = document.getElementById(param.elId);
+function createDlg(param: IDlgParam) {
+    const parentEl: HTMLElement | null = document.getElementById(param.elId);
     if (!parentEl) {
         return;
     }

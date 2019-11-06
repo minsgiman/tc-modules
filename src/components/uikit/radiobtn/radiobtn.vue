@@ -9,17 +9,19 @@
 <script lang="ts">
     import { Component } from 'vue-property-decorator';
     import Base from './../base.vue';
+    import { IRadioItem } from './../interface';
 
     @Component
     export default class Radiobtn extends Base {
         name: string = 'name_' + this.parentId;
         radioValue: string = '';
-        items: any = [];
+        items: IRadioItem[] = [];
 
-        get value() {
+        get value(): string {
             return this.radioValue;
         }
-        set value(newValue) {
+
+        set value(newValue: string) {
             this.radioValue = newValue;
         }
 

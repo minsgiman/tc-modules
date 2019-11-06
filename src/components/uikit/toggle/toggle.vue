@@ -9,14 +9,14 @@
     export default class Toggle extends Base {
         isOn: boolean = true;
 
-        get value() {
+        get value(): boolean {
             return this.isOn;
         }
-        set value(newValue) {
+        set value(newValue: boolean) {
             this.isOn = newValue;
         }
 
-        toggleBtn(): void {
+        toggleBtn() {
             this.isOn = !this.isOn;
             this.emitEvent('changed', this.isOn);
         }
