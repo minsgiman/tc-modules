@@ -6,5 +6,5 @@ export interface IClipPlayInfo {
     thumbnailPath: string,
     startTime: number,
     endTime: number,
-    eventHandler?: Function
+    eventHandler?: (event: any) => void
 }

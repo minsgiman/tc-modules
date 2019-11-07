@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import clipplayer from './clipplayer.vue';
-import { IClipPlayInfo } from "./interface";
+import { IClipPlayInfo } from './interface';
 
 function createDlg(param: IClipPlayInfo) {
     const parentEl: HTMLElement | null = document.getElementById(param.elId);

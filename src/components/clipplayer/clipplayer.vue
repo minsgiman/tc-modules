@@ -11,12 +11,12 @@
                     <img src="/resources/img/loading.svg" style="width:45px; height:45px;">
                 </span>
             </div>
-            <div class="clip_play" :class="{clip_fade: isShowAnimate && metaLoaded}" @click="togglePlay()" v-show="isPlayed && !replaceShow && metaLoaded" v-if="clipStatus == '4' || clipStatus == '5'">
+            <div class="clip_play" :class="{clip_fade: isShowAnimate && metaLoaded}" @click="togglePlay()" v-show="isPlayed && !replaceShow && metaLoaded" v-if="clipStatus === '4' || clipStatus === '5'">
                   <span>
                     <button></button>
                   </span>
             </div>
-            <div class="clip_stop" :class="{clip_fade: !isShowAnimate && metaLoaded}" @click="togglePlay()" v-show="!isPlayed && !replaceShow && metaLoaded" v-if="clipStatus == '4' || clipStatus == '5'">
+            <div class="clip_stop" :class="{clip_fade: !isShowAnimate && metaLoaded}" @click="togglePlay()" v-show="!isPlayed && !replaceShow && metaLoaded" v-if="clipStatus === '4' || clipStatus === '5'">
                   <span>
                     <button></button>
                   </span>
@@ -36,23 +36,21 @@
                         </div>
                     </div>
                 </div>
-                <div class="time_box" id="timebox" v-show="clipFullScreen == false">
+                <div class="time_box" id="timebox" v-show="!clipFullScreen">
                     <span class="time"><em>{{ formattedDetailDate(startTime ? startTime : 0) }}</em>{{ formattedDetailTime(startTime ? startTime : 0) }}</span>
                     <span class="time_mg"> ~ </span>
                     <span class="time"><em>{{ formattedDetailDate(endTime ? endTime : 0) }}</em>{{ formattedDetailTime(endTime ? endTime : 0) }}</span>
-                    <span class="long" v-if="clipStatus == '4' || clipStatus == '5' "><em>{{timeMsg}}</em>{{ remainTimeStr }}</span>
+                    <span class="long" v-if="clipStatus === '4' || clipStatus === '5' "><em>{{timeMsg}}</em>{{ remainTimeStr }}</span>
                 </div>
-                <div class="time_box time_box_full" id="timeboxfull" v-show="clipFullScreen == true" style="border-top:2px solid #262626; height:104px;">
+                <div class="time_box time_box_full" id="timeboxfull" v-show="clipFullScreen" style="border-top:2px solid #262626; height:104px;">
                     <div style="position:relative; width:100%; text-align:center; margin-top:-15px;">
-                        <li>
-                            <span style="font-size:22px; color:#777; letter-spacing: -0.5px; margin-right: 5px; top: 53px;">{{ formattedDetailDate(startTime ? startTime : 0) }}</span>
-                            <span style="font-size:22px; color:#fff; letter-spacing: -0.5px; top: 53px;">{{ formattedDetailTime(startTime ? startTime : 0) }}</span>
-                            <span style="font-size:22px; color:#fff; letter-spacing: -0.5px; margin-left:10px; margin-right:10px; top: 53px;"> ~ </span>
-                            <span style="font-size:22px; color:#777; letter-spacing: -0.5px; margin-right: 5px; top: 53px;">{{ formattedDetailDate(endTime ? endTime : 0) }}</span>
-                            <span style="font-size:22px; color:#fff; letter-spacing: -0.5px; top: 53px;">{{ formattedDetailTime(endTime ? endTime : 0) }}</span>
-                            <span style="font-size:22px; color:#777; letter-spacing: -0.5px; margin-left:30px; top: 53px;">{{timeMsg}}</span>
-                            <span style="font-size:22px; color:#4b96e6; letter-spacing: -0.5px; margin-left:10px; top: 53px;">{{ remainTimeStr }}</span>
-                        </li>
+                        <span style="font-size:22px; color:#777; letter-spacing: -0.5px; margin-right: 5px; top: 53px;">{{ formattedDetailDate(startTime ? startTime : 0) }}</span>
+                        <span style="font-size:22px; color:#fff; letter-spacing: -0.5px; top: 53px;">{{ formattedDetailTime(startTime ? startTime : 0) }}</span>
+                        <span style="font-size:22px; color:#fff; letter-spacing: -0.5px; margin-left:10px; margin-right:10px; top: 53px;"> ~ </span>
+                        <span style="font-size:22px; color:#777; letter-spacing: -0.5px; margin-right: 5px; top: 53px;">{{ formattedDetailDate(endTime ? endTime : 0) }}</span>
+                        <span style="font-size:22px; color:#fff; letter-spacing: -0.5px; top: 53px;">{{ formattedDetailTime(endTime ? endTime : 0) }}</span>
+                        <span style="font-size:22px; color:#777; letter-spacing: -0.5px; margin-left:30px; top: 53px;">{{timeMsg}}</span>
+                        <span style="font-size:22px; color:#4b96e6; letter-spacing: -0.5px; margin-left:10px; top: 53px;">{{ remainTimeStr }}</span>
                     </div>
                 </div>
             </div>
@@ -69,19 +67,15 @@
     const d3: any = (window as any).d3 as any;
     const moment: any = (window as any).moment as any;
 
-    function getBrowserLanguage (): string | null {
-        var nav: any = window.navigator,
-            browserLanguagePropertyKeys: string[] = [ 'language', 'browserLanguage', 'systemLanguage', 'userLanguage' ],
-            i: number, language: string;
+    function getBrowserLanguage(): string | null {
+        const nav: any = window.navigator,
+              browserLanguagePropertyKeys: string[] = [ 'language', 'browserLanguage', 'systemLanguage', 'userLanguage' ];
+        let i: number, language: string;
 
-        // support for HTML 5.1 "navigator.languages"
         if (nav.languages && nav.languages.length) {
             for (i = 0; i < nav.languages.length; i++) {
                 language = nav.languages[i];
-                /*if (language && language.length) {
-                    return language;
-                }*/
-                if($("html").attr("lang") == nav.languages[i]){
+                if ($('html').attr('lang') === nav.languages[i]) {
                     return language;
                 }
             }
@@ -100,14 +94,14 @@
 
     @Component
     export default class ClipPlayer extends Vue {
-        @Prop() private videoUrl!: string;
-        @Prop() private durationStr!: string;
-        @Prop() private clipStatus!: string;
-        @Prop() private thumbnailPath!: string;
-        @Prop() private startTime!: number;
-        @Prop() private endTime!: number;
+        @Prop() videoUrl!: string;
+        @Prop() durationStr!: string;
+        @Prop() clipStatus!: string;
+        @Prop() thumbnailPath!: string;
+        @Prop() startTime!: number;
+        @Prop() endTime!: number;
 
-        remainTimeStr: string = "";
+        remainTimeStr: string = '';
         replaceShow: boolean = false;
         isShowAnimate: boolean = false;
         metaLoaded: boolean = false;
@@ -123,7 +117,7 @@
         video: any;
         fullBottom: string = '104px';
 
-        private created () {
+        private created() {
             this.lang = document.documentElement.getAttribute('lang');
             this.timeMsg = this.lang === 'ja' ? '合計時間' : '총 시간';
             this.remainTimeStr = this.durationStr;
@@ -136,9 +130,9 @@
             }
         }
 
-        initialize () {
-            this.barWidth = parseInt(d3.select('#videoCursor').style('width'));//  커서가 bar 밖으로 나가지 않도록 보정
-            const fullscreenCb: Function = this.fullscreenChangeEvent.bind(this);
+        initialize() {
+            this.barWidth = parseInt(d3.select('#videoCursor').style('width'), 10); // 커서가 bar 밖으로 나가지 않도록 보정
+            const fullscreenCb: () => void = this.fullscreenChangeEvent.bind(this);
             d3.select('#fullscreen').on('fullscreenchange', fullscreenCb);
             d3.select('#fullscreen').on('webkitfullscreenchange', fullscreenCb);
             d3.select('#fullscreen').on('mozfullscreenchange', fullscreenCb);
@@ -147,17 +141,21 @@
             this.startVideoTimer();
         }
 
-        timeCalcul (timeSec: number): string{
-            let absTimeSec: number = Math.abs(timeSec),
+        destroy() {
+            this.$destroy();
+        }
+
+        timeCalcul(timeSec: number): string {
+            const absTimeSec: number = Math.abs(timeSec),
                 min: number = Math.floor(absTimeSec / 60),
                 sec: number = Math.floor(absTimeSec % 60);
 
-            return min + ":" + (sec < 10 ? "0" : "") + (absTimeSec < 0 ? 1 : sec);
+            return min + ':' + (sec < 10 ? '0' : '') + (absTimeSec < 0 ? 1 : sec);
         }
 
-        setDragControl () {
-            var that = this;
-            var videoDrag = d3.behavior.drag().on('drag', function (e: any) {
+        setDragControl() {
+            const that = this;
+            const videoDrag = d3.behavior.drag().on('drag', () => {
                 that.videoCursorPosition += d3.event.dx;
                 if (that.videoCursorPosition < 0) {
                     that.videoCursorPosition = 0;
@@ -165,25 +163,24 @@
                     that.videoCursorPosition = that.barWidth;
                 }
 
-                if(that.videoCursorPosition.toString() == "NaN"){
+                if (that.videoCursorPosition.toString() === 'NaN') {
                     that.videoCursorPosition = 0;
                 }
-                var newTime = that.video.duration * (that.videoCursorPosition / that.barWidth);
-                that.video.currentTime = newTime;
+                that.video.currentTime = that.video.duration * (that.videoCursorPosition / that.barWidth);
                 that.remainTimeStr = that.timeCalcul(Math.floor(that.video.duration - that.video.currentTime));
                 if (that.firstPlay) {
                     that.firstPlay = false;
                     that.timeMsg = that.lang === 'ja' ? '残り時間' : '남은 시간';
                 }
-            }).on('dragstart', function () {
+            }).on('dragstart', () => {
                 that.replaceShow = false;
-            }).on('dragend', function () {
-                let newTime: number = that.video.duration * (that.videoCursorPosition / that.barWidth);
+            }).on('dragend', () => {
+                const newTime: number = that.video.duration * (that.videoCursorPosition / that.barWidth);
 
-                if(Math.floor((that.video.currentTime / that.video.duration) * that.barWidth) >= that.barWidth){
+                if (Math.floor((that.video.currentTime / that.video.duration) * that.barWidth) >= that.barWidth) {
                     that.video.pause();
                     that.replaceShow = true;
-                }else{
+                } else {
                     that.replaceShow = false;
                 }
                 that.video.currentTime = newTime;
@@ -191,12 +188,10 @@
             });
 
             d3.select('#videoCursor').call(videoDrag);
-            d3.select('#videoBar').on('click', function () {
-                var x = d3.mouse(document.getElementById('videoBar'))[0] - 8; // for cursur center
-                that.videoCursorPosition = x;
-                that.barWidth = parseInt(d3.select('#videoBar').style('width'));
-                var newTime = that.video.duration * (that.videoCursorPosition / that.barWidth);
-                that.video.currentTime = newTime;
+            d3.select('#videoBar').on('click', () => {
+                that.videoCursorPosition = d3.mouse(document.getElementById('videoBar'))[0] - 8; // for cursor center;
+                that.barWidth = parseInt(d3.select('#videoBar').style('width'), 10);
+                that.video.currentTime = that.video.duration * (that.videoCursorPosition / that.barWidth);
                 that.replaceShow = false;
                 if (that.firstPlay) {
                     that.firstPlay = false;
@@ -206,37 +201,35 @@
         }
 
         startVideoTimer() {
-            var that = this;
+            const that = this;
 
-            this.video = document.getElementById("video");
-            this.barWidth = parseInt((document.getElementById('videoBar') as any).offsetWidth);
+            this.video = document.getElementById('video');
+            this.barWidth = parseInt((document.getElementById('videoBar') as any).offsetWidth, 10);
             if (this.barWidth < 650) {
                 this.barWidth = 650;
             }
 
-            this.video.addEventListener('loadedmetadata', function() {
-                const elVideo: any = that.video;
+            this.video.addEventListener('loadedmetadata', () => {
                 that.metaLoaded = true;
                 that.remainTimeStr = that.timeCalcul(that.video.duration);
             });
 
-            // 플레이시간 업데이트 이벤트에 따라 cusor 위치 업데이트
-            this.video.addEventListener("timeupdate", function () {
+            // 플레이시간 업데이트 이벤트에 따라 cursor 위치 업데이트
+            this.video.addEventListener('timeupdate', () => {
                 const elVideo: any = that.video;
-                var minusPrefix = (Math.floor(elVideo.duration - elVideo.currentTime) > 0) ? "-" : "";
                 that.remainTimeStr = that.timeCalcul(Math.floor(elVideo.duration - elVideo.currentTime));
                 that.videoCursorPosition = Math.floor((elVideo.currentTime / elVideo.duration) * that.barWidth);
             });
 
             // play 끝났을때 replay layer show
-            this.video.addEventListener("ended", function () {
+            this.video.addEventListener('ended', () => {
                 const elVideo: any = that.video;
                 that.remainTimeStr = that.timeCalcul(Math.floor(elVideo.duration - elVideo.currentTime));
                 that.replaceShow = true;
             });
         }
 
-        clipsReplay () {
+        clipsReplay() {
             this.videoCursorPosition = 0;
             this.replaceShow = false;
             this.video.currentTime = 0;
@@ -248,7 +241,7 @@
             this.startVideoTimer();
         }
 
-        togglePlay () {
+        togglePlay() {
             if (this.video.paused) {
                 this.video.play();
                 this.isPlayed = true;
@@ -264,74 +257,81 @@
             }
         }
 
-        fullscreenChangeEvent () {
-            var that = this;
-            if(this.clipFullScreen == true){
-                this.clipFullScreen = false;
-                setTimeout(function () {
-                    $("#dsc_box").show();
-                    $("#player_bar_area").css("bottom","53px");
-                    $("#video").css("height","366px");
-                    $("#player_bar_area").css("width","650px");
-                    $("#timeboxfull").css("height",that.smallTimeboxHeight);
-                    if (that.clipStatus == '4' || that.clipStatus == '5') {
-                        that.barWidth = parseInt(d3.select('#videoBar').style('width'));
+        fullscreenChangeEvent() {
+            const that = this;
 
+            if (this.clipFullScreen) {
+                this.clipFullScreen = false;
+                setTimeout(() => {
+                    const $playerBarArea = $('#player_bar_area'),
+                          $replayShowArea = $('#replayShowArea'),
+                          $video = $('#video');
+
+                    $('#dsc_box').show();
+                    $playerBarArea.css('bottom', '53px');
+                    $playerBarArea.css('width', '650px');
+                    $video.css('height', '366px');
+                    $('#timeboxfull').css('height', that.smallTimeboxHeight);
+                    if (that.clipStatus === '4' || that.clipStatus === '5') {
+                        that.barWidth = parseInt(d3.select('#videoBar').style('width'), 10);
                         that.videoCursorPosition = Math.floor((that.video.currentTime / that.video.duration) * that.barWidth);
-                        var newTime = that.video.duration * (that.videoCursorPosition / that.barWidth);
-                        that.video.currentTime = newTime;
+                        that.video.currentTime = that.video.duration * (that.videoCursorPosition / that.barWidth);
                     }
-                    $("#replayShowArea").css("height",$("#video").css("height"));
-                    $("#replayShowArea > span").css("margin", "-43px 0px 0px -43px");
-                    $("#replayShowArea").find("img").css("width","64px");
-                    $("#replayShowArea").find("img").css("height","64px");
+                    $replayShowArea.css('height', $video.css('height'));
+                    $replayShowArea.find('img').css('width', '64px');
+                    $replayShowArea.find('img').css('height', '64px');
+                    $('#replayShowArea > span').css('margin', '-43px 0px 0px -43px');
                 }, 100);
-            }else{
+            } else {
                 this.clipFullScreen = true;
             }
         }
 
-        pressedFullScreenButton () {
-            var that = this;
-            var element: any = document.getElementById("fullscreen");
+        pressedFullScreenButton() {
+            const that = this,
+                  $dscBox = $('#dsc_box'),
+                  element: any = document.getElementById('fullscreen');
+
             if (element.requestFullscreen) {
                 element.requestFullscreen();
-            } else if(element.mozRequestFullScreen) {
+            } else if (element.mozRequestFullScreen) {
                 element.mozRequestFullScreen();
-            } else if(element.webkitRequestFullscreen) {
+            } else if (element.webkitRequestFullscreen) {
                 element.webkitRequestFullscreen();
-            } else if(element.msRequestFullscreen) {
+            } else if (element.msRequestFullscreen) {
                 element.msRequestFullscreen();
             }
-            // $scope.clipFullScreen = true;
-            this.smallHeight = $("#video").height();
-            setTimeout(function () {
-                $("#dsc_box").hide();
-                $("#video").css("height","");
-                $("#player_bar_area").css("bottom",-1);
-                $("#player_bar_area").css("width","");
-                $("#player_bar_area").css("left","");
-                $("#zoom_bg").css("bottom","");
-                that.smallTimeboxHeight = $("#timebox").height();
 
-                if (that.clipStatus == '4' || that.clipStatus == '5') {
-                    that.barWidth = parseInt(d3.select('#videoBar').style('width'));
+            this.smallHeight = $('#video').height();
+            setTimeout(() => {
+                const $playBarArea = $('#player_bar_area'),
+                      $replayShowArea = $('replayShowArea'),
+                      $video = $('#video');
+
+                $dscBox.hide();
+                $video.css('height', '');
+                $playBarArea.css('bottom', -1);
+                $playBarArea.css('width', '');
+                $playBarArea.css('left', '');
+                $('#zoom_bg').css('bottom', '');
+                that.smallTimeboxHeight = $('#timebox').height();
+
+                if (that.clipStatus === '4' || that.clipStatus === '5') {
+                    that.barWidth = parseInt(d3.select('#videoBar').style('width'), 10);
                     that.videoCursorPosition = Math.floor((that.video.currentTime / that.video.duration) * that.barWidth);
-                    var newTime = that.video.duration * (that.videoCursorPosition / that.barWidth);
-
-                    that.video.currentTime = newTime;
+                    that.video.currentTime = that.video.duration * (that.videoCursorPosition / that.barWidth);
                 }
-                $("#replayShowArea").css("height",$("#video").css("height"));
-                $("#replayShowArea > span").css("margin", "-62px 0px 0px -62px");
-                $("#replayShowArea").find("img").css("width","128px");
-                $("#replayShowArea").find("img").css("height","128px");
+                $replayShowArea.css('height', $video.css('height'));
+                $('#replayShowArea > span').css('margin', '-62px 0px 0px -62px');
+                $replayShowArea.find('img').css('width', '128px');
+                $replayShowArea.find('img').css('height', '128px');
             }, 200);
 
-            $("#dsc_box").hide();
-            $("#dsc_box").show();
+            $dscBox.hide();
+            $dscBox.show();
         }
 
-        pressedExitFullScreenButton () {
+        pressedExitFullScreenButton() {
             const doc: any = document;
             if (doc.exitFullscreen) {
                 doc.exitFullscreen();
@@ -344,16 +344,12 @@
             }
         }
 
-        formattedDetailDate (time: number) {
+        formattedDetailDate(time: number) {
             return moment(new Date(time)).locale(getBrowserLanguage()).format('YYYY.MM.DD (ddd)');
         }
 
-        formattedDetailTime (time: number) {
+        formattedDetailTime(time: number) {
             return moment(new Date(time)).locale(getBrowserLanguage()).format('HH:mm:ss');
-        }
-
-        destroy () {
-            this.$destroy();
         }
     }
 </script>
@@ -371,7 +367,7 @@
                     top: 50%;
                     position: absolute;
                     left: 50%;
-                    margin: -43px 0px 0px -43px;
+                    margin: -43px 0 0 -43px;
                 }
             }
             video {

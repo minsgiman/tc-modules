@@ -3,5 +3,5 @@ export interface IDlgParam {
     dlgStyle?: any,
     webmUrl?: string,
     mp4Url?: string,
-    eventHandler?: Function
+    eventHandler?: (event: any) => void
 }

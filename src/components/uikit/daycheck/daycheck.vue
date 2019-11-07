@@ -14,10 +14,11 @@
 <script lang="ts">
     import { Component } from 'vue-property-decorator';
     import Base from './../base.vue';
-    import { IDayChecking } from "../interface";
+    import { IDayChecking } from '../interface';
 
     @Component
     export default class Daycheck extends Base {
+        // @ts-ignore
         name: string = 'name_' + this.parentId;
         dayList: IDayChecking[] = [];
 
@@ -33,8 +34,9 @@
             if (!newValues) {
                 return;
             }
-            let i, len = newValues.length;
-            for (i = 0; i < len; i+=1) {
+            const len = newValues.length;
+            let i;
+            for (i = 0; i < len; i += 1) {
                 if (this.dayList[i]) {
                     this.dayList[i].check = newValues[i];
                 }
@@ -59,6 +61,7 @@
             this.dayList.forEach((day: IDayChecking) => {
                 valueList.push(day.check);
             });
+            // @ts-ignore
             this.emitEvent('changed', valueList);
         }
     }
@@ -81,8 +84,8 @@
                 position: absolute;
                 width: 32px;
                 height: 32px;
-                top: 0px;
-                left: 0px;
+                top: 0;
+                left: 0;
                 background-color: #ffffff;
                 border: solid 1px #cccccc;
                 border-radius: 32px;

@@ -7,17 +7,17 @@
 
         eventCallback: any = {};
 
-        private beforeDestroy () {
+        private beforeDestroy() {
             if (this.$el.parentNode) {
                 this.$el.parentNode.removeChild(this.$el);
             }
         }
 
-        on(events: string, callback: Function) {
+        on(events: string, callback: (event: any) => void) {
             if (!events || !callback) {
                 return;
             }
-            const eventList = events.split(" ");
+            const eventList = events.split(' ');
             eventList.forEach((event: string) => {
                 this.eventCallback[event] = callback;
             });
@@ -27,7 +27,7 @@
             if (!events) {
                 return;
             }
-            const eventList = events.split(" ");
+            const eventList = events.split(' ');
             eventList.forEach((event: string) => {
                 this.eventCallback[event] = null;
             });
@@ -39,7 +39,7 @@
             }
             this.eventCallback[event]({
                 type: event,
-                value: value
+                value
             });
         }
 

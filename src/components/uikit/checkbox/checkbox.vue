@@ -12,6 +12,7 @@
 
     @Component
     export default class Checkbox extends Base {
+        // @ts-ignore
         name: string = 'name_' + this.parentId;
         text: string = '';
         checked: boolean = false;
@@ -24,6 +25,7 @@
         }
 
         changeValue() {
+            // @ts-ignore
             this.emitEvent('changed', this.checked);
         }
     }

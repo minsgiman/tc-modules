@@ -26,18 +26,18 @@
         @Prop({ default: '' }) webmUrl!: string;
         @Prop({ default: '' }) mp4Url!: string;
 
-        private beforeDestroy () {
+        private beforeDestroy() {
             this.$emit('event', {event: 'close'});
             if (this.$el.parentNode) {
                 this.$el.parentNode.removeChild(this.$el);
             }
         }
 
-        onCloseDialog () {
+        onCloseDialog() {
             this.$destroy();
         }
 
-        destroy () {
+        destroy() {
             this.$destroy();
         }
     }

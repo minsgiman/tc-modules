@@ -29,24 +29,21 @@
         }
     })
     export default class PlayerTipDialog extends Vue {
-        @Prop() private dlgStyle!: any;
-        @Prop() private txtMap!: any;
+        @Prop() dlgStyle!: any;
+        @Prop() txtMap!: any;
 
-        private created () {
-        }
-
-        private beforeDestroy () {
+        private beforeDestroy() {
             this.$emit('event', {event: 'close'});
             if (this.$el.parentNode) {
                 this.$el.parentNode.removeChild(this.$el);
             }
         }
 
-        onCloseDialog () {
+        onCloseDialog() {
             this.$destroy();
         }
 
-        destroy () {
+        destroy() {
             this.$destroy();
         }
     }

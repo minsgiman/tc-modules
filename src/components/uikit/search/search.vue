@@ -29,6 +29,7 @@
 
         searchStrUpdate() {
             const sInput: any = this.$refs.searchInput as HTMLInputElement;
+            // @ts-ignore
             this.emitEvent('changed', sInput.value);
             this.showDeleteBtn();
         }
@@ -36,17 +37,14 @@
         deleteSearchStr() {
             const sInput: any = this.$refs.searchInput as HTMLInputElement;
             sInput.value = '';
+            // @ts-ignore
             this.emitEvent('changed', sInput.value);
             this.showDeleteBtn();
         }
 
         showDeleteBtn() {
             const sInput: any = this.$refs.searchInput as HTMLInputElement;
-            if (sInput.value) {
-                this.isShowDeleteBtn = true;
-            } else {
-                this.isShowDeleteBtn = false;
-            }
+            this.isShowDeleteBtn = !!sInput.value;
         }
     }
 </script>

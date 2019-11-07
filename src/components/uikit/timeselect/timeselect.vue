@@ -53,11 +53,12 @@
         }
 
         timeChange() {
-            if (!(this.date)) {
+            if (!this.date) {
                 this.date = new Date();
             }
-            this.date.setHours(parseInt(this.hour));
-            this.date.setMinutes(parseInt(this.min));
+            this.date.setHours(parseInt(this.hour, 10));
+            this.date.setMinutes(parseInt(this.min, 10));
+            // @ts-ignore
             this.emitEvent('changed', this.date);
         }
 

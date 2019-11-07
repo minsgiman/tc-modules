@@ -18,6 +18,7 @@
 
         toggleBtn() {
             this.isOn = !this.isOn;
+            // @ts-ignore
             this.emitEvent('changed', this.isOn);
         }
     }

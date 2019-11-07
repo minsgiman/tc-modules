@@ -11,7 +11,6 @@
     export default class Dropdown extends Base {
         dropId: string = '';
         position: string = '';
-        btnWidth: number = 24;
         btnHeight: number = 24;
         isDrop: boolean = false;
 
@@ -76,6 +75,7 @@
                     dropEl.style.display = 'none';
                 }
             }
+            // @ts-ignore
             this.emitEvent('changed', this.isDrop);
         }
     }

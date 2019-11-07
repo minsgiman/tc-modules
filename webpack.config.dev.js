@@ -8,10 +8,10 @@ function resolve (dir) {
 
 module.exports = {
     entry: {
-        "api.min" : './src/api.js',
-        "api.common.min" : './src/api.common.js',
-        "api.esm.min" : './src/api.esm.js'
-        //"api.min": "./src/comp_test.ts"
+        // "api.min" : './src/api.js',
+        // "api.common.min" : './src/api.common.js',
+        // "api.esm.min" : './src/api.esm.js'
+        "api.min": "./src/comp_test.ts"
     },
     output: {
         libraryTarget: 'umd',
