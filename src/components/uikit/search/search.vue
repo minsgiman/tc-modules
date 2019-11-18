@@ -2,7 +2,7 @@
     <div class="tc_search">
         <span class="search_box" :class="{focusable: design === 'search'}">
             <img v-if="design === 'search'" class="search_img" src="/resources/img/btn-title-shop-search-normal.svg">
-            <input ref="searchInput" type="text" :placeholder="placeholder" @input="searchStrUpdate" :style="{width: design === 'search' ? '132px' : '154px'}">
+            <input ref="searchInput" type="search" :placeholder="placeholder" @input="searchStrUpdate" :style="{width: design === 'search' ? '132px' : '154px'}">
             <img v-if="isShowDeleteBtn" @click="deleteSearchStr()" src="/resources/img/btn-input-text-delete.png">
         </span>
     </div>
@@ -66,6 +66,16 @@
                     border-color: #444444;
                 }
             }
+
+            input[type=search]::-ms-clear {  display: none; width : 0; height: 0; }
+            input[type=search]::-ms-reveal {  display: none; width : 0; height: 0; }
+            input[type="search"]::-webkit-search-decoration,
+            input[type="search"]::-webkit-search-cancel-button,
+            input[type="search"]::-webkit-search-results-button,
+            input[type="search"]::-webkit-search-results-decoration {
+                -webkit-appearance:none;
+            }
+
             input {
                 width: 154px;
                 height: 100%;
