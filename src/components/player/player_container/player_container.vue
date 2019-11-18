@@ -1,11 +1,11 @@
-<script>
+<script lang="ts">
+    import { Component, Vue } from 'vue-property-decorator';
     import store from '../../../service/player/store';
-    import flashPlayerContainer from './flash_player_container';
-    import webRTCPlayerContainer from './webrtc_player_container';
+    import flashPlayerContainer from './flash_player_container.vue';
+    import webRTCPlayerContainer from './webrtc_player_container.vue';
     import toastcamAPIs from './../../../service/toastcamAPIs';
-    import Vue from 'vue';
 
-    var getNvrServerUrl = function(data){
+    var getNvrServerUrl = function(data: any){
 
         var returnUrl = "";
         if(data == "" || data == undefined){
@@ -27,7 +27,7 @@
         return returnUrl;
     };
 
-    var getCvrServerUrl = function(data){
+    var getCvrServerUrl = function(data: any){
 
         var returnUrl = "";
         if(data == "" || data == undefined){
@@ -37,8 +37,8 @@
         returnUrl = data;
         var tmp = returnUrl.replace("://","");
 
-        var getPort = parseInt(tmp.substring(tmp.indexOf(":")+1,tmp.length));
-        var iePort = getPort+1
+        var getPort: any = parseInt(tmp.substring(tmp.indexOf(":")+1,tmp.length));
+        var iePort: any = getPort+1
         if (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0) {
             returnUrl = returnUrl.replace(getPort,iePort);
         }
@@ -46,7 +46,7 @@
         return returnUrl;
     };
 
-    var getLiveServerUrl = function(data){
+    var getLiveServerUrl = function(data: any){
 
         var returnUrl = "";
         if(data == "" || data == undefined){
@@ -67,32 +67,27 @@
 
         tmp = returnUrl.replace("://","");
 
-        var getPort = parseInt(tmp.substring(tmp.indexOf(":")+1,tmp.length));
-        var iePort = getPort+1
+        var getPort: any = parseInt(tmp.substring(tmp.indexOf(":")+1,tmp.length));
+        var iePort: any = getPort+1
         if (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0) {
             returnUrl = returnUrl.replace(getPort,iePort);
         }
         return returnUrl;
     };
 
-    export default {
-        name: 'playerContainer',
-        props: [],
-        computed: {
-            cameraData: function () {
-                return store.state.cameraData;
-            },
-            isShared: function () {
-                return store.state.isShared;
-            }
-        },
-        data: function () {
-            return {
-                player : null,
-                playTimeoutId : null
-            }
-        },
-        created : function() {
+    @Component
+    export default class PlayerContainer extends Vue {
+        get cameraData() {
+            return store.state.cameraData;
+        }
+        get isShared() {
+            return store.state.isShared;
+        }
+
+        player: any = null;
+        playTimeoutId: any = null;
+
+        private created() {
             let vExtendConstructor;
             if (this.cameraData.recorderType == "recorder") {
                 vExtendConstructor = Vue.extend(webRTCPlayerContainer);
@@ -102,84 +97,98 @@
                 this.player = new vExtendConstructor();
             }
             this.player.$on('playerStatusChanged', this.playerStatusChangedHandler.bind(this));
-        },
-        mounted : function() {
-        },
-        beforeDestroy : function() {
+        }
+
+        private beforeDestroy() {
             if (this.player) {
                 this.player.$destroy();
             }
-        },
-        methods : {
-            play : function (time) {
-                if (this.playTimeoutId) {
-                    clearTimeout(this.playTimeoutId);
-                    this.playTimeoutId = null;
-                }
-                this.playTimeoutId = setTimeout(() => {
-                    if (this.cameraData.recorderType == "nvr") {
-                        this.player.play({url: getNvrServerUrl(this.cameraData.mediaStreamURL), path: this.cameraData.channel + (time ? "?time=" + time.getTime() : '')});
-                    } else if (this.cameraData.recorderType == "recorder") {
-                        this.player.play(time ? time.getTime() : 0);
-                    } else {
-                        toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAM_TOKEN : toastcamAPIs.camera.GET_TOKEN, {cameraId: this.cameraData.id}, (res) => {
-                            if (time) {
-                                this.player.play({url: getCvrServerUrl(res.cvrHostPort), path: '/token=' + res.token + '&time=' + time.getTime()});
-                            } else {
-                                this.player.play({url: getLiveServerUrl(this.cameraData.mediaStreamURL), path: this.cameraData.id + '?token=' + res.token});
-                            }
-                        });
-                    }
-                }, 200);
-            },
-            resume : function () {
-                this.player.resume();
-            },
-            mute : function () {
-                this.player.mute();
-            },
-            pause : function () {
-                this.player.pause();
-            },
-            stop : function () {
-                this.player.stop();
-            },
-            close : function () {
-                this.player.close();
-            },
-            getCurrentTime : function () {
-                return this.player.getCurrentTime();
-            },
-            getStatus : function () {
-                return this.player.getStatus();
-            },
-            zoomZone : function (top, left) {
-                this.player.zoomZone(top, left);
-            },
-            zoomVideo : function (ratio) {
-                this.player.zoomVideo(ratio);
-            },
-            zoomVideoWithZoomablePoint : function(x, y) {
-                this.player.zoomVideoWithZoomablePoint(x, y);
-            },
-            zoomUp : function(zoom) {
-                this.player.zoomUp(zoom);
-            },
-            zoomUpWithZoom : function(zoom) {
-                this.player.zoomUpWithZoom(zoom);
-            },
-            positionZoomable : function(zoom) {
-                this.player.positionZoomable(zoom);
-            },
-            playerStatusChangedHandler : function (status) {
-                this.$emit('event', status);
-            },
-            setData : function(key, value) {
-                this.player.setData(key, value);
-            },
-            getData : function(key) {
-                return this.player.getData(key);
+        }
+
+        play(time: any) {
+            if (this.playTimeoutId) {
+                clearTimeout(this.playTimeoutId);
+                this.playTimeoutId = null;
             }
+            this.playTimeoutId = setTimeout(() => {
+                if (this.cameraData.recorderType == "nvr") {
+                    this.player.play({url: getNvrServerUrl(this.cameraData.mediaStreamURL), path: this.cameraData.channel + (time ? "?time=" + time.getTime() : '')});
+                } else if (this.cameraData.recorderType == "recorder") {
+                    this.player.play(time ? time.getTime() : 0);
+                } else {
+                    toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAM_TOKEN : toastcamAPIs.camera.GET_TOKEN, {cameraId: this.cameraData.id}, (res: any) => {
+                        if (time) {
+                            this.player.play({url: getCvrServerUrl(res.cvrHostPort), path: '/token=' + res.token + '&time=' + time.getTime()});
+                        } else {
+                            this.player.play({url: getLiveServerUrl(this.cameraData.mediaStreamURL), path: this.cameraData.id + '?token=' + res.token});
+                        }
+                    });
+                }
+            }, 200);
+        }
+
+        resume() {
+            this.player.resume();
+        }
+
+        mute() {
+            this.player.mute();
+        }
+
+        pause() {
+            this.player.pause();
+        }
+
+        stop() {
+            this.player.stop();
+        }
+
+        close() {
+            this.player.close();
+        }
+
+        getCurrentTime() {
+            return this.player.getCurrentTime();
+        }
+
+        getStatus() {
+            return this.player.getStatus();
+        }
+
+        zoomZone(top: any, left: any) {
+            this.player.zoomZone(top, left);
+        }
+
+        zoomVideo(ratio: any) {
+            this.player.zoomVideo(ratio);
+        }
+
+        zoomVideoWithZoomablePoint(x: any, y: any) {
+            this.player.zoomVideoWithZoomablePoint(x, y);
+        }
+
+        zoomUp(zoom: any) {
+            this.player.zoomUp(zoom);
+        }
+
+        zoomUpWithZoom(zoom: any) {
+            this.player.zoomUpWithZoom(zoom);
+        }
+
+        positionZoomable(zoom: any) {
+            this.player.positionZoomable(zoom);
+        }
+
+        playerStatusChangedHandler(status: any) {
+            this.$emit('event', status);
+        }
+
+        setData(key: any, value: any) {
+            (this as any)[key] = value;
+        }
+
+        getData(key: any) {
+            return (this as any)[key];
         }
     }
 </script>

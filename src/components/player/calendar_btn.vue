@@ -13,34 +13,23 @@
         </span>
     </span>
 </template>
-<script>
+<script lang="ts">
+    import { Component, Prop, Vue } from 'vue-property-decorator';
     import store from '../../service/player/store';
 
-    export default {
-        name: 'calendarBtn',
-        props: ['fullMode'],
-        computed: {
-            isShowTimelineCalendar: function () {
-                return store.state.isShowTimelineCalendar;
-            }
-        },
-        data: function () {
-            return {
-            }
-        },
-        created : function() {
-        },
-        mounted : function() {
-        },
-        beforeDestroy : function() {
-        },
-        methods : {
-            pressedShowTimelineCalendarButton: function () {
-                const isShowTimelineCalendar = !this.isShowTimelineCalendar;
-                store.dispatch('IS_SHOW_CALENDAR_CHANGE', isShowTimelineCalendar);
-                if (isShowTimelineCalendar) {
-                    this.$emit('event', {event: 'updateCalendarDate'});
-                }
+    @Component
+    export default class CalendarBtn extends Vue {
+        @Prop() fullMode!: any;
+
+        get isShowTimelineCalendar() {
+            return store.state.isShowTimelineCalendar;
+        }
+
+        pressedShowTimelineCalendarButton() {
+            const isShowTimelineCalendar = !this.isShowTimelineCalendar;
+            store.dispatch('IS_SHOW_CALENDAR_CHANGE', isShowTimelineCalendar);
+            if (isShowTimelineCalendar) {
+                this.$emit('event', {event: 'updateCalendarDate'});
             }
         }
     }

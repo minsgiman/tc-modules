@@ -10,30 +10,18 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
+    import { Component, Vue } from 'vue-property-decorator';
     import store from '../../service/player/store';
 
-    export default {
-        name: 'zoomBtn',
-        computed: {
-            cameraData: function () {
-                return store.state.cameraData;
-            }
-        },
-        data: function () {
-            return {
-            }
-        },
-        created : function() {
-        },
-        mounted : function() {
-        },
-        beforeDestroy : function() {
-        },
-        methods : {
-            zoomUp: function (zoom) {
-                this.$emit('event', zoom);
-            }
+    @Component
+    export default class ZoomBtn extends Vue {
+        get cameraData() {
+            return store.state.cameraData;
+        }
+
+        zoomUp(zoom: any) {
+            this.$emit('event', zoom);
         }
     }
 </script>

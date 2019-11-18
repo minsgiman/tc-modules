@@ -46,77 +46,69 @@
         </div>
     </div>
 </template>
-<script>
+<script lang="ts">
+    import { Component, Prop, Vue } from 'vue-property-decorator';
     import store from '../../service/player/store';
-    import calendar_btn from './calendar_btn';
+    import calendar_btn from './calendar_btn.vue';
 
-    export default {
-        name: 'timelineTimeController',
-        props: ['timeline', 'fullMode'],
-        computed: {
-            timeRange: function () {
-                return store.state.timeRange;
-            },
-            currentTime: function () {
-                return store.state.currentTime;
-            },
-            isShowTimelineCalendar: function () {
-                return store.state.isShowTimelineCalendar;
-            },
-            isExpiredCloud: function () {
-                return store.getters.isExpiredCloud;
-            },
-            isFullScreen: function () {
-                return store.state.isFullScreen;
-            }
-        },
-        data: function () {
-            return {
-            }
-        },
-        created : function() {
-        },
-        mounted : function() {
-        },
-        beforeDestroy : function() {
-        },
-        methods : {
-            changeTimeRange: function (minutes) {
-                this.timeline.setData('newTimelineDragCnt', 0);
-                this.$emit('event', {event: 'dblClickFlagChanged', data: false});
-                this.timeline.setData('lineMoveFlag', true);
-                this.timeline.setData('changeTimeRangeClick', true);
-                this.timeline.setData('dragThumCancle', false);
-                if(this.timeRange == minutes){
-                    return;
-                }
-
-                if(this.timeline.changeTimeRangeFlag == true){
-                    this.$emit('event', {event: 'loadingDataAlert'});
-                    return;
-                }
-
-                this.timeline.changeTimeRangeFlag = true;
-
-                setTimeout(() => {
-                    this.timeline.changeTimeRangeFlag = false;
-                    this.timeline.updateCursor(this.currentTime);
-                    this.timeline.getData('svg').select('.cursor').classed('hide', false);
-                },800);
-                store.dispatch('TIME_RANGE_CHANGE', minutes);
-
-                if (this.timeline.getData('forceDomain')) {
-                    this.timeline.setTimeRange(minutes);
-                } else {
-                    this.timeline.zoomDomain(this.timeline.domainCenterTime(), minutes);
-                }
-            },
-            updateCalendarDate: function() {
-                this.$emit('event', {event: 'updateCalendarDate'});
-            }
-        },
-        components : {
+    @Component({
+        components: {
             calendar_btn
+        }
+    })
+    export default class TimelineTimeController extends Vue {
+        @Prop() timeline!: any;
+        @Prop() fullMode!: any;
+
+        get timeRange() {
+            return store.state.timeRange;
+        }
+        get currentTime() {
+            return store.state.currentTime;
+        }
+        get isShowTimelineCalendar() {
+            return store.state.isShowTimelineCalendar;
+        }
+        get isExpiredCloud() {
+            return store.getters.isExpiredCloud;
+        }
+        get isFullScreen() {
+            return store.state.isFullScreen;
+        }
+
+        changeTimeRange(minutes: any) {
+            this.timeline.setData('newTimelineDragCnt', 0);
+            this.$emit('event', {event: 'dblClickFlagChanged', data: false});
+            this.timeline.setData('lineMoveFlag', true);
+            this.timeline.setData('changeTimeRangeClick', true);
+            this.timeline.setData('dragThumCancle', false);
+            if(this.timeRange == minutes){
+                return;
+            }
+
+            if(this.timeline.changeTimeRangeFlag == true){
+                this.$emit('event', {event: 'loadingDataAlert'});
+                return;
+            }
+
+            this.timeline.changeTimeRangeFlag = true;
+
+            setTimeout(() => {
+                this.timeline.changeTimeRangeFlag = false;
+                this.timeline.updateCursor(this.currentTime);
+                this.timeline.getData('svg').select('.cursor').classed('hide', false);
+            },800);
+            store.dispatch('TIME_RANGE_CHANGE', minutes);
+
+            if (this.timeline.getData('forceDomain')) {
+                this.timeline.setTimeRange(minutes);
+            } else {
+                this.timeline.zoomDomain(this.timeline.domainCenterTime(), minutes);
+            }
+        }
+
+        updateCalendarDate() {
+            this.$emit('event', {event: 'updateCalendarDate'});
         }
     }
 </script>

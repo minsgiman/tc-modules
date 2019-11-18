@@ -19,111 +19,98 @@
         </div>
     </div>
 </template>
-<script>
+<script lang="ts">
+    import { Component, Vue } from 'vue-property-decorator';
     import store from '../../service/player/store';
     import toastcamAPIs from './../../service/toastcamAPIs';
 
-    export default {
-        name: 'cvrPlaySecureManager',
-        props: [],
-        computed: {
-            cameraData: function () {
-                return store.state.cameraData;
-            },
-            isLive: function () {
-                return store.state.isLive;
-            },
-            isShared: function () {
-                return store.state.isShared;
-            },
-            category: function () {
-                return store.state.category;
-            }
-        },
-        data: function () {
-            return {
-                securePassword: '',
-                cvrPasswordSuccessCallback: null,
-                isShowCVRPlayPasswordConfirm: false
-            }
-        },
-        created : function() {
-        },
-        mounted : function() {
-        },
-        beforeDestroy : function() {
+    @Component
+    export default class CvrPlaySecureManager extends Vue {
+        get cameraData() {
+            return store.state.cameraData;
+        }
+        get isLive() {
+            return store.state.isLive;
+        }
+        get isShared() {
+            return store.state.isShared;
+        }
+        get category() {
+            return store.state.category;
+        }
 
-        },
-        methods : {
-            checkCVRSeucre: function(callback) {
-                if (this.category === 'demo') {
-                    callback(false);
-                } else {
-                    toastcamAPIs.call(this.isShared && this.category === 'b2b' ? toastcamAPIs.camera.GET_SHARED_CAMERA_CONFIG : toastcamAPIs.camera.GET_CAMERA_CONFIG, {cameraId: this.cameraData.id}, (data) => {
-                        if(data.secureMode == "on"){
-                            this.$emit('event', {event: 'stopTimer'});
-                            var passCVRSecure = sessionStorage.getItem("passCVRSecureCameraIds");
-                            if (passCVRSecure == null || passCVRSecure === "undefined"){
-                                callback(true);
-                            } else {
-                                if(passCVRSecure.indexOf(this.cameraData.id) > -1){
-                                    callback(false);
-                                }else{
-                                    callback(true);
-                                }
-                            }
-                        } else {
-                            callback(false);
-                        }
-                    }, (err) => {
-                        callback(false);
-                    });
-                }
-            },
+        securePassword: string = '';
+        cvrPasswordSuccessCallback: any = null;
+        isShowCVRPlayPasswordConfirm: boolean = false;
 
-            showCVRPlayPasswordConfirm: function() {
-                this.isShowCVRPlayPasswordConfirm = true;
-            },
-
-            setCVRSecureCallback: function(callback) {
-                this.securePassword = '';
-                this.isShowCVRPlayPasswordConfirm = true;
-                this.cvrPasswordSuccessCallback = callback;
-            },
-
-            checkPlayPassword: function() {
-                this.isShowCVRPlayPasswordConfirm = false;
-                toastcamAPIs.call(toastcamAPIs.camera.CONFIRM_SECURE_PASSWORD, {cameraId: this.cameraData.id, securePassword: this.securePassword}, (data) => {
-                    if(data.code == "ok"){
+        checkCVRSeucre(callback: any) {
+            if (this.category === 'demo') {
+                callback(false);
+            } else {
+                toastcamAPIs.call(this.isShared && this.category === 'b2b' ? toastcamAPIs.camera.GET_SHARED_CAMERA_CONFIG : toastcamAPIs.camera.GET_CAMERA_CONFIG, {cameraId: this.cameraData.id}, (data: any) => {
+                    if(data.secureMode == "on"){
+                        this.$emit('event', {event: 'stopTimer'});
                         var passCVRSecure = sessionStorage.getItem("passCVRSecureCameraIds");
-                        if(passCVRSecure == null || passCVRSecure == "undefined" || passCVRSecure.indexOf(this.cameraData.id) > -1){
-                            sessionStorage.setItem("passCVRSecureCameraIds", this.cameraData.id);
+                        if (passCVRSecure == null || passCVRSecure === "undefined"){
+                            callback(true);
                         } else {
-                            sessionStorage.setItem("passCVRSecureCameraIds", passCVRSecure + "," + this.cameraData.id);
-                        }
-                        if (this.cvrPasswordSuccessCallback) {
-                            this.cvrPasswordSuccessCallback();
+                            if(passCVRSecure.indexOf(this.cameraData.id) > -1){
+                                callback(false);
+                            }else{
+                                callback(true);
+                            }
                         }
                     } else {
-                        this.$emit('event', {event: 'isIncorrectPlayPasswordChanged', data: true});
+                        callback(false);
                     }
-                }, (err) => {});
-            },
-
-            cancelCVRPlay: function() {
-                if(this.isLive){
-                    this.$emit('event', {event: 'goLiveByCancleCVR'});
-                }
-                this.isShowCVRPlayPasswordConfirm = false;
-            },
-
-            setData : function(key, value) {
-                this[key] = value;
-            },
-
-            getData : function(key) {
-                return this[key];
+                }, (err: any) => {
+                    callback(false);
+                });
             }
+        }
+
+        showCVRPlayPasswordConfirm() {
+            this.isShowCVRPlayPasswordConfirm = true;
+        }
+
+        setCVRSecureCallback(callback: any) {
+            this.securePassword = '';
+            this.isShowCVRPlayPasswordConfirm = true;
+            this.cvrPasswordSuccessCallback = callback;
+        }
+
+        checkPlayPassword() {
+            this.isShowCVRPlayPasswordConfirm = false;
+            toastcamAPIs.call(toastcamAPIs.camera.CONFIRM_SECURE_PASSWORD, {cameraId: this.cameraData.id, securePassword: this.securePassword}, (data: any) => {
+                if(data.code == "ok"){
+                    var passCVRSecure = sessionStorage.getItem("passCVRSecureCameraIds");
+                    if(passCVRSecure == null || passCVRSecure == "undefined" || passCVRSecure.indexOf(this.cameraData.id) > -1){
+                        sessionStorage.setItem("passCVRSecureCameraIds", this.cameraData.id);
+                    } else {
+                        sessionStorage.setItem("passCVRSecureCameraIds", passCVRSecure + "," + this.cameraData.id);
+                    }
+                    if (this.cvrPasswordSuccessCallback) {
+                        this.cvrPasswordSuccessCallback();
+                    }
+                } else {
+                    this.$emit('event', {event: 'isIncorrectPlayPasswordChanged', data: true});
+                }
+            }, (err: any) => {});
+        }
+
+        cancelCVRPlay() {
+            if(this.isLive){
+                this.$emit('event', {event: 'goLiveByCancleCVR'});
+            }
+            this.isShowCVRPlayPasswordConfirm = false;
+        }
+
+        setData(key: any, value: any) {
+            (this as any)[key] = value;
+        }
+
+        getData(key: any) {
+            return (this as any)[key];
         }
     }
 </script>

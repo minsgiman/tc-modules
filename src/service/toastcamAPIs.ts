@@ -1,6 +1,6 @@
-import toastcamAPIs from "toastcam-apis";
+import toastcamAPIs from 'toastcam-apis';
 
-function toastAPICall (api, param, successCb, errorCb) {
+function toastAPICall(api: any, param?: any, successCb?: any, errorCb?: any) {
     toastcamAPIs.call(api, param, successCb, errorCb);
 }
 

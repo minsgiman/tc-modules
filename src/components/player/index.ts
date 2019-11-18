@@ -3,22 +3,24 @@ import { i18n } from '../../i18n/player/i18n';
 import toastcamAPIs from './../../service/toastcamAPIs';
 import store from '../../service/player/store';
 import playContainer from './toastcam_player.vue';
-import "ie-array-find-polyfill";
+import 'ie-array-find-polyfill';
 
 if (!Array.prototype.includes) {
-    Object.defineProperty(Array.prototype, "includes", {
+    Object.defineProperty(Array.prototype, 'includes', {
         enumerable: false,
-        value: function(obj) {
-            var newArr = this.filter(function(el) {
-                return el == obj;
+        value: function(obj: any) {
+            const newArr: any = this.filter((el: any) => {
+                return el === obj;
             });
             return newArr.length > 0;
         }
     });
 }
 
-class player {
-    constructor(param) {
+class Player {
+    control: any;
+
+    constructor(param: any) {
         if (param.category === 'b2b') {
             toastcamAPIs.setConfig({
                 prefix: '/json/biz/'
@@ -38,7 +40,7 @@ class player {
         this.setData('shopId', param.shopId ? param.shopId : '');
         this.setData('isShared', param.isShared);
 
-        let vExtendConstructor = Vue.extend(playContainer);
+        const vExtendConstructor: any = Vue.extend(playContainer);
         this.control = new vExtendConstructor({
             i18n,
             propsData: {
@@ -49,15 +51,15 @@ class player {
         });
     }
 
-    requestPlay(time) {
+    requestPlay(time: any) {
         this.control.timeline.requestPlay(time);
     }
 
-    redrawEvents(events) {
+    redrawEvents(events: any) {
         this.control.timeline.redrawEvents(events);
     }
 
-    jumpToCvrWithSeconds(seconds) {
+    jumpToCvrWithSeconds(seconds: any) {
         if (seconds > 0) {
             this.control.playIndicator.showIndicator('forward');
         } else {
@@ -80,8 +82,8 @@ class player {
         this.control.reloadPlayer();
     }
 
-    setData(key, value) {
-        switch(key) {
+    setData(key: string, value: any) {
+        switch (key) {
             case 'cameraData':
                 store.dispatch('CAMERA_DATA_CHANGE', value);
                 break;
@@ -138,4 +140,4 @@ class player {
     }
 }
 
-export default player;
+export default Player;

@@ -5,31 +5,27 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
+    import { Component, Vue } from 'vue-property-decorator';
     import store from '../../service/player/store';
 
-    export default {
-        name: 'playIndicator',
-        props: [],
-        computed: {
-            isFullScreen: function () {
-                return store.state.isFullScreen;
-            },
-            isPlaying: function () {
-                return store.state.isPlaying;
-            },
-            ptzControlMode: function () {
-                return store.state.ptzControlMode;
-            }
-        },
-        data: function () {
-            return {
-                indicatorTimeout: null
-            }
-        },
-        created : function() {
-        },
-        mounted : function() {
+    const $: any = (window as any).$ as any;
+
+    @Component
+    export default class PlayIndicator extends Vue {
+        get isFullScreen() {
+            return store.state.isFullScreen;
+        }
+        get isPlaying() {
+            return store.state.isPlaying;
+        }
+        get ptzControlMode() {
+            return store.state.ptzControlMode;
+        }
+
+        indicatorTimeout: any = null;
+
+        private mounted() {
             this.updateIndicatorSize();
             $('#play_indicator').hover(() => {
                 this.$emit('event', {event: 'indicatorHoverIn'});
@@ -39,64 +35,61 @@
             $('#play_indicator').mousemove(() => {
                 this.$emit('event', {event: 'indicatorHoverIn'});
             });
-        },
-        beforeDestroy : function() {
-        },
-        methods : {
-            showIndicator : function(type) {
-                if (this.indicatorTimeout) {
-                    clearTimeout(this.indicatorTimeout);
-                    this.indicatorTimeout = null;
-                    $('#play_indicator .btn_wrap').empty();
-                }
+        }
 
-                this.indicatorTimeout = setTimeout(() => {
-                    let className;
-
-                    if (type === 'play') {
-                        className = 'play_btn';
-                    } else if (type === 'pause') {
-                        className = 'pause_btn';
-                    } else if (type === 'backward') {
-                        className = 'left_btn';
-                    } else if (type === 'forward') {
-                        className = 'right_btn';
-                    }
-                    const $btn = $('<button>', {class: className});
-                    if (type === 'forward' || type === 'backward') {
-                        const $num = $('<span>');
-                        $num.text(10);
-                        $num.css('color', 'white').css('font-size', '8px').css('display', 'inline-block').css('margin-top', '2px');
-                        $btn.append($num);
-                    }
-                    $('#play_indicator .btn_wrap').append($btn);
-                    setTimeout(function () {
-                        $btn.addClass('animate');
-                    },100);
-                    setTimeout(function (){
-                        $btn.remove();
-                    }, 700);
-                }, 200);
-            },
-
-            togglePlay: function() {
-                if (this.ptzControlMode) {
-                    return;
-                }
-                if (this.isPlaying) {
-                    this.showIndicator('pause');
-                } else {
-                    this.showIndicator('play');
-                }
-                this.$emit('event', {event: 'togglePlay'});
-            },
-
-            updateIndicatorSize: function() {
-                $('#play_indicator').css('display', 'block');
-                $('#play_indicator').css('width', $("#player").width() - 200);
-                $('#play_indicator').css('height', $("#player").height());
-                $('#play_indicator').css('display', 'table');
+        showIndicator(type: string) {
+            if (this.indicatorTimeout) {
+                clearTimeout(this.indicatorTimeout);
+                this.indicatorTimeout = null;
+                $('#play_indicator .btn_wrap').empty();
             }
+
+            this.indicatorTimeout = setTimeout(() => {
+                let className;
+
+                if (type === 'play') {
+                    className = 'play_btn';
+                } else if (type === 'pause') {
+                    className = 'pause_btn';
+                } else if (type === 'backward') {
+                    className = 'left_btn';
+                } else if (type === 'forward') {
+                    className = 'right_btn';
+                }
+                const $btn = $('<button>', {class: className});
+                if (type === 'forward' || type === 'backward') {
+                    const $num = $('<span>');
+                    $num.text(10);
+                    $num.css('color', 'white').css('font-size', '8px').css('display', 'inline-block').css('margin-top', '2px');
+                    $btn.append($num);
+                }
+                $('#play_indicator .btn_wrap').append($btn);
+                setTimeout(function () {
+                    $btn.addClass('animate');
+                },100);
+                setTimeout(function (){
+                    $btn.remove();
+                }, 700);
+            }, 200);
+        }
+
+        togglePlay() {
+            if (this.ptzControlMode) {
+                return;
+            }
+            if (this.isPlaying) {
+                this.showIndicator('pause');
+            } else {
+                this.showIndicator('play');
+            }
+            this.$emit('event', {event: 'togglePlay'});
+        }
+
+        updateIndicatorSize() {
+            $('#play_indicator').css('display', 'block');
+            $('#play_indicator').css('width', $("#player").width() - 200);
+            $('#play_indicator').css('height', $("#player").height());
+            $('#play_indicator').css('display', 'table');
         }
     }
 </script>

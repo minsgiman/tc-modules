@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
-import localeKR from './locale-ko';
-import localeJP from './locale-ja';
-import localeEN from './locale-en';
+import localeKR from './locale-ko.json';
+import localeJP from './locale-ja.json';
+import localeEN from './locale-en.json';
 
 Vue.use(VueI18n);
 
@@ -13,11 +13,11 @@ const messages = {
 };
 
 let locale = 'ko';
-if (navigator.language.indexOf('ko') != -1) {
+if (navigator.language.indexOf('ko') !== -1) {
     locale = 'ko';
-} else if (navigator.language.indexOf('ja') != -1) {
+} else if (navigator.language.indexOf('ja') !== -1) {
     locale = 'ja';
-} else if (navigator.language.indexOf('en') != -1) {
+} else if (navigator.language.indexOf('en') !== -1) {
     locale = 'en';
 }
 

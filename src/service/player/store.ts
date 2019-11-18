@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import { IStoreState } from './interface';
 
 Vue.use(Vuex);
 const store = new Vuex.Store({
@@ -27,36 +28,40 @@ const store = new Vuex.Store({
         currentDomain: null,
         isShowTimelineCalendar: false,
         ptzControlMode: false
-    },
+    } as IStoreState,
     getters: {
-        isExpiredCloud: state => {
+        isExpiredCloud: (state) => {
             if ((state.cameraData.serviceType === 'n/a' || state.cameraData.serviceType === '0d' || state.cameraData.saveEndDate < Date.now()) && state.cameraData.recorderType !== 'nvr') {
                 return true;
             }
             return false;
         },
-        getAllFilteredZonesIds: state => {
-            return zoneData => {
-                var filteredEventZoneIdsArr = state.eventZones.filter(item => item.filterMark === 'on').map(item => item.id);
-                var filteredMotionZoneIdsArr = state.motionZones.filter(item => item.filterMark === 'on' && item.id !== '9').map(item => item.uid);
-                var allFilteredZoneIdsArr = filteredEventZoneIdsArr.concat(filteredMotionZoneIdsArr);	// 체크 처리된 모든 zoneId
-                var deleteZone = state.motionZones.find(item => item.id === '9');
-                var isCheckedDeleteZoneId = (deleteZone && deleteZone.filterMark === 'on') ? true : false;
+        getAllFilteredZonesIds: (state) => {
+            return (zoneData: any) => {
+                const filteredEventZoneIdsArr: any = state.eventZones.filter((item: any) => item.filterMark === 'on').map((item: any) => item.id);
+                const filteredMotionZoneIdsArr: any = state.motionZones.filter((item: any) => item.filterMark === 'on' && item.id !== '9').map((item: any) => item.uid);
+                let allFilteredZoneIdsArr: any = filteredEventZoneIdsArr.concat(filteredMotionZoneIdsArr);	// 체크 처리된 모든 zoneId
+                const deleteZone: any = state.motionZones.find((item: any) => item.id === '9');
+                const isCheckedDeleteZoneId: any = (deleteZone && deleteZone.filterMark === 'on') ? true : false;
 
                 // 삭제된 이벤트가 체크된 경우 이벤트에서 alarmzone으로 설정된 zoneId가 아닌 zoneId 모두를 추출.
                 if (isCheckedDeleteZoneId) {
-                    var allZoneIdsArr = state.eventZones.map(item => item.id).concat(state.motionZones.filter(item => item.id !== '9').map(item => item.uid));
-                    var deletedZoneIdsArr = zoneData ? zoneData.filter(item => !allZoneIdsArr.includes(item)) : [];
-                    allFilteredZoneIdsArr = allFilteredZoneIdsArr.concat(deletedZoneIdsArr.filter(item => (item !== "ACCESS_ENTER" && item !== "ACCESS_EXIT" && item !== "SENSOR_TEMP" && item !== "SENSOR_HUMID" && item !== "SENSOR_MOTION" && item !== "SENSOR_MAGNETIC" && item !== "SENSOR_SMOKE" && item !== "SENSOR_GAS" && item !== "SENSOR_PLUG" && item !== "DOORLOCK_EVENT")));
+                    const allZoneIdsArr: any = state.eventZones.map((item: any) => item.id).concat(state.motionZones.filter((item: any) => item.id !== '9').map((item: any) => item.uid));
+                    const deletedZoneIdsArr: any = zoneData ? zoneData.filter((item: any) => !allZoneIdsArr.includes(item)) : [];
+                    allFilteredZoneIdsArr = allFilteredZoneIdsArr.concat(deletedZoneIdsArr.filter((item: any) => (
+                        item !== 'ACCESS_ENTER' && item !== 'ACCESS_EXIT' && item !== 'SENSOR_TEMP' &&
+                        item !== 'SENSOR_HUMID' && item !== 'SENSOR_MOTION' && item !== 'SENSOR_MAGNETIC' &&
+                        item !== 'SENSOR_SMOKE' && item !== 'SENSOR_GAS' && item !== 'SENSOR_PLUG' && item !== 'DOORLOCK_EVENT')));
                 }
 
                 if (state.inoutFilter) {
-                    allFilteredZoneIdsArr = allFilteredZoneIdsArr.concat(["ACCESS_ENTER", "ACCESS_EXIT"]);
+                    allFilteredZoneIdsArr = allFilteredZoneIdsArr.concat(['ACCESS_ENTER', 'ACCESS_EXIT']);
                 }
                 if (state.sensorZones) {
-                    var i, len = state.sensorZones.length;
-                    for (i = 0; i < len; i+=1) {
-                        if (state.sensorZones[i].filterMark === "on") {
+                    let i;
+                    const len = state.sensorZones.length;
+                    for (i = 0; i < len; i += 1) {
+                        if (state.sensorZones[i].filterMark === 'on') {
                             allFilteredZoneIdsArr.push(state.sensorZones[i].id);
                         }
                     }
@@ -66,82 +71,82 @@ const store = new Vuex.Store({
         }
     },
     actions: {
-        CATEGORY_CHANGE: function(context, state) {
+        CATEGORY_CHANGE: (context, state) => {
             context.commit('UPDATE_CATEGORY', state);
         },
-        CAMERA_DATA_CHANGE: function(context, state) {
+        CAMERA_DATA_CHANGE: (context, state) => {
             context.commit('UPDATE_CAMERA_DATA', state);
         },
-        CAMERA_CONFIG_CHANGE: function(context, state) {
+        CAMERA_CONFIG_CHANGE: (context, state) => {
             let timezone = '';
             if (state && state.timezone) {
-                var tokens = state.timezone.split(',');
+                const tokens = state.timezone.split(',');
                 timezone = tokens[2];
             }
             context.commit('UPDATE_CAMERA_CONFIG', state);
             context.commit('UPDATE_TIMEZONE', timezone);
         },
-        SHOP_ID_CHANGE: function(context, state) {
+        SHOP_ID_CHANGE: (context, state) => {
             context.commit('UPDATE_SHOP_ID', state);
         },
-        IS_SHARED_CHANGE: function(context, state) {
+        IS_SHARED_CHANGE: (context, state) => {
             context.commit('UPDATE_IS_SHARED', state);
         },
-        IS_FULLSCREEN_CHANGE: function(context, state) {
+        IS_FULLSCREEN_CHANGE: (context, state) => {
             context.commit('UPDATE_IS_FULLSCREEN', state);
         },
-        IS_PLAYING_CHANGE: function(context, state) {
+        IS_PLAYING_CHANGE: (context, state) => {
             context.commit('UPDATE_IS_PLAYING', state);
         },
-        DATA_LOADING_STATUS_CHANGE: function(context, state) {
+        DATA_LOADING_STATUS_CHANGE: (context, state) => {
             context.commit('UPDATE_DATA_LOADING_STATUS', state);
         },
-        CURRENT_TIME_CHANGE: function(context, state) {
+        CURRENT_TIME_CHANGE: (context, state) => {
             context.commit('UPDATE_CURRENT_TIME', state);
         },
-        IS_LIVE_CHANGE: function(context, state) {
+        IS_LIVE_CHANGE: (context, state) => {
             context.commit('UPDATE_IS_LIVE', state);
         },
-        PLAY_BTN_STATUS_CHANGE: function(context, state) {
+        PLAY_BTN_STATUS_CHANGE: (context, state) => {
             context.commit('UPDATE_PLAY_BTN_STATUS', state);
         },
-        SERVICE_DAY_CHANGE: function(context, state) {
+        SERVICE_DAY_CHANGE: (context, state) => {
             context.commit('UPDATE_SERVICE_DAY', state);
         },
-        TIME_ZONE_CHANGE: function(context, state) {
+        TIME_ZONE_CHANGE: (context, state) => {
             context.commit('UPDATE_TIME_ZONE', state);
         },
-        CURRENT_DOMAIN_CHANGE: function(context, state) {
+        CURRENT_DOMAIN_CHANGE: (context, state) => {
             context.commit('UPDATE_CURRENT_DOMAIN', state);
         },
-        CVR_DATA_CHANGE: function(context, state) {
+        CVR_DATA_CHANGE: (context, state) => {
             context.commit('UPDATE_CVR_DATA', state);
         },
-        EVENTS_CHANGE: function(context, state) {
+        EVENTS_CHANGE: (context, state) => {
             context.commit('UPDATE_EVENTS', state);
         },
-        INOUT_FILTER_CHANGE: function(context, state) {
+        INOUT_FILTER_CHANGE: (context, state) => {
             context.commit('UPDATE_INOUT_FILTER', state);
         },
-        SENSOR_ZONES_CHANGE: function(context, state) {
+        SENSOR_ZONES_CHANGE: (context, state) => {
             context.commit('UPDATE_SENSOR_ZONES', state);
         },
-        EVENT_ZONES_CHANGE: function(context, state) {
+        EVENT_ZONES_CHANGE: (context, state) => {
             context.commit('UPDATE_EVENT_ZONES', state);
         },
-        MOTION_ZONES_CHANGE: function(context, state) {
+        MOTION_ZONES_CHANGE: (context, state) => {
             context.commit('UPDATE_MOTION_ZONES', state);
         },
-        TIME_RANGE_CHANGE: function(context, state) {
+        TIME_RANGE_CHANGE: (context, state) => {
             context.commit('UPDATE_TIME_RANGE', state);
         },
-        IS_SHOW_CALENDAR_CHANGE: function(context, state) {
+        IS_SHOW_CALENDAR_CHANGE: (context, state) => {
             context.commit('UPDATE_IS_SHOW_CALENDAR', state);
         },
-        PTZ_CONTROL_CHANGE: function(context, state) {
+        PTZ_CONTROL_CHANGE: (context, state) => {
             context.commit('UPDATE_PTZ_CONTROL', state);
         },
-        INIT_ALL_DATA: function(context, state) {
+        INIT_ALL_DATA: (context, state) => {
             context.commit('UPDATE_CAMERA_DATA', {});
             context.commit('UPDATE_CAMERA_CONFIG', {});
             context.commit('UPDATE_SHOP_ID', '');
@@ -167,73 +172,73 @@ const store = new Vuex.Store({
         }
     },
     mutations: {
-        UPDATE_CATEGORY: function(state, value) {
+        UPDATE_CATEGORY: (state, value) => {
             state.category = value;
         },
-        UPDATE_CAMERA_DATA: function(state, value) {
+        UPDATE_CAMERA_DATA: (state, value) => {
             state.cameraData = value;
         },
-        UPDATE_CAMERA_CONFIG: function(state, value) {
+        UPDATE_CAMERA_CONFIG: (state, value) => {
             state.cameraConfig = value;
         },
-        UPDATE_SHOP_ID: function(state, value) {
+        UPDATE_SHOP_ID: (state, value) => {
             state.shopId = value;
         },
-        UPDATE_IS_SHARED: function(state, value) {
+        UPDATE_IS_SHARED: (state, value) => {
             state.isShared = value;
         },
-        UPDATE_IS_FULLSCREEN: function(state, value) {
+        UPDATE_IS_FULLSCREEN: (state, value) => {
             state.isFullScreen = value;
         },
-        UPDATE_DATA_LOADING_STATUS: function(state, value) {
+        UPDATE_DATA_LOADING_STATUS: (state, value) => {
             state.dataLoadingStatus = value;
         },
-        UPDATE_IS_PLAYING: function(state, value) {
+        UPDATE_IS_PLAYING: (state, value) => {
             state.isPlaying = value;
         },
-        UPDATE_CURRENT_TIME: function(state, value) {
+        UPDATE_CURRENT_TIME: (state, value) => {
             state.currentTime = value;
         },
-        UPDATE_IS_LIVE: function(state, value) {
+        UPDATE_IS_LIVE: (state, value) => {
             state.isLive = value;
         },
-        UPDATE_PLAY_BTN_STATUS: function(state, value) {
+        UPDATE_PLAY_BTN_STATUS: (state, value) => {
             state.playBtnStatus = value;
         },
-        UPDATE_SERVICE_DAY: function(state, value) {
+        UPDATE_SERVICE_DAY: (state, value) => {
             state.serviceDay = value;
         },
-        UPDATE_CURRENT_DOMAIN: function(state, value) {
+        UPDATE_CURRENT_DOMAIN: (state, value) => {
             state.currentDomain = value;
         },
-        UPDATE_TIMEZONE: function(state, value) {
+        UPDATE_TIMEZONE: (state, value) => {
             state.timezone = value;
         },
-        UPDATE_CVR_DATA: function(state, value) {
+        UPDATE_CVR_DATA: (state, value) => {
             state.cvrData = value;
         },
-        UPDATE_EVENTS: function(state, value) {
+        UPDATE_EVENTS: (state, value) => {
             state.arrEvents = value;
         },
-        UPDATE_INOUT_FILTER: function(state, value) {
+        UPDATE_INOUT_FILTER: (state, value) => {
             state.inoutFilter = value;
         },
-        UPDATE_SENSOR_ZONES: function(state, value) {
+        UPDATE_SENSOR_ZONES: (state, value) => {
             state.sensorZones = value;
         },
-        UPDATE_EVENT_ZONES: function(state, value) {
+        UPDATE_EVENT_ZONES: (state, value) => {
             state.eventZones = value;
         },
-        UPDATE_MOTION_ZONES: function(state, value) {
+        UPDATE_MOTION_ZONES: (state, value) => {
             state.motionZones = value;
         },
-        UPDATE_TIME_RANGE: function(state, value) {
+        UPDATE_TIME_RANGE: (state, value) => {
             state.timeRange = value;
         },
-        UPDATE_IS_SHOW_CALENDAR: function(state, value) {
+        UPDATE_IS_SHOW_CALENDAR: (state, value) => {
             state.isShowTimelineCalendar = value;
         },
-        UPDATE_PTZ_CONTROL: function(state, value) {
+        UPDATE_PTZ_CONTROL: (state, value) => {
             state.ptzControlMode = value;
         }
     }

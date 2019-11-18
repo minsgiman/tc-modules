@@ -67,10 +67,15 @@
         <div class="calendar_ar"></div>
     </div>
 </template>
-<script>
+<script lang="ts">
+    import { Component, Vue } from 'vue-property-decorator';
     import store from '../../service/player/store';
 
-    var pressedTimeUpButton = function (val, max) {
+    const $: any = (window as any).$ as any;
+    const moment: any = (window as any).moment as any;
+    const Pikaday: any = (window as any).Pikaday as any;
+
+    var pressedTimeUpButton = function (val: any, max: any) {
         val = val.length < 1 ? 0 : val;
         var time = parseInt(val);
         time += 1;
@@ -85,7 +90,7 @@
         }
     };
 
-    var pressedTimeDownButton = function (val, max) {
+    var pressedTimeDownButton = function (val: any, max: any) {
         val = val.length < 1 ? 0 : val;
         var time = parseInt(val);
         time -= 1;
@@ -100,41 +105,34 @@
         }
     };
 
-    export default {
-        name: 'timelineDateSelector',
-        props: [],
-        computed: {
-            cameraData: function () {
-                return store.state.cameraData;
-            },
-            currentTime: function () {
-                return store.state.currentTime;
-            },
-            isFullScreen: function () {
-                return store.state.isFullScreen;
-            },
-            isShowTimelineCalendar: function () {
-                return store.state.isShowTimelineCalendar;
-            }
-        },
-        data: function () {
-            return {
-                timelineDate: {
-                    date: '',
-                    time: '',
-                    hour: '',
-                    minute: '',
-                    second: ''
-                },
-                isShowingTimelineTimePicker: false,
-                timelineDatePicker: null
-            }
-        },
-        created : function() {
-        },
-        mounted : function() {
+    @Component
+    export default class TimelineTimeSelector extends Vue {
+        get cameraData() {
+            return store.state.cameraData;
+        }
+        get currentTime() {
+            return store.state.currentTime;
+        }
+        get isFullScreen() {
+            return store.state.isFullScreen;
+        }
+        get isShowTimelineCalendar() {
+            return store.state.isShowTimelineCalendar;
+        }
+
+        timelineDate: any = {
+            date: '',
+            time: '',
+            hour: '',
+            minute: '',
+            second: ''
+        };
+        isShowingTimelineTimePicker: any = false;
+        timelineDatePicker: any = null;
+
+        private mounted() {
             if (this.cameraData.recorderType === 'nvr') {
-                this.setupClipCalendar(this.serviceDay.toString());
+                this.setupClipCalendar((this as any).serviceDay.toString());
             } else {
                 this.setupClipCalendar(this.cameraData.serviceType);
             }
@@ -142,141 +140,141 @@
                 this.toggleTimelineCalendar();
                 return false;
             });
-        },
-        beforeDestroy : function() {
+        }
+
+        private beforeDestroy() {
             if (this.timelineDatePicker) {
                 this.timelineDatePicker.destroy();
             }
-        },
-        methods : {
-            setupClipCalendar : function (serviceType) {
-                var minDate = moment().subtract(parseInt(serviceType), 'd');
+        }
 
-                this.timelineDatePicker = new Pikaday({
-                    field: document.getElementById('timelineDate'),
-                    container: document.getElementById('calendarContainer'),
-                    format: this.$i18n.t('CLIP_CREATE_CLIP_DATE_FORMAT'),
-                    minDate: minDate.toDate(),
-                    maxDate: new Date(),
-                    defaultDate: this.currentTime,
-                    position: 'bottom right'
-                });
-            },
+        setupClipCalendar(serviceType: any) {
+            var minDate = moment().subtract(parseInt(serviceType), 'd');
 
-            setTimelineTimeMoment : function (m) {
-                this.timelineDate.time = m.format('HH : mm : ss');
-                var token = this.timelineDate.time.split(' : ');
-                if(token[0] == "Invalid date"){
-                    token[0] = "00";
-                    token[1] = "00";
-                    token[2] = "00";
-                }
-                this.timelineDate.hour = token[0];
-                this.timelineDate.minute = token[1];
-                this.timelineDate.second = token[2];
-            },
+            this.timelineDatePicker = new Pikaday({
+                field: document.getElementById('timelineDate'),
+                container: document.getElementById('calendarContainer'),
+                format: (this as any).$i18n.t('CLIP_CREATE_CLIP_DATE_FORMAT'),
+                minDate: minDate.toDate(),
+                maxDate: new Date(),
+                defaultDate: this.currentTime,
+                position: 'bottom right'
+            });
+        }
 
-            hideSelector : function () {
-                this.isShowingTimelineTimePicker = false;
-                store.dispatch('IS_SHOW_CALENDAR_CHANGE', false);
-            },
+        setTimelineTimeMoment(m: any) {
+            this.timelineDate.time = m.format('HH : mm : ss');
+            var token = this.timelineDate.time.split(' : ');
+            if(token[0] == "Invalid date"){
+                token[0] = "00";
+                token[1] = "00";
+                token[2] = "00";
+            }
+            this.timelineDate.hour = token[0];
+            this.timelineDate.minute = token[1];
+            this.timelineDate.second = token[2];
+        }
 
-            updateCalendarDate : function () {
-                this.timelineDatePicker._d = this.currentTime;
-                this.timelineDate.date = moment(parseInt(this.timelineDatePicker._d.getTime())).locale($("html").attr("lang")).format(this.$i18n.t('CLIP_CREATE_CLIP_DATE_FORMAT'));
-                this.setTimelineTimeMoment(moment(parseInt(this.timelineDatePicker._d.getTime())));
-            },
+        hideSelector() {
+            this.isShowingTimelineTimePicker = false;
+            store.dispatch('IS_SHOW_CALENDAR_CHANGE', false);
+        }
 
-            toggleTimelineCalendar : function () {
-                if (this.timelineDatePicker.isVisible()) {
-                    this.timelineDatePicker.hide();
-                } else {
-                    this.timelineDatePicker.show();
-                }
-            },
+        updateCalendarDate() {
+            this.timelineDatePicker._d = this.currentTime;
+            this.timelineDate.date = moment(parseInt(this.timelineDatePicker._d.getTime())).locale($("html").attr("lang")).format((this as any).$i18n.t('CLIP_CREATE_CLIP_DATE_FORMAT'));
+            this.setTimelineTimeMoment(moment(parseInt(this.timelineDatePicker._d.getTime())));
+        }
 
-            toggleTimelineTimePicker : function () {
-                // if (this.isShowingTimelineTimePicker) {
-                //     var timelineMoment = moment(this.timelineDate.time, 'HH : mm : ss');
-                //     this.setTimelineTimeMoment(timelineMoment);
-                // }
-                this.isShowingTimelineTimePicker = !this.isShowingTimelineTimePicker;
-            },
+        toggleTimelineCalendar() {
+            if (this.timelineDatePicker.isVisible()) {
+                this.timelineDatePicker.hide();
+            } else {
+                this.timelineDatePicker.show();
+            }
+        }
 
-            pressedTimelineHourUpButton : function () {
-                this.timelineDate.hour = pressedTimeUpButton(this.timelineDate.hour, 23);
-            },
+        toggleTimelineTimePicker() {
+            // if (this.isShowingTimelineTimePicker) {
+            //     var timelineMoment = moment(this.timelineDate.time, 'HH : mm : ss');
+            //     this.setTimelineTimeMoment(timelineMoment);
+            // }
+            this.isShowingTimelineTimePicker = !this.isShowingTimelineTimePicker;
+        }
 
-            pressedTimelineHourDownButton : function () {
-                this.timelineDate.hour = pressedTimeDownButton(this.timelineDate.hour, 23);
-            },
+        pressedTimelineHourUpButton() {
+            this.timelineDate.hour = pressedTimeUpButton(this.timelineDate.hour, 23);
+        }
 
-            pressedTimelineMinuteUpButton : function () {
-                this.timelineDate.minute = pressedTimeUpButton(this.timelineDate.minute, 59);
-            },
+        pressedTimelineHourDownButton() {
+            this.timelineDate.hour = pressedTimeDownButton(this.timelineDate.hour, 23);
+        }
 
-            pressedTimelineMinuteDownButton : function () {
-                this.timelineDate.minute = pressedTimeDownButton(this.timelineDate.minute, 59);
-            },
+        pressedTimelineMinuteUpButton() {
+            this.timelineDate.minute = pressedTimeUpButton(this.timelineDate.minute, 59);
+        }
 
-            pressedTimelineSecondUpButton : function () {
-                this.timelineDate.second = pressedTimeUpButton(this.timelineDate.second, 59);
-            },
+        pressedTimelineMinuteDownButton() {
+            this.timelineDate.minute = pressedTimeDownButton(this.timelineDate.minute, 59);
+        }
 
-            pressedTimelineSecondDownButton : function () {
-                this.timelineDate.second = pressedTimeDownButton(this.timelineDate.second, 59);
-            },
+        pressedTimelineSecondUpButton() {
+            this.timelineDate.second = pressedTimeUpButton(this.timelineDate.second, 59);
+        }
 
-            pressedTimelineTimeSelect : function () {
-                if (this.timelineDate.hour.length < 1) {
-                    this.$emit('event', {event: 'timeInputError', data: 'time'});
-                    return;
-                }
+        pressedTimelineSecondDownButton() {
+            this.timelineDate.second = pressedTimeDownButton(this.timelineDate.second, 59);
+        }
 
-                if (this.timelineDate.minute.length < 1) {
-                    this.$emit('event', {event: 'timeInputError', data: 'minute'});
-                    return;
-                }
+        pressedTimelineTimeSelect() {
+            if (this.timelineDate.hour.length < 1) {
+                this.$emit('event', {event: 'timeInputError', data: 'time'});
+                return;
+            }
 
-                if (this.timelineDate.second.length < 1) {
-                    this.$emit('event', {event: 'timeInputError', data: 'second'});
-                    return;
-                }
+            if (this.timelineDate.minute.length < 1) {
+                this.$emit('event', {event: 'timeInputError', data: 'minute'});
+                return;
+            }
 
-                this.timelineDate.time = (parseInt(this.timelineDate.hour) < 10 && this.timelineDate.hour.length < 2 ? "0" + this.timelineDate.hour : this.timelineDate.hour) + " : "
-                    + (parseInt(this.timelineDate.minute) < 10 && this.timelineDate.minute.length < 2 ? "0" + this.timelineDate.minute : this.timelineDate.minute) + " : "
-                    + (parseInt(this.timelineDate.second) < 10 && this.timelineDate.second.length < 2 ? "0" + this.timelineDate.second : this.timelineDate.second);
-                this.isShowingTimelineTimePicker = false;
-            },
+            if (this.timelineDate.second.length < 1) {
+                this.$emit('event', {event: 'timeInputError', data: 'second'});
+                return;
+            }
 
-            moveTimeline : function () {
-                var that = this;
-                this.$emit('event', {event: 'checkCVRSeucre', data: (isSecureMode) => {
-                    if(isSecureMode){
-                        that.$emit('event', {event: 'updateCVRSecureStatus', data: () => {
+            this.timelineDate.time = (parseInt(this.timelineDate.hour) < 10 && this.timelineDate.hour.length < 2 ? "0" + this.timelineDate.hour : this.timelineDate.hour) + " : "
+                + (parseInt(this.timelineDate.minute) < 10 && this.timelineDate.minute.length < 2 ? "0" + this.timelineDate.minute : this.timelineDate.minute) + " : "
+                + (parseInt(this.timelineDate.second) < 10 && this.timelineDate.second.length < 2 ? "0" + this.timelineDate.second : this.timelineDate.second);
+            this.isShowingTimelineTimePicker = false;
+        }
+
+        moveTimeline() {
+            const that: any = this;
+            this.$emit('event', {event: 'checkCVRSeucre', data: (isSecureMode: any) => {
+                if(isSecureMode){
+                    that.$emit('event', {event: 'updateCVRSecureStatus', data: () => {
                             that.$emit('event', {event: 'playCvr', data: that.getTimelineMoment().toDate()});
                             store.dispatch('IS_SHOW_CALENDAR_CHANGE', false);
                             that.isShowingTimelineTimePicker = false;
                         }});
-                    }else{
-                        that.$emit('event', {event: 'playCvr', data: that.getTimelineMoment().toDate()});
-                        store.dispatch('IS_SHOW_CALENDAR_CHANGE', false);
-                        that.isShowingTimelineTimePicker = false;
-                    }
-                }});
-            },
-
-            getTimelineMoment : function () {
-                var dateMoment = this.timelineDatePicker.getMoment();
-
-                if(this.timelineDate.time == "Invalid date"){
-                    this.timelineDate.time="00 : 00 : 00";
+                }else{
+                    that.$emit('event', {event: 'playCvr', data: that.getTimelineMoment().toDate()});
+                    store.dispatch('IS_SHOW_CALENDAR_CHANGE', false);
+                    that.isShowingTimelineTimePicker = false;
                 }
+            }});
+        }
 
-                var timeString = this.timelineDate.time;
+        getTimelineMoment() {
+            var dateMoment = this.timelineDatePicker.getMoment();
 
-                return moment(dateMoment.format("YYYYMMDD") + " " + timeString, "YYYYMMDD HH : mm : ss");
+            if(this.timelineDate.time == "Invalid date"){
+                this.timelineDate.time="00 : 00 : 00";
             }
+
+            var timeString = this.timelineDate.time;
+
+            return moment(dateMoment.format("YYYYMMDD") + " " + timeString, "YYYYMMDD HH : mm : ss");
         }
     }
 </script>

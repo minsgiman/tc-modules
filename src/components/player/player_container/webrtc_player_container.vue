@@ -1,7 +1,9 @@
-<script>
+<script lang="ts">
+    import { Component, Vue } from 'vue-property-decorator';
     import store from '../../../service/player/store';
-    import webRTCPlayer from './webrtc_player';
-    import Vue from 'vue';
+    import webRTCPlayer from './webrtc_player.vue';
+
+    const $: any = (window as any).$ as any;
 
     function getBrowserType() {
         if((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) {
@@ -12,116 +14,125 @@
             return 'safari';
         } else if(navigator.userAgent.indexOf("Firefox") != -1) {
             return 'firefox';
-        } else if((navigator.userAgent.indexOf("MSIE") != -1 ) || (!!document.documentMode == true)) {
+        } else if((navigator.userAgent.indexOf("MSIE") != -1 ) || (!!(document as any).documentMode == true)) {
             return 'ie';
         } else {
             return 'unknown';
         }
     }
 
-    export default {
-        name: 'webrtcPlayerContainer',
-        props: [],
-        computed: {
-            cameraData: function () {
-                return store.state.cameraData;
-            }
-        },
-        data: function () {
-            return {
-                player : null
-            }
-        },
-        created : function() {
+    @Component
+    export default class WebrtcPlayerContainer extends Vue {
+        get cameraData() {
+            return store.state.cameraData;
+        }
+
+        player: any = null;
+
+        private created() {
             const vExtendConstructor = Vue.extend(webRTCPlayer);
             this.player = new vExtendConstructor().$mount('#webrtc_player_wrap');
             this.player.$on('playerStatusChanged', this.webRTCEventCallback.bind(this));
-        },
-        mounted : function() {
-        },
-        beforeDestroy : function() {
+        }
+
+        private beforeDestroy() {
             this.stop();
             if (this.player) {
                 this.player.$destroy();
             }
-        },
-        methods : {
-            play : function (time) {
-                var isBrowserSupport = true, browserType = getBrowserType;
-                this.player.dvrConnectFail = false;
-                if (browserType === 'ie') {
-                    isBrowserSupport = false;
-                }
-                // if (browserType === 'safari' && navigator.userAgent.indexOf('Version/11') == -1) {
-                //     isBrowserSupport = false;
-                // }
+        }
 
-                if (isBrowserSupport) {
-                    this.player.webRTCStatus = this.player.webRTCStatusEnum.EVENT_STREAM_CONNECTING;
-                    if (this.player.currentWebRTCPeerId) {
-                        this.stop(this.player.currentWebRTCPeerId);
-                    }
-                    this.player.currentWebRTCPeerId = this.cameraData.id;
-                    this.player.play(this.cameraData.id, time);
-                    $('#webrtc_logo').show();
-                    $('#webrtc_loading').show();
-                } else {
-                    $('#webrtc_logo').hide();
-                    $('#webrtc_loading').hide();
-                    //$scope.isShowNoSupportBrowser = true; //TODO:
+        play(time: any) {
+            var isBrowserSupport = true, browserType = getBrowserType();
+            this.player.dvrConnectFail = false;
+            if (browserType === 'ie') {
+                isBrowserSupport = false;
+            }
+            // if (browserType === 'safari' && navigator.userAgent.indexOf('Version/11') == -1) {
+            //     isBrowserSupport = false;
+            // }
+
+            if (isBrowserSupport) {
+                this.player.webRTCStatus = this.player.webRTCStatusEnum.EVENT_STREAM_CONNECTING;
+                if (this.player.currentWebRTCPeerId) {
+                    this.stop();
                 }
-            },
-            resume : function () {
-                this.player.resume();
-            },
-            mute : function () {
-                return;
-            },
-            pause : function () {
-                this.player.pause();
-            },
-            stop : function () {
-                $('#remoteVideosContainer').empty();
-                this.player.stop();
+                this.player.currentWebRTCPeerId = this.cameraData.id;
+                this.player.play(this.cameraData.id, time);
+                $('#webrtc_logo').show();
+                $('#webrtc_loading').show();
+            } else {
                 $('#webrtc_logo').hide();
                 $('#webrtc_loading').hide();
-            },
-            close : function () {
-                this.player.close();
-            },
-            getCurrentTime : function () {
-                return;
-            },
-            getStatus : function () {
-                return this.player.getStatus();
-            },
-            zoomZone: function () {
-                return;
-            },
-            zoomVideo: function () {
-                return;
-            },
-            zoomVideoWithZoomablePoint : function(x, y) {
-                return;
-            },
-            zoomUp : function(zoom) {
-                return;
-            },
-            zoomUpWithZoom : function(zoom) {
-                return;
-            },
-            positionZoomable : function(zoom) {
-                return;
-            },
-            webRTCEventCallback : function (status) {
-                this.$emit('playerStatusChanged', status);
-            },
-            setData : function(key, value) {
-                this[key] = value;
-            },
-            getData : function(key) {
-                return this[key];
+                //$scope.isShowNoSupportBrowser = true; //TODO:
             }
+        }
+
+        resume() {
+            this.player.resume();
+        }
+
+        mute() {
+            return;
+        }
+
+        pause() {
+            this.player.pause();
+        }
+
+        stop() {
+            $('#remoteVideosContainer').empty();
+            this.player.stop();
+            $('#webrtc_logo').hide();
+            $('#webrtc_loading').hide();
+        }
+
+        close() {
+            this.player.close();
+        }
+
+        getCurrentTime() {
+            return;
+        }
+
+        getStatus() {
+            return this.player.getStatus();
+        }
+
+        zoomZone() {
+            return;
+        }
+
+        zoomVideo() {
+            return;
+        }
+
+        zoomVideoWithZoomablePoint(x: any, y: any) {
+            return;
+        }
+
+        zoomUp(zoom: any) {
+            return;
+        }
+
+        zoomUpWithZoom(zoom: any) {
+            return;
+        }
+
+        positionZoomable(zoom: any) {
+            return;
+        }
+
+        webRTCEventCallback(status: any) {
+            this.$emit('playerStatusChanged', status);
+        }
+
+        setData(key: any, value: any) {
+            (this as any)[key] = value;
+        }
+
+        getData(key: any) {
+            return (this as any)[key];
         }
     }
 </script>

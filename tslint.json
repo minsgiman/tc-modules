@@ -15,7 +15,8 @@
         "one-variable-per-declaration": false,
         "member-access": false,
         "member-ordering": false,
-        "eofline": false
+        "eofline": false,
+        "object-literal-shorthand": false
     },
     "rulesDirectory": []
 }
