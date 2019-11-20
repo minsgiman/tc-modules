@@ -2,7 +2,7 @@
     <div class="tc_search">
         <span class="search_box" :class="{focusable: design === 'search'}">
             <img v-if="design === 'search'" class="search_img" src="/resources/img/btn-title-shop-search-normal.svg">
-            <input ref="searchInput" type="search" :placeholder="placeholder" @input="searchStrUpdate" :style="{width: design === 'search' ? '132px' : '154px'}">
+            <input ref="searchInput" type="search" autocomplete="off" :placeholder="placeholder" @input="searchStrUpdate" :style="{width: design === 'search' ? '132px' : '154px'}">
             <img v-if="isShowDeleteBtn" @click="deleteSearchStr()" src="/resources/img/btn-input-text-delete.png">
         </span>
     </div>
