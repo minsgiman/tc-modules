@@ -9,8 +9,7 @@ import radiobtn from './components/uikit/radiobtn';
 import search from './components/uikit/search';
 import timeselect from './components/uikit/timeselect';
 import toggle from './components/uikit/toggle';
-import playerTipDlg from './components/player_tip_dialog';
-import videoPlayDlg from './components/videoplay_dialog';
+import { playerTipDialog, videoPlayDialog, confirmDialog } from './components/dialogs';
 
 /* timeselect */
 const timeselect1 = timeselect('timeselectId');
@@ -89,7 +88,7 @@ checkboxObj.on('changed', (event: any) => {
 checkboxObj.text = 'checklabel';
 /////////////////
 
-const dlgObj = playerTipDlg({
+const dlgObj = playerTipDialog({
     elId: 'dlgId',
     dlgStyle : {
         width: '500px', height: '610px', padding: '24px', boxSizing: 'border-box', overflow: 'auto'
@@ -106,7 +105,7 @@ const dlgObj = playerTipDlg({
 });
 
 (window as any).playVideo = () => {
-    const videoObj = videoPlayDlg({
+    const videoObj = videoPlayDialog({
         elId: 'dlgId2',
         dlgStyle : {
             width: '1180px', height: '730px', padding: '60px', boxSizing: 'border-box', overflow: 'auto'
@@ -114,6 +113,21 @@ const dlgObj = playerTipDlg({
         webmUrl : '',
         mp4Url : 'http://10.161.240.93:10000/3.mp4'
     });
+}
+
+(window as any).showConfirm = () => {
+    const confirmObj = confirmDialog({
+        elId: 'dlgId3',
+        dlgStyle : {
+            width: '450px', height: '208px', padding: '24px 30px', boxSizing: 'border-box', overflow: 'auto'
+        },
+        title : '',
+        description : '로그인이 만료되었거나, 비정상적인 접근입니다.<br>다시 로그인해주세요.',
+        btns : [{name: 'conf', text: '확인', style: 'blue'}],
+        eventHandler : (event: any) => {
+            console.log(event)
+        }
+    })
 }
 
 /*

@@ -14,7 +14,7 @@
 </template>
 <script lang="ts">
     import { Component, Prop, Vue } from 'vue-property-decorator';
-    import { modal_dialog } from './../uikit';
+    import { modal_dialog } from './../../uikit';
 
     @Component({
         components: {
@@ -43,7 +43,7 @@
     }
 </script>
 <style lang="less">
-    @import './../uikit/common';
+    @import './../../uikit/common';
 
     .video_modal_dialog {
         .video_cont {

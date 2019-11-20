@@ -3,7 +3,7 @@
         <div class="dlg_wrap">
             <div class="content" :style="dlgStyle">
                 <slot name="content"></slot>
-                <button class="btn_close" @click="closeDialog"></button>
+                <button v-show="!noCloseBtn" class="btn_close" @click="closeDialog"></button>
             </div>
         </div>
     </div>
@@ -15,6 +15,7 @@
     @Component
     export default class ModalDialog extends Vue {
         @Prop() dlgStyle: any;
+        @Prop() noCloseBtn!: boolean;
 
         private created() {
             document.body.className = 'blockScroll';
