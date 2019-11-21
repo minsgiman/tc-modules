@@ -1,9 +1,9 @@
 <template>
     <div class="tc_search">
         <span class="search_box" :class="{focusable: design === 'search'}">
-            <img v-if="design === 'search'" class="search_img" src="/resources/img/btn-title-shop-search-normal.svg">
-            <input ref="searchInput" type="search" autocomplete="off" :placeholder="placeholder" @input="searchStrUpdate" :style="{width: design === 'search' ? '132px' : '154px'}">
-            <img v-if="isShowDeleteBtn" @click="deleteSearchStr()" src="/resources/img/btn-input-text-delete.png">
+            <img v-if="design === 'search'" class="search_img" src="/resources/img/btn-title-shop-search-small.svg">
+            <input ref="searchInput" type="search" autocomplete="new-password" :placeholder="placeholder" @input="searchStrUpdate" :style="{width: design === 'search' ? '152px' : '176px'}">
+            <img v-if="isShowDeleteBtn" class="delete_img" @click="deleteSearchStr()" src="/resources/img/btn-input-text-delete.svg">
         </span>
     </div>
 </template>
@@ -25,6 +25,10 @@
             const sInput: any = this.$refs.searchInput as HTMLInputElement;
             sInput.value = newValue;
             this.showDeleteBtn();
+        }
+
+        setFocus() {
+            (this.$refs.searchInput as HTMLInputElement).focus();
         }
 
         searchStrUpdate() {
@@ -56,11 +60,12 @@
             box-sizing: border-box;
             padding: 0 5px;
             background: #fff;
-            width: 200px;
+            width: 220px;
             height: 40px;
             margin: 0 auto;
             border: 1px solid #333333;
             &.focusable {
+                padding-left: 0;
                 border-color: #999999;
                 &:focus-within {
                     border-color: #444444;
@@ -83,11 +88,12 @@
                 cursor:pointer;
             }
             img {
-                margin-top:3px;
                 cursor:pointer;
                 &.search_img {
                     float:left;
-                    margin-top:8px;
+                }
+                &.delete_img {
+                    margin-top:11px;
                 }
             }
         }

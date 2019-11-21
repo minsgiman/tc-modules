@@ -1,6 +1,6 @@
 <template>
     <div class="tc_dropdown">
-        <div class="drop_btn" :class="{isSelect: isDrop}" @click="itemDropToggle()"></div>
+        <div class="drop_btn" :class="{isSelect: isDrop, isDisabled: !isActive}" @click="itemDropToggle()"></div>
     </div>
 </template>
 <script lang="ts">
@@ -13,6 +13,7 @@
         position: string = '';
         btnHeight: number = 24;
         isDrop: boolean = false;
+        isActive: boolean = true;
 
         get value(): boolean {
             return this.isDrop;
@@ -28,6 +29,14 @@
                     dropEl.style.display = 'none';
                 }
             }
+        }
+
+        get active(): boolean {
+            return this.isActive;
+        }
+
+        set active(newValue: boolean) {
+            this.isActive = newValue;
         }
 
         get dropElementId(): string {
@@ -66,6 +75,10 @@
         }
 
         itemDropToggle() {
+            if (!this.isActive) {
+                return;
+            }
+
             this.isDrop = !this.isDrop;
             const dropEl: HTMLElement | null = document.getElementById(this.dropId);
             if (dropEl) {
@@ -85,11 +98,14 @@
         .drop_btn {
             width: 24px;
             height: 24px;
-            background: url(/resources/img/btn-title-shop-sorting-normal.png) no-repeat;
+            background: url(/resources/img/btn-title-shop-sorting-normal.svg) no-repeat;
             cursor: pointer;
             margin-bottom: -3px;
             &.isSelect {
-                background-image: url(/resources/img/btn-title-shop-sorting-select.png);
+                background-image: url(/resources/img/btn-title-shop-sorting-select.svg);
+            }
+            &.isDisabled {
+                background-image: url(/resources/img/btn-title-shop-sorting-disabeld.svg) !important;
             }
         }
     }
