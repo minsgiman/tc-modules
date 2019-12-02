@@ -1,5 +1,5 @@
 <template>
-    <div class="modal_dialog">
+    <div class="modal_dialog_cont">
         <div class="dlg_wrap">
             <div class="content" :style="dlgStyle">
                 <slot name="content"></slot>
@@ -20,8 +20,11 @@
         private created() {
             document.body.className = 'blockScroll';
         }
-        private beforeDestroy() {
-            document.body.className = '';
+
+        private destroyed() {
+            if (!document.getElementsByClassName('modal_dialog_cont').length && !document.getElementsByClassName('modal_dlg').length) {
+                document.body.className = '';
+            }
         }
 
         closeDialog() {
@@ -31,7 +34,7 @@
 </script>
 <style lang="less">
     body.blockScroll {overflow:hidden;}
-    .modal_dialog {
+    .modal_dialog_cont {
         position: fixed;
         display: table;
         left: 0px;
