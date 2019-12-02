@@ -14,16 +14,19 @@
     "build": "webpack -p",
     "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
     "e2e": "node test/e2e/runner.js",
-    "test": "npm run unit && npm run e2e"
+    "test": "start-storybook -s ./ -p 9001"
   },
   "dependencies": {
+    "@storybook/vue": "^5.2.6",
     "axios": "^0.18.0",
     "babel-cli": "^6.26.0",
     "babel-plugin-syntax-dynamic-import": "^6.18.0",
     "babel-preset-es2015": "^6.24.1",
+    "babel-preset-vue": "^2.0.2",
     "babel-regenerator-runtime": "^6.5.0",
     "d3": "^3.4.13",
     "es6-promise": "^4.2.4",
+    "fork-ts-checker-webpack-plugin": "^3.1.1",
     "ie-array-find-polyfill": "^1.1.0",
     "jasmine-core": "^3.3.0",
     "karma-chrome-launcher": "^2.2.0",
