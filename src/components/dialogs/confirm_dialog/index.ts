@@ -6,6 +6,7 @@ function createDlg(param: IConfDlgParam) {
     return creator(param.elId, confirmDialog, {
         dlgStyle: param.dlgStyle,
         title: param.title,
+        theme: param.theme,
         btns: param.btns,
         noCloseBtn: param.noCloseBtn,
         description: param.description

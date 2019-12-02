@@ -2,6 +2,7 @@ export interface IConfDlgParam {
     elId: string,
     dlgStyle?: any,
     title?: string,
+    theme?: string,
     description?: string,
     noCloseBtn?: boolean,
     btns: any[],

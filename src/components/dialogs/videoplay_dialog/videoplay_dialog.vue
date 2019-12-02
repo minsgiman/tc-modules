@@ -27,7 +27,6 @@
         @Prop({ default: '' }) mp4Url!: string;
 
         private beforeDestroy() {
-            this.$emit('event', {event: 'close'});
             if (this.$el.parentNode) {
                 this.$el.parentNode.removeChild(this.$el);
             }

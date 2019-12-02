@@ -51,11 +51,11 @@
             this.confirmDlg = confirmDialog({
                 elId: 'conrfirmDlgId',
                 dlgStyle : {
-                    width: '450px', height: '208px', padding: '24px 30px', boxSizing: 'border-box', overflow: 'auto'
+                    width: '450px', padding: '24px 30px', boxSizing: 'border-box', overflow: 'auto'
                 },
                 title : '',
                 description : '로그인이 만료되었거나, 비정상적인 접근입니다.<br>다시 로그인해주세요.',
-                btns : [{name: 'conf', text: '확인', style: 'blue'}],
+                btns : [{name: 'conf', text: '확인', class: 'blue'}],
                 eventHandler : (event: any) => {
                     console.log(event);
                     if (event.name === 'conf') {
@@ -63,6 +63,26 @@
                     }
                 }
             });
+
+            /*
+            this.confirmDlg = confirmDialog({
+                elId: 'conrfirmDlgId',
+                dlgStyle : {
+                    width: '482px', padding: '24px 30px', boxSizing: 'border-box', overflow: 'auto'
+                },
+                theme : 'checker',
+                noCloseBtn : true,
+                title : '매장을 공유하면 해당 카메라들에 대한<br>클라우드 모니터 기능도 함께 공유됩니다.',
+                description : '공유를 진행하시겠습니까?',
+                btns : [{name: 'cancel', text: '취소', class: 'white'}, {name: 'conf', text: '확인', class: 'blue'}],
+                eventHandler : (event: any) => {
+                    console.log(event);
+                    if (event.name === 'conf') {
+                        this.confirmDlg.destroy();
+                    }
+                }
+            });
+            */
         }
     }
 </script>

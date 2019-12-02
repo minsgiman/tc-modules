@@ -2,11 +2,17 @@
     <div class="confirm_dialog">
         <modal_dialog @close="onCloseDialog" :dlgStyle="dlgStyle" :noCloseBtn="noCloseBtn">
             <template slot="content">
-                <div class="content_wrap" :class="{no_tit: !title}">
-                    <h2 v-if="title">{{title}}</h2>
-                    <p v-html="description"></p>
+                <div class="content_wrap">
+                    <div v-if="theme === 'normal'" class="normal" :class="{no_tit: !title}">
+                        <h2 v-if="title" v-html="title"></h2>
+                        <p v-html="description"></p>
+                    </div>
+                    <div v-if="theme === 'checker'" class="checker">
+                        <h2 v-if="title" v-html="title"></h2>
+                        <p v-html="description"></p>
+                    </div>
                     <div class="btn_wrap">
-                        <button v-for="(btn, index) in btns" @click="btnClick(btn.name)">{{btn.text}}</button>
+                        <button v-for="(btn, index) in btns" :class="btn.class" @click="btnClick(btn.name)">{{btn.text}}</button>
                     </div>
                 </div>
             </template>
@@ -27,10 +33,10 @@
         @Prop() title!: string;
         @Prop() description!: string;
         @Prop() btns!: [];
+        @Prop({default: 'normal'}) theme!: string;
         @Prop() noCloseBtn!: boolean;
 
         private beforeDestroy() {
-            this.$emit('event', {event: 'close'});
             if (this.$el.parentNode) {
                 this.$el.parentNode.removeChild(this.$el);
             }
@@ -55,6 +61,12 @@
     .confirm_dialog {
         .content_wrap {
             text-align:left;
+            h2 {
+                font-size:20px;
+                color:#333;
+                line-height:26px;
+                font-weight:400;
+            }
             p {
                 font-size:16px;
                 margin-top:30px;
@@ -75,14 +87,35 @@
                         color: #fff;
                         background: #4b96e6;
                     }
+                    &.white {
+                        border: 1px solid #d5d5d5;
+                        color: #555555;
+                        background: #fff;
+                    }
                 }
             }
-
-            &.no_tit {
+            .normal {
                 p {
-                    text-align:center;
-                    margin-top:32px;
-                    height:49px;
+                    color: #777;
+                    font-size: 14px;
+                }
+                &.no_tit {
+                    p {
+                        color:#333;
+                        font-size:16px;
+                        text-align:center;
+                        margin-top:32px;
+                        height:49px;
+                    }
+                }
+            }
+            .checker {
+                text-align:center;
+                p {
+                    color: #4a96e6;
+                    font-size: 16px;
+                    margin-top: 16px;
+                    padding-bottom: 6px;
                 }
             }
         }
