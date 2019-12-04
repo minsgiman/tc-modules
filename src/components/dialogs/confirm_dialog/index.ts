@@ -7,6 +7,7 @@ function createDlg(param: IConfDlgParam) {
         dlgStyle: param.dlgStyle,
         title: param.title,
         theme: param.theme,
+        pCheckList: param.pCheckList,
         btns: param.btns,
         noCloseBtn: param.noCloseBtn,
         description: param.description

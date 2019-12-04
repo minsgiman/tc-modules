@@ -3,6 +3,7 @@ export interface IConfDlgParam {
     dlgStyle?: any,
     title?: string,
     theme?: string,
+    pCheckList?: any[],
     description?: string,
     noCloseBtn?: boolean,
     btns: any[],

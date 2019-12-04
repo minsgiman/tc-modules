@@ -1,21 +1,34 @@
 <template>
     <div class="tc_checkbox">
         <span>
-            <input type="checkbox" :id="name" v-model="checked" @change="changeValue">
+            <input type="checkbox" :id="name" v-model="checked" @change="changeValue" :disabled="disabled">
             <label :for="name" class="ng-binding" v-html="text"></label>
         </span>
     </div>
 </template>
 <script lang="ts">
-    import { Component } from 'vue-property-decorator';
+    import { Component, Prop } from 'vue-property-decorator';
     import Base from './../base.vue';
 
     @Component
     export default class Checkbox extends Base {
+        @Prop() pText!: string;
+        @Prop() pChecked!: boolean;
+        @Prop() disabled!: boolean;
+
         // @ts-ignore
         name: string = 'name_' + this.parentId;
         text: string = '';
         checked: boolean = false;
+
+        private created () {
+            if (this.pText) {
+                this.text = this.pText;
+            }
+            if (this.pChecked) {
+                this.checked = this.pChecked;
+            }
+        }
 
         get value(): boolean {
             return this.checked;
@@ -25,6 +38,7 @@
         }
 
         changeValue() {
+            //this.$emit('changed', this.checked);
             // @ts-ignore
             this.emitEvent('changed', this.checked);
         }

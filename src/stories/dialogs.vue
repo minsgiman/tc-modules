@@ -5,7 +5,9 @@
         <div id="conrfirmDlgId"></div>
         <button class="dlg-btn" @click="createPlayerTipDlg">Show player-tip-dialog</button>
         <button class="dlg-btn" @click="createVideoPlayDlg">Show video-play-dialog</button>
-        <button class="dlg-btn" @click="createConfirmDlg">Show confirm-dialog</button>
+        <button class="dlg-btn" @click="createConfirmDlg('normal')">Show confirm-dialog (normal)</button>
+        <button class="dlg-btn" @click="createConfirmDlg('center')">Show confirm-dialog (center)</button>
+        <button class="dlg-btn" @click="createConfirmDlg('checker')">Show confirm-dialog (checker)</button>
     </div>
 </template>
 <script lang="ts">
@@ -47,42 +49,60 @@
             });
         }
 
-        createConfirmDlg () {
-            this.confirmDlg = confirmDialog({
-                elId: 'conrfirmDlgId',
-                dlgStyle : {
-                    width: '450px', padding: '24px 30px', boxSizing: 'border-box', overflow: 'auto'
-                },
-                title : '',
-                description : '로그인이 만료되었거나, 비정상적인 접근입니다.<br>다시 로그인해주세요.',
-                btns : [{name: 'conf', text: '확인', class: 'blue'}],
-                eventHandler : (event: any) => {
-                    console.log(event);
-                    if (event.name === 'conf') {
+        createConfirmDlg (type: string) {
+            if (type === 'center') {
+                this.confirmDlg = confirmDialog({
+                    elId: 'conrfirmDlgId',
+                    dlgStyle : {
+                        width: '482px', padding: '24px 30px', boxSizing: 'border-box', overflow: 'auto'
+                    },
+                    theme : 'center',
+                    title : '매장을 공유하면 해당 카메라들에 대한<br>클라우드 모니터 기능도 함께 공유됩니다.',
+                    description : '공유를 진행하시겠습니까?',
+                    btns : [{name: 'cancel', text: '취소', class: 'white'}, {name: 'conf', text: '확인', class: 'blue'}],
+                    eventHandler : (event: any) => {
+                        console.log(event);
                         this.confirmDlg.destroy();
                     }
-                }
-            });
-
-            /*
-            this.confirmDlg = confirmDialog({
-                elId: 'conrfirmDlgId',
-                dlgStyle : {
-                    width: '482px', padding: '24px 30px', boxSizing: 'border-box', overflow: 'auto'
-                },
-                theme : 'checker',
-                noCloseBtn : true,
-                title : '매장을 공유하면 해당 카메라들에 대한<br>클라우드 모니터 기능도 함께 공유됩니다.',
-                description : '공유를 진행하시겠습니까?',
-                btns : [{name: 'cancel', text: '취소', class: 'white'}, {name: 'conf', text: '확인', class: 'blue'}],
-                eventHandler : (event: any) => {
-                    console.log(event);
-                    if (event.name === 'conf') {
+                });
+            } else if (type === 'checker') {
+                this.confirmDlg = confirmDialog({
+                    elId: 'conrfirmDlgId',
+                    dlgStyle : {
+                        width: '460px', padding: '24px 30px', boxSizing: 'border-box', overflow: 'auto'
+                    },
+                    theme : 'checker',
+                    title : '공유설정 변경',
+                    pCheckList : [
+                        { id: 1, text: '영상,센서/도어락 이벤트 (필수)', value: true, disabled: true },
+                        { id: 2, text: '클립&타임랩스', value: true },
+                        { id: 3, text: '근태관리기록', value: false },
+                        { id: 4, text: '매출관리기록', value: false },
+                        { id: 5, text: 'DID 컨텐츠', value: false }
+                    ],
+                    btns : [{name: 'cancel', text: '취소', class: 'white'}, {name: 'conf', text: '확인', class: 'blue'}],
+                    eventHandler : (event: any) => {
+                        console.log(event);
                         this.confirmDlg.destroy();
                     }
-                }
-            });
-            */
+                });
+            } else {
+                this.confirmDlg = confirmDialog({
+                    elId: 'conrfirmDlgId',
+                    dlgStyle : {
+                        width: '450px', padding: '24px 30px', boxSizing: 'border-box', overflow: 'auto'
+                    },
+                    noCloseBtn : true,
+                    description : '로그인이 만료되었거나, 비정상적인 접근입니다.<br>다시 로그인해주세요.',
+                    btns : [{name: 'conf', text: '확인', class: 'blue'}],
+                    eventHandler : (event: any) => {
+                        console.log(event);
+                        if (event.name === 'conf') {
+                            this.confirmDlg.destroy();
+                        }
+                    }
+                });
+            }
         }
     }
 </script>
@@ -91,7 +111,7 @@
         padding: 20px;
         .dlg-btn {
             display: block;
-            width: 200px;
+            width: 230px;
             height: 80px;
             border: 1px solid;
             font-size:14px;
