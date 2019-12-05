@@ -31,7 +31,12 @@
         </div>
 
         <div class="comp_wrap">
-            <p class="comp_tit">7. dropdown</p>
+            <p class="comp_tit">7. list</p>
+            <div id="listId"></div>
+        </div>
+
+        <div class="comp_wrap">
+            <p class="comp_tit">8. dropdown</p>
             <div>
                 <div id="dropdownId"></div>
                 <ul id="dropitem" style="width:200px; border:1px solid black;">
@@ -54,6 +59,7 @@
     import search from './../components/uikit/search';
     import timeselect from './../components/uikit/timeselect';
     import toggle from './../components/uikit/toggle';
+    import list from './../components/uikit/list';
 
     @Component
     export default class Checkbox extends Vue {
@@ -65,6 +71,40 @@
             this.createDropdown();
             this.createDaycheck();
             this.createCheckbox();
+            this.createList();
+        }
+
+        createList () {
+            const listObj = list('listId');
+            listObj.on('selected', (event: any) => {
+                 console.log('event : ' + JSON.stringify(event));
+            });
+            listObj.listStyle = {
+                width: '600px',
+                height: '32px',
+                border: '1px solid'
+            };
+            listObj.itemStyle = {
+                margin: '0 20px',
+                padding: '5px',
+                cursor: 'pointer',
+                border: '1px solid'
+            };
+            listObj.focusStyle = {
+                border: '1px solid blue'
+            };
+            listObj.maxViewCount = 5;
+            listObj.focusId = 'item3';
+            listObj.value = [
+                { content: 'Item1', id: 'item1'},
+                { content: 'Item2', id: 'item2'},
+                { content: 'Item3', id: 'item3'},
+                { content: 'Item4', id: 'item4'},
+                { content: 'Item5', id: 'item5'},
+                { content: 'Item6', id: 'item6'},
+                { content: 'Item7', id: 'item7'},
+                { content: 'Item8', id: 'item8'}
+            ];
         }
 
         createTimeselect () {

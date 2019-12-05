@@ -2,7 +2,7 @@ import Vue from 'vue';
 import clipplayer from './clipplayer.vue';
 import { IClipPlayInfo } from './interface';
 
-function createDlg(param: IClipPlayInfo) {
+function createComponent(param: IClipPlayInfo) {
     const parentEl: HTMLElement | null = document.getElementById(param.elId);
     if (!parentEl) {
         return;
@@ -26,4 +26,4 @@ function createDlg(param: IClipPlayInfo) {
     return vComponent;
 }
 
-export default createDlg;
+export default createComponent;
