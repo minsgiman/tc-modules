@@ -10,7 +10,7 @@
     </div>
 </template>
 <script lang="ts">
-    import { Component, Prop } from 'vue-property-decorator';
+    import { Component, Prop, Watch } from 'vue-property-decorator';
     import Base from './../base.vue';
 
     @Component
@@ -29,6 +29,13 @@
         itemStyle: any = null;
         focusStyle: any = null;
         focusId: string = '';
+
+        @Watch('pFocusId')
+        onPFocusIdChanged(value: string, oldValue: string) {
+            this.focusId = value;
+            this.calcViewFirstIndex();
+            this.makeViewList();
+        }
 
         get value(): any[] {
             return this.list;
@@ -73,7 +80,8 @@
             }
 
             j = 1;
-            while (focusIdx > (this.viewFirstIndex + this.maxViewCount * j)) {
+            this.viewFirstIndex = 0;
+            while (focusIdx >= (this.viewFirstIndex + this.maxViewCount * j)) {
                 j+=1;
             }
             this.viewFirstIndex = this.viewFirstIndex + this.maxViewCount * (j - 1);

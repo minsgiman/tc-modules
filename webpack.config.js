@@ -61,11 +61,13 @@ module.exports = {
     context: __dirname
 }
 
+/*
 module.exports.plugins = (module.exports.plugins || []).concat([
     new CopyWebpackPlugin([
         {from: './resources', to: './dist/resources'}
     ])
 ])
+ */
 
 
 
