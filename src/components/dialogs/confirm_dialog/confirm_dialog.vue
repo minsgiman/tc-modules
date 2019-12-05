@@ -14,7 +14,7 @@
                     <div v-if="theme === 'checker'" class="checker">
                         <h2 v-if="title" v-html="title"></h2>
                         <checkbox :p-text="check.text" :p-checked="check.value" :disabled="check.disabled"
-                                :parent-id="check.id" :ref="check.id" v-for="(check, index) in lCheckList"></checkbox>
+                                :parent-id="check.id" :ref="check.id" :key="check.id" v-for="(check, index) in lCheckList"></checkbox>
                     </div>
                     <div class="btn_wrap">
                         <button v-for="(btn, index) in btns" :class="btn.class" @click="btnClick(btn.name)">{{btn.text}}</button>

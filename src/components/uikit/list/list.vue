@@ -47,7 +47,7 @@
             this.makeViewList();
         }
 
-        private created () {
+        private mounted () {
             if (this.pList) {
                 this.list = this.pList;
             }
@@ -71,6 +71,10 @@
         }
 
         calcViewFirstIndex () {
+            if (this.maxViewCount === 0) {
+                return;
+            }
+
             let i, j, focusIdx = 0, len = this.list.length;
             for (i = 0; i < len; i+=1) {
                 if (this.focusId === this.list[i].id) {
@@ -78,7 +82,6 @@
                     break;
                 }
             }
-
             j = 1;
             this.viewFirstIndex = 0;
             while (focusIdx >= (this.viewFirstIndex + this.maxViewCount * j)) {
