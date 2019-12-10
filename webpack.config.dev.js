@@ -6,59 +6,63 @@ function resolve (dir) {
     return path.join(__dirname, '..', dir)
 }
 
-module.exports = {
-    entry: {
-        "api.min" : './src/api.js',
-        "api.common.min" : './src/api.common.js',
-        "api.esm.min" : './src/api.esm.js'
-    },
-    output: {
-        libraryTarget: 'umd',
-        path: path.resolve(__dirname, './../dist'),
-        filename: '[name].js'
-    },
-    module: {
-        rules: [
-            {
-                test: /\.less$/,
-                loader: 'style-loader!css-loader!less-loader'
-            },
-            {
-                test: /\.css$/,
-                use: [
-                    'vue-style-loader',
-                    'css-loader'
-                ]
-            },
-            {
-                test: /\.vue$/,
-                loader: 'vue-loader',
-                options: {
-                    loaders: {
-                        less: 'vue-style-loader!css-loader!less-loader'
+module.exports = (env) => {
+    return {
+        mode: 'development',
+        entry: {
+            "api" : env.category === 'b2b' ? './src/api.b2b.js' : './src/api.b2c.js',
+            "api.common" : './src/api.common.js',
+            "api.esm" : './src/api.esm.js'
+        },
+        //devtool: 'inline-source-map',
+        output: {
+            libraryTarget: 'umd',
+            path: path.resolve(__dirname, './dist'),
+            filename: '[name].js'
+        },
+        module: {
+            rules: [
+                {
+                    test: /\.less$/,
+                    loader: 'style-loader!css-loader!less-loader'
+                },
+                {
+                    test: /\.css$/,
+                    use: [
+                        'vue-style-loader',
+                        'css-loader'
+                    ]
+                },
+                {
+                    test: /\.vue$/,
+                    loader: 'vue-loader',
+                    options: {
+                        loaders: {
+                            less: 'vue-style-loader!css-loader!less-loader'
+                        }
+                    }
+                },
+                {
+                    test: /\.tsx?$/,
+                    loader: 'ts-loader',
+                    exclude: /node_modules/,
+                    options: {
+                        appendTsSuffixTo: [/\.vue$/]
                     }
                 }
-            },
-            {
-                test: /\.tsx?$/,
-                loader: 'ts-loader',
-                exclude: /node_modules/,
-                options: {
-                    appendTsSuffixTo: [/\.vue$/]
-                }
+            ]
+        },
+        resolve: {
+            extensions: ['.ts', '.js', '.vue', '.json'],
+            alias: {
+                '@': resolve('src')
             }
-        ]
-    },
-    resolve: {
-        extensions: ['.ts', '.js', '.vue', '.json'],
-        alias: {
-            '@': resolve('src')
-        }
-    },
-    plugins: [
-        new VueLoaderPlugin()
-    ],
-    context: __dirname
+        },
+        plugins: [
+            new VueLoaderPlugin()
+        ],
+        context: __dirname
+    }
 }
 
 /*

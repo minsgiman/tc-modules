@@ -62,35 +62,11 @@
     // import * as d3 from "d3";
     // import moment from 'moment';
     import { Component, Prop, Vue } from 'vue-property-decorator';
+    import { getBrowserLanguage } from '../../service/util';
 
     const $: any = (window as any).$ as any;
     const d3: any = (window as any).d3 as any;
     const moment: any = (window as any).moment as any;
-
-    function getBrowserLanguage(): string | null {
-        const nav: any = window.navigator,
-              browserLanguagePropertyKeys: string[] = [ 'language', 'browserLanguage', 'systemLanguage', 'userLanguage' ];
-        let i: number, language: string;
-
-        if (nav.languages && nav.languages.length) {
-            for (i = 0; i < nav.languages.length; i++) {
-                language = nav.languages[i];
-                if ($('html').attr('lang') === nav.languages[i]) {
-                    return language;
-                }
-            }
-        }
-
-        // support for other well known properties in browsers
-        for (i = 0; i < browserLanguagePropertyKeys.length; i++) {
-            language = nav[browserLanguagePropertyKeys[i]];
-            if (language && language.length) {
-                return language;
-            }
-        }
-
-        return null;
-    }
 
     @Component
     export default class ClipPlayer extends Vue {

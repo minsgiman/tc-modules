@@ -26,7 +26,7 @@
 </template>
 <script lang="ts">
     import { Component, Prop, Vue } from 'vue-property-decorator';
-    import { modal_dialog } from './../../uikit';
+    import modal_dialog from './../../uikit/modal_dialog';
     import checkbox from './../../uikit/checkbox/checkbox.vue';
 
     @Component({

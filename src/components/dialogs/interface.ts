@@ -24,3 +24,26 @@ export interface IVideoDlgParam {
     mp4Url?: string,
     eventHandler?: (event: any) => void
 }
+
+export interface IAiGraphsDlgParam {
+    elId: string,
+    dlgStyle?: any,
+    txtMap: any,
+    pShopStats: any,
+    pAiGraphObject: any,
+    pRequestCamStats: any,
+    pRequestShopStats: any,
+    pGetCameraName: any,
+    pAiStartTime: number,
+    pAiEndTime: number,
+    pAiIs24Hours: boolean,
+    eventHandler?: (event: any) => void
+}
+
+export interface IAiStatsDlgParam {
+    elId: string,
+    dlgStyle?: any,
+    txtMap: any,
+    pCameraStats: any,
+    eventHandler?: (event: any) => void
+}

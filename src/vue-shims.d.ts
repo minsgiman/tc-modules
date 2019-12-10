@@ -4,3 +4,7 @@ declare module '*.vue' {
 }
 
 declare module 'toastcam-apis'
+
+declare module 'jquery'
+
+declare module 'tui-chart'
