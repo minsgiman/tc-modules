@@ -10,8 +10,8 @@
     "url": "git@github.nhnent.com:mediatechlab/toastcam-components.git"
   },
   "scripts": {
-    "start-b2c": "webpack --env.category=b2c --config webpack.config.dev.js",
-    "start-b2b": "webpack --env.category=b2b --config webpack.config.dev.js",
+    "start-b2c": "webpack-dev-server --env.category=b2c --config webpack.config.dev.js",
+    "start-b2b": "webpack-dev-server --env.category=b2b --config webpack.config.dev.js",
     "build-b2c": "webpack --env.category=b2c -p",
     "build-b2b": "webpack --env.category=b2b -p",
     "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
