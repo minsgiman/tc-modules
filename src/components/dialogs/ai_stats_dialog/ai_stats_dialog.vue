@@ -61,6 +61,11 @@
         }
 
         onCloseDialog () {
+            this.$emit('event', {event: 'close'});
+            this.$destroy();
+        }
+
+        destroy() {
             this.$destroy();
         }
 

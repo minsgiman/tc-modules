@@ -22,8 +22,42 @@
         }
 
         private destroyed() {
-            if (!document.getElementsByClassName('modal_dialog_cont').length && !document.getElementsByClassName('modal_dlg').length) {
+            if (!this.checkIsDlgOpened()) {
                 document.body.className = '';
+            }
+        }
+
+        private checkIsDlgOpened(): boolean {
+            const modalDlgConts = document.getElementsByClassName('modal_dialog_cont'),
+                modalDlgs = document.getElementsByClassName('modal_dlg');
+            let i, len, modalEls: any[] = [];
+
+            len = modalDlgs.length;
+            for (i = 0; i < len; i+=1) {
+                if (modalDlgs[i]) {
+                    modalEls.push(modalDlgs[i]);
+                }
+            }
+            len = modalDlgConts.length;
+            for (i = 0; i < len; i+=1) {
+                if (modalDlgConts[i]) {
+                    modalEls.push(modalDlgConts[i]);
+                }
+            }
+            return modalEls.some((el: HTMLElement) => {
+                return this.isVisible(el);
+            });
+        }
+
+        private isVisible(el: HTMLElement): boolean {
+            if (!el) {
+                return false;
+            }
+            const $style = window.getComputedStyle(el, null);
+            if (!$style || $style.display === 'none' || $style.visibility === 'hidden') {
+                return false;
+            } else {
+                return true;
             }
         }
 
