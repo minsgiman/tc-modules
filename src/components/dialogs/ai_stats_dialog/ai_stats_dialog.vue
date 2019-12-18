@@ -5,15 +5,15 @@
                 <div>
                     <h4>{{txtMap.title}}</h4>
                     <ul class="ai_cam_list">
-                        <li class="ai_cam" v-for="(camera, index) in cameraStats">
-                            <img :src="getAiThumb(camera)">
+                        <li class="ai_cam" v-for="(camera, index) in cameraSummaries">
+                            <img :src="camera.aiThumbnail" onerror="this.src='/resources/images/img_camera_fail.png'">
                             <p>
                                 <span class="ai_cam_name">{{camera.cameraName}}</span>
-                                <span class="ai_date">{{aiDataTimeConverter(camera.last10Record[camera.last10Record.length - 1] .regDate)}}</span>
+                                <span class="ai_date">{{aiDataTimeConverter(updateDate)}}</span>
                                 <span class="ai_count_wrap">
-                                <span class="count_num">{{camera.last10Record[camera.last10Record.length - 1].people_count}}</span>
+                                <span class="count_num">{{camera.totalInPeopleZone}}</span>
                                 <span>{{txtMap.countUnit}},</span>
-                                <span class="count_num">{{getSeatedCount(camera.last10Record[camera.last10Record.length - 1].seat_table)}}/{{cameraSeats && cameraSeats[camera.cameraId] ? cameraSeats[camera.cameraId] : 0}}</span>
+                                <span class="count_num">{{camera.useTableCount}}/{{camera.allTableCount}}</span>
                                 <span>{{txtMap.seatUnit}}</span>
                             </span>
                             </p>
@@ -27,6 +27,7 @@
 <script lang="ts">
     import { Component, Prop, Vue } from 'vue-property-decorator';
     import modal_dialog from '../../uikit/modal_dialog';
+    import { IAiCameraSummary } from '../interface';
 
     @Component({
         components: {
@@ -36,14 +37,15 @@
     export default class AiStatsDialog extends Vue {
         @Prop() dlgStyle!: any;
         @Prop() txtMap!: any;
-        @Prop() pCameraStats!: any;
+        @Prop() pUpdateDate!: number;
+        @Prop() pCameraSummaries!: IAiCameraSummary[];
 
-        cameraStats: any = null;
-        cameraSeats: any = null;
-        maxRecord: any = null;
+        cameraSummaries: IAiCameraSummary[] | null = null;
+        updateDate: number = 0;
 
         private created() {
-            this.cameraStats = this.pCameraStats;
+            this.cameraSummaries = this.pCameraSummaries;
+            this.updateDate = this.pUpdateDate;
         }
 
         private beforeDestroy() {
@@ -52,12 +54,9 @@
             }
         }
 
-        setCameraStats (cameraStats: any) {
-            this.cameraStats = cameraStats;
-        }
-
-        setCameraSeats (cameraSeats: any) {
-            this.cameraSeats = cameraSeats;
+        updateAiData (cameraSummaries: IAiCameraSummary[], updateDate: number) {
+            this.cameraSummaries = cameraSummaries;
+            this.updateDate = updateDate;
         }
 
         onCloseDialog () {
@@ -67,43 +66,6 @@
 
         destroy() {
             this.$destroy();
-        }
-
-        getSeatedCount (seatTable: any): number {
-            let tableCnt: number = 0, i: number,
-                tableArr: string[] = seatTable.split(','), len: number = tableArr.length;
-
-            if (!seatTable) {
-                return 0;
-            }
-            for (i = 0; i < len; i+=1) {
-                if (parseInt(tableArr[i]) > 0) {
-                    tableCnt+=1;
-                }
-            }
-            return tableCnt;
-        }
-
-        getMaxRecord (records: any[]): any {
-            let i: number, len: number = records.length, maxCount: number = -1, maxRecord: any = {};
-
-            for (i = 0; i < len; i+=1) {
-                if (records[i].people_count > maxCount) {
-                    maxCount = records[i].people_count;
-                    maxRecord = records[i];
-                }
-            }
-            return maxRecord;
-        }
-
-        getAiThumb (camera: any): string {
-            const errorThumb: string = '/resources/images/img_camera_fail.png',
-                  maxRecord = camera.last10Record[camera.last10Record.length - 1]; //var maxRecord = this.getMaxRecord(camera.last10Record);
-
-            if (!camera.last10Record) {
-                return errorThumb;
-            }
-            return (maxRecord && maxRecord.thumbnail) ? maxRecord.thumbnail : errorThumb;
         }
 
         aiDataTimeConverter (timestamp: number): string {

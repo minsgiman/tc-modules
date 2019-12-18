@@ -29,21 +29,46 @@ export interface IAiGraphsDlgParam {
     elId: string,
     dlgStyle?: any,
     txtMap: any,
-    pShopStats: any,
-    pAiGraphObject: any,
-    pRequestCamStats: any,
-    pRequestShopStats: any,
-    pGetCameraName: any,
-    pAiStartTime: number,
-    pAiEndTime: number,
-    pAiIs24Hours: boolean,
+    aiCameraList: any,
+    pRequestCamCharts: any,
+    pRequestShopChart: any,
     eventHandler?: (event: any) => void
+}
+
+export interface IAiCameraSummary {
+    cameraId: string,
+    cameraName: string,
+    totalInPeopleZone: number,
+    useTableCount: number,
+    allTableCount: number,
+    aiThumbnail: string
 }
 
 export interface IAiStatsDlgParam {
     elId: string,
     dlgStyle?: any,
     txtMap: any,
-    pCameraStats: any,
+    pUpdateDate: number,
+    pCameraSummaries: IAiCameraSummary[],
     eventHandler?: (event: any) => void
+}
+
+export interface ICameraInfo {
+    id: string,
+    labelName: string
+}
+
+export interface IAiChart {
+    data: string[],
+    yAxis: IYAxis,
+    xAxis: IXAxis
+}
+
+export interface IYAxis {
+    min: number,
+    max: number
+}
+
+export interface IXAxis {
+    items: string[]
 }

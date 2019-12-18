@@ -8,28 +8,28 @@
                         <div class="ai_date_select_wrap">
                         <span class="date_control_wrap">
                             <a @click="goPrev" class="prev_btn"></a>
-                            <span class="select_day">{{periodStr}} {{(aiGraphObject.mode === 'hourly' || aiGraphObject.mode === 'min') && isToday ? txtMap.today : ''}}</span>
+                            <span class="select_day">{{periodStr}} {{(mode === 'hourly' || mode === 'min') && isToday ? txtMap.today : ''}}</span>
                             <a @click="goNext" class="next_btn"></a>
                         </span>
-                            <button class="date_mode_control" @click="toggleMode">{{(aiGraphObject.mode === 'hourly' || aiGraphObject.mode === 'min') ? txtMap.weekly : txtMap.daily}}</button>
+                            <button class="date_mode_control" @click="toggleMode">{{(mode === 'hourly' || mode === 'min') ? txtMap.weekly : txtMap.daily}}</button>
                         </div>
                     </div>
                     <div class="graph_area">
-                        <div class="graph_time_set_wrap" v-show="aiGraphObject.mode === 'min' || aiGraphObject.mode === 'hourly' ">
-                            <span class="min" :class="{enable: aiGraphObject.mode === 'min'}" @click="setGraphTimeUnit(10)">10{{txtMap.min}}</span>
-                            <span class="hour" :class="{enable: aiGraphObject.mode === 'hourly'}" @click="setGraphTimeUnit(60)">1{{txtMap.hour}}</span>
+                        <div class="graph_time_set_wrap" v-show="mode === 'min' || mode === 'hourly' ">
+                            <span class="min" :class="{enable: mode === 'min'}" @click="setGraphTimeUnit(10)">10{{txtMap.min}}</span>
+                            <span class="hour" :class="{enable: mode === 'hourly'}" @click="setGraphTimeUnit(60)">1{{txtMap.hour}}</span>
                         </div>
                         <div class="sum_graph_wrap">
                             <div id="sum_graph"></div>
                         </div>
                         <ul class="cam_graph_list" style="text-align:left;">
-                            <li class="cam_graph" v-for="(camera, index) in cameraStats">
+                            <li class="cam_graph" v-for="(camera, index) in aiCameraList">
                                 <p class="cam_tit_wrap">
-                                    <img src="/resources/img/ic-toast-camera.png">
-                                    <span class="cam_name">{{pGetCameraName(index)}}</span>
+                                    <img src="/resources/img/ic-toast-camera.svg">
+                                    <span class="cam_name">{{camera.labelName}}</span>
                                 </p>
                                 <div class="cam_graph_wrap">
-                                    <div :id="'cam_graph_' + index"></div>
+                                    <div :id="'cam_graph_' + camera.id"></div>
                                 </div>
                                 <!--img class="cam_stat_load_img" v-show="!camera" src="/resources/img/loading.svg"-->
                             </li>
@@ -44,6 +44,7 @@
     import { Component, Prop, Vue } from 'vue-property-decorator';
     import modal_dialog from '../../uikit/modal_dialog';
     import { getBrowserLanguage } from '../../../service/util';
+    import { IAiChart, ICameraInfo } from '../interface';
 
     // import $ from 'jquery';
     // import moment from 'moment';
@@ -53,6 +54,51 @@
     const tui: any = (window as any).tui as any;
     const moment: any = (window as any).moment as any;
 
+    function getGraphMaxIndex (array: string[]) {
+        let counter, max = -1;
+
+        for (counter = 0; counter < array.length; counter+=1) {
+            if (max === -1) {
+                if (parseInt(array[counter]) > 0) {
+                    max = counter;
+                }
+            } else {
+                if (parseInt(array[max]) < parseInt(array[counter])){
+                    max = counter;
+                }
+            }
+        }
+        return max;
+    }
+
+    function getGraphMinIndex (array: string[]) {
+        let counter, min = -1;
+
+        for (counter = 0; counter < array.length; counter+=1) {
+            if (min === -1) {
+                if (parseInt(array[counter]) > 0) {
+                    min = counter;
+                }
+            } else {
+                if (parseInt(array[counter]) > 0 && parseInt(array[min]) > parseInt(array[counter])){
+                    min = counter;
+                }
+            }
+        }
+        return min;
+    }
+
+    function applyTuiChartMaxMinColor (id: string, maxColor: string, minColor: string, maxIdx: number, minIdx: number) {
+        const svgRects = document.querySelectorAll('#' + id + ' .tui-chart-series-area svg rect'),
+            maxRect = svgRects[maxIdx], minRect = svgRects[minIdx];
+        if (maxRect) {
+            maxRect.setAttribute('fill', maxColor);
+        }
+        if (maxIdx !== minIdx && minRect) {
+            minRect.setAttribute('fill', minColor);
+        }
+    }
+
     @Component({
         components: {
             modal_dialog
@@ -61,39 +107,24 @@
     export default class AiGraphsDialog extends Vue {
         @Prop() dlgStyle!: any;
         @Prop() txtMap!: any;
-        @Prop() pShopStats!: any;
-        @Prop() pAiGraphObject!: any;
-        @Prop() pRequestCamStats!: any;
-        @Prop() pRequestShopStats!: any;
-        @Prop() pGetCameraName!: any;
-        @Prop() pAiStartTime!: any;
-        @Prop() pAiEndTime!: any;
-        @Prop() pAiIs24Hours!: any;
+        @Prop() aiCameraList!: ICameraInfo[];
+        @Prop() pRequestCamCharts!: any;
+        @Prop() pRequestShopChart!: any;
 
-        shopStats: any = null;
-        aiGraphObject: any = null;
-        dateStr: string = '';
-        cameraStats: any = {};
-        camStatsPromiseMap: any = {};
-        cameraIds: string[] = [];
+        startDate: Date = new Date();
+        endDate: Date = new Date();
+        mode: string = 'hourly';
+        camChartPromiseMap: any = {};
         isToday: boolean = true;
         periodStr: string = '';
 
         private created() {
-            let i, len;
-            this.aiGraphObject = this.pAiGraphObject;
-            this.shopStats = this.pShopStats;
-            this.cameraIds = this.shopStats[0].cameraId.split(',');
-            for (i = 0, len = this.cameraIds.length; i < len; i+=1) {
-                this.cameraStats[this.cameraIds[i]] = null;
-            }
-            this.isToday = this.checkIsToday();
-            this.periodStr = this.dateFormat(this.aiGraphObject.endDate, "YY.MM.DD (ddd)");
+            this.periodStr = this.dateFormat(this.endDate, "YY.MM.DD (ddd)");
         }
 
         private mounted() {
-            this.requestCamStats();
-            this.makeAICamGraph(this.shopStats, 'sum');
+            this.requestShopChart();
+            this.requestCamCharts();
         }
 
         private beforeDestroy() {
@@ -103,99 +134,115 @@
         }
 
         checkIsToday(): boolean {
-            if (!this.aiGraphObject) {
-                return false;
-            }
             const today = new Date();
 
-            if (today <= this.aiGraphObject.endDate || (today.getFullYear() === this.aiGraphObject.endDate.getFullYear() && today.getMonth() === this.aiGraphObject.endDate.getMonth() && today.getDate() === this.aiGraphObject.endDate.getDate())) {
+            if (today <= this.endDate || (today.getFullYear() === this.endDate.getFullYear() && today.getMonth() === this.endDate.getMonth() && today.getDate() === this.endDate.getDate())) {
                 return true;
             } else {
                 return false;
             }
         }
 
-        setShopStats(stats: any[]) {
-            if (!stats || !stats.length) {
-                return;
-            }
+        requestShopChart() {
+            this.pRequestShopChart(this.mode, this.startDate, this.endDate).then((res: any) => {
+                }, (err: any) => {
+                }).finally(() => {
+                    const response: IAiChart = {
+                        data : ["1","20","0","5","8","10"],
+                        yAxis : {
+                            min : 1,
+                            max : 20
+                        },
+                        xAxis : {
+                            items : ["9","10","11","12","13","14"]
+                        }
+                    };
 
-            let i, len;
-            this.shopStats = stats;
-            this.cameraIds = this.shopStats[0].cameraId.split(',');
-            for (i = 0, len = this.cameraIds.length; i < len; i+=1) {
-                this.cameraStats[this.cameraIds[i]] = null;
-            }
-            this.isToday = this.checkIsToday();
-            if (this.aiGraphObject.mode === 'daily') {
-                this.periodStr = this.weeklyFormat(this.aiGraphObject.startDate, this.aiGraphObject.endDate);
-            } else {
-                this.periodStr = this.dateFormat(this.aiGraphObject.endDate, "YY.MM.DD (ddd)");
-            }
-            this.requestCamStats();
-            if (this.aiGraphObject.mode === 'min') {
-                this.makeAICamLineChart(stats, 'sum');
-            } else {
-                this.makeAICamGraph(this.shopStats, 'sum');
-            }
+                    if (this.mode === 'daily') {
+                        this.periodStr = this.weeklyFormat(this.startDate, this.endDate);
+                    } else {
+                        this.periodStr = this.dateFormat(this.endDate, "YY.MM.DD (ddd)");
+                    }
+                    if (this.mode === 'min') {
+                        this.makeAICamLineChart(response, 'sum');
+                    } else {
+                        this.makeAICamGraph(response, 'sum');
+                    }
+                });
         }
 
         goPrev() {
-            if (this.aiGraphObject.mode === 'daily') {
-                this.aiGraphObject.startDate.setDate(this.aiGraphObject.startDate.getDate() - 7);
-                this.aiGraphObject.endDate.setDate(this.aiGraphObject.endDate.getDate() - 7);
+            if (this.mode === 'daily') {
+                this.startDate.setDate(this.startDate.getDate() - 7);
+                this.endDate.setDate(this.endDate.getDate() - 7);
             } else {
-                this.aiGraphObject.startDate.setDate(this.aiGraphObject.startDate.getDate() - 1);
-                this.aiGraphObject.endDate.setDate(this.aiGraphObject.endDate.getDate() - 1);
+                this.startDate.setDate(this.startDate.getDate() - 1);
+                this.endDate.setDate(this.endDate.getDate() - 1);
             }
-            this.pRequestShopStats(this.aiGraphObject.mode, this.aiGraphObject.startDate, this.aiGraphObject.endDate).then((res: any) => {
-                this.setShopStats(res.aiStatList);
-            });
+            this.isToday = this.checkIsToday();
+            this.requestShopChart();
+            this.requestCamCharts();
         }
 
         goNext() {
             if (this.isToday) {
                 return;
             }
-            if (this.aiGraphObject.mode === 'daily') {
-                this.aiGraphObject.startDate.setDate(this.aiGraphObject.startDate.getDate() + 7);
-                this.aiGraphObject.endDate.setDate(this.aiGraphObject.endDate.getDate() + 7);
+            if (this.mode === 'daily') {
+                this.startDate.setDate(this.startDate.getDate() + 7);
+                this.endDate.setDate(this.endDate.getDate() + 7);
             } else {
-                this.aiGraphObject.startDate.setDate(this.aiGraphObject.startDate.getDate() + 1);
-                this.aiGraphObject.endDate.setDate(this.aiGraphObject.endDate.getDate() + 1);
+                this.startDate.setDate(this.startDate.getDate() + 1);
+                this.endDate.setDate(this.endDate.getDate() + 1);
             }
-            this.pRequestShopStats(this.aiGraphObject.mode, this.aiGraphObject.startDate, this.aiGraphObject.endDate).then((res: any) => {
-                this.setShopStats(res.aiStatList);
-            });
+            this.isToday = this.checkIsToday();
+            this.requestShopChart();
+            this.requestCamCharts();
         }
 
-        requestCamStats() {
-            if (!this.cameraIds.length) {
+        requestCamCharts() {
+            if (!this.aiCameraList.length) {
                 return;
             }
+            const cameraIds = this.aiCameraList.map((camera) => camera.id);
             let key: string;
-            this.camStatsPromiseMap = this.pRequestCamStats(this.cameraIds, this.aiGraphObject.mode, this.aiGraphObject.startDate, this.aiGraphObject.endDate);
-            for (key in this.camStatsPromiseMap) {
-                this.camStatsPromiseMap[key].then((res: any) => {
-                    this.cameraStats[key] = res.aiStatList;
-                    if (this.aiGraphObject.mode === 'min') {
-                        this.makeAICamLineChart(this.cameraStats[key], 'cam');
+
+            this.camChartPromiseMap = this.pRequestCamCharts(cameraIds, this.mode, this.startDate, this.endDate);
+            for (key in this.camChartPromiseMap) {
+                this.handleCamChartRequest(this.camChartPromiseMap[key], key);
+            }
+        }
+
+        handleCamChartRequest(promise: any, id: string) {
+            promise.then((res: any) => {
+                }, (err: any) => {
+                }).finally(() => {
+                    const response: IAiChart = {
+                        data : ["1","20","0","5","8","10"],
+                        yAxis : {
+                            min : 1,
+                            max : 20
+                        },
+                        xAxis : {
+                            items : ["9","10","11","12","13","14"]
+                        }
+                    };
+                    if (this.mode === 'min') {
+                        this.makeAICamLineChart(response, 'cam', id);
                     } else {
-                        this.makeAICamGraph(this.cameraStats[key], 'cam');
+                        this.makeAICamGraph(response, 'cam', id);
                     }
                 });
-            }
         }
 
-        cancelCamStats() {
-            if (!this.camStatsPromiseMap) {
+        cancelCamCharts() {
+            if (!this.camChartPromiseMap) {
                 return;
             }
             let key: string;
-            for (key in this.camStatsPromiseMap) {
-                this.camStatsPromiseMap[key].abort();
+            for (key in this.camChartPromiseMap) {
+                this.camChartPromiseMap[key].abort();
             }
-            this.cameraStats = {};
         }
 
         dateFormat(date: Date, format: string): any {
@@ -216,63 +263,40 @@
             return startMonth + '.' + startDay + ' ~ ' + endMonth + '.' + endDay;
         }
 
-        aiDataTimeConverter(timestamp: number): string {
-            const date = new Date(timestamp);
-            let month: string | number = (1 + date.getMonth()),
-                day: string | number = date.getDate(),
-                hour: string | number = date.getHours(),
-                min: string | number = date.getMinutes(),
-                seconds: string | number = date.getSeconds();
-
-            month = month >= 10 ? month : '0' + month;
-            day = day >= 10 ? day : '0' + day;
-            hour = hour >= 10 ? hour : '0' + hour;
-            min = min >= 10 ? min : '0' + min;
-            seconds = seconds >= 10 ? seconds : '0' + seconds;
-            return  month + '.' + day + ' ' + hour + ':' + min + ':' + seconds;
-        }
-
         setGraphTimeUnit(unit: number) {
             if (unit === 10) {
-                this.aiGraphObject.mode = 'min';
+                this.mode = 'min';
             } else {
-                this.aiGraphObject.mode = 'hourly';
+                this.mode = 'hourly';
             }
-            this.pRequestShopStats(this.aiGraphObject.mode, this.aiGraphObject.startDate, this.aiGraphObject.endDate).then((res: any) => {
-                this.setShopStats(res.aiStatList);
-            });
+            this.requestShopChart();
+            this.requestCamCharts();
         }
 
         toggleMode() {
-            if (this.aiGraphObject.mode === 'daily') {
-                this.aiGraphObject.mode = 'hourly';
-                this.aiGraphObject.startDate = new Date();
-                this.aiGraphObject.endDate = new Date();
+            if (this.mode === 'daily') {
+                this.mode = 'hourly';
+                this.startDate = new Date();
+                this.endDate = new Date();
             } else {
-                this.aiGraphObject.mode = 'daily';
-                this.aiGraphObject.startDate = new Date();
-                while (this.aiGraphObject.startDate.getDay() != 0) {
-                    this.aiGraphObject.startDate.setDate(this.aiGraphObject.startDate.getDate() - 1);
+                this.mode = 'daily';
+                this.startDate = new Date();
+                while (this.startDate.getDay() != 0) {
+                    this.startDate.setDate(this.startDate.getDate() - 1);
                 }
-                this.aiGraphObject.endDate = new Date(this.aiGraphObject.startDate.valueOf());
-                this.aiGraphObject.endDate.setDate(this.aiGraphObject.endDate.getDate() + 6);
+                this.endDate = new Date(this.startDate.valueOf());
+                this.endDate.setDate(this.endDate.getDate() + 6);
             }
-            this.pRequestShopStats(this.aiGraphObject.mode, this.aiGraphObject.startDate, this.aiGraphObject.endDate).then((res: any) => {
-                this.setShopStats(res.aiStatList);
-            });
+            this.requestShopChart();
+            this.requestCamCharts();
         }
 
-        makeAICamGraph(stats: any, type: string) {
-            if (!stats || !stats.length) {
-                return;
-            }
-
-            let elementId, $aiGraphEl, chartWidth, key: string, data: any = {},
-                weekDay: any = this.txtMap.dayMap;
+        makeAICamGraph(chartData: IAiChart, type: string, id?: string) {
+            let elementId, $aiGraphEl, chartWidth, data: any = {}, color: string = '#4a96e6', weekDay: any = this.txtMap.dayMap;
             if (type === 'sum') {
                 elementId = 'sum_graph';
             } else {
-                elementId = 'cam_graph_' + stats[0].cameraId;
+                elementId = 'cam_graph_' + id;
             }
             $aiGraphEl = $('#' + elementId);
             if (!$aiGraphEl.length) {
@@ -281,63 +305,30 @@
             $aiGraphEl.html('');
 
             chartWidth = $aiGraphEl.width();
-            if (stats) {
-                let i: number;
-                data.categories = [];
-                data.series = [{name: this.txtMap.man, data: [], color: "#81b5ee"}];
-                if (this.aiGraphObject.mode === 'daily') {
-                    for (key in weekDay) {
-                        data.categories.push(weekDay[key]);
-                        data.series[0].data.push(stats[key] ? stats[key].peopleMax : 0);
-                    }
-                } else {
-                    let left: number = 0;
-                    for (key in stats) {
-                        if (!this.pAiIs24Hours) {
-                            if (this.pAiStartTime <= parseInt(key) && this.pAiEndTime >= parseInt(key)) {
-                                data.categories.push(key);
-                                data.series[0].data.push(stats[key].peopleMax);
-                            }
-                        } else {
-                            data.categories.push(key);
-                            data.series[0].data.push(stats[key].peopleMax);
-                        }
-                    }
-                    if (this.pAiIs24Hours) {
-                        left = 24 - data.categories.length;
-                        for (i = 0; i < left; i+=1) {
-                            data.categories.push('' + (24 - left + i));
-                            data.series[0].data.push(0);
-                        }
-                    } else {
-                        left = (this.pAiEndTime - this.pAiStartTime) + 1 - data.categories.length;
-                        const lastTime: number = parseInt(data.categories[data.categories.length - 1]);
-                        for (i = 0; i < left; i+=1) {
-                            var time = lastTime + (i + 1);
-                            data.categories.push('' + time);
-                            data.series[0].data.push(0);
-                        }
-                    }
-                }
-                // option 설정
+            if (chartData) {
+                data.categories = chartData.xAxis.items;
+                data.series = [{name: this.txtMap.man, data: chartData.data, color}];
+                const maxIdx = getGraphMaxIndex(data.series[0].data);
+                const minIdx = getGraphMinIndex(data.series[0].data);
                 const options: any = {
                     theme: "newTheme",
                     chart: {
-                        "width": (chartWidth),
+                        "width": (chartWidth - 10),
                         "height": type === 'sum' ? 400 : 260,
                         "title": "",
                         "format": '1,000'
                     },
                     yAxis: {
-                        "title": "",
-                        "min": 0
+                        title: "",
+                        max: chartData.yAxis.max,
+                        min: chartData.yAxis.min
                     },
                     tooltip: {
                         "suffix": this.txtMap.manCount
                     },
                     xAxis: {
                         "title": "",
-                        "labelInterval": this.aiGraphObject.mode === 'daily' ? 1 : 2
+                        "labelInterval": this.mode === 'daily' ? 1 : 2
                     },
                     series: {
                         "hasDot": false,
@@ -345,35 +336,29 @@
                     },
                     legend: {
                         "visible": false
+                    },
+                    chartExportMenu: {
+                        "visible": false
                     }
                 };
-                // //차트 라인 컬러 변경
-                const colors: string[] = [];
-                if (data.series) {
-                    for (i = 0; i < data.series.length; i+=1) {
-                        colors.push(data.series[i].color);
-                    }
-                }
-                const theme: any = {
+                tui.chart.registerTheme('newTheme', {
                     series: {
-                        colors: colors
+                        colors: [color]
                     }
-                };
-                tui.chart.registerTheme('newTheme', theme);
-                // 차트생성
-                const lineChart = tui.chart.columnChart(document.getElementById(elementId), data, options);
+                });
+                tui.chart.columnChart(document.getElementById(elementId), data, options);
                 $aiGraphEl.children('.tui-chart').css('margin', "auto");
+                applyTuiChartMaxMinColor(elementId, '#eb4e61', '#cae01c', maxIdx, minIdx);
             }
         }
 
-        makeAICamLineChart(stats: any, type: string) {
-            let i: number, len: number, format: string, yTitle: string, data: any, options: any,
-                elementId: string, container: HTMLElement | null, datas: (string|number)[] = [], categories: string[] = [];
+        makeAICamLineChart(chartData: IAiChart, type: string, id?: string) {
+            let format: string, yTitle: string, data: any, options: any, elementId: string, container: HTMLElement | null;
 
             if (type === 'sum') {
                 elementId = 'sum_graph';
             } else {
-                elementId = 'cam_graph_' + stats[0].cameraId;
+                elementId = 'cam_graph_' + id;
             }
             container = document.getElementById(elementId);
             if (container) {
@@ -381,33 +366,14 @@
                     container.removeChild(container.firstChild);
                 }
             }
-            //Make Categories
-            if (this.pAiIs24Hours) {
-                for (i = 0; i < 25; i+=1) {
-                    categories.push(i < 10 ? '0' + i : '' + i);
-                }
-            } else {
-                for (i = this.pAiStartTime; i < this.pAiEndTime + 1; i+=1) {
-                    categories.push(i < 10 ? '0' + i : '' + i);
-                }
-            }
-            //Make Datas
-            len = (categories.length - 1) * 6;
-            for (i = 0; i < len; i+=1) {
-                if (stats[i]) {
-                    datas.push(stats[i].peopleMax);
-                } else {
-                    datas.push("");
-                }
-            }
             yTitle = '(' + this.txtMap.manCount + ')';
             format = '0';
             data = {
-                categories: categories,
+                categories: chartData.xAxis.items,
                 series: [
                     {
                         name: '',
-                        data: datas
+                        data: chartData.data
                     }
                 ]
             };
@@ -419,23 +385,26 @@
                 },
                 yAxis: {
                     title: yTitle,
-                    min: 0
+                    max: chartData.yAxis.max,
+                    min: chartData.yAxis.min
                 },
                 xAxis: {
                     title: '(' + this.txtMap.hourCount + ')'
                 },
                 legend: {
                     visible: false
+                },
+                chartExportMenu: {
+                    visible: false
                 }
             };
-            const theme = {
+            tui.chart.registerTheme('theme', {
                 series: {
-                    colors: ['#4b96e6']  // '#D95576, '#00628C', '#00A8DA', '#1EA399', '#F7A655'
+                    colors: ['#4b96e6']
                 }
-            };
-            tui.chart.registerTheme('theme', theme);
+            });
             options.theme = 'theme';
-            const chart = tui.chart.lineChart(container, data, options);
+            tui.chart.lineChart(container, data, options);
             $('#' + elementId + ' .tui-chart-series-custom-event-area').hide();
             $('#' + elementId + ' .tui-chart-plot-area').hide();
         }
@@ -455,11 +424,11 @@
         h4 {
             font-size: 24px; text-align: left; font-weight:bold; padding:32px 0 20px 32px;
         }
-        .sum_graph_wrap {
-            border-bottom: 1px solid #dddddd;
-        }
         #sum_graph {
             width: 100%; height:414px;
+        }
+        .tui-chart {
+            margin: 0 auto;
         }
         .ai_date_area {
             padding-top: 8px;
@@ -468,7 +437,7 @@
             border-bottom: 1px solid #cccccc;
         }
         .graph_area {
-            height:579px; overflow-y:auto;
+            height:579px; overflow-y:auto; overflow-x:hidden;
         }
         .ai_date_select_wrap {
             position:relative; background-color: #fafafa; height:52px;
@@ -482,14 +451,14 @@
                 }
             }
             .prev_btn {
-                display:inline-block; background: url(/resources/img/btn-arrow-prev-gray.png) no-repeat; width:32px; height:32px; float:left;
+                display:inline-block; background: url(/resources/img/btn-arrow-gay-prev.png) no-repeat; width:30px; height:30px; float:left;
             }
             .next_btn {
-                display:inline-block; background: url(/resources/img/btn-arrow-next-gray.png) no-repeat; width:32px; height:32px; float:right;
+                display:inline-block; background: url(/resources/img/btn-arrow-gay-next.png) no-repeat; width:30px; height:30px; float:right;
             }
         }
         .cam_graph {
-            display:inline-block; box-sizing:border-box; border:1px solid #dddddd; width:50%; height:316px;
+            display:inline-block; box-sizing:border-box; border:1px solid #dddddd; width:calc(50% - 4px); height:316px;
             .cam_tit_wrap {
                 height:52px; text-align:left; padding:9px 0 0 22px; box-sizing:border-box;
                 img {
