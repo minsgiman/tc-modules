@@ -144,20 +144,7 @@
         }
 
         requestShopChart() {
-            this.pRequestShopChart(this.mode, this.startDate, this.endDate).then((res: any) => {
-                }, (err: any) => {
-                }).finally(() => {
-                    const response: IAiChart = {
-                        data : ["1","20","0","5","8","10"],
-                        yAxis : {
-                            min : 1,
-                            max : 20
-                        },
-                        xAxis : {
-                            items : ["9","10","11","12","13","14"]
-                        }
-                    };
-
+            this.pRequestShopChart(this.mode, this.startDate, this.endDate).then((response: IAiChart) => {
                     if (this.mode === 'daily') {
                         this.periodStr = this.weeklyFormat(this.startDate, this.endDate);
                     } else {
@@ -168,6 +155,7 @@
                     } else {
                         this.makeAICamGraph(response, 'sum');
                     }
+                }, (err: any) => {
                 });
         }
 
@@ -214,24 +202,13 @@
         }
 
         handleCamChartRequest(promise: any, id: string) {
-            promise.then((res: any) => {
-                }, (err: any) => {
-                }).finally(() => {
-                    const response: IAiChart = {
-                        data : ["1","20","0","5","8","10"],
-                        yAxis : {
-                            min : 1,
-                            max : 20
-                        },
-                        xAxis : {
-                            items : ["9","10","11","12","13","14"]
-                        }
-                    };
+            promise.then((response: IAiChart) => {
                     if (this.mode === 'min') {
                         this.makeAICamLineChart(response, 'cam', id);
                     } else {
                         this.makeAICamGraph(response, 'cam', id);
                     }
+                }, (err: any) => {
                 });
         }
 
