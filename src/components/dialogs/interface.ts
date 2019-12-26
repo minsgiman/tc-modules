@@ -53,6 +53,14 @@ export interface IAiStatsDlgParam {
     eventHandler?: (event: any) => void
 }
 
+export interface IAiZoneGuideDlgParam {
+    elId: string,
+    dlgStyle?: any,
+    txtMap: any,
+    noCloseBtn?: boolean,
+    eventHandler?: (event: any) => void
+}
+
 export interface ICameraInfo {
     id: string,
     labelName: string

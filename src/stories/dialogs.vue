@@ -6,13 +6,14 @@
         <button class="dlg-btn" @click="createConfirmDlg('normal')">Show confirm-dialog (normal)</button>
         <button class="dlg-btn" @click="createConfirmDlg('center')">Show confirm-dialog (center)</button>
         <button class="dlg-btn" @click="createConfirmDlg('checker')">Show confirm-dialog (checker)</button>
+        <button class="dlg-btn" @click="createAiGuideDlg">Show ai-guide-dialog</button>
         <button class="dlg-btn" @click="createAiStatsDialog">Show ai-stats-dialog</button>
         <button class="dlg-btn" @click="createAiGraphsDialog">Show ai-graphs-dialog</button>
     </div>
 </template>
 <script lang="ts">
     import { Component, Vue } from 'vue-property-decorator';
-    import { playerTipDialog, videoPlayDialog, confirmDialog, aiStatsDialog, aiGraphsDialog } from './../components/dialogs';
+    import { playerTipDialog, videoPlayDialog, confirmDialog, aiStatsDialog, aiGraphsDialog, aiGuideDialog } from './../components/dialogs';
 
     @Component
     export default class Checkbox extends Vue {
@@ -21,6 +22,25 @@
         confirmDlg: any = null;
         aiStatsDlg: any = null;
         aiGraphsDlg: any = null;
+        aiGuideDlg: any = null;
+
+        createAiGuideDlg () {
+            this.aiGuideDlg = aiGuideDialog({
+                elId: 'dlgId',
+                dlgStyle: {
+                    width: '452px', height: '367px', borderRadius: '12px', boxSizing: 'border-box', overflow: 'hidden'
+                },
+                txtMap: {
+                    description : '수정할 영역의 점을 눌러 원하는 방향으로 늘리거나 줄여보세요.',
+                    noshow : '다시 보지 않기',
+                    confirm : '확인'
+                },
+                noCloseBtn: true,
+                eventHandler: (event: any) => {
+                    console.log(JSON.stringify(event));
+                }
+            });
+        }
 
         createAiStatsDialog () {
             this.aiStatsDlg = aiStatsDialog({
