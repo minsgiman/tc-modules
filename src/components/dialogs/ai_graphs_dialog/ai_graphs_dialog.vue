@@ -22,7 +22,7 @@
                         <div class="sum_graph_wrap">
                             <div id="sum_graph"></div>
                         </div>
-                        <ul class="cam_graph_list" style="text-align:left;">
+                        <!--ul class="cam_graph_list" style="text-align:left;">
                             <li class="cam_graph" v-for="(camera, index) in aiCameraList">
                                 <p class="cam_tit_wrap">
                                     <img src="/resources/img/ic-toast-camera.svg">
@@ -31,9 +31,8 @@
                                 <div class="cam_graph_wrap">
                                     <div :id="'cam_graph_' + camera.id"></div>
                                 </div>
-                                <!--img class="cam_stat_load_img" v-show="!camera" src="/resources/img/loading.svg"-->
                             </li>
-                        </ul>
+                        </ul-->
                     </div>
                 </div>
             </template>
@@ -44,7 +43,7 @@
     import { Component, Prop, Vue } from 'vue-property-decorator';
     import modal_dialog from '../../uikit/modal_dialog';
     import { getBrowserLanguage } from '../../../service/util';
-    import { IAiChart, ICameraInfo } from '../interface';
+    import { IAiChart } from '../interface';
 
     // import $ from 'jquery';
     // import moment from 'moment';
@@ -107,14 +106,14 @@
     export default class AiGraphsDialog extends Vue {
         @Prop() dlgStyle!: any;
         @Prop() txtMap!: any;
-        @Prop() aiCameraList!: ICameraInfo[];
-        @Prop() pRequestCamCharts!: any;
+        //@Prop() aiCameraList!: ICameraInfo[];
+        //@Prop() pRequestCamCharts!: any;
         @Prop() pRequestShopChart!: any;
 
         startDate: Date = new Date();
         endDate: Date = new Date();
         mode: string = 'hourly';
-        camChartPromiseMap: any = {};
+        //camChartPromiseMap: any = {};
         isToday: boolean = true;
         periodStr: string = '';
 
@@ -124,7 +123,7 @@
 
         private mounted() {
             this.requestShopChart();
-            this.requestCamCharts();
+            //this.requestCamCharts();
         }
 
         private beforeDestroy() {
@@ -144,16 +143,20 @@
         }
 
         requestShopChart() {
-            this.pRequestShopChart(this.mode, this.startDate, this.endDate).then((response: IAiChart) => {
+            this.pRequestShopChart(this.mode, this.startDate, this.endDate).then((response: any) => {
                     if (this.mode === 'daily') {
                         this.periodStr = this.weeklyFormat(this.startDate, this.endDate);
                     } else {
                         this.periodStr = this.dateFormat(this.endDate, "YY.MM.DD (ddd)");
                     }
                     if (this.mode === 'min') {
-                        this.makeAICamLineChart(response, 'sum');
+                        if (response.peopleArea) {
+                            this.makeAICamLineChart(response.peopleArea, 'sum');
+                        }
                     } else {
-                        this.makeAICamGraph(response, 'sum');
+                        if (response.peopleArea) {
+                            this.makeAICamGraph(response.peopleArea, 'sum');
+                        }
                     }
                 }, (err: any) => {
                 });
@@ -169,7 +172,7 @@
             }
             this.isToday = this.checkIsToday();
             this.requestShopChart();
-            this.requestCamCharts();
+            //this.requestCamCharts();
         }
 
         goNext() {
@@ -185,42 +188,42 @@
             }
             this.isToday = this.checkIsToday();
             this.requestShopChart();
-            this.requestCamCharts();
+            //this.requestCamCharts();
         }
 
-        requestCamCharts() {
-            if (!this.aiCameraList.length) {
-                return;
-            }
-            const cameraIds = this.aiCameraList.map((camera) => camera.id);
-            let key: string;
+        // requestCamCharts() {
+        //     if (!this.aiCameraList.length) {
+        //         return;
+        //     }
+        //     const cameraIds = this.aiCameraList.map((camera) => camera.id);
+        //     let key: string;
+        //
+        //     this.camChartPromiseMap = this.pRequestCamCharts(cameraIds, this.mode, this.startDate, this.endDate);
+        //     for (key in this.camChartPromiseMap) {
+        //         this.handleCamChartRequest(this.camChartPromiseMap[key], key);
+        //     }
+        // }
 
-            this.camChartPromiseMap = this.pRequestCamCharts(cameraIds, this.mode, this.startDate, this.endDate);
-            for (key in this.camChartPromiseMap) {
-                this.handleCamChartRequest(this.camChartPromiseMap[key], key);
-            }
-        }
+        // handleCamChartRequest(promise: any, id: string) {
+        //     promise.then((response: IAiChart) => {
+        //             if (this.mode === 'min') {
+        //                 this.makeAICamLineChart(response, 'cam', id);
+        //             } else {
+        //                 this.makeAICamGraph(response, 'cam', id);
+        //             }
+        //         }, (err: any) => {
+        //         });
+        // }
 
-        handleCamChartRequest(promise: any, id: string) {
-            promise.then((response: IAiChart) => {
-                    if (this.mode === 'min') {
-                        this.makeAICamLineChart(response, 'cam', id);
-                    } else {
-                        this.makeAICamGraph(response, 'cam', id);
-                    }
-                }, (err: any) => {
-                });
-        }
-
-        cancelCamCharts() {
-            if (!this.camChartPromiseMap) {
-                return;
-            }
-            let key: string;
-            for (key in this.camChartPromiseMap) {
-                this.camChartPromiseMap[key].abort();
-            }
-        }
+        // cancelCamCharts() {
+        //     if (!this.camChartPromiseMap) {
+        //         return;
+        //     }
+        //     let key: string;
+        //     for (key in this.camChartPromiseMap) {
+        //         this.camChartPromiseMap[key].abort();
+        //     }
+        // }
 
         dateFormat(date: Date, format: string): any {
             const md = moment(date);
@@ -247,7 +250,7 @@
                 this.mode = 'hourly';
             }
             this.requestShopChart();
-            this.requestCamCharts();
+            //this.requestCamCharts();
         }
 
         toggleMode() {
@@ -265,7 +268,7 @@
                 this.endDate.setDate(this.endDate.getDate() + 6);
             }
             this.requestShopChart();
-            this.requestCamCharts();
+            //this.requestCamCharts();
         }
 
         makeAICamGraph(chartData: IAiChart, type: string, id?: string) {
@@ -445,9 +448,6 @@
                     font-size:16px; color:#333333;
                 }
             }
-        }
-        .cam_stat_load_img {
-            width:50px; height:50px; margin-top:30px;
         }
         .date_mode_control {
             border: 1px solid #b2b2b2; width:60px; height:32px; position:absolute; right:24px; top:10px; color:#333333; font-size:13px;
