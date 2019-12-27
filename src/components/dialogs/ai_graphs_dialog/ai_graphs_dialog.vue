@@ -198,6 +198,7 @@
                         that.endDate.setDate(that.endDate.getDate() + 6);
                         that.periodStr = that.weeklyFormat(that.startDate, that.endDate);
                     }
+                    that.isToday = that.checkIsToday();
                     that.requestShopChart();
                 }
             });
@@ -367,42 +368,7 @@
                         return data ? Math.ceil(data) : null;
                     });
                 }
-                if (this.mode === 'daily') {
-                    if (chartData.xAxis) {
-                        data.categories = chartData.xAxis.items.map((item) => {
-                            let data;
-                            switch(item) {
-                                case "Sun":
-                                    data = lang === 'ja' ? '日' : '일';
-                                    break;
-                                case "Mon":
-                                    data = lang === 'ja' ? '月' : '월';
-                                    break;
-                                case "Tue":
-                                    data = lang === 'ja' ? '火' : '화';
-                                    break;
-                                case "Wed":
-                                    data = lang === 'ja' ? '水' : '수';
-                                    break;
-                                case "Thu":
-                                    data = lang === 'ja' ? '木' : '목';
-                                    break;
-                                case "Fri":
-                                    data = lang === 'ja' ? '金' : '금';
-                                    break;
-                                case "Sat":
-                                    data = lang === 'ja' ? '土' : '토';
-                                    break;
-                                default:
-                                    data = lang === 'ja' ? '日' : '일';
-                                    break;
-                            }
-                            return data;
-                        });
-                    }
-                } else {
-                    data.categories = chartData.xAxis.items;
-                }
+                data.categories = chartData.xAxis.items;
                 data.series = [{name: this.txtMap.man, data: chartData.data, color}];
                 const maxIdx = getGraphMaxIndex(data.series[0].data);
                 const minIdx = getGraphMinIndex(data.series[0].data);

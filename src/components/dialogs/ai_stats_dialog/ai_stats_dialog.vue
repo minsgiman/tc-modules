@@ -6,7 +6,7 @@
                     <h4>{{txtMap.title}}</h4>
                     <ul class="ai_cam_list">
                         <li class="ai_cam" v-for="(camera, index) in cameraSummaries">
-                            <img :src="camera.thumbnailPath" onerror="this.src='/resources/images/img_camera_fail.png'">
+                            <img :src="'https://' + camera.thumbnailPath" onerror="this.src='/resources/images/img_camera_fail.png'">
                             <p>
                                 <span class="ai_cam_name">{{camera.labelName}}</span>
                                 <span class="ai_date">{{aiDataTimeConverter(camera.aiCountSummary.updateDate)}}</span>
