@@ -79,9 +79,9 @@
             this.aiGraphsDlg = aiGraphsDialog({
                 elId: 'dlgId',
                 dlgStyle : {
-                    width: '1100px', height: '720px', boxSizing: 'border-box'
+                    width: '1100px', height: '662px', boxSizing: 'border-box'
                 },
-                'txtMap' : {
+                txtMap : {
                     title : '혼잡도 그래프',
                     weekly : '주간',
                     daily : '일일',
@@ -93,67 +93,8 @@
                     hourCount : '시',
                     dayMap : ['일', '월', '화', '수', '목', '금', '토']
                 },
-                'pAiStartTime' : 0,
-                'pAiEndTime' : 0,
-                'pAiIs24Hours' : false,
-                'pShopStats' : [{"key":2019121000,"cameraId":"AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK","count":1278,"objMax":0,"objMin":-1,"objSum":0,"peopleMax":0,"peopleMin":-1,"peopleSum":0,"seatMax":0,"seatMin":-1,"seatSum":0},{"key":2019121001,"cameraId":"AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK","count":1265,"objMax":0,"objMin":-1,"objSum":0,"peopleMax":0,"peopleMin":-1,"peopleSum":0,"seatMax":0,"seatMin":-1,"seatSum":0},{"key":2019121002,"cameraId":"AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK","count":1277,"objMax":0,"objMin":-1,"objSum":0,"peopleMax":0,"peopleMin":-1,"peopleSum":0,"seatMax":0,"seatMin":-1,"seatSum":0},{"key":2019121003,"cameraId":"AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK","count":1277,"objMax":0,"objMin":-1,"objSum":0,"peopleMax":0,"peopleMin":-1,"peopleSum":0,"seatMax":0,"seatMin":-1,"seatSum":0},{"key":2019121004,"cameraId":"AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK","count":1275,"objMax":0,"objMin":-1,"objSum":0,"peopleMax":0,"peopleMin":-1,"peopleSum":0,"seatMax":0,"seatMin":-1,"seatSum":0},{"key":2019121005,"cameraId":"AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK","count":1282,"objMax":0,"objMin":-1,"objSum":0,"peopleMax":0,"peopleMin":-1,"peopleSum":0,"seatMax":0,"seatMin":-1,"seatSum":0},{"key":2019121006,"cameraId":"AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK","count":1274,"objMax":0,"objMin":-1,"objSum":0,"peopleMax":0,"peopleMin":-1,"peopleSum":0,"seatMax":0,"seatMin":-1,"seatSum":0},{"key":2019121007,"cameraId":"AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK","count":1244,"objMax":0,"objMin":-1,"objSum":0,"peopleMax":0,"peopleMin":-1,"peopleSum":0,"seatMax":0,"seatMin":-1,"seatSum":0},{"key":2019121008,"cameraId":"AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK","count":1227,"objMax":0,"objMin":-1,"objSum":0,"peopleMax":0,"peopleMin":-1,"peopleSum":0,"seatMax":0,"seatMin":-1,"seatSum":0},{"key":2019121009,"cameraId":"AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK","count":1214,"objMax":2,"objMin":-1,"objSum":45,"peopleMax":2,"peopleMin":-1,"peopleSum":27,"seatMax":1,"seatMin":-1,"seatSum":22},{"key":2019121010,"cameraId":"AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK","count":1188,"objMax":5,"objMin":0,"objSum":1098,"peopleMax":4,"peopleMin":-1,"peopleSum":688,"seatMax":3,"seatMin":-1,"seatSum":633},{"key":2019121011,"cameraId":"AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK","count":1134,"objMax":10,"objMin":0,"objSum":3117,"peopleMax":8,"peopleMin":0,"peopleSum":1820,"seatMax":4,"seatMin":0,"seatSum":1573},{"key":2019121012,"cameraId":"AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK","count":1092,"objMax":12,"objMin":0,"objSum":6566,"peopleMax":8,"peopleMin":0,"peopleSum":4281,"seatMax":4,"seatMin":0,"seatSum":3049},{"key":2019121013,"cameraId":"AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK","count":1035,"objMax":8,"objMin":0,"objSum":4079,"peopleMax":7,"peopleMin":0,"peopleSum":3196,"seatMax":4,"seatMin":0,"seatSum":1989},{"key":2019121014,"cameraId":"AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK","count":1158,"objMax":6,"objMin":0,"objSum":1049,"peopleMax":5,"peopleMin":-1,"peopleSum":613,"seatMax":3,"seatMin":-1,"seatSum":556},{"key":2019121015,"cameraId":"AAADIYJ,AAADIYK,AAADIYJ,AAADIYK,AAADIYJ,AAADIYK","count":383,"objMax":3,"objMin":-1,"objSum":209,"peopleMax":3,"peopleMin":-1,"peopleSum":209,"seatMax":2,"seatMin":-1,"seatSum":26}],
-                'pAiGraphObject' : aiGraphObject,
-                'pRequestShopStats' : function(mode: string, startDate: Date, endDate: Date) {
-                    /*
-                    if (mode === 'hourly') {
-                        return Shop.aiHourlyStats({shopId: $scope.shopId, start: getDateString(startDate), end: getDateString(endDate), count: 1}).$promise;
-                    } else if (mode === 'min') {
-                        var startDateStr = getDateString(startDate), endDateStr = getDateString(endDate);
-                        if (aiIs24Hours) {
-                            startDateStr = startDateStr + '-00';
-                            endDateStr = endDateStr + '-23';
-                        } else {
-                            startDateStr = startDateStr + '-' + (aiStartTime < 10 ? '0' + aiStartTime : aiStartTime);
-                            endDateStr = endDateStr + '-' + (aiEndTime < 10 ? '0' + aiEndTime : aiEndTime);
-                        }
-                        return Shop.aiMinStats({shopId: $scope.shopId, start: startDateStr, end: endDateStr, count: 1}).$promise;
-                    } else {
-                        return Shop.aiDailyStats({shopId: $scope.shopId, start: getDateString(startDate), end: getDateString(endDate)}).$promise;
-                    }
-                     */
-                },
-                'pRequestCamStats' : function(camIds: string[], mode: string, startDate: Date, endDate: Date) {
-                    /*
-                    var i, len = camIds.length, promiseMap = {};
-                    var startDateStr = getDateString(startDate), endDateStr = getDateString(endDate);
-                    if (mode === 'min') {
-                        if (aiIs24Hours) {
-                            startDateStr = startDateStr + '-00';
-                            endDateStr = endDateStr + '-23';
-                        } else {
-                            startDateStr = startDateStr + '-' + (aiStartTime < 10 ? '0' + aiStartTime : aiStartTime);
-                            endDateStr = endDateStr + '-' + (aiEndTime < 10 ? '0' + aiEndTime : aiEndTime);
-                        }
-                    }
-                    for (i = 0; i < len; i+=1) {
-                        if (mode === 'hourly') {
-                            promiseMap[camIds[i]] = Camera.aiHourlyStats({cameraId: camIds[i], start: startDateStr, end: endDateStr}).$promise;
-                        } else if (mode === 'min') {
-                            promiseMap[camIds[i]] = Camera.aiMinStats({cameraId: camIds[i], start: startDateStr, end: endDateStr}).$promise;
-                        } else {
-                            promiseMap[camIds[i]] = Camera.aiDailyStats({cameraId: camIds[i], start: startDateStr, end: endDateStr}).$promise;
-                        }
-                    }
-                    return promiseMap;
-                     */
-                },
-                'pGetCameraName' : function(camId: string) {
-                    /*
-                    if (aiStats) {
-                        var i, len = aiStats.length;
-                        for (i = 0; i < len; i+=1) {
-                            if (aiStats[i].cameraId === camId) {
-                                return aiStats[i].cameraName;
-                            }
-                        }
-                    }
-                    return '';
-                    */
+                pRequestShopChart : function(mode: any, startDate: any, endDate: any) {
+
                 }
             });
         }

@@ -6,15 +6,19 @@
                     <h4>{{txtMap.title}}</h4>
                     <div class="ai_date_area">
                         <div class="ai_date_select_wrap">
-                        <span class="date_control_wrap">
-                            <a @click="goPrev" class="prev_btn"></a>
-                            <span class="select_day">{{periodStr}} {{(mode === 'hourly' || mode === 'min') && isToday ? txtMap.today : ''}}</span>
-                            <a @click="goNext" class="next_btn"></a>
-                        </span>
+                            <div class="calendar_wrap">
+                                <button @click="toggleCalendar" id="calendarBtn" class="calendar_btn"></button>
+                            </div>
+                            <div id="calendarContainer" class="calendar_open_area"></div>
+                            <span class="date_control_wrap">
+                                <a @click="goPrev" class="prev_btn"></a>
+                                <span class="select_day">{{periodStr}} {{(mode === 'hourly' || mode === 'min') && isToday ? txtMap.today : ''}}</span>
+                                <a @click="goNext" class="next_btn"></a>
+                            </span>
                             <button class="date_mode_control" @click="toggleMode">{{(mode === 'hourly' || mode === 'min') ? txtMap.weekly : txtMap.daily}}</button>
                         </div>
                     </div>
-                    <div class="graph_area">
+                    <div v-show="!isLoading" class="graph_area">
                         <div class="graph_time_set_wrap" v-show="mode === 'min' || mode === 'hourly' ">
                             <span class="min" :class="{enable: mode === 'min'}" @click="setGraphTimeUnit(10)">10{{txtMap.min}}</span>
                             <span class="hour" :class="{enable: mode === 'hourly'}" @click="setGraphTimeUnit(60)">1{{txtMap.hour}}</span>
@@ -34,6 +38,7 @@
                             </li>
                         </ul-->
                     </div>
+                    <img v-show="isLoading" class="ai_load" src="/resources/img/progress_rolling_blue.svg">
                 </div>
             </template>
         </modal_dialog>
@@ -49,13 +54,18 @@
     // import moment from 'moment';
     // import chart from 'tui-chart';
     // const tui = { chart };
+    // import Pikaday from 'pikaday';
     const $: any = (window as any).$ as any;
     const tui: any = (window as any).tui as any;
     const moment: any = (window as any).moment as any;
+    const Pikaday: any = (window as any).Pikaday as any;
 
     function getGraphMaxIndex (array: string[]) {
         let counter, max = -1;
 
+        if (!array) {
+            return max;
+        }
         for (counter = 0; counter < array.length; counter+=1) {
             if (max === -1) {
                 if (parseInt(array[counter]) > 0) {
@@ -73,6 +83,9 @@
     function getGraphMinIndex (array: string[]) {
         let counter, min = -1;
 
+        if (!array) {
+            return min;
+        }
         for (counter = 0; counter < array.length; counter+=1) {
             if (min === -1) {
                 if (parseInt(array[counter]) > 0) {
@@ -116,6 +129,8 @@
         //camChartPromiseMap: any = {};
         isToday: boolean = true;
         periodStr: string = '';
+        isLoading: boolean = false;
+        datePicker: any = null;
 
         private created() {
             this.periodStr = this.dateFormat(this.endDate, "YY.MM.DD (ddd)");
@@ -124,9 +139,15 @@
         private mounted() {
             this.requestShopChart();
             //this.requestCamCharts();
+            setTimeout(() => {
+                this.initCalendar();
+            }, 500);
         }
 
         private beforeDestroy() {
+            if (this.datePicker) {
+                this.datePicker.destroy();
+            }
             if (this.$el.parentNode) {
                 this.$el.parentNode.removeChild(this.$el);
             }
@@ -142,23 +163,71 @@
             }
         }
 
-        requestShopChart() {
-            this.pRequestShopChart(this.mode, this.startDate, this.endDate).then((response: any) => {
-                    if (this.mode === 'daily') {
-                        this.periodStr = this.weeklyFormat(this.startDate, this.endDate);
+        toggleCalendar() {
+            if (this.datePicker) {
+                if (this.datePicker.isVisible()) {
+                    this.datePicker.hide();
+                } else {
+                    this.datePicker.show();
+                }
+            }
+        }
+
+        initCalendar() {
+            const that = this;
+            const lang = document.documentElement.getAttribute('lang');
+            const format = lang === 'ja' ? 'YYYY年MM月DD日' : 'YYYY년 MM월 DD일';
+            this.datePicker = new Pikaday({
+                field: document.getElementById('calendarBtn'),
+                container: document.getElementById('calendarContainer'),
+                format: format,
+                maxDate: new Date(),
+                defaultDate: that.endDate ? that.endDate : new Date(),
+                position: 'bottom right',
+                onSelect: function(date: Date) {
+                    if (that.mode === 'hourly' || that.mode === 'min') {
+                        that.startDate = date;
+                        that.endDate = date;
+                        that.periodStr = that.dateFormat(that.endDate, "YY.MM.DD (ddd)");
                     } else {
-                        this.periodStr = this.dateFormat(this.endDate, "YY.MM.DD (ddd)");
+                        that.startDate = date;
+                        while (that.startDate.getDay() != 0) {
+                            that.startDate.setDate(that.startDate.getDate() - 1);
+                        }
+                        that.endDate = new Date(that.startDate.valueOf());
+                        that.endDate.setDate(that.endDate.getDate() + 6);
+                        that.periodStr = that.weeklyFormat(that.startDate, that.endDate);
                     }
+                    that.requestShopChart();
+                }
+            });
+        }
+
+        requestShopChart() {
+            this.isLoading = true;
+            this.pRequestShopChart(this.mode, this.startDate, this.endDate).then((response: any) => {
                     if (this.mode === 'min') {
                         if (response.peopleArea) {
                             this.makeAICamLineChart(response.peopleArea, 'sum');
+                        } else {
+                            this.makeAICamLineChart({data: [],
+                                yAxis: {min: 0, max: 0},
+                                xAxis: {items: []}
+                            }, 'sum');
                         }
                     } else {
                         if (response.peopleArea) {
                             this.makeAICamGraph(response.peopleArea, 'sum');
+                        } else {
+                            this.makeAICamGraph({data: [],
+                                yAxis: {min: 0, max: 0},
+                                xAxis: {items: []}
+                            }, 'sum');
                         }
                     }
                 }, (err: any) => {
+                }).finally(() => {
+                    this.isLoading = false;
                 });
         }
 
@@ -166,9 +235,11 @@
             if (this.mode === 'daily') {
                 this.startDate.setDate(this.startDate.getDate() - 7);
                 this.endDate.setDate(this.endDate.getDate() - 7);
+                this.periodStr = this.weeklyFormat(this.startDate, this.endDate);
             } else {
                 this.startDate.setDate(this.startDate.getDate() - 1);
                 this.endDate.setDate(this.endDate.getDate() - 1);
+                this.periodStr = this.dateFormat(this.endDate, "YY.MM.DD (ddd)");
             }
             this.isToday = this.checkIsToday();
             this.requestShopChart();
@@ -182,9 +253,11 @@
             if (this.mode === 'daily') {
                 this.startDate.setDate(this.startDate.getDate() + 7);
                 this.endDate.setDate(this.endDate.getDate() + 7);
+                this.periodStr = this.weeklyFormat(this.startDate, this.endDate);
             } else {
                 this.startDate.setDate(this.startDate.getDate() + 1);
                 this.endDate.setDate(this.endDate.getDate() + 1);
+                this.periodStr = this.dateFormat(this.endDate, "YY.MM.DD (ddd)");
             }
             this.isToday = this.checkIsToday();
             this.requestShopChart();
@@ -258,6 +331,7 @@
                 this.mode = 'hourly';
                 this.startDate = new Date();
                 this.endDate = new Date();
+                this.periodStr = this.dateFormat(this.endDate, "YY.MM.DD (ddd)");
             } else {
                 this.mode = 'daily';
                 this.startDate = new Date();
@@ -266,12 +340,14 @@
                 }
                 this.endDate = new Date(this.startDate.valueOf());
                 this.endDate.setDate(this.endDate.getDate() + 6);
+                this.periodStr = this.weeklyFormat(this.startDate, this.endDate);
             }
             this.requestShopChart();
             //this.requestCamCharts();
         }
 
         makeAICamGraph(chartData: IAiChart, type: string, id?: string) {
+            const lang = document.documentElement.getAttribute('lang');
             let elementId, $aiGraphEl, chartWidth, data: any = {}, color: string = '#4a96e6', weekDay: any = this.txtMap.dayMap;
             if (type === 'sum') {
                 elementId = 'sum_graph';
@@ -284,9 +360,49 @@
             }
             $aiGraphEl.html('');
 
-            chartWidth = $aiGraphEl.width();
+            chartWidth = 1000;
             if (chartData) {
-                data.categories = chartData.xAxis.items;
+                if (chartData.data) {
+                    chartData.data = chartData.data.map((data: any) => {
+                        return data ? Math.ceil(data) : null;
+                    });
+                }
+                if (this.mode === 'daily') {
+                    if (chartData.xAxis) {
+                        data.categories = chartData.xAxis.items.map((item) => {
+                            let data;
+                            switch(item) {
+                                case "Sun":
+                                    data = lang === 'ja' ? '日' : '일';
+                                    break;
+                                case "Mon":
+                                    data = lang === 'ja' ? '月' : '월';
+                                    break;
+                                case "Tue":
+                                    data = lang === 'ja' ? '火' : '화';
+                                    break;
+                                case "Wed":
+                                    data = lang === 'ja' ? '水' : '수';
+                                    break;
+                                case "Thu":
+                                    data = lang === 'ja' ? '木' : '목';
+                                    break;
+                                case "Fri":
+                                    data = lang === 'ja' ? '金' : '금';
+                                    break;
+                                case "Sat":
+                                    data = lang === 'ja' ? '土' : '토';
+                                    break;
+                                default:
+                                    data = lang === 'ja' ? '日' : '일';
+                                    break;
+                            }
+                            return data;
+                        });
+                    }
+                } else {
+                    data.categories = chartData.xAxis.items;
+                }
                 data.series = [{name: this.txtMap.man, data: chartData.data, color}];
                 const maxIdx = getGraphMaxIndex(data.series[0].data);
                 const minIdx = getGraphMinIndex(data.series[0].data);
@@ -333,7 +449,7 @@
         }
 
         makeAICamLineChart(chartData: IAiChart, type: string, id?: string) {
-            let format: string, yTitle: string, data: any, options: any, elementId: string, container: HTMLElement | null;
+            let categories: any, format: string, yTitle: string, data: any, options: any, elementId: string, container: HTMLElement | null;
 
             if (type === 'sum') {
                 elementId = 'sum_graph';
@@ -346,10 +462,20 @@
                     container.removeChild(container.firstChild);
                 }
             }
+            if (chartData.data) {
+                chartData.data = chartData.data.map((data: any) => {
+                    return data ? Math.ceil(data) : null;
+                });
+            }
+            if (chartData.xAxis) {
+                categories = chartData.xAxis.items.filter((item) => {
+                    return !!item;
+                });
+            }
             yTitle = '(' + this.txtMap.manCount + ')';
             format = '0';
             data = {
-                categories: chartData.xAxis.items,
+                categories: categories,
                 series: [
                     {
                         name: '',
@@ -359,7 +485,7 @@
             };
             options = {
                 chart: {
-                    width: $('#' + elementId).width() - (type === 'sum' ? 30 : 10),
+                    width: 1000 - (type === 'sum' ? 30 : 10),
                     height: type === 'sum' ? 400 : 260,
                     format: format
                 },
@@ -421,8 +547,22 @@
         }
         .ai_date_select_wrap {
             position:relative; background-color: #fafafa; height:52px;
+            .calendar_wrap {
+                float: left;
+                height: 100%;
+                width: 60px;
+                padding: 13px 0;
+                box-sizing: border-box;
+                border-right: 1px solid #e0e0e0;
+                .calendar_btn {
+                    background: url(/resources/img/ic-camera-calendar.svg) no-repeat; width: 28px; height: 28px;
+                }
+            }
+            .calendar_open_area {
+                position:absolute; right:0; left:22px; top:54px;
+            }
             .date_control_wrap {
-                display:inline-block; width:230px; margin-top:10px;
+                display:inline-block; width:230px; margin-top:10px; margin-left:-65px;
             }
             .select_day {
                 font-size:16px; color:#333333; font-weight:bold; margin-top:7px; display:inline-block;
@@ -448,6 +588,9 @@
                     font-size:16px; color:#333333;
                 }
             }
+        }
+        .ai_load {
+            position:absolute; width:60px; height:60px; top:350px; left:calc(50% - 30px);
         }
         .date_mode_control {
             border: 1px solid #b2b2b2; width:60px; height:32px; position:absolute; right:24px; top:10px; color:#333333; font-size:13px;

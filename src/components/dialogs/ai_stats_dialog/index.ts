@@ -6,7 +6,6 @@ function createDlg(param: IAiStatsDlgParam) {
     return creator(param.elId, aiStatsDialog, {
         dlgStyle: param.dlgStyle,
         txtMap: param.txtMap,
-        pUpdateDate: param.pUpdateDate,
         pCameraSummaries: param.pCameraSummaries
     }, param.eventHandler);
 }

@@ -8,12 +8,12 @@
                         <li class="ai_cam" v-for="(camera, index) in cameraSummaries">
                             <img :src="camera.thumbnailPath" onerror="this.src='/resources/images/img_camera_fail.png'">
                             <p>
-                                <span class="ai_cam_name">{{camera.cameraName}}</span>
-                                <span class="ai_date">{{aiDataTimeConverter(updateDate)}}</span>
+                                <span class="ai_cam_name">{{camera.labelName}}</span>
+                                <span class="ai_date">{{aiDataTimeConverter(camera.aiCountSummary.updateDate)}}</span>
                                 <span class="ai_count_wrap">
-                                <span class="count_num">{{camera.totalInPeopleZone}}</span>
+                                <span class="count_num">{{camera.aiCountSummary.totalInPeopleZone}}</span>
                                 <span>{{txtMap.countUnit}},</span>
-                                <span class="count_num">{{camera.useTableCount}}/{{camera.allTableCount}}</span>
+                                <span class="count_num">{{camera.aiCountSummary.useTableCount}}/{{camera.aiCountSummary.allTableCount}}</span>
                                 <span>{{txtMap.seatUnit}}</span>
                             </span>
                             </p>
@@ -37,15 +37,12 @@
     export default class AiStatsDialog extends Vue {
         @Prop() dlgStyle!: any;
         @Prop() txtMap!: any;
-        @Prop() pUpdateDate!: number;
         @Prop() pCameraSummaries!: IAiCameraSummary[];
 
         cameraSummaries: IAiCameraSummary[] | null = null;
-        updateDate: number = 0;
 
         private created() {
             this.cameraSummaries = this.pCameraSummaries;
-            this.updateDate = this.pUpdateDate;
         }
 
         private beforeDestroy() {
@@ -54,9 +51,8 @@
             }
         }
 
-        updateAiData (cameraSummaries: IAiCameraSummary[], updateDate: number) {
+        updateAiData (cameraSummaries: IAiCameraSummary[]) {
             this.cameraSummaries = cameraSummaries;
-            this.updateDate = updateDate;
         }
 
         onCloseDialog () {

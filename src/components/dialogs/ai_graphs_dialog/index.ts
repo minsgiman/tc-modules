@@ -6,8 +6,6 @@ function createDlg(param: IAiGraphsDlgParam) {
     return creator(param.elId, aiGraphsDialog, {
         dlgStyle: param.dlgStyle,
         txtMap: param.txtMap,
-        aiCameraList: param.aiCameraList,
-        pRequestCamCharts: param.pRequestCamCharts,
         pRequestShopChart: param.pRequestShopChart
     }, param.eventHandler);
 }
