@@ -6,6 +6,7 @@ function createDlg(param: IAiZoneGuideDlgParam) {
     return creator(param.elId, aizoneGuideDialog, {
         dlgStyle: param.dlgStyle,
         txtMap: param.txtMap,
+        swipeInfos: param.swipeInfos,
         noCloseBtn: param.noCloseBtn
     }, param.eventHandler);
 }

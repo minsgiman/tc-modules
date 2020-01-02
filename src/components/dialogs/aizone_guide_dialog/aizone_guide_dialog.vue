@@ -5,13 +5,14 @@
                 <div class="ai_guide_area">
                     <div class="swiper-container">
                         <div class="swiper-wrapper">
-                            <div class="swiper-slide ai_guide_img1"></div>
-                            <div class="swiper-slide ai_guide_img2"></div>
+                            <div class="swiper-slide" v-for="(item, index) in swipeInfos">
+                                <div :style="{backgroundImage: 'url(' + item.imgUrl + ')'}"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="page_num">{{pageCount}}/2</div>
                     <div class="ai_guide_desc">
-                        <span>{{txtMap.description}}</span>
+                        <span>{{description}}</span>
                     </div>
                     <div class="ai_btn_wrap">
                         <button @click="clickNoShow">{{txtMap.noshow}}</button>
@@ -37,11 +38,15 @@
         @Prop() dlgStyle!: any;
         @Prop() txtMap!: any;
         @Prop() noCloseBtn!: boolean;
+        @Prop() swipeInfos!: any[];
 
         aiSwiper: any = null;
         pageCount: number = 1;
+        description: string = '';
 
         private mounted() {
+            const swipeInfo = this.swipeInfos[0];
+            this.description = swipeInfo ? swipeInfo.description : '';
             setTimeout(() => {
                 this.initSwiper();
             }, 500);
@@ -74,6 +79,8 @@
                         this.pageCount = 1;
                         break;
                 }
+                const swipeInfo = this.swipeInfos[this.pageCount - 1];
+                this.description = swipeInfo ? swipeInfo.description : '';
             });
         }
 
@@ -99,11 +106,9 @@
             .swiper-slide {
                 width: 452px;
                 height: 240px;
-                &.ai_guide_img1 {
-                    background: url(/resources/img/img-zone-modify-guide-1.jpg) no-repeat;
-                }
-                &.ai_guide_img2 {
-                    background: url(/resources/img/img-zone-modify-guide-2.jpg) no-repeat;
+                div {
+                    width: 100%;
+                    height: 100%;
                 }
             }
         }

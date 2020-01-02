@@ -91,7 +91,7 @@
             font-size: 24px; text-align: left; font-weight:bold;
         }
         .ai_cam_list {
-            width:calc(100% + 12px); height:578px; margin-top:24px; overflow-y:auto; text-align:left;
+            width:calc(100% + 12px); height:auto; margin-top:24px; overflow-y:auto; text-align:left;
         }
         .ai_cam {
             display:inline-block; width:356px; height:252px; margin:0 16px 16px 0;
@@ -108,13 +108,13 @@
                 }
             }
             .ai_cam_name {
-                font-size:15px; font-weight:bold; color:#333333; margin-right:12px;
+                font-size:14px; font-weight:bold; color:#333333; margin-right:12px;
             }
             .ai_date {
-                font-size:16px; color:#333333;
+                font-size:14px; color:#333333;
             }
             .ai_count_wrap {
-                font-size:16px; color:#333333; float:right;
+                font-size:14px; color:#333333; float:right;
             }
             .count_num {
                 color:#e94155;

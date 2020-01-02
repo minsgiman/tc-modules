@@ -31,10 +31,19 @@
                     width: '452px', height: '367px', borderRadius: '12px', boxSizing: 'border-box', overflow: 'hidden'
                 },
                 txtMap: {
-                    description : '수정할 영역의 점을 눌러 원하는 방향으로 늘리거나 줄여보세요.',
                     noshow : '다시 보지 않기',
                     confirm : '확인'
                 },
+                swipeInfos : [
+                    {
+                        imgUrl: '/resources/img/img-zone-modify-guide-1.jpg',
+                        description: '수정할 영역의 점을 눌러 원하는 방향으로 늘리거나 줄여보세요.'
+                    },
+                    {
+                        imgUrl: '/resources/img/img-zone-modify-guide-2.jpg',
+                        description: '수정할 영역의 점을 눌러 원하는 방향으로 늘리거나 줄여보세요.'
+                    }
+                ],
                 noCloseBtn: true,
                 eventHandler: (event: any) => {
                     console.log(JSON.stringify(event));
@@ -46,22 +55,24 @@
             this.aiStatsDlg = aiStatsDialog({
                 elId: 'dlgId',
                 dlgStyle: {
-                    width: '800px', height: '667px', padding: '32px', boxSizing: 'border-box'
+                    width: '800px', padding: '32px', boxSizing: 'border-box'
                 },
                 txtMap: {
                     title : '카메라별 혼잡도',
                     countUnit : '명',
                     seatUnit : '석'
                 },
-                pUpdateDate: 1521709944718,
                 pCameraSummaries: [
                     {
-                        "cameraId":"AAAAAADFRO",
-                        "cameraName":"v3lite",
+                        "id":"AAAAAADFRO",
+                        "labelName":"v3lite",
                         "aiThumbnail": "http://dev-bizcam.toast.com/AAAAAADFRO/title_image.jpg?1576628323312",
-                        "totalInPeopleZone" : 1,
-                        "useTableCount" : 3,
-                        "allTableCount" : 5
+                        "aiCountSummary" : {
+                            "totalInPeopleZone" : 1,
+                            "useTableCount" : 3,
+                            "allTableCount" : 5,
+                            "updateDate" : 1234567890123
+                        }
                     }
                 ],
                 eventHandler: (event) => {
@@ -70,33 +81,33 @@
         }
 
         createAiGraphsDialog () {
-            const aiGraphObject = {
-                startDate: new Date(),
-                endDate: new Date(),
-                mode: 'hourly'
-            };
-
-            this.aiGraphsDlg = aiGraphsDialog({
-                elId: 'dlgId',
-                dlgStyle : {
-                    width: '1100px', height: '662px', boxSizing: 'border-box'
-                },
-                txtMap : {
-                    title : '혼잡도 그래프',
-                    weekly : '주간',
-                    daily : '일일',
-                    today : '오늘',
-                    hour : '시간',
-                    min : '분',
-                    man : '인원',
-                    manCount : '명',
-                    hourCount : '시',
-                    dayMap : ['일', '월', '화', '수', '목', '금', '토']
-                },
-                pRequestShopChart : function(mode: any, startDate: any, endDate: any) {
-
-                }
-            });
+            // const aiGraphObject = {
+            //     startDate: new Date(),
+            //     endDate: new Date(),
+            //     mode: 'hourly'
+            // };
+            //
+            // this.aiGraphsDlg = aiGraphsDialog({
+            //     elId: 'dlgId',
+            //     dlgStyle : {
+            //         width: '1100px', height: '662px', boxSizing: 'border-box'
+            //     },
+            //     txtMap : {
+            //         title : '혼잡도 그래프',
+            //         weekly : '주간',
+            //         daily : '일일',
+            //         today : '오늘',
+            //         hour : '시간',
+            //         min : '분',
+            //         man : '인원',
+            //         manCount : '명',
+            //         hourCount : '시',
+            //         dayMap : ['일', '월', '화', '수', '목', '금', '토']
+            //     },
+            //     pRequestShopChart : function(mode: any, startDate: any, endDate: any) {
+            //
+            //     }
+            // });
         }
 
         createPlayerTipDlg () {

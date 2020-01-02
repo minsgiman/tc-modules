@@ -34,8 +34,8 @@ export interface IAiGraphsDlgParam {
 }
 
 export interface IAiCameraSummary {
-    cameraId: string,
-    cameraName: string,
+    id: string,
+    labelName: string,
     aiCountSummary: IAiCountSummary,
     aiThumbnail: string,
 }
@@ -59,6 +59,7 @@ export interface IAiZoneGuideDlgParam {
     elId: string,
     dlgStyle?: any,
     txtMap: any,
+    swipeInfos: ISwipeInfo[],
     noCloseBtn?: boolean,
     eventHandler?: (event: any) => void
 }
@@ -66,6 +67,11 @@ export interface IAiZoneGuideDlgParam {
 export interface ICameraInfo {
     id: string,
     labelName: string
+}
+
+export interface ISwipeInfo {
+    imgUrl: string,
+    description: string
 }
 
 export interface IAiChart {

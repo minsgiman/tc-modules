@@ -89,6 +89,7 @@
                 background-color:#fff;
                 padding:0px;
                 margin: 0 auto;
+                overflow-y: auto;
             }
             .btn_close {
                 position:absolute;

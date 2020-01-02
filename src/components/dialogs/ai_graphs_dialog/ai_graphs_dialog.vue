@@ -23,7 +23,7 @@
                             <span class="min" :class="{enable: mode === 'min'}" @click="setGraphTimeUnit(10)">10{{txtMap.min}}</span>
                             <span class="hour" :class="{enable: mode === 'hourly'}" @click="setGraphTimeUnit(60)">1{{txtMap.hour}}</span>
                         </div>
-                        <div class="sum_graph_wrap">
+                        <div class="sum_graph_wrap" :style="{marginTop: mode === 'daily' ? '30px' : 0}">
                             <div id="sum_graph"></div>
                         </div>
                         <!--ul class="cam_graph_list" style="text-align:left;">
@@ -61,7 +61,7 @@
     const Pikaday: any = (window as any).Pikaday as any;
 
     function getGraphMaxIndex (array: string[]) {
-        let counter, max = -1;
+        let counter, max = -1, hasSame = false;
 
         if (!array) {
             return max;
@@ -70,18 +70,23 @@
             if (max === -1) {
                 if (parseInt(array[counter]) > 0) {
                     max = counter;
+                    hasSame = false;
                 }
             } else {
                 if (parseInt(array[max]) < parseInt(array[counter])){
                     max = counter;
+                    hasSame = false;
+                } else if (parseInt(array[max]) === parseInt(array[counter])) {
+                    hasSame = true;
                 }
             }
         }
-        return max;
+
+        return hasSame ? -1 : max;
     }
 
     function getGraphMinIndex (array: string[]) {
-        let counter, min = -1;
+        let counter, min = -1, hasSame = false;
 
         if (!array) {
             return min;
@@ -90,14 +95,20 @@
             if (min === -1) {
                 if (parseInt(array[counter]) > 0) {
                     min = counter;
+                    hasSame = false;
                 }
             } else {
-                if (parseInt(array[counter]) > 0 && parseInt(array[min]) > parseInt(array[counter])){
-                    min = counter;
+                if (parseInt(array[counter]) > 0) {
+                    if (parseInt(array[min]) > parseInt(array[counter])){
+                        min = counter;
+                        hasSame = false;
+                    } else if (parseInt(array[min]) === parseInt(array[counter])) {
+                        hasSame = true;
+                    }
                 }
             }
         }
-        return min;
+        return hasSame ? -1 : min;
     }
 
     function applyTuiChartMaxMinColor (id: string, maxColor: string, minColor: string, maxIdx: number, minIdx: number) {
@@ -381,7 +392,7 @@
                         "format": '1,000'
                     },
                     yAxis: {
-                        title: "",
+                        title: '(' + this.txtMap.manCount + ')',
                         max: chartData.yAxis ? chartData.yAxis.max : 0,
                         min: chartData.yAxis ? chartData.yAxis.min : 0
                     },
@@ -389,7 +400,7 @@
                         "suffix": this.txtMap.manCount
                     },
                     xAxis: {
-                        "title": "",
+                        "title": '(' + this.txtMap.hourCount + ')',
                         "labelInterval": this.mode === 'daily' ? 1 : 2
                     },
                     series: {
@@ -510,6 +521,11 @@
         }
         .graph_area {
             height:579px; overflow-y:auto; overflow-x:hidden;
+            .graph_time_set_wrap {
+                span {
+                    cursor: pointer;
+                }
+            }
         }
         .ai_date_select_wrap {
             position:relative; background-color: #fafafa; height:52px;
@@ -528,7 +544,7 @@
                 position:absolute; right:0; left:22px; top:54px;
             }
             .date_control_wrap {
-                display:inline-block; width:230px; margin-top:10px; margin-left:-65px;
+                display:inline-block; width:242px; margin-top:10px; margin-left:-65px;
             }
             .select_day {
                 font-size:16px; color:#333333; font-weight:bold; margin-top:7px; display:inline-block;
