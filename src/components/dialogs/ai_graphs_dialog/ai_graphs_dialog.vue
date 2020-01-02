@@ -186,11 +186,11 @@
                 position: 'bottom right',
                 onSelect: function(date: Date) {
                     if (that.mode === 'hourly' || that.mode === 'min') {
-                        that.startDate = date;
-                        that.endDate = date;
+                        that.startDate = new Date(date.valueOf());
+                        that.endDate = new Date(date.valueOf());
                         that.periodStr = that.dateFormat(that.endDate, "YY.MM.DD (ddd)");
                     } else {
-                        that.startDate = date;
+                        that.startDate = new Date(date.valueOf());
                         while (that.startDate.getDay() != 0) {
                             that.startDate.setDate(that.startDate.getDate() - 1);
                         }
@@ -382,8 +382,8 @@
                     },
                     yAxis: {
                         title: "",
-                        max: chartData.yAxis.max,
-                        min: chartData.yAxis.min
+                        max: chartData.yAxis ? chartData.yAxis.max : 0,
+                        min: chartData.yAxis ? chartData.yAxis.min : 0
                     },
                     tooltip: {
                         "suffix": this.txtMap.manCount
@@ -457,8 +457,8 @@
                 },
                 yAxis: {
                     title: yTitle,
-                    max: chartData.yAxis.max,
-                    min: chartData.yAxis.min
+                    max: chartData.yAxis ? chartData.yAxis.max : 0,
+                    min: chartData.yAxis ? chartData.yAxis.min : 0
                 },
                 xAxis: {
                     title: '(' + this.txtMap.hourCount + ')'
