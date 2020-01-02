@@ -1,17 +1,20 @@
 import player from './components/player/light_webrtc_main';
 
 let playerObj = new player({
-    serialNo: 'AZZDSF21312A',
+    serialNo: 'BC8AA30000B1',
     elementId : 'playerwrap',
-    startTime : 1571289300000,
-    endTime : 1571289306000,
+    startTime : 1577539800000,
+    endTime : 1577539810000,
+    cvrMoveInterval : 5000,
     usePauseResume: true,  //default: false
-    loop : false,    //default : true
+    loop : true,    //default : true
     showTime : true,  //default : false
-    credentialUrl: 'https://mediartc.toast.com:10090/rtc/credential', //default : /rtc/credential
-    candidateUrl: 'https://mediartc.toast.com:10090/rtc/candidate',  //default : /rtc/candidate
-    offerUrl: 'https://mediartc.toast.com:10090/rtc/offer',          //default : /rtc/offer
+
+    credentialUrl: 'https://devmedia010.toastcam.com:10090/rtc/credential', //default : /rtc/credential
+    candidateUrl: 'https://devmedia010.toastcam.com:10090/rtc/candidate',  //default : /rtc/candidate
+    offerUrl: 'https://devmedia010.toastcam.com:10090/rtc/offer',          //default : /rtc/offer
     getTokenUrl : 'http://10.161.240.93:10000/biz/cameras/token/:serialNo',    //default : '/biz/cameras/token/:serialNo',
+    getTimelineUrl : 'http://10.161.240.93:10000/biz/timeline',
     playEventHandler : function (event) {
         console.log('playEventHandler - event.status : ' + event.status); //event.status : 'stream_connected', 'webrtc_server_error', 'finish', 'webrtc_not_support_browser'
         if (event.status === 'finish') {

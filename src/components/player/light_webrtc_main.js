@@ -17,12 +17,14 @@ class lightPlayer {
                 elementId: this.getEmptyWrapId(this.wrapBaseId),
                 startTime: param.startTime,
                 endTime: param.endTime,
+                cvrMoveInterval: param.cvrMoveInterval,
                 loop: param.loop,
                 showTime: param.showTime,
                 usePauseResume: param.usePauseResume,
                 getTokenUrl: param.getTokenUrl,
                 credentialUrl: param.credentialUrl,
                 candidateUrl: param.candidateUrl,
+                getTimelineUrl: param.getTimelineUrl,
                 offerUrl: param.offerUrl,
                 playEventHandler: param.playEventHandler
             }

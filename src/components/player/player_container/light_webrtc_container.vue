@@ -41,7 +41,8 @@
 
     export default {
         name: 'playerContainer',
-        props: ['serialNo', 'elementId', 'startTime', 'endTime', 'loop', 'showTime', 'getTokenUrl', 'usePauseResume', 'credentialUrl', 'candidateUrl', 'offerUrl', 'playEventHandler'],
+        props: ['serialNo', 'elementId', 'startTime', 'endTime', 'cvrMoveInterval', 'loop', 'showTime', 'getTokenUrl',
+            'usePauseResume', 'credentialUrl', 'candidateUrl', 'getTimelineUrl', 'offerUrl', 'playEventHandler'],
         computed: {
         },
         data: function () {
@@ -67,7 +68,9 @@
                 timeInterval : 100,
                 playStatus : 0,
                 retryTimeout : null,
+                defCvrMoveInterval : 5000,
                 defGetTokenUrl : '/biz/cameras/token/:serialNo',
+                defGetTimelineUrl : '/biz/cameras/:serialNo/timeline',
                 defCredentialUrl : '/rtc/credential',
                 defCandidateUrl : '/rtc/candidate',
                 defOfferUrl : '/rtc/offer'
@@ -129,32 +132,90 @@
                     clearTimeout(this.playTimeoutId);
                     this.playTimeoutId = null;
                 }
-                this.playTimeoutId = setTimeout(function() {
-                    if (!that.player) {
-                        return null;
-                    }
-                    const httpRequest = new XMLHttpRequest();
-                    httpRequest.onreadystatechange = function() {
-                        if (httpRequest.readyState === XMLHttpRequest.DONE) {
-                            if (httpRequest.status === 200) {
-                                const resObj = JSON.parse(httpRequest.responseText);
-                                if (time) {
-                                    that.player.play(resObj.cameraId, resObj.cvrHostPort + '/flvplayback/' + resObj.cameraId + '?token=' + resObj.token + '&time=' + time);
-                                    that.startPlayTimer();
-                                } else {
-                                    that.player.play(resObj.cameraId, resObj.cvrHostPort + '/flvplayback/' + resObj.cameraId + '?token=' + resObj.token);
-                                    that.playTime = new Date().valueOf();
-                                    that.startLiveTimer();
-                                }
+
+                if (this.playTime) {
+                    this.requestTimeline(function(resObj) {
+                        if (resObj) {
+                            if (that.checkHasCvr(time, resObj.recTimes)) {
+                                that.playTimeoutId = setTimeout(that.requestToken.bind(that)(function(resObj) {
+                                    if (resObj) {
+                                        that.playStart(resObj.cameraId, resObj.cvrHostPort, resObj.token);
+                                    }
+                                }), 200);
                             } else {
-                                //TODO: ERROR
+                                alert('No CVR');
+                                //TODO: Show Error
                             }
                         }
-                    };
-                    httpRequest.open('GET', setPathParams((that.getTokenUrl ? that.getTokenUrl : that.defGetTokenUrl), {serialNo : that.serialNo}));
-                    httpRequest.send();
-                }, 200);
+                    });
+                } else {
+                    this.playTimeoutId = setTimeout(that.requestToken.bind(that)(function(resObj) {
+                        if (resObj) {
+                            that.playStart(resObj.cameraId, resObj.cvrHostPort, resObj.token);
+                        }
+                    }), 200);
+                }
             },
+
+            playStart : function (cameraId, cvrHostPort, token) {
+                if (this.playTime) {
+                    this.player.play(cameraId, cvrHostPort + '/flvplayback/' + cameraId + '?token=' + token + '&time=' + this.playTime);
+                    this.startPlayTimer();
+                } else {
+                    this.player.play(cameraId, cvrHostPort + '/flvplayback/' + cameraId + '?token=' + token);
+                    this.playTime = new Date().valueOf();
+                    this.startLiveTimer();
+                }
+            },
+
+            checkHasCvr : function (time, recTimes) {
+                if (!recTimes || !recTimes.length) {
+                    return false;
+                }
+
+                return recTimes.some((recTime) => {
+                    return (parseInt(recTime.startTime) <= time) && (parseInt(recTime.endTime) >= time);
+                });
+            },
+
+            requestTimeline : function (callback) {
+                const httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = () => {
+                    if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                        if (httpRequest.status === 200) {
+                            const resObj = JSON.parse(httpRequest.responseText);
+                            callback(resObj);
+                        } else {
+                            callback(null);
+                        }
+                    }
+                };
+                const timelineUrl = this.getTimelineUrl ? this.getTimelineUrl : this.defGetTimelineUrl;
+                const startRange = this.playTime - (2 * (this.cvrMoveInterval ? this.cvrMoveInterval : this.defCvrMoveInterval));
+                const endRange = this.playTime + (2 * (this.cvrMoveInterval ? this.cvrMoveInterval : this.defCvrMoveInterval));
+                httpRequest.open('GET', setPathParams(timelineUrl + '?scale=1h&start=' + startRange + '&end=' + endRange , {serialNo : this.serialNo}));
+                httpRequest.send();
+            },
+
+            requestToken : function (callback) {
+                if (!this.player) {
+                    return null;
+                }
+                const httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = () => {
+                    if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                        if (httpRequest.status === 200) {
+                            const resObj = JSON.parse(httpRequest.responseText);
+                            callback(resObj);
+                        } else {
+                            callback(null);
+                        }
+                    }
+                };
+                httpRequest.open('GET', setPathParams((this.getTokenUrl ? this.getTokenUrl : this.defGetTokenUrl), {serialNo : this.serialNo}));
+                httpRequest.send();
+            },
+
             resume : function () {
                 if (this.playStatus === this.E_PLAY_STATUS.pause || this.playStatus === this.E_PLAY_STATUS.error) {
                     this.stop();
