@@ -379,8 +379,8 @@
                         return data ? Math.ceil(data) : null;
                     });
                 }
-                data.categories = chartData.xAxis.items;
-                data.series = [{name: this.txtMap.man, data: chartData.data, color}];
+                data.categories = chartData.xAxis ? chartData.xAxis.items : [0];
+                data.series = [{name: this.txtMap.man, data: chartData.data ? chartData.data : [0], color}];
                 const maxIdx = getGraphMaxIndex(data.series[0].data);
                 const minIdx = getGraphMinIndex(data.series[0].data);
                 const options: any = {
@@ -452,11 +452,11 @@
             yTitle = '(' + this.txtMap.manCount + ')';
             format = '0';
             data = {
-                categories: categories,
+                categories: categories ? categories : [0],
                 series: [
                     {
                         name: '',
-                        data: chartData.data
+                        data: chartData.data ? chartData.data : [0]
                     }
                 ]
             };
