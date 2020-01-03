@@ -10,6 +10,10 @@
                     <span class="time" style="display:inline-block; padding:4px 9px; background:#e60012; color:#fff; font-size:13px; line-height: 14px; width:51px;">{{getTimeStr(playTime)}}</span>
                 </div>
             </div>
+            <div style="position:absolute; bottom: 5px; left: 5px;">
+                <button @click="cvrMoveByInterval('b')">Backward</button>
+                <button @click="cvrMoveByInterval('f')">Forward</button>
+            </div>
         </div>
     </div>
 </template>
@@ -176,6 +180,14 @@
                 return recTimes.some((recTime) => {
                     return (parseInt(recTime.startTime) <= time) && (parseInt(recTime.endTime) >= time);
                 });
+            },
+
+            cvrMoveByInterval : function (direction) {
+                if (direction === 'b') {
+                    this.play(this.playTime - (this.cvrMoveInterval ? this.cvrMoveInterval : this.defCvrMoveInterval));
+                } else if (direction === 'f') {
+                    this.play(this.playTime + (this.cvrMoveInterval ? this.cvrMoveInterval : this.defCvrMoveInterval));
+                }
             },
 
             requestTimeline : function (callback) {
