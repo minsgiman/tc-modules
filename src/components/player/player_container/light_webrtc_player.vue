@@ -45,7 +45,7 @@
     function Peer (pcConfig, pcConstraints) {
         this.pc = new RTCPeerConnection(pcConfig, pcConstraints);
         this.remoteVideoEl = document.createElement('video');
-        this.remoteVideoEl.muted = "muted";
+        this.remoteVideoEl.muted = true;
         this.remoteVideoEl.controls = false;
         this.remoteVideoEl.autoplay = true;
     }
@@ -94,6 +94,7 @@
                 localStream : null,
                 sessionId : '',
                 timeoutId : null,
+                httpCredRequest : null,
                 remoteVideoContainer : null,
                 webRTCStatusEnum : {
                     EVENT_STREAM_CONNECTING : 'stream_connecting',
@@ -128,25 +129,18 @@
                 this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_CONNECTING;
                 this.sessionId = makeMsgId() + '_' + new Date().getTime();
                 this.url = url;
-
                 document.getElementById(this.elementIdMap.webrtcLoading).style.display = 'block';
 
-                const httpRequest = new XMLHttpRequest();
-                httpRequest.onreadystatechange = function() {
-                    if (httpRequest.readyState === XMLHttpRequest.DONE) {
-                        if (httpRequest.status === 200) {
-                            const resObj = JSON.parse(httpRequest.responseText);
-                            that.webRTCConfig.peerConnectionConfig.iceServers.push({urls: resObj.urls, username: resObj.username, credential: resObj.credential});
-                            that.addPeer(that.currentWebRTCPeerId); //new RTCPeerConnection with Turn Server
-                            that.offer(cameraIdValue);
-                        } else {
-                            that.webRTCStatus = that.webRTCStatusEnum.EVENT_ERROR_WEBRTC_SERVER;
-                            that.$emit('playerStatusChanged', that.webRTCStatus);
-                        }
+                this.requestCredential(function(resObj) {
+                    if (resObj) {
+                        that.webRTCConfig.peerConnectionConfig.iceServers.push({urls: resObj.urls, username: resObj.username, credential: resObj.credential});
+                        that.addPeer(that.currentWebRTCPeerId); //new RTCPeerConnection with Turn Server
+                        that.offer(cameraIdValue);
+                    } else {
+                        that.webRTCStatus = that.webRTCStatusEnum.EVENT_ERROR_WEBRTC_SERVER;
+                        that.$emit('playerStatusChanged', that.webRTCStatus);
                     }
-                };
-                httpRequest.open('GET', this.credentialUrl);
-                httpRequest.send();
+                });
             },
 
             resume : function () {
@@ -186,6 +180,51 @@
                 }
                 this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_STOPPED;
                 document.getElementById(this.elementIdMap.webrtcLoading).style.display = 'none';
+            },
+
+            getMuteState : function() {
+                if (!this.currentWebRTCPeerId) {
+                    return false;
+                }
+                const peer = this.peerDatabase[this.currentWebRTCPeerId];
+                if (peer) {
+                    return peer.remoteVideoEl.muted;
+                } else {
+                    return false;
+                }
+            },
+
+            toggleMute : function() {
+                if (!this.currentWebRTCPeerId) {
+                    return;
+                }
+                const peer = this.peerDatabase[this.currentWebRTCPeerId];
+                if (peer) {
+                    if (peer.remoteVideoEl.muted) {
+                        peer.remoteVideoEl.muted = false;
+                    } else {
+                        peer.remoteVideoEl.muted = true;
+                    }
+                }
+            },
+
+            requestCredential : function (callback) {
+                if (this.httpCredRequest) {
+                    this.httpCredRequest.abort();
+                }
+                this.httpCredRequest = new XMLHttpRequest();
+                this.httpCredRequest.onreadystatechange = () => {
+                    if (this.httpCredRequest.readyState === XMLHttpRequest.DONE) {
+                        if (this.httpCredRequest.status === 200) {
+                            const resObj = JSON.parse(this.httpCredRequest.responseText);
+                            callback(resObj);
+                        } else {
+                            callback(null);
+                        }
+                    }
+                };
+                this.httpCredRequest.open('GET', this.credentialUrl);
+                this.httpCredRequest.send();
             },
 
             addPeer : function (remoteId) {
