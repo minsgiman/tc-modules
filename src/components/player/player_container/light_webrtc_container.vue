@@ -25,11 +25,12 @@
                 </div>
             </div>
         </div>
-        <div class="error_status_wrap" v-show="playStatus === E_PLAY_STATUS.no_cvr">
+        <div class="error_status_wrap" v-show="(playStatus === E_PLAY_STATUS.no_cvr) || (playStatus === E_PLAY_STATUS.not_support)">
             <div class="error_mid_wrap">
                 <div class="player_off_black">
                     <div></div>
-                    <p>저장된 영상이 없습니다.</p>
+                    <p v-show="(playStatus === E_PLAY_STATUS.no_cvr)">{{language === 'ja' ? '保存された映像がありません。' :  '저장된 영상이 없습니다.'}}</p>
+                    <p v-show="(playStatus === E_PLAY_STATUS.not_support)">{{language === 'ja' ? '対応していないブラウザー' : '지원하지 않는 브라우저 입니다.'}}</p>
                 </div>
             </div>
         </div>
@@ -76,7 +77,8 @@
                     finish : 2,
                     server_error : 3,
                     pause : 4,
-                    no_cvr : 5
+                    no_cvr : 5,
+                    not_support : 6
                 },
                 E_PLAY_EVENT : {
                     start : 'start',
@@ -101,16 +103,27 @@
                 defCredentialUrl : '/rtc/credential',
                 defCandidateUrl : '/rtc/candidate',
                 defOfferUrl : '/rtc/offer',
+                isCvrLoading : false,
                 cvrData: {
                     startTime: 0,
                     endTime: 0,
                     recordList: []
                 },
+                language: 'ko'
             }
         },
         created : function() {
         },
         mounted : function() {
+            let locale = 'ko';
+            if (navigator.language.indexOf('ko') != -1) {
+                locale = 'ko';
+            } else if (navigator.language.indexOf('ja') != -1) {
+                locale = 'ja';
+            } else if (navigator.language.indexOf('en') != -1) {
+                locale = 'en';
+            }
+            this.language = locale;
             setTimeout(() => {
                 this.getMaxFontSizeApprox(document.querySelector('.time_str'));
             }, 100);
@@ -129,6 +142,7 @@
         methods : {
             initPlayer : function () {
                 if (browser.name === 'Internet Explorer' || browser.name === 'Edge' || (browser.name === 'Safari' && browser.version < 11)) {
+                    this.playStatus = this.E_PLAY_STATUS.not_support;
                     if (this.playEventHandler) {
                         this.playEventHandler({status: this.E_PLAY_EVENT.webrtc_not_support_browser});
                     }
@@ -164,6 +178,7 @@
                 if (this.playTime) {
                     this.requestTimeline(function(resObj) {
                         if (resObj) {
+                            that.cvrData.recordList = resObj.recordList;
                             if (that.checkHasCvr(time, resObj.recordList)) {
                                 that.playTimeoutId = setTimeout(that.requestToken.bind(that)(function(resObj) {
                                     if (resObj) {
@@ -172,7 +187,7 @@
                                 }), 200);
                             } else {
                                 that.playStatus = that.E_PLAY_STATUS.no_cvr;
-                                that.hideControl();
+                                //that.hideControl();
                             }
                         }
                     });
@@ -228,6 +243,7 @@
 
             requestTimeline : function (callback) {
                 const httpRequest = new XMLHttpRequest();
+                this.isCvrLoading = true;
                 httpRequest.onreadystatechange = () => {
                     if (httpRequest.readyState === XMLHttpRequest.DONE) {
                         if (httpRequest.status === 200) {
@@ -236,12 +252,22 @@
                         } else {
                             callback(null);
                         }
+                        this.isCvrLoading = false;
                     }
                 };
+
+                const startDate = new Date(this.playTime);
+                const endDate = new Date(this.playTime);
+                startDate.setMinutes(0);
+                startDate.setSeconds(0);
+                startDate.setMilliseconds(0);
+                endDate.setMinutes(0);
+                endDate.setSeconds(1);
+                endDate.setHours(startDate.getHours() + 1);
+                this.cvrData.startTime = startDate.valueOf();
+                this.cvrData.endTime = endDate.valueOf();
                 const timelineUrl = this.getTimelineUrl ? this.getTimelineUrl : this.defGetTimelineUrl;
-                const startRange = this.playTime - (2 * (this.cvrMoveInterval ? this.cvrMoveInterval : this.defCvrMoveInterval));
-                const endRange = this.playTime + (2 * (this.cvrMoveInterval ? this.cvrMoveInterval : this.defCvrMoveInterval));
-                httpRequest.open('GET', setPathParams(timelineUrl + '?startTime=' + startRange + '&endTime=' + endRange , {serialNo : this.serialNo}));
+                httpRequest.open('GET', setPathParams(timelineUrl + '?startTime=' + this.cvrData.startTime + '&endTime=' + this.cvrData.endTime , {serialNo : this.serialNo}));
                 httpRequest.send();
             },
 
@@ -370,7 +396,7 @@
             },
             getDateStr : function (timestamp) {
                 const date = new Date(timestamp);
-                const week = ['일', '월', '화', '수', '목', '금', '토'];
+                const week = this.language === 'ja' ? ['日', '月', '火', '水', '木', '金', '土'] : ['일', '월', '화', '수', '목', '금', '토'];
                 const dayOfWeek = week[date.getDay()];
 
                 return addZero(date.getMonth()+1) + '.' + addZero(date.getDate().toString()) + ' (' + dayOfWeek + ') ';
@@ -400,10 +426,28 @@
                             that.stop();
                             that.playStatus = that.E_PLAY_STATUS.finish;
                             if (that.playEventHandler) {
-                                that.playEventHandler({status: that.E_PLAY_EVENT.finish});
+                                that.playEventHandler({status: that.playStatus});
                             }
                             if (that.loop != false) {
                                 that.play(that.startTime);
+                            }
+                        } else if (!that.isCvrLoading) {
+                            const curDate = new Date(that.playTime);
+                            if (curDate.getMilliseconds() >= 900) {
+                                if (!that.checkHasCvr(that.playTime, that.cvrData.recordList)) {
+                                    that.stop();
+                                    that.playStatus = that.E_PLAY_STATUS.no_cvr;
+                                    if (that.playEventHandler) {
+                                        that.playEventHandler({status: that.playStatus});
+                                    }
+                                    that.hideControl();
+                                } else if (curDate.getMinutes() === 59 && curDate.getSeconds() === 59) {
+                                    that.requestTimeline(function(resObj) {
+                                        if (resObj) {
+                                            that.cvrData.recordList = resObj.recordList;
+                                        }
+                                    });
+                                }
                             }
                         }
                     }
