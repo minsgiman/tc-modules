@@ -380,7 +380,7 @@
                 this.isShowControl = true;
                 this.stopShowControlTimeout();
                 this.showControlTimeout = setTimeout(() => {
-                    if (this.playStatus !== this.E_PLAY_STATUS.finish) {
+                    if ((this.playStatus !== this.E_PLAY_STATUS.finish) && (this.playStatus !== this.E_PLAY_STATUS.pause)) {
                         this.isShowControl = false;
                     }
                 }, 3000);
