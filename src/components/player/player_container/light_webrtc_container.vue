@@ -8,8 +8,8 @@
                     <button v-if="!isLive" class="backward_btn" @click="cvrMoveByInterval('b', $event)"></button>
                 </div>
                 <div class="btn_cont play_cont">
-                    <button type="button" class="sp pause" v-show="playStatus === E_PLAY_STATUS.play" @click="clickPause" id="pause_btn"></button>
-                    <button type="button" class="sp play" v-show="playStatus !== E_PLAY_STATUS.play" @click="clickPlay" id="play_btn"></button>
+                    <button type="button" class="sp pause" v-show="playStatus === E_PLAY_STATUS.play || playStatus === E_PLAY_STATUS.none" @click="clickPause" id="pause_btn"></button>
+                    <button type="button" class="sp play" v-show="playStatus !== E_PLAY_STATUS.play && playStatus !== E_PLAY_STATUS.none" @click="clickPlay" id="play_btn"></button>
                 </div>
                 <div class="btn_cont forward_cont">
                     <button v-if="!isLive" class="forward_btn" @click="cvrMoveByInterval('f', $event)"></button>
@@ -42,7 +42,7 @@
     import Vue from 'vue';
     import browser from './../browser_checker';
 
-    var setPathParams = function(url, params) {
+    function setPathParams (url, params) {
         const pathParamReg = /\/:\w+/gi;
         let pathParams = url.match(pathParamReg);
 
@@ -57,7 +57,66 @@
             });
         }
         return url;
-    };
+    }
+
+    function getPlatform() {
+        const uagentLow = navigator.userAgent.toLocaleLowerCase();
+        let platform = 'pc';
+
+        if (uagentLow.search("android") > -1) {
+            platform = 'aos';
+        } else if (uagentLow.search("iphone") > -1 || uagentLow.search("ipad") > -1 || uagentLow.search("ipod") > -1) {
+            platform = 'ios';
+        }
+        return platform;
+    }
+
+    function getLanguage() {
+        let locale = 'ko';
+        if (navigator.language.indexOf('ko') != -1) {
+            locale = 'ko';
+        } else if (navigator.language.indexOf('ja') != -1) {
+            locale = 'ja';
+        } else if (navigator.language.indexOf('en') != -1) {
+            locale = 'en';
+        }
+        return locale;
+    }
+
+    function getMaxFontSizeApprox(el) {
+        var fontSize = 18;
+        var p = el.parentNode.parentNode;
+
+        var parent_h = p.offsetHeight ? p.offsetHeight : p.style.pixelHeight;
+        if(!parent_h)
+            parent_h = 0;
+
+        var parent_w = p.offsetHeight ? p.offsetWidth : p.style.pixelWidth;
+        if(!parent_w)
+            parent_w = 0;
+
+        el.style.fontSize = fontSize + "px";
+
+        var el_h = el.offsetHeight ? el.offsetHeight : el.style.pixelHeight;
+        if(!el_h)
+            el_h = 0;
+
+        var el_w = el.offsetHeight ? el.offsetWidth : el.style.pixelWidth;
+        if(!el_w)
+            el_w = 0;
+
+        // 0.5 is the error on the measure that JavaScript does
+        // if the real measure had been 12.49 px => JavaScript would have said 12px
+        // so we think about the worst case when could have, we add 0.5 to
+        // compensate the round error
+        var fs1 = (fontSize*(parent_w + 0.5))/(el_w + 0.5);
+        var fs2 = (fontSize*(parent_h) + 0.5)/(el_h + 0.5);
+
+        fontSize = Math.floor(Math.min(fs1,fs2));
+        fontSize += 1;
+        el.style.fontSize = fontSize + "px";
+        return fontSize;
+    }
 
     function addZero(data){
         return (data<10) ? "0"+data : data;
@@ -109,23 +168,16 @@
                     endTime: 0,
                     recordList: []
                 },
-                language: 'ko'
+                language: 'ko',
+                platform: 'pc'
             }
         },
         created : function() {
         },
         mounted : function() {
-            let locale = 'ko';
-            if (navigator.language.indexOf('ko') != -1) {
-                locale = 'ko';
-            } else if (navigator.language.indexOf('ja') != -1) {
-                locale = 'ja';
-            } else if (navigator.language.indexOf('en') != -1) {
-                locale = 'en';
-            }
-            this.language = locale;
+            this.language = getLanguage();
             setTimeout(() => {
-                this.getMaxFontSizeApprox(document.querySelector('.time_str'));
+                getMaxFontSizeApprox(document.querySelector('.time_str'));
             }, 100);
         },
         beforeDestroy : function() {
@@ -141,26 +193,29 @@
         },
         methods : {
             initPlayer : function () {
-                if (browser.name === 'Internet Explorer' || browser.name === 'Edge' || (browser.name === 'Safari' && browser.version < 11)) {
+                this.platform = getPlatform();
+                if ((this.platform === 'pc' && (browser.name === 'Internet Explorer' || browser.name === 'Edge' || (browser.name === 'Safari' && browser.version < 11))) ||
+                    (this.platform === 'ios' && (browser.name === 'Chrome' || (browser.name === 'Safari' && browser.version < 11)))) {
                     this.playStatus = this.E_PLAY_STATUS.not_support;
                     if (this.playEventHandler) {
                         this.playEventHandler({status: this.E_PLAY_EVENT.webrtc_not_support_browser});
                     }
-                } else {
-                    const vExtendConstructor = Vue.extend(webRTCPlayer);
-                    this.player = new vExtendConstructor({
-                        propsData : {
-                            credentialUrl : this.credentialUrl ? this.credentialUrl : this.defCredentialUrl,
-                            candidateUrl : this.candidateUrl ? this.candidateUrl : this.defCandidateUrl,
-                            offerUrl : this.offerUrl ? this.offerUrl : this.defOfferUrl,
-                            varPlayerId : this.varPlayerId
-                        }
-                    }).$mount('#' + this.varPlayerId);
-                    this.isLive = !this.startTime;
-                    //this.showControl();
-                    this.player.$on('playerStatusChanged', this.playerStatusChangedHandler.bind(this));
-                    this.play(this.startTime);
+                    return;
                 }
+
+                const vExtendConstructor = Vue.extend(webRTCPlayer);
+                this.player = new vExtendConstructor({
+                    propsData : {
+                        credentialUrl : this.credentialUrl ? this.credentialUrl : this.defCredentialUrl,
+                        candidateUrl : this.candidateUrl ? this.candidateUrl : this.defCandidateUrl,
+                        offerUrl : this.offerUrl ? this.offerUrl : this.defOfferUrl,
+                        varPlayerId : this.varPlayerId
+                    }
+                }).$mount('#' + this.varPlayerId);
+                this.isLive = !this.startTime;
+                //this.showControl();
+                this.player.$on('playerStatusChanged', this.playerStatusChangedHandler.bind(this));
+                this.play(this.startTime);
             },
             play : function (time) {
                 const that = this;
@@ -294,43 +349,10 @@
                 this.isShowControl = true;
                 this.stopShowControlTimeout();
                 this.showControlTimeout = setTimeout(() => {
-                    this.isShowControl = false;
+                    if (this.playStatus !== this.E_PLAY_STATUS.finish) {
+                        this.isShowControl = false;
+                    }
                 }, 3000);
-            },
-
-            getMaxFontSizeApprox: function (el){
-                var fontSize = 18;
-                var p = el.parentNode.parentNode;
-
-                var parent_h = p.offsetHeight ? p.offsetHeight : p.style.pixelHeight;
-                if(!parent_h)
-                    parent_h = 0;
-
-                var parent_w = p.offsetHeight ? p.offsetWidth : p.style.pixelWidth;
-                if(!parent_w)
-                    parent_w = 0;
-
-                el.style.fontSize = fontSize + "px";
-
-                var el_h = el.offsetHeight ? el.offsetHeight : el.style.pixelHeight;
-                if(!el_h)
-                    el_h = 0;
-
-                var el_w = el.offsetHeight ? el.offsetWidth : el.style.pixelWidth;
-                if(!el_w)
-                    el_w = 0;
-
-                // 0.5 is the error on the measure that JavaScript does
-                // if the real measure had been 12.49 px => JavaScript would have said 12px
-                // so we think about the worst case when could have, we add 0.5 to
-                // compensate the round error
-                var fs1 = (fontSize*(parent_w + 0.5))/(el_w + 0.5);
-                var fs2 = (fontSize*(parent_h) + 0.5)/(el_h + 0.5);
-
-                fontSize = Math.floor(Math.min(fs1,fs2));
-                fontSize += 1;
-                el.style.fontSize = fontSize + "px";
-                return fontSize;
             },
 
             clickPause : function(event) {
@@ -430,6 +452,8 @@
                             }
                             if (that.loop != false) {
                                 that.play(that.startTime);
+                            } else {
+                                that.showControl();
                             }
                         } else if (!that.isCvrLoading) {
                             const curDate = new Date(that.playTime);
