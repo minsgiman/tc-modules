@@ -16,7 +16,7 @@
                 </div>
             </div>
         </div>
-        <div v-show="showTime" class="time_wrap">
+        <div v-show="showTime" id="time_wrap" class="time_wrap">
             <div class="time_dim"></div>
             <div class="time_str_wrap">
                 <div class="time_str">
@@ -29,8 +29,8 @@
             <div class="error_mid_wrap">
                 <div class="player_off_black">
                     <div></div>
-                    <p v-show="(playStatus === E_PLAY_STATUS.no_cvr)">{{language === 'ja' ? '保存された映像がありません。' :  '저장된 영상이 없습니다.'}}</p>
-                    <p v-show="(playStatus === E_PLAY_STATUS.not_support)">{{language === 'ja' ? '対応していないブラウザー' : '지원하지 않는 브라우저 입니다.'}}</p>
+                    <p class="tcam_light_play_error_desc" v-show="(playStatus === E_PLAY_STATUS.no_cvr)">{{language === 'ja' ? '保存された映像がありません。' :  '저장된 영상이 없습니다.'}}</p>
+                    <p class="tcam_light_play_error_desc" v-show="(playStatus === E_PLAY_STATUS.not_support)">{{language === 'ja' ? '対応していないブラウザー' : '지원하지 않는 브라우저 입니다.'}}</p>
                 </div>
             </div>
         </div>
@@ -84,7 +84,7 @@
     }
 
     function getMaxFontSizeApprox(el) {
-        var fontSize = 18;
+        var fontSize = 14;
         var p = el.parentNode.parentNode;
 
         var parent_h = p.offsetHeight ? p.offsetHeight : p.style.pixelHeight;
@@ -112,9 +112,21 @@
         var fs1 = (fontSize*(parent_w + 0.5))/(el_w + 0.5);
         var fs2 = (fontSize*(parent_h) + 0.5)/(el_h + 0.5);
 
-        fontSize = Math.floor(Math.min(fs1,fs2));
-        fontSize += 1;
-        el.style.fontSize = fontSize + "px";
+        if (getPlatform() === 'pc') {
+            if (parent_w > 220) {
+                fontSize = 24;
+            } else if (parent_w > 150) {
+                fontSize = 18;
+            } else {
+                fontSize = Math.floor(Math.min(fs1,fs2));
+            }
+            if (fontSize < 11) {
+                fontSize = 11;
+            }
+            el.style.fontSize = fontSize + "px";
+        } else {
+            el.style.fontSize = '2.63vw';
+        }
         return fontSize;
     }
 
@@ -179,6 +191,21 @@
             this.language = getLanguage();
             setTimeout(() => {
                 getMaxFontSizeApprox(document.querySelector('.time_str'));
+                if (getPlatform() !== 'pc') {
+                    const timeEl = document.getElementById('time_wrap');
+                    if (timeEl) {
+                        timeEl.style.width = '28vw';
+                        timeEl.style.height = '5.6vw';
+                        timeEl.querySelector('.time_dim').style.borderRadius = '0.8vw';
+                    }
+                    const errorTxtEl = document.querySelectorAll('.tcam_light_play_error_desc');
+                    if (errorTxtEl) {
+                        let i, len = errorTxtEl.length;
+                        for (i = 0; i < len; i+=1) {
+                            errorTxtEl[i].style.fontSize = '2.9vw';
+                        }
+                    }
+                }
             }, 100);
         },
         beforeDestroy : function() {
@@ -627,8 +654,12 @@
             position: absolute;
             left: 12px;
             top: 12px;
-            width: 28%;
-            height: 10%;
+            width: 18%;
+            height: 6%;
+            max-width: 230px;
+            max-height: 43px;
+            min-width: 115px;
+            min-height: 22px;
             z-index: 20;
             .time_dim {
                 position: absolute;
