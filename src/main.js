@@ -27,3 +27,10 @@ let playerObj = new player({
 //     playerObj.destroy();
 //     playerObj = null;
 // }, 5000);
+
+// import markdownViewer from "./components/markdown_viewer";
+//
+// new markdownViewer({
+//     elementId: 'app',
+//     source: '/README.md'
+// });
