@@ -48,32 +48,36 @@ import tcPlayer from 'toastcam-player-light'; /* ES6 */
 
 The TOASTCAM Light Player needs following parameters
 
- - serialNo: Camera serial number
+ - serialNo: Camera serial number (***mandatory***)
  - elementId: elementId where TOASTCAM Light Player will be created (***mandatory***)
  - startTime: CVR start timestamp - 13 digits (if not set this param, play live mode)  
  - endTime: CVR end timestamp - 13 digits
+ - useControl : If set 'useControl' true, you can use control buttons (play, pause, forward, backward). When click play area, control layer show up (default: false)
+ - cvrJumpInterval : CVR jump interval when click forward & backward button. if use this option, 'useControl' option should be true previously (default: 5000)
+ - showTime: show play timer (default : false)
  - loop: repeat video (default: true)
- - showTime: show timer (default : false)
- - usePauseResume: show Pause Resume Button. if want to use it, showTime should be set to true (default : false)
  - credentialUrl: WebRTC credential API Url (default : '/rtc/credential')
  - candidateUrl: WebRTC candidate API Url (default : '/rtc/candidate') 
  - offerUrl: WebRTC offer API Url (default: '/rtc/offer') 
  - getTokenUrl : Get Token API Url (default: '/biz/cameras/token/:serialNo')
+ - getTimelineUrl : Get Timeline API Url (default: '/biz/cameras/:serialNo/video')
  - playEventHandler: Player Event Handler (not mandatory)
 
 ```javascript
 var data = {
-    serialNo: 'AZZDSF21312A',
+    serialNo: 'BC8AA30000B1',
     elementId : 'player',
-    startTime : 1563837900000,
-    endTime : 1563837903000,
-    loop : true,
+    startTime : 1578322740915,
+    endTime : 1578322745915,
+    cvrJumpInterval : 5000,
+    useControl : true,
     showTime : true,
-    usePauseResume: true,
-    credentialUrl: '/rtc/credential',
+    loop : true,
+    credentialUrl: '/rtc/credential', 
     candidateUrl: '/rtc/candidate',
     offerUrl: '/rtc/offer',
     getTokenUrl : '/biz/cameras/token/:serialNo',
+    getTimelineUrl : '/biz/cameras/:serialNo/video',
     playEventHandler : function (event) {
         console.log('playEventHandler - event.status : ' + event.status);
         //event.status : 'stream_connected', 'webrtc_server_error', 'finish', 'webrtc_not_support_browser'

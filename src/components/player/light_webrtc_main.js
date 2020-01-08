@@ -17,7 +17,7 @@ class lightPlayer {
                 elementId: this.getEmptyWrapId(this.wrapBaseId),
                 startTime: param.startTime,
                 endTime: param.endTime,
-                cvrMoveInterval: param.cvrMoveInterval,
+                cvrJumpInterval: param.cvrJumpInterval,
                 useControl: param.useControl,
                 loop: param.loop,
                 showTime: param.showTime,

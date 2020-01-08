@@ -124,7 +124,7 @@
 
     export default {
         name: 'playerContainer',
-        props: ['serialNo', 'elementId', 'startTime', 'endTime', 'cvrMoveInterval', 'useControl', 'loop', 'showTime', 'getTokenUrl',
+        props: ['serialNo', 'elementId', 'startTime', 'endTime', 'cvrJumpInterval', 'useControl', 'loop', 'showTime', 'getTokenUrl',
             'credentialUrl', 'candidateUrl', 'getTimelineUrl', 'offerUrl', 'playEventHandler'],
         computed: {
         },
@@ -156,7 +156,7 @@
                 playStatus : 0,
                 retryTimeout : null,
                 showControlTimeout : null,
-                defCvrMoveInterval : 5000,
+                defCvrJumpInterval : 5000,
                 defGetTokenUrl : '/biz/cameras/token/:serialNo',
                 defGetTimelineUrl : '/biz/cameras/:serialNo/video',
                 defCredentialUrl : '/rtc/credential',
@@ -285,9 +285,9 @@
                 this.showControl();
                 if (direction === 'b') {
                     this.stop();
-                    this.play(this.playTime - (this.cvrMoveInterval ? this.cvrMoveInterval : this.defCvrMoveInterval));
+                    this.play(this.playTime - (this.cvrJumpInterval ? this.cvrJumpInterval : this.defCvrJumpInterval));
                 } else if (direction === 'f') {
-                    const fTime = this.playTime + (this.cvrMoveInterval ? this.cvrMoveInterval : this.defCvrMoveInterval);
+                    const fTime = this.playTime + (this.cvrJumpInterval ? this.cvrJumpInterval : this.defCvrJumpInterval);
                     const curDate = new Date();
                     this.stop();
                     this.play(fTime >= curDate.valueOf() ? 0 : fTime);
