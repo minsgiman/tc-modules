@@ -143,7 +143,8 @@
                     start : 'start',
                     finish : 'finish',
                     error : 'error',
-                    webrtc_not_support_browser : 'webrtc_not_support_browser'
+                    webrtc_not_support_browser : 'webrtc_not_support_browser',
+                    no_cvr : 'no_cvr'
                 },
                 player : null,
                 playTimeoutId : null,
@@ -242,6 +243,9 @@
                                 }), 200);
                             } else {
                                 that.playStatus = that.E_PLAY_STATUS.no_cvr;
+                                if (that.playEventHandler) {
+                                    that.playEventHandler({status: that.E_PLAY_EVENT.no_cvr});
+                                }
                                 //that.hideControl();
                             }
                         }
@@ -448,7 +452,7 @@
                             that.stop();
                             that.playStatus = that.E_PLAY_STATUS.finish;
                             if (that.playEventHandler) {
-                                that.playEventHandler({status: that.playStatus});
+                                that.playEventHandler({status: that.E_PLAY_EVENT.finish});
                             }
                             if (that.loop != false) {
                                 that.play(that.startTime);
@@ -462,7 +466,7 @@
                                     that.stop();
                                     that.playStatus = that.E_PLAY_STATUS.no_cvr;
                                     if (that.playEventHandler) {
-                                        that.playEventHandler({status: that.playStatus});
+                                        that.playEventHandler({status: that.E_PLAY_EVENT.no_cvr});
                                     }
                                     that.hideControl();
                                 } else if (curDate.getMinutes() === 59 && curDate.getSeconds() === 59) {

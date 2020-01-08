@@ -80,11 +80,12 @@ var data = {
     getTimelineUrl : '/biz/cameras/:serialNo/video',
     playEventHandler : function (event) {
         console.log('playEventHandler - event.status : ' + event.status);
-        //event.status : 'stream_connected', 'webrtc_server_error', 'finish', 'webrtc_not_support_browser'
+        //event.status : 'stream_connected', 'webrtc_server_error', 'finish', 'webrtc_not_support_browser', 'no_cvr'
         // 'stream_connected' -> webRTC connected. play will start
         // 'webrtc_server_error' -> webRTC API error
         // 'finish' -> play end
         // 'webrtc_not_support_browser' -> browser does not support webrtc
+        // 'no_cvr' -> 'cvr record not exist'
     }
 }
 
