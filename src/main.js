@@ -4,7 +4,7 @@ let playerObj = new player({
     serialNo: 'BC8AA30000B1',
     elementId : 'playerwrap',
     startTime : 1578322740915,
-    endTime : 1578322745915,  //1578322799915,
+    endTime : 1578322799915,
     cvrJumpInterval : 5000,
     useControl : true, //default: false
     showTime : true,  //default : false

@@ -205,6 +205,31 @@
                             errorTxtEl[i].style.fontSize = '2.9vw';
                         }
                     }
+                } else {
+                    const btnWrap = document.querySelector('.btns_wrap');
+                    const pauseBtn = document.getElementById('pause_btn');
+                    const playBtn = document.getElementById('play_btn');
+                    const backBtn = document.querySelector('.backward_btn');
+                    const forwardBtn = document.querySelector('.forward_btn');
+                    if (btnWrap) {
+                        btnWrap.style.maxWidth = '353px';
+                    }
+                    if (pauseBtn) {
+                        pauseBtn.style.maxWidth = '100px';
+                        pauseBtn.style.maxHeight = '100px';
+                    }
+                    if (playBtn) {
+                        playBtn.style.maxWidth = '100px';
+                        playBtn.style.maxHeight = '100px';
+                    }
+                    if (backBtn) {
+                        backBtn.style.maxWidth = '58px';
+                        backBtn.style.maxHeight = '58px';
+                    }
+                    if (forwardBtn) {
+                        forwardBtn.style.maxWidth = '58px';
+                        forwardBtn.style.maxHeight = '58px';
+                    }
                 }
             }, 100);
         },
@@ -620,7 +645,7 @@
                     display: inline-block;
                     width: 60%;
                     padding-top:60%;
-                    background-size: cover;
+                    background-size: contain;
                     background-position: center;
                     background-repeat: no-repeat;
                     background-color: transparent;
