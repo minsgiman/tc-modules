@@ -1,24 +1,24 @@
 ## Install
 
-### script
+#### 1. Download
 
-#### (npm)
+download SDK ***(tc.player.min.js)*** from "https://dev-bizcam.toast.com/openapi/"
+
+#### 2. Copy & Paste
+
+copy ***tc.player.min.js*** to your appropriate library directory
+
+<br><br>
+
+## Import
+
+#### 1. Import script manually
 
 ```sh
-$ npm install --save https://github.com/nhn/toastcam_player_light.git
-```
-
-#### (script tag)
-
-download ***dist/tc.player.min.js*** from git repository and copy to your publish directory
-
-```sh
-<script src="tc.player.min.js"></script>
+<script src="library/tc.player.min.js"></script>
 ```
  
-
-<br>
-<br>
+<br><br>
 
 ## Usage
 
@@ -31,20 +31,14 @@ Add the element where TOASTCAM Light Player will be created
 ```
 
 ### Javascript
-#### Load
-The TOASTCAM Light Player can be used by creating an instance with the constructor function. To access the constructor function, import the module using one of the three following methods depending on your environment.
+#### 1. Get Class
+The TOASTCAM Light Player can be used by creating an instance with the constructor function.
 
 ```javascript
-var tcPlayer = toastcam.lPlayer; /* namespace */
-```
-```javascript
-var tcPlayer = require('toastcam-player-light'); /* CommonJS */
-```
-```javascript
-import tcPlayer from 'toastcam-player-light'; /* ES6 */
+const ToastCamPlayer = toastcam.lPlayer; /* namespace */
 ```
 
-#### Create Instance
+#### 2. Create Instance
 
 The TOASTCAM Light Player needs following parameters
 
@@ -64,7 +58,7 @@ The TOASTCAM Light Player needs following parameters
  - playEventHandler: Player Event Handler (not mandatory)
 
 ```javascript
-var data = {
+const data = {
     serialNo: 'BC8AA30000B1',
     elementId : 'player',
     startTime : 1578322740915,
@@ -87,14 +81,14 @@ var data = {
         // 'webrtc_not_support_browser' -> browser does not support webrtc
         // 'no_cvr' -> 'cvr record not exist'
     }
-}
+};
 
-var playerObj = new tcPlayer(data);
+let playerObj = new ToastCamPlayer(data);
 ```
 
 <br>
 
-#### Replay Method
+#### 3. Replay Method
 
 replay cvr video method. if not set startTime and endTime, replay original startTime and endTime 
 
@@ -102,7 +96,7 @@ replay cvr video method. if not set startTime and endTime, replay original start
 
 ```javascript
 /* Example */
-var data = {
+const data = {
     ...
     ...
     playEventHandler : function (event) {
@@ -111,17 +105,17 @@ var data = {
             //playerObj.replay();
         }
     }
-}
+};
 
-var playerObj = new tcPlayer(data);
+let playerObj = new ToastCamPlayer(data);
 ```
 
 <br>
 
-#### Destroy Instance
+#### 4. Destroy Instance
 
 ```javascript
-var playerObj = new tcPlayer(data);
+let playerObj = new ToastCamPlayer(data);
 playerObj.destroy();
 playerObj = null;
 ```
