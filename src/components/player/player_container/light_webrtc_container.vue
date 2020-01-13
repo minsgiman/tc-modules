@@ -341,8 +341,9 @@
             cvrMoveByInterval : function (direction, event) {
                 this.showControl();
                 if (direction === 'b') {
+                    const backTime = this.playTime - (this.cvrJumpInterval ? this.cvrJumpInterval : this.defCvrJumpInterval);
                     this.stop();
-                    this.play(this.playTime - (this.cvrJumpInterval ? this.cvrJumpInterval : this.defCvrJumpInterval));
+                    this.play(this.startTime < backTime ? backTime : this.startTime);
                 } else if (direction === 'f' && this.playStatus !== this.E_PLAY_STATUS.finish) {
                     const fTime = this.playTime + (this.cvrJumpInterval ? this.cvrJumpInterval : this.defCvrJumpInterval);
                     const curDate = new Date();
