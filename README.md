@@ -49,7 +49,6 @@ The TOASTCAM Light Player needs following parameters
  - useControl : If set 'useControl' true, you can use control buttons (play, pause, forward, backward). When click play area, control layer show up (default: false)
  - cvrJumpInterval : CVR jump interval when click forward & backward button. if use this option, 'useControl' option should be true previously (default: 5000)
  - showTime: show play timer (default : false)
- - loop: repeat video (default: true)
  - credentialUrl: WebRTC credential API Url (default : '/rtc/credential')
  - candidateUrl: WebRTC candidate API Url (default : '/rtc/candidate') 
  - offerUrl: WebRTC offer API Url (default: '/rtc/offer') 
@@ -66,7 +65,6 @@ const data = {
     cvrJumpInterval : 5000,
     useControl : true,
     showTime : true,
-    loop : true,
     credentialUrl: '/rtc/credential', 
     candidateUrl: '/rtc/candidate',
     offerUrl: '/rtc/offer',
