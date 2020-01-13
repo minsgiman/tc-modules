@@ -8,7 +8,6 @@ let playerObj = new player({
     cvrJumpInterval : 5000,
     useControl : true, //default: false
     showTime : true,  //default : false
-    loop : true,    //default : true
     credentialUrl: 'https://devmedia010.toastcam.com:10090/rtc/credential', //default : /rtc/credential
     candidateUrl: 'https://devmedia010.toastcam.com:10090/rtc/candidate',  //default : /rtc/candidate
     offerUrl: 'https://devmedia010.toastcam.com:10090/rtc/offer',          //default : /rtc/offer

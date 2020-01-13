@@ -19,7 +19,6 @@ class lightPlayer {
                 endTime: param.endTime,
                 cvrJumpInterval: param.cvrJumpInterval,
                 useControl: param.useControl,
-                loop: param.loop,
                 showTime: param.showTime,
                 getTokenUrl: param.getTokenUrl,
                 credentialUrl: param.credentialUrl,
