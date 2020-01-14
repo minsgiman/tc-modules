@@ -11,9 +11,9 @@
                                 <span class="ai_cam_name">{{camera.labelName}}</span>
                                 <span class="ai_date">{{camera.aiCountSummary ? aiDataTimeConverter(camera.aiCountSummary.updateDate) : ''}}</span>
                                 <span class="ai_count_wrap">
-                                <span class="count_num">{{camera.aiCountSummary ? camera.aiCountSummary.totalInPeopleZone : 0}}</span>
+                                <span class="count_num">{{camera.aiCountSummary ? (camera.aiCountSummary.allPeopleZoneCount > 0 ? camera.aiCountSummary.totalInPeopleZone : '-') : '-'}}</span>
                                 <span>{{txtMap.countUnit}},</span>
-                                <span class="count_num">{{camera.aiCountSummary ? camera.aiCountSummary.useTableCount : 0}}/{{camera.aiCountSummary ? camera.aiCountSummary.allTableCount : 0}}</span>
+                                <span class="count_num">{{camera.aiCountSummary ? (camera.aiCountSummary.allTableCount > 0 ? camera.aiCountSummary.useTableCount : '-') : '-'}}/{{camera.aiCountSummary ? (camera.aiCountSummary.allTableCount > 0 ? camera.aiCountSummary.allTableCount : '-') : '-'}}</span>
                                 <span>{{txtMap.seatUnit}}</span>
                             </span>
                             </p>

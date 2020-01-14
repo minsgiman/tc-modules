@@ -43,6 +43,7 @@ export interface IAiCameraSummary {
 export interface IAiCountSummary {
     useTableCount: number,
     allTableCount: number,
+    allPeopleZoneCount: number,
     totalInPeopleZone: number,
     updateDate: number
 }
