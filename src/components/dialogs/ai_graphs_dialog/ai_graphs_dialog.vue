@@ -381,8 +381,8 @@
                 }
                 data.categories = chartData.xAxis ? chartData.xAxis.items : [0];
                 data.series = [{name: this.txtMap.man, data: chartData.data ? chartData.data : [0], color}];
-                const maxIdx = getGraphMaxIndex(data.series[0].data);
-                const minIdx = getGraphMinIndex(data.series[0].data);
+                //const maxIdx = getGraphMaxIndex(data.series[0].data);
+                //const minIdx = getGraphMinIndex(data.series[0].data);
                 const options: any = {
                     theme: "newTheme",
                     chart: {
@@ -421,7 +421,7 @@
                 });
                 tui.chart.columnChart(document.getElementById(elementId), data, options);
                 $aiGraphEl.children('.tui-chart').css('margin', "auto");
-                applyTuiChartMaxMinColor(elementId, '#eb4e61', '#cae01c', maxIdx, minIdx);
+                //applyTuiChartMaxMinColor(elementId, '#eb4e61', '#cae01c', maxIdx, minIdx);
             }
         }
 
