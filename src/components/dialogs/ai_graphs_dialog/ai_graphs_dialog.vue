@@ -202,7 +202,7 @@
                         that.periodStr = that.dateFormat(that.endDate, "YY.MM.DD (ddd)");
                     } else {
                         that.startDate = new Date(date.valueOf());
-                        while (that.startDate.getDay() != 0) {
+                        while (that.startDate.getDay() != 1) {
                             that.startDate.setDate(that.startDate.getDate() - 1);
                         }
                         that.endDate = new Date(that.startDate.valueOf());
@@ -341,13 +341,23 @@
         toggleMode() {
             if (this.mode === 'daily') {
                 this.mode = 'hourly';
-                this.startDate = new Date();
-                this.endDate = new Date();
+                if (this.startDate) {
+                    this.startDate = new Date(this.startDate.valueOf());
+                    this.endDate = new Date(this.startDate.valueOf());
+                } else {
+                    this.startDate = new Date();
+                    this.endDate = new Date();
+                }
                 this.periodStr = this.dateFormat(this.endDate, "YY.MM.DD (ddd)");
+                this.isToday = this.checkIsToday();
             } else {
                 this.mode = 'daily';
-                this.startDate = new Date();
-                while (this.startDate.getDay() != 0) {
+                if (this.startDate) {
+                    this.startDate = new Date(this.startDate.valueOf());
+                } else {
+                    this.startDate = new Date();
+                }
+                while (this.startDate.getDay() != 1) {
                     this.startDate.setDate(this.startDate.getDate() - 1);
                 }
                 this.endDate = new Date(this.startDate.valueOf());
