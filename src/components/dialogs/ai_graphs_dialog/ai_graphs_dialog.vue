@@ -13,7 +13,7 @@
                             <span class="date_control_wrap">
                                 <a @click="goPrev" class="prev_btn"></a>
                                 <span class="select_day">{{periodStr}} {{(mode === 'hourly' || mode === 'min') && isToday ? txtMap.today : ''}}</span>
-                                <a @click="goNext" class="next_btn"></a>
+                                <a @click="goNext" class="next_btn" :class="{disabled: isToday}"></a>
                             </span>
                             <button class="date_mode_control" @click="toggleMode">{{(mode === 'hourly' || mode === 'min') ? txtMap.weekly : txtMap.daily}}</button>
                         </div>
@@ -23,7 +23,7 @@
                             <span class="min" :class="{enable: mode === 'min'}" @click="setGraphTimeUnit(10)">10{{txtMap.min}}</span>
                             <span class="hour" :class="{enable: mode === 'hourly'}" @click="setGraphTimeUnit(60)">1{{txtMap.hour}}</span>
                         </div>
-                        <div class="sum_graph_wrap" :style="{marginTop: mode === 'daily' ? '30px' : 0}">
+                        <div class="sum_graph_wrap" :style="{marginTop: mode === 'daily' ? '50px' : '12px'}">
                             <div id="sum_graph"></div>
                         </div>
                         <!--ul class="cam_graph_list" style="text-align:left;">
@@ -410,7 +410,7 @@
                         "suffix": this.txtMap.manCount
                     },
                     xAxis: {
-                        "title": '(' + this.txtMap.hourCount + ')',
+                        "title": '(' + (this.mode === 'daily' ? this.txtMap.dayCount : this.txtMap.hourCount) + ')',
                         "labelInterval": this.mode === 'daily' ? 1 : 2
                     },
                     series: {
@@ -431,6 +431,7 @@
                 });
                 tui.chart.columnChart(document.getElementById(elementId), data, options);
                 $aiGraphEl.children('.tui-chart').css('margin', "auto");
+                $('#' + elementId + ' .tui-chart-series-custom-event-area').hide();
                 //applyTuiChartMaxMinColor(elementId, '#eb4e61', '#cae01c', maxIdx, minIdx);
             }
         }
@@ -524,13 +525,12 @@
             margin: 0 auto;
         }
         .ai_date_area {
-            padding-top: 8px;
             background-color: #e6e6e6;
-            border-top: 1px solid #cccccc;
-            border-bottom: 1px solid #cccccc;
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
         }
         .graph_area {
-            height:579px; overflow-y:auto; overflow-x:hidden;
+            height:528px; overflow-y:auto; overflow-x:hidden;
             .graph_time_set_wrap {
                 span {
                     cursor: pointer;
@@ -567,6 +567,9 @@
             }
             .next_btn {
                 display:inline-block; background: url(/resources/img/btn-arrow-gay-next.png) no-repeat; width:30px; height:30px; float:right;
+                &.disabled {
+                    background-image: url(/resources/img/btn-arrow-gray-next-disabled.png);
+                }
             }
         }
         .cam_graph {

@@ -14,7 +14,6 @@
                                 <span class="count_num">{{camera.aiCountSummary ? (camera.aiCountSummary.allPeopleZoneCount > 0 ? camera.aiCountSummary.totalInPeopleZone : '-') : '-'}}</span>
                                 <span>{{txtMap.countUnit}},</span>
                                 <span class="count_num">{{camera.aiCountSummary ? (camera.aiCountSummary.allTableCount > 0 ? camera.aiCountSummary.useTableCount : '-') : '-'}}/{{camera.aiCountSummary ? (camera.aiCountSummary.allTableCount > 0 ? camera.aiCountSummary.allTableCount : '-') : '-'}}</span>
-                                <span>{{txtMap.seatUnit}}</span>
                             </span>
                             </p>
                         </li>
