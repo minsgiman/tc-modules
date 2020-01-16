@@ -23,9 +23,7 @@
                             <span class="min" :class="{enable: mode === 'min'}" @click="setGraphTimeUnit(10)">10{{txtMap.min}}</span>
                             <span class="hour" :class="{enable: mode === 'hourly'}" @click="setGraphTimeUnit(60)">1{{txtMap.hour}}</span>
                         </div>
-                        <div class="sum_graph_wrap" :style="{marginTop: mode === 'daily' ? '50px' : '12px'}">
-                            <div id="sum_graph"></div>
-                        </div>
+                        <div id="sum_graph" class="sum_graph_wrap" :style="{width: (GRAPH_WIDTH + 'px'), margin: '0 auto', marginTop: mode === 'daily' ? '50px' : '12px'}"></div>
                         <!--ul class="cam_graph_list" style="text-align:left;">
                             <li class="cam_graph" v-for="(camera, index) in aiCameraList">
                                 <p class="cam_tit_wrap">
@@ -142,6 +140,8 @@
         periodStr: string = '';
         isLoading: boolean = false;
         datePicker: any = null;
+        GRAPH_WIDTH: number = 970;
+        GRAPH_HEIGHT: number = 400;
 
         private created() {
             this.periodStr = this.dateFormat(this.endDate, "YY.MM.DD (ddd)");
@@ -382,7 +382,6 @@
             }
             $aiGraphEl.html('');
 
-            chartWidth = 1000;
             if (chartData) {
                 if (chartData.data) {
                     chartData.data = chartData.data.map((data: any) => {
@@ -396,8 +395,8 @@
                 const options: any = {
                     theme: "newTheme",
                     chart: {
-                        "width": (chartWidth - 10),
-                        "height": type === 'sum' ? 400 : 260,
+                        "width": this.GRAPH_WIDTH,
+                        "height": this.GRAPH_HEIGHT,
                         "title": "",
                         "format": '1,000'
                     },
@@ -473,8 +472,8 @@
             };
             options = {
                 chart: {
-                    width: 1000 - (type === 'sum' ? 30 : 10),
-                    height: type === 'sum' ? 400 : 260,
+                    width: this.GRAPH_WIDTH,
+                    height: this.GRAPH_HEIGHT,
                     format: format
                 },
                 yAxis: {
@@ -500,7 +499,6 @@
             options.theme = 'theme';
             tui.chart.lineChart(container, data, options);
             $('#' + elementId + ' .tui-chart-series-custom-event-area').hide();
-            $('#' + elementId + ' .tui-chart-plot-area').hide();
         }
 
         onCloseDialog () {
