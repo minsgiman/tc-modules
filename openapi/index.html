@@ -15,6 +15,11 @@
             box-sizing: border-box;
             background: #4b96e6;
         }
+        a {
+            color: -webkit-link;
+            cursor: pointer;
+            text-decoration: underline;
+        }
         h2 {
             margin: 0;
             padding: 20px 30px;
@@ -56,7 +61,7 @@
             <h4>Documentation</h4>
             <ul>
                 <li>
-                    <a href="openapi-1.2.3.html">1.2.3</a>
+                    <a onclick="clickOpenAPI()">1.2.3</a>
                 </li>
             </ul>
         </div>
@@ -77,7 +82,15 @@
                 </li>
             </ul>
         </div>
-
     </div>
+    <script>
+        function clickOpenAPI () {
+            if (navigator.language.indexOf('ko') != -1) {
+                location.href = 'openapi-1.2.3.html';
+            } else {
+                location.href = 'openapi-1.2.3-ja.html';
+            }
+        }
+    </script>
 </body>
 </html>
