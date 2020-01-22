@@ -12,7 +12,7 @@
                     </div>
                     <div class="page_num">{{pageCount}}/2</div>
                     <div class="ai_guide_desc">
-                        <span>{{description}}</span>
+                        <span v-html="description"></span>
                     </div>
                     <div class="ai_btn_wrap">
                         <button @click="clickNoShow">{{txtMap.noshow}}</button>

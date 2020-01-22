@@ -144,7 +144,7 @@
         GRAPH_HEIGHT: number = 400;
 
         private created() {
-            this.periodStr = this.dateFormat(this.endDate, "YY.MM.DD (ddd)");
+            this.periodStr = this.dateFormat(this.endDate, "YYYY.MM.DD (ddd)");
         }
 
         private mounted() {
@@ -199,7 +199,7 @@
                     if (that.mode === 'hourly' || that.mode === 'min') {
                         that.startDate = new Date(date.valueOf());
                         that.endDate = new Date(date.valueOf());
-                        that.periodStr = that.dateFormat(that.endDate, "YY.MM.DD (ddd)");
+                        that.periodStr = that.dateFormat(that.endDate, "YYYY.MM.DD (ddd)");
                     } else {
                         that.startDate = new Date(date.valueOf());
                         while (that.startDate.getDay() != 1) {
@@ -251,7 +251,7 @@
             } else {
                 this.startDate.setDate(this.startDate.getDate() - 1);
                 this.endDate.setDate(this.endDate.getDate() - 1);
-                this.periodStr = this.dateFormat(this.endDate, "YY.MM.DD (ddd)");
+                this.periodStr = this.dateFormat(this.endDate, "YYYY.MM.DD (ddd)");
             }
             this.isToday = this.checkIsToday();
             this.requestShopChart();
@@ -269,7 +269,7 @@
             } else {
                 this.startDate.setDate(this.startDate.getDate() + 1);
                 this.endDate.setDate(this.endDate.getDate() + 1);
-                this.periodStr = this.dateFormat(this.endDate, "YY.MM.DD (ddd)");
+                this.periodStr = this.dateFormat(this.endDate, "YYYY.MM.DD (ddd)");
             }
             this.isToday = this.checkIsToday();
             this.requestShopChart();
@@ -348,7 +348,7 @@
                     this.startDate = new Date();
                     this.endDate = new Date();
                 }
-                this.periodStr = this.dateFormat(this.endDate, "YY.MM.DD (ddd)");
+                this.periodStr = this.dateFormat(this.endDate, "YYYY.MM.DD (ddd)");
                 this.isToday = this.checkIsToday();
             } else {
                 this.mode = 'daily';

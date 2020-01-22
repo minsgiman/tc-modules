@@ -2,9 +2,7 @@
     <div class="tc_list" :class="{horizontal: type === 'horizontal', vertical: type === 'vertical'}" :style="listStyle">
         <button :class="{enabled: list.length > maxViewCount && viewFirstIndex > 0}" @click="moveList(-1)" class="backward"></button>
         <ul>
-            <slot v-for="(item, index) in viewList" :name="item.id">
-                <li v-html="item.content" :style="[itemStyle, focusId === item.id ? focusStyle : null]" @click="itemSelect(item)"></li>
-            </slot>
+            <slot v-for="(item, index) in viewList" v-bind:item="item"></slot>
         </ul>
         <button :class="{enabled: list.length > maxViewCount && ((viewFirstIndex + viewList.length) < list.length)} " @click="moveList(1)" class="forward"></button>
     </div>

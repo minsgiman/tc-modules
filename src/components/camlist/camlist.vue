@@ -1,12 +1,12 @@
 <template>
     <div class="tc_camlist">
         <list :pList="pList" :pMaxViewCount="maxViewCount" :pFocusId="focusId">
-            <template v-for="(item, index) in pList" :slot="item.id">
-                <li @click="selectCamera(item)" :class="{has_error: checkHasError(item), has_focus: focusId === item.id}">
-                    <img class="lst_thumb" :src="item.thumbnailPath" onerror="this.src='/resources/images/img_camera_fail.png'">
+            <template v-slot:default="slotProps">
+                <li @click="selectCamera(slotProps.item)" :class="{has_error: checkHasError(slotProps.item), has_focus: focusId === slotProps.item.id}">
+                    <img class="lst_thumb" :src="slotProps.item.thumbnailPath" onerror="this.src='/resources/images/img_camera_fail.png'">
                     <div class="lst_dim"></div>
                     <div class="lst_camera_name">
-                        <span>{{item.labelName}}</span>
+                        <span>{{slotProps.item.labelName}}</span>
                     </div>
                     <div class="lst_txt_off">
                         <img src="/resources/img/ic-detailview-smallthumb-disconnect.png">
