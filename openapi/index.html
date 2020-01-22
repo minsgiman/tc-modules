@@ -30,6 +30,9 @@
         ul {
             padding: 0 0 0 90px;
         }
+        li {
+            margin: 10px 0;
+        }
         li span {
             color: gray;
         }
@@ -61,7 +64,7 @@
             <h4>Documentation</h4>
             <ul>
                 <li>
-                    <a onclick="clickOpenAPI()">1.2.3</a>
+                    <a onclick="clickOpenAPI('1.2.4')">1.2.4</a>
                 </li>
             </ul>
         </div>
@@ -75,6 +78,12 @@
                     <a href="markdown.html">1.1.1</a><span> (2020.1.9)</span>
                 </li>
             </ul>
+            <h4 style="margin-top:40px;">Example</h4>
+            <ul>
+                <li>
+                    <a href="example.html">1.1.1</a><span> (2020.1.9)</span>
+                </li>
+            </ul>
             <h4 style="margin-top:40px;">Download</h4>
             <ul>
                 <li>
@@ -84,11 +93,11 @@
         </div>
     </div>
     <script>
-        function clickOpenAPI () {
+        function clickOpenAPI (version) {
             if (navigator.language.indexOf('ko') != -1) {
-                location.href = 'openapi-1.2.3.html';
+                location.href = 'openapi-' + version + '-ko.html';
             } else {
-                location.href = 'openapi-1.2.3-ja.html';
+                location.href = 'openapi-' + version + '-jp.html';
             }
         }
     </script>
