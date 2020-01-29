@@ -132,7 +132,7 @@
                 font-size: 14px;
                 line-height: 20px;
                 display: inline-block;
-                width: 240px;
+                width: 254px;
             }
         }
         .ai_btn_wrap {

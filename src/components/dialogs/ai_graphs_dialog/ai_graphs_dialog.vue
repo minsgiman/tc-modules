@@ -449,11 +449,6 @@
                     container.removeChild(container.firstChild);
                 }
             }
-            if (chartData.data) {
-                chartData.data = chartData.data.map((data: any) => {
-                    return data ? Math.ceil(data) : null;
-                });
-            }
             if (chartData.xAxis) {
                 categories = chartData.xAxis.items.filter((item) => {
                     return !!item;
