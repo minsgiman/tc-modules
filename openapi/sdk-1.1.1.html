@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Player SDK</title>
+    <link href="./editor.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div style="padding:0px 30px 30px;">
+    <div class="dooray-contents markdown ng-scope ng-isolate-scope ng-not-empty ng-valid" ng-switch-when="MARKDOWN" ng-if="!$ctrl.readOnly" ng-model="$ctrl.body.content" disable-edit="::$ctrl.isDisabled" on-checked="$ctrl.onMarkdownChecked(content, target)" on-load="$ctrl.onLoad(target)" aria-invalid="false"><div class="tui-editor-contents"><h1 id="webrtc-player-sdk-guide">WebRTC Player SDK Guide</h1>
+        <p><br></p>
+        <h2 id="sdk-install">SDK Install</h2>
+        <h3 id="1.-download">1. Download</h3>
+        <ul>
+            <li>download <i><strong>SDK js file (tc.player.min.js)</strong></i> from "<a href="https://dev-bizcam.toast.com/openapi/" target="_blank">https://dev-bizcam.toast.com/openapi/</a>"</li>
+        </ul>
+        <h3 id="2.-copy-%26-paste">2. Copy &amp; Paste</h3>
+        <ul>
+            <li>copy <i><strong>tc.player.min.js</strong></i> to your appropriate library directory</li>
+        </ul>
+        <h3 id="3.-import-script-manually">3. Import script manually</h3>
+        <pre><code data-language="html" class="lang-html">/* index.html */
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"library/tc.player.min.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+        <p><br></p>
+        <h2 id="usage">Usage</h2>
+        <h3 id="1.-make-the-element-(where-player-will-be-created)">1. Make the element (where player will be created)</h3>
+        <pre><code data-language="html" class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"player"</span> <span class="hljs-attr">style</span>=<span class="hljs-string">"width:640px; height:360px;"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</code></pre>
+        <h3 id="2.-get-player-constructor">2. Get player constructor</h3>
+        <pre><code data-language="javascript" class="lang-javascript"><span class="hljs-keyword">const</span> ToastCamPlayer = toastcam.lPlayer; <span class="hljs-comment">/* if you install SDK, namespace 'toastcam' will exist */</span>
+</code></pre>
+        <h3 id="3.-create-player-instance">3. Create player Instance</h3>
+        <p><span style="color:#5319e7; ">The WebRTC Player requires following parameters</span></p>
+        <p>1). <span style="color:#0052cc; ">serialNo</span>: Camera serial number (<i><strong>mandatory</strong></i>)<br>
+            2). <span style="color:#0052cc; ">elementId</span>: elementId where WebRTC Player will be created (<i><strong>mandatory</strong></i>)<br>
+            3). <span style="color:#0052cc; ">startTime</span>: video start timestamp - 13 digits (<i><strong>if not set this param, play live mode</strong></i>)<br>
+            4). <span style="color:#0052cc; ">endTime</span>: video end timestamp - 13 digits<br>
+            5). <span style="color:#0052cc; ">useControl</span> : If set 'useControl' true, you can use control buttons (play, pause, forward, backward). When click play area, control layer show up (default: false)<br>
+            6). <span style="color:#0052cc; ">cvrJumpInterval</span> : CVR jump interval when click forward &amp; backward button. if use this option, 'useControl' option should be true previously (default: 5000)<br>
+            7). <span style="color:#0052cc; ">showTime</span>: show play timer (default : false)<br>
+            8). <span style="color:#0052cc; ">credentialUrl</span>: WebRTC credential GET API Url (default : '/rtc/credential')<br>
+            9). <span style="color:#0052cc; ">candidateUrl</span>: WebRTC candidate POST API Url (default : '/rtc/candidate')<br>
+            10). <span style="color:#0052cc; ">offerUrl</span>: WebRTC offer POST API Url (default: '/rtc/offer')<br>
+            11). <span style="color:#0052cc; ">getTokenUrl</span> : Get video play token GET API url (default: '/biz/cameras/token/:serialNo')<br>
+            12). <span style="color:#0052cc; ">getTimelineUrl</span> : Get video timeline GET API url (default: '/biz/cameras/:serialNo/video')<br>
+            13). <span style="color:#0052cc; ">playEventHandler</span>: Player event handler. there are the following event status - 'stream_connected', 'webrtc_server_error', 'finish', 'webrtc_not_support_browser', 'no_cvr' (not mandatory)</p>
+        <ul>
+            <li><em><strong>number 8 ~ 12 parameters is customer's tunneling server API path</strong></em></li>
+        </ul>
+        <p><img src="./player-server.png" alt="image (1).png"></p>
+        <ul>
+            <li><em><strong>if you create the player instance, video will play automatically</strong></em></li>
+        </ul>
+        <h5 id="create-instance-example">create instance example</h5>
+        <pre><code data-language="javascript" class="lang-javascript"><span class="hljs-comment">/* Event Play */</span>
+<span class="hljs-keyword">const</span> data = {
+    <span class="hljs-attr">serialNo</span>: <span class="hljs-string">'BC8AA30000B1'</span>,
+    <span class="hljs-attr">elementId</span> : <span class="hljs-string">'player'</span>,
+    <span class="hljs-attr">startTime</span> : <span class="hljs-number">1578322740915</span>,
+    <span class="hljs-attr">endTime</span> : <span class="hljs-number">1578322745915</span>,
+    <span class="hljs-attr">cvrJumpInterval</span> : <span class="hljs-number">5000</span>,
+    <span class="hljs-attr">useControl</span> : <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">showTime</span> : <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">credentialUrl</span>: <span class="hljs-string">'/rtc/credential'</span>,
+    <span class="hljs-attr">candidateUrl</span>: <span class="hljs-string">'/rtc/candidate'</span>,
+    <span class="hljs-attr">offerUrl</span>: <span class="hljs-string">'/rtc/offer'</span>,
+    <span class="hljs-attr">getTokenUrl</span> : <span class="hljs-string">'/biz/cameras/token/:serialNo'</span>,
+    <span class="hljs-attr">getTimelineUrl</span> : <span class="hljs-string">'/biz/cameras/:serialNo/video'</span>,
+    <span class="hljs-attr">playEventHandler</span> : <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'playEventHandler - event.status : '</span> + event.status);
+    }
+};
+
+<span class="hljs-keyword">let</span> playerObj = <span class="hljs-keyword">new</span> ToastCamPlayer(data);
+</code></pre>
+        <pre><code data-language="javascript" class="lang-javascript"><span class="hljs-comment">/* Live Play */</span>
+<span class="hljs-keyword">const</span> data = {
+    <span class="hljs-attr">serialNo</span>: <span class="hljs-string">'BC8AA30000B1'</span>,
+    <span class="hljs-attr">elementId</span> : <span class="hljs-string">'player'</span>,
+    <span class="hljs-attr">useControl</span> : <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">showTime</span> : <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">credentialUrl</span>: <span class="hljs-string">'/rtc/credential'</span>,
+    <span class="hljs-attr">candidateUrl</span>: <span class="hljs-string">'/rtc/candidate'</span>,
+    <span class="hljs-attr">offerUrl</span>: <span class="hljs-string">'/rtc/offer'</span>,
+    <span class="hljs-attr">getTokenUrl</span> : <span class="hljs-string">'/biz/cameras/token/:serialNo'</span>,
+    <span class="hljs-attr">playEventHandler</span> : <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+         <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'playEventHandler - event.status : '</span> + event.status);
+    }
+};
+
+<span class="hljs-keyword">let</span> playerObj = <span class="hljs-keyword">new</span> ToastCamPlayer(data);
+</code></pre>
+        <p><br></p>
+        <h3 id="4.-destroy-player-after-play">4. Destroy player after play</h3>
+        <pre><code data-language="javascript" class="lang-javascript"><span class="hljs-keyword">let</span> playerObj = <span class="hljs-keyword">new</span> ToastCamPlayer(data);
+playerObj.destroy();
+playerObj = <span class="hljs-literal">null</span>;
+</code></pre>
+    </div></div>
+</div>
+</body>
+</html>
