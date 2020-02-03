@@ -62,11 +62,12 @@
         .log_menu>li{position:relative;float:left;font-size: 16px; color: #fff; padding: 0 20px; line-height: 74px;}
         .log_menu>li:hover{cursor: pointer; border-bottom: 3px solid #fff;}
         .log_menu>li.on{cursor: pointer; border-bottom: 3px solid #fff;}
-        .log_menu a{display:inline-block;color:#fff;text-decoration:none;cursor:pointer}
+        .log_menu a{display:inline-block;color:#fff;text-decoration:none;cursor:pointer;font-family:'arial';}
         .log_menu a:hover, .log_menu a:active, .log_menu a:focus{text-decoration:none}
         .main_tit {
             color:#4b96e6;
             font-size:36px;
+            font-family: 'arial';
         }
     </style>
 </head>
@@ -114,7 +115,7 @@
                 </li>
                 <li>인증 서버(Auth Server) : <a href="#authTokenGuide" target="">인증 토큰 관리</a>용 배치 서버 입니다. 배치 주기는 <a href="#tokenPolicy" target="">토큰 관리 정책</a> 에 따라 설정하도록 합니다.</li>
                 <li>터널링 서버(Tunneling Server) : Player SDK와 Open API 사이에서 <a href="#tunnelingGuide" target="">터널링 처리</a>를 합니다.</li>
-                <li>Player SDK : WebRTC Player SDK입니다. Open API와 연결되는 터널링 서버 API Path를 옵션으로 설정해야 합니다.</li>
+                <li>Player SDK : Video Player SDK입니다. Open API와 연결되는 터널링 서버 API Path를 옵션으로 설정해야 합니다.</li>
             </ul>
             <h1 id="%EC%9D%B8%EC%A6%9D-%ED%86%A0%ED%81%B0-%EA%B4%80%EB%A6%AC">인증 토큰 관리<span id="authTokenGuide"></span></h1>
             <hr>
@@ -177,15 +178,15 @@
 </code></pre>
             <ol start="4">
                 <li>Open API 로부터 응답을 받습니다.</li>
-                <li>클라이언트(Player SDK)에 응답정보를 전달합니다.</li>
+                <li>클라이언트<a href="sdk-1.1.1.html" target="_blank">(Player SDK)</a>에 응답정보를 전달합니다.</li>
             </ol>
-            <h1 id="%EC%B0%B8%EA%B3%A0%EC%9E%90%EB%A3%8C">참고자료</h1>
+            <!--h1 id="%EC%B0%B8%EA%B3%A0%EC%9E%90%EB%A3%8C">참고자료</h1>
             <h2 id="api-%EB%AC%B8%EC%84%9C">API 문서</h2>
             <ul>
                 <li>Korean : <a href="openapi-1.2.4-ko.html" target="_blank">openapi-1.2.4-ko</a></li>
                 <li>Japanese : <a href="openapi-1.2.4-jp.html" target="_blank">openapi-1.2.4-jp</a></li>
                 <li>Player SDK : <a href="sdk-1.1.1.html" target="_blank">Player SDK Guide</a></li>
-            </ul>
+            </ul-->
             <h2 id="%ED%86%A0%ED%81%B0-%EA%B4%80%EB%A6%AC-%EC%A0%95%EC%B1%85">토큰 관리 정책<span id="tokenPolicy"></span></h2>
             <ul>
                 <li>새로 발급 또는 갱신된 토큰의 만료일(expire date)은 처리된 시간으로부터 10일 이후 입니다.</li>
@@ -207,11 +208,11 @@
         </div>
         <br>
         <div class="contents doc_cont_wrap">
-            <h2>Web SDK</h2>
+            <h2>Player SDK</h2>
             <div class="line"></div>
             <ul>
                 <li>
-                    <a href="sdk-1.1.1.html">1.1.1</a><span> (2020.1.9)</span>
+                    <a href="sdk-1.1.1.html" target="_blank">1.1.1</a><span> (2020.1.9)</span>
                 </li>
             </ul>
         </div>
@@ -220,7 +221,7 @@
     <div id="download_content" class="content_wrap" style="display:none;">
         <h2 class="main_tit">Download</h2>
         <div class="contents doc_cont_wrap" style="margin-top:52px;">
-            <h2>Web SDK</h2>
+            <h2>Player SDK</h2>
             <div class="line"></div>
             <ul>
                 <li>
@@ -266,9 +267,9 @@
 
         function clickOpenAPI (version) {
             if (navigator.language.indexOf('ko') != -1) {
-                location.href = 'openapi-' + version + '-ko.html';
+                window.open('openapi-' + version + '-ko.html', 'openapi');
             } else {
-                location.href = 'openapi-' + version + '-jp.html';
+                window.open('openapi-' + version + '-jp.html', 'openapi');
             }
         }
 
