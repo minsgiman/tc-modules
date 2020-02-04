@@ -286,9 +286,9 @@
 
                 if (this.playTime) {
                     this.requestTimeline(function(resObj) {
-                        if (resObj) {
-                            that.cvrData.recordList = resObj.recordList;
-                            if (that.checkHasCvr(time, resObj.recordList)) {
+                        if (resObj && resObj.code === 0) {
+                            that.cvrData.recordList = resObj.result.recordList;
+                            if (that.checkHasCvr(time, resObj.result.recordList)) {
                                 that.playTimeoutId = setTimeout(that.requestToken.bind(that)(function(resObj) {
                                     if (resObj) {
                                         that.playStart(resObj.cameraId, resObj.cvrHostPort, resObj.token);
@@ -300,6 +300,11 @@
                                     that.playEventHandler({status: that.E_PLAY_EVENT.no_cvr});
                                 }
                                 //that.hideControl();
+                            }
+                        } else {
+                            that.playStatus = that.E_PLAY_STATUS.no_cvr;
+                            if (that.playEventHandler) {
+                                that.playEventHandler({status: that.E_PLAY_EVENT.no_cvr});
                             }
                         }
                     });
