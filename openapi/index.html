@@ -62,12 +62,24 @@
         .log_menu>li{position:relative;float:left;font-size: 16px; color: #fff; padding: 0 20px; line-height: 74px;}
         .log_menu>li:hover{cursor: pointer; border-bottom: 3px solid #fff;}
         .log_menu>li.on{cursor: pointer; border-bottom: 3px solid #fff;}
+        .log_menu>li.no_line{border-bottom:none!important;}
         .log_menu a{display:inline-block;color:#fff;text-decoration:none;cursor:pointer;font-family:'arial';}
         .log_menu a:hover, .log_menu a:active, .log_menu a:focus{text-decoration:none}
         .main_tit {
             color:#4b96e6;
             font-size:36px;
             font-family: 'arial';
+            width: auto;
+            display: inline-block;
+        }
+        .main_sub_tit {
+            font-size: 28px;
+            float: right;
+            display: inline-block;
+            margin: 5px 0 0 10px;
+        }
+        .top_tit {
+            color:black;
         }
     </style>
 </head>
@@ -78,66 +90,185 @@
             <li id="start_menu"><a href="#starter">Getting Started</a></li>
             <li id="doc_menu"><a href="#documentation">Documentation</a></li>
             <li id="download_menu"><a href="#download">Download</a></li>
+            <li class="no_line">
+                <select id="langSelect" onchange="changeLanguage()" style="height:26px;width:100px;font-size:14px;">
+                    <option value="ko">Korean</option>
+                    <option value="ja">japanese</option>
+                </select>
+            </li>
         </ul>
     </header>
     <div id="start_content" class="content_wrap" style="display:none;">
-        <h2 class="main_tit">Getting Started</h2>
-        <div class="view-contents-body">
-            <section class="body-in-view">
-                <div class="ng-scope ng-isolate-scope">
-                    <content-view body="$ctrl.body" translation="$ctrl.bodyTranslation" on-checked="$ctrl.onCheckGfmCheckBox(content)" on-load-complete="$ctrl.completeContentLoad()" class="ng-isolate-scope"><div ng-switch="$ctrl.contentType"><!-- ngSwitchWhen: HTML --><!-- ngSwitchWhen: MARKDOWN --><!-- ngIf: !$ctrl.readOnly --><div class="dooray-contents markdown ng-scope ng-isolate-scope ng-not-empty ng-valid" ng-switch-when="MARKDOWN" ng-if="!$ctrl.readOnly" ng-model="$ctrl.body.content" disable-edit="::$ctrl.isDisabled" on-checked="$ctrl.onMarkdownChecked(content, target)" on-load="$ctrl.onLoad(target)" aria-invalid="false"><div class="tui-editor-contents"><h1 id="%EC%82%AC%EC%A0%84-%EC%A4%80%EB%B9%84">사전 준비</h1>
-            <h2 id="%EA%B3%84%EC%A0%95-%EB%93%B1%EB%A1%9D">계정 등록</h2>
-            <p>Open API를 사용할 토스트캠Biz 계정을 만듭니다.</p>
+        <h3 class="main_tit">
+            <span class="top_tit">Open API > </span>
+            <span class="main_sub_tit">Getting Started</span>
+        </h3>
+        <div id="start_content_kr" class="view-contents-body" style="display:none;">
+                <section class="body-in-view">
+                    <div class="ng-scope ng-isolate-scope">
+                        <content-view body="$ctrl.body" translation="$ctrl.bodyTranslation" on-checked="$ctrl.onCheckGfmCheckBox(content)" on-load-complete="$ctrl.completeContentLoad()" class="ng-isolate-scope"><div ng-switch="$ctrl.contentType"><!-- ngSwitchWhen: HTML --><!-- ngSwitchWhen: MARKDOWN --><!-- ngIf: !$ctrl.readOnly --><div class="dooray-contents markdown ng-scope ng-isolate-scope ng-not-empty ng-valid" ng-switch-when="MARKDOWN" ng-if="!$ctrl.readOnly" ng-model="$ctrl.body.content" disable-edit="::$ctrl.isDisabled" on-checked="$ctrl.onMarkdownChecked(content, target)" on-load="$ctrl.onLoad(target)" aria-invalid="false"><div class="tui-editor-contents"><h1 id="%EC%82%AC%EC%A0%84-%EC%A4%80%EB%B9%84">사전 준비</h1>
+                            <h2 id="%EA%B3%84%EC%A0%95-%EB%93%B1%EB%A1%9D">계정 등록</h2>
+                            <p>Open API를 사용할 토스트캠Biz 계정을 만듭니다.</p>
+                            <ul>
+                                <li>회원가입 : <a href="https://bizcam.toast.com/" target="_blank">https://bizcam.toast.com/</a></li>
+                            </ul>
+                            <h2 id="%EB%B2%A4%EB%8D%94%EC%95%84%EC%9D%B4%EB%94%94(vendorid)-%EB%B0%9B%EA%B8%B0">벤더아이디(vendorId) 받기</h2>
+                            <p>토스트캠Biz(<a href="mailto:dl_toastcamcs@nhn.com" target="_blank">dl_toastcamcs@nhn.com</a>)에 Open API 사용 요청을 하여, 벤더아이디(vendorId)를 전달 받습니다.<br>
+                                사용 요청시 아래 정보를 포함하여 전달해주세요.</p>
+                            <ul>
+                                <li>토스트캠Biz 계정 ID</li>
+                                <li>인증 서버(Auth server) NAT IP 주소</li>
+                            </ul>
+                            <h2 id="%EC%84%9C%EB%B9%84%EC%8A%A4-%EA%B5%AC%EC%A1%B0">서비스 구조</h2>
+                            <p>토스트캠에서 제안하는 서비스 구조는 아래와 같습니다.<br>
+                                <img src="./image-server1.png" alt="image.png"></p>
+                            <h3 id="toastcam-%EC%A0%9C%EA%B3%B5-%ED%99%98%EA%B2%BD">Toastcam 제공 환경</h3>
+                            <ul>
+                                <li>Open API 서버</li>
+                            </ul>
+                            <h3 id="%EA%B3%A0%EA%B0%9D%EC%82%AC-%EC%9D%B8%ED%94%84%EB%9D%BC-%EC%9A%94%EA%B5%AC%EC%82%AC%ED%95%AD">고객사 인프라 요구사항</h3>
+                            <ul>
+                                <li>인증 DB(Auth DB) : 인증용 토큰정보를 관리할 DB 입니다. <strong>토스트캠Biz 계정</strong>을 기준으로 아래 정보를 관리 할 수 있도록 합니다.
+                                    <ul>
+                                        <li>토큰(token)</li>
+                                        <li>만료일 (expirationTime)</li>
+                                    </ul>
+                                </li>
+                                <li>인증 서버(Auth Server) : <a href="#authTokenGuide" target="">인증 토큰 관리</a>용 배치 서버 입니다. 배치 주기는 <a href="#tokenPolicy" target="">토큰 관리 정책</a> 에 따라 설정하도록 합니다.</li>
+                                <li>터널링 서버(Tunneling Server) : Player SDK와 Open API 사이에서 <a href="#tunnelingGuide" target="">터널링 처리</a>를 합니다.</li>
+                                <li>Player SDK : Video Player SDK입니다. Open API와 연결되는 터널링 서버 API Path를 옵션으로 설정해야 합니다.</li>
+                            </ul>
+                            <h1 id="%EC%9D%B8%EC%A6%9D-%ED%86%A0%ED%81%B0-%EA%B4%80%EB%A6%AC">인증 토큰 관리<span id="authTokenGuide"></span></h1>
+                            <hr>
+                            <p><strong>토큰 정보를 Auth DB에 저장하고, 토큰을 주기적으로 갱신하여 토큰이 만료되지 않도록 합니다.</strong><br>
+                                <strong>갱신 주기는 <a href="#tokenPolicy" target="">토큰 관리 정책</a>을 참고하여 정하도록 합니다.</strong></p>
+                            <hr>
+                            <p><img src="./image-server2.png" alt="image.png"></p>
+                            <ol>
+                                <li>토큰 조회
+                                    <ul>
+                                        <li>Auth DB에 저장된 토큰이 있는지 조회합니다.</li>
+                                    </ul>
+                                </li>
+                                <li>토큰 발급 및 갱신 요청
+                                    <ul>
+                                        <li>Auth DB에 저장된 토큰이 없는 경우, 신규 발급요청을 합니다.
+                                            <ul>
+                                                <li>Korean : <a href="/openapi/openapi-1.2.4-ko.html#api-Auth-createTokenUsingPOST" target="_blank">openapi-1.2.4-ko#api-Auth-createTokenUsingPOST</a></li>
+                                                <li>Japanese : <a href="/openapi/openapi-1.2.4-jp.html#api-Auth-createTokenUsingPOST" target="_blank">openapi-1.2.4-jp#api-Auth-createTokenUsingPOST</a></li>
+                                            </ul>
+                                        </li>
+                                        <li>저장된 토큰이 있는 경우 갱신요청을 합니다.
+                                            <ul>
+                                                <li>Korean : <a href="/openapi/openapi-1.2.4-ko.html#api-Auth-refreshTokenUsingGET" target="_blank">openapi-1.2.4-ko#api-Auth-refreshTokenUsingGET</a></li>
+                                                <li>Japanese : <a href="/openapi/openapi-1.2.4-jp.html#api-Auth-refreshTokenUsingGET" target="_blank">openapi-1.2.4-jp#api-Auth-refreshTokenUsingGET</a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li>Auth DB에 갱신
+                                    <ul>
+                                        <li>2)의 요청결과를 Auth DB에 업데이트 합니다.</li>
+                                    </ul>
+                                </li>
+                            </ol>
+                            <h1 id="%ED%84%B0%EB%84%90%EB%A7%81-%EC%B2%98%EB%A6%AC">터널링 처리<span id="tunnelingGuide"></span></h1>
+                            <hr>
+                            <p><strong>Player SDK와 Open API 사이에서 터널링 역할을 하는 서버를 두도록 합니다. 터널링시 인증 토큰(token)을 헤더에 포함시켜 전달합니다.</strong></p>
+                            <hr>
+                            <p><img src="./image-server3.png" alt="image.png"></p>
+                            <ol>
+                                <li>호출 요청
+                                    <ul>
+                                        <li>Player SDK으로부터 Open API 호출 요청이 들어옵니다.</li>
+                                    </ul>
+                                </li>
+                                <li>토큰 조회
+                                    <ul>
+                                        <li>Auth DB에 저장된 토큰 정보를 가져옵니다.</li>
+                                    </ul>
+                                </li>
+                                <li>서비스 Open API 호출
+                                    <ul>
+                                        <li>1)의 요청정보에 2) 에서 조회한 인증 토큰(token) 정보를 헤더에 추가 하여 Open API를 호출합니다.<br>
+                                            아래는 영상재생정보 조회 API 호출 예시입니다. 토큰값을 x-access-token 헤더에 추가하였습니다.</li>
+                                    </ul>
+                                </li>
+                            </ol>
+                            <pre><code>curl -X GET "https://openapi.toastcam.com/service/v1/cameras/AAAAA3008947/play" -H "x-access-token:토큰값"
+</code></pre>
+                            <ol start="4">
+                                <li>Open API 로부터 응답을 받습니다.</li>
+                                <li>클라이언트<a href="sdk-1.1.1.html" target="_blank">(Player SDK)</a>에 응답정보를 전달합니다.</li>
+                            </ol>
+                            <!--h1 id="%EC%B0%B8%EA%B3%A0%EC%9E%90%EB%A3%8C">참고자료</h1>
+                            <h2 id="api-%EB%AC%B8%EC%84%9C">API 문서</h2>
+                            <ul>
+                                <li>Korean : <a href="openapi-1.2.4-ko.html" target="_blank">openapi-1.2.4-ko</a></li>
+                                <li>Japanese : <a href="openapi-1.2.4-jp.html" target="_blank">openapi-1.2.4-jp</a></li>
+                                <li>Player SDK : <a href="sdk-1.1.1.html" target="_blank">Player SDK Guide</a></li>
+                            </ul-->
+                            <h2 id="%ED%86%A0%ED%81%B0-%EA%B4%80%EB%A6%AC-%EC%A0%95%EC%B1%85">토큰 관리 정책<span id="tokenPolicy"></span></h2>
+                            <ul>
+                                <li>새로 발급 또는 갱신된 토큰의 만료일(expire date)은 처리된 시간으로부터 10일 이후 입니다.</li>
+                                <li>기존 토큰의 만료일은 현재 시점으로부터 1분 뒤로 변경이 됩니다. (만료일이 1분 보다 짧은 경우 갱신하지 않습니다.)</li>
+                            </ul>
+                        </div></div><!-- end ngIf: !$ctrl.readOnly --><!-- end ngSwitchWhen: --><!-- ngSwitchWhen: MARKDOWN --><!-- ngIf: $ctrl.readOnly --><!-- end ngSwitchWhen: --><!-- ngSwitchDefault: --></div></content-view></div><!-- end ngSwitchWhen: --><!-- ngSwitchWhen: true --></section></body-in-view><!-- ngIf: !selectedTask.data.bodyUpdatableFlag --><!-- ngIf: isSimpleViewMode --></div>
+        <div id="start_content_jp" class="dooray-contents markdown" style="display:none;" aria-invalid="false">
+            <div class="tui-editor-contents">
+                <h1 id="%E4%BA%8B%E5%89%8D%E6%BA%96%E5%82%99">事前準備</h1>
+            <h2 id="id%E7%99%BB%E9%8C%B2">ID登録</h2>
+            <p>Open APIを使用するトースカムBiz IDを作成します。</p>
             <ul>
-                <li>회원가입 : <a href="https://bizcam.toast.com/" target="_blank">https://bizcam.toast.com/</a></li>
+                <li>会員登録：<a href="https://bizcam.toast.com/" target="_blank">https://bizcam.toast.com/</a></li>
             </ul>
-            <h2 id="%EB%B2%A4%EB%8D%94%EC%95%84%EC%9D%B4%EB%94%94(vendorid)-%EB%B0%9B%EA%B8%B0">벤더아이디(vendorId) 받기</h2>
-            <p>토스트캠Biz(<a href="mailto:dl_toastcamcs@nhn.com" target="_blank">dl_toastcamcs@nhn.com</a>)에 Open API 사용 요청을 하여, 벤더아이디(vendorId)를 전달 받습니다.<br>
-                사용 요청시 아래 정보를 포함하여 전달해주세요.</p>
+            <h2 id="%E3%83%99%E3%83%B3%E3%83%80%E3%83%BCid">ベンダーID</h2>
+            <p>トースカムBiz(<a href="mailto:dl_toastcamcs@nhn.com" target="_blank">dl_toastcamcs@nhn.com</a>) から Open API 使用するために、ベンダーID(vendorId) を申請します。<br>
+                使用時に以下の情報も送ってください。</p>
             <ul>
-                <li>토스트캠Biz 계정 ID</li>
-                <li>인증 서버(Auth server) NAT IP 주소</li>
+                <li>トースカムBiz ID ID</li>
+                <li>認証 サーバー(Auth server) NAT IP アドレス</li>
             </ul>
-            <h2 id="%EC%84%9C%EB%B9%84%EC%8A%A4-%EA%B5%AC%EC%A1%B0">서비스 구조</h2>
-            <p>토스트캠에서 제안하는 서비스 구조는 아래와 같습니다.<br>
+            <h2 id="%E3%82%B5%E3%83%BC%E3%83%93%E3%82%B9%E6%A7%8B%E9%80%A0">サービス構造</h2>
+            <p>トースカムカムから提供するサービス構造は以下のようになります。<br>
                 <img src="./image-server1.png" alt="image.png"></p>
-            <h3 id="toastcam-%EC%A0%9C%EA%B3%B5-%ED%99%98%EA%B2%BD">Toastcam 제공 환경</h3>
+            <h3 id="toastcam-%E6%8F%90%E4%BE%9B%E7%92%B0%E5%A2%83">Toastcam 提供環境</h3>
             <ul>
-                <li>Open API 서버</li>
+                <li>Open API サーバー</li>
             </ul>
-            <h3 id="%EA%B3%A0%EA%B0%9D%EC%82%AC-%EC%9D%B8%ED%94%84%EB%9D%BC-%EC%9A%94%EA%B5%AC%EC%82%AC%ED%95%AD">고객사 인프라 요구사항</h3>
+            <h3 id="%E9%A1%A7%E5%AE%A2%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E3%82%B9%E3%83%9A%E3%83%83%E3%82%AF">顧客インフラスペック</h3>
             <ul>
-                <li>인증 DB(Auth DB) : 인증용 토큰정보를 관리할 DB 입니다. <strong>토스트캠Biz 계정</strong>을 기준으로 아래 정보를 관리 할 수 있도록 합니다.
+                <li>認証 DB(Auth DB) : 認証用トークン情報を管理するDB です。<strong>トースカムカムBiz ID</strong>を基準で以下の情報管理できるようにします。
                     <ul>
-                        <li>토큰(token)</li>
-                        <li>만료일 (expirationTime)</li>
+                        <li>トークン(token)</li>
+                        <li>満了日 (expirationTime)</li>
                     </ul>
                 </li>
-                <li>인증 서버(Auth Server) : <a href="#authTokenGuide" target="">인증 토큰 관리</a>용 배치 서버 입니다. 배치 주기는 <a href="#tokenPolicy" target="">토큰 관리 정책</a> 에 따라 설정하도록 합니다.</li>
-                <li>터널링 서버(Tunneling Server) : Player SDK와 Open API 사이에서 <a href="#tunnelingGuide" target="">터널링 처리</a>를 합니다.</li>
-                <li>Player SDK : Video Player SDK입니다. Open API와 연결되는 터널링 서버 API Path를 옵션으로 설정해야 합니다.</li>
+                <li>認証サーバー(Auth Server)：<a href="#authTokenGuideJP" target="">認証トークン管理</a>用バッチサーバーです。・バッチの周期は <a href="#tokenPolicyJP" target="">トークン管理ポリシー</a> により設定されます。</li>
+                <li>トンネリングサーバー(Tunneling Server)：Player SDK와 Open API 間いに <a href="#tunnelingGuideJP" target="">トンネリング処理</a>をします。</li>
+                <li>Player SDK : WebRTC Player SDKです。Open APIとつながっているトンネリングサーバー API Pathをオプションで設定しなければなりません。</li>
             </ul>
-            <h1 id="%EC%9D%B8%EC%A6%9D-%ED%86%A0%ED%81%B0-%EA%B4%80%EB%A6%AC">인증 토큰 관리<span id="authTokenGuide"></span></h1>
+            <h1 id="%E8%AA%8D%E8%A8%BC%E3%83%88%E3%83%BC%E3%82%AF%E3%83%B3%E7%AE%A1%E7%90%86">認証トークン管理<span id="authTokenGuideJP"></span></h1>
             <hr>
-            <p><strong>토큰 정보를 Auth DB에 저장하고, 토큰을 주기적으로 갱신하여 토큰이 만료되지 않도록 합니다.</strong><br>
-                <strong>갱신 주기는 <a href="#tokenPolicy" target="">토큰 관리 정책</a>을 참고하여 정하도록 합니다.</strong></p>
+            <p><strong>トークン情報を Auth DBに保存して、トークンを周期的に更新してトークンに満了しないようにします。</strong><br>
+                <strong>更新周期は <a href="#tokenPolicyJP" target="">トークン管理ポリシー</a> を参照して決めます。</strong></p>
             <hr>
             <p><img src="./image-server2.png" alt="image.png"></p>
             <ol>
-                <li>토큰 조회
+                <li>トークン参照
                     <ul>
-                        <li>Auth DB에 저장된 토큰이 있는지 조회합니다.</li>
+                        <li>Auth DB に保存されたトークンがあるか参照します。</li>
                     </ul>
                 </li>
-                <li>토큰 발급 및 갱신 요청
+                <li>トークン発行及び更新リクエスト
                     <ul>
-                        <li>Auth DB에 저장된 토큰이 없는 경우, 신규 발급요청을 합니다.
+                        <li>Auth DBに保存されたトークンがない場合、新規発行リクエストをします。
                             <ul>
                                 <li>Korean : <a href="/openapi/openapi-1.2.4-ko.html#api-Auth-createTokenUsingPOST" target="_blank">openapi-1.2.4-ko#api-Auth-createTokenUsingPOST</a></li>
                                 <li>Japanese : <a href="/openapi/openapi-1.2.4-jp.html#api-Auth-createTokenUsingPOST" target="_blank">openapi-1.2.4-jp#api-Auth-createTokenUsingPOST</a></li>
                             </ul>
                         </li>
-                        <li>저장된 토큰이 있는 경우 갱신요청을 합니다.
+                        <li>保存されたトークンがある場合更新リクエストをします。
                             <ul>
                                 <li>Korean : <a href="/openapi/openapi-1.2.4-ko.html#api-Auth-refreshTokenUsingGET" target="_blank">openapi-1.2.4-ko#api-Auth-refreshTokenUsingGET</a></li>
                                 <li>Japanese : <a href="/openapi/openapi-1.2.4-jp.html#api-Auth-refreshTokenUsingGET" target="_blank">openapi-1.2.4-jp#api-Auth-refreshTokenUsingGET</a></li>
@@ -145,60 +276,71 @@
                         </li>
                     </ul>
                 </li>
-                <li>Auth DB에 갱신
+                <li>Auth DBに更新
                     <ul>
-                        <li>2)의 요청결과를 Auth DB에 업데이트 합니다.</li>
+                        <li>
+                            <ol start="2">
+                                <li>のリクエスト結果を Auth DBにアップデートします。</li>
+                            </ol>
+                        </li>
                     </ul>
                 </li>
             </ol>
-            <h1 id="%ED%84%B0%EB%84%90%EB%A7%81-%EC%B2%98%EB%A6%AC">터널링 처리<span id="tunnelingGuide"></span></h1>
+            <h1 id="%E3%83%88%E3%83%B3%E3%83%8D%E3%83%AA%E3%83%B3%E3%82%B0%E5%87%A6%E7%90%86">トンネリング処理<span id="tunnelingGuideJP"></span></h1>
             <hr>
-            <p><strong>Player SDK와 Open API 사이에서 터널링 역할을 하는 서버를 두도록 합니다. 터널링시 인증 토큰(token)을 헤더에 포함시켜 전달합니다.</strong></p>
+            <p><strong>Player SDKと Open API 間でトンネリングを行うサーバーを設置します。トンネリング時認証 トークン(token)をヘッダを含めて転送します。</strong></p>
             <hr>
             <p><img src="./image-server3.png" alt="image.png"></p>
             <ol>
-                <li>호출 요청
+                <li>呼出しリクエスト
                     <ul>
-                        <li>Player SDK으로부터 Open API 호출 요청이 들어옵니다.</li>
+                        <li>Player SDKから Open API 呼出しリクエストがきます。</li>
                     </ul>
                 </li>
-                <li>토큰 조회
+                <li>トークン参照
                     <ul>
-                        <li>Auth DB에 저장된 토큰 정보를 가져옵니다.</li>
+                        <li>Auth DBに保存されたトークン情報を読込みます。</li>
                     </ul>
                 </li>
-                <li>서비스 Open API 호출
+                <li>サービス Open API 呼出し
                     <ul>
-                        <li>1)의 요청정보에 2) 에서 조회한 인증 토큰(token) 정보를 헤더에 추가 하여 Open API를 호출합니다.<br>
-                            아래는 영상재생정보 조회 API 호출 예시입니다. 토큰값을 x-access-token 헤더에 추가하였습니다.</li>
+                        <li>
+                            <ol>
+                                <li>のリクエスト情報に 2) から参照した認証トークン(token) 情報をヘッダに追加して Open APIを呼出しをします。<br>
+                                    以下は映像再生情報参照 API 呼出し事例です。トークン値は x-access-token ヘッダに追加しました。</li>
+                            </ol>
+                        </li>
                     </ul>
                 </li>
             </ol>
-            <pre><code>curl -X GET "https://openapi.toastcam.com/service/v1/cameras/AAAAA3008947/play" -H "x-access-token:토큰값"
+            <pre><code>curl -X GET "https://openapi.toastcam.com/service/v1/cameras/AAAAA3008947/play" -H "x-access-token:トークン値"
 </code></pre>
             <ol start="4">
-                <li>Open API 로부터 응답을 받습니다.</li>
-                <li>클라이언트<a href="sdk-1.1.1.html" target="_blank">(Player SDK)</a>에 응답정보를 전달합니다.</li>
+                <li>Open API からレスポンスします。</li>
+                <li>クライアント<a href="sdk-1.1.1.html" target="_blank">(Player SDK)</a>からレスポンス情報を転送します。</li>
             </ol>
-            <!--h1 id="%EC%B0%B8%EA%B3%A0%EC%9E%90%EB%A3%8C">참고자료</h1>
-            <h2 id="api-%EB%AC%B8%EC%84%9C">API 문서</h2>
+            <!--h1 id="%E5%8F%82%E7%85%A7%E8%B3%87%E6%96%99">参照資料</h1>
+            <h2 id="api-%E3%83%89%E3%82%AD%E3%83%A5%E3%83%A1%E3%83%B3%E3%83%88">API ドキュメント</h2>
             <ul>
-                <li>Korean : <a href="openapi-1.2.4-ko.html" target="_blank">openapi-1.2.4-ko</a></li>
-                <li>Japanese : <a href="openapi-1.2.4-jp.html" target="_blank">openapi-1.2.4-jp</a></li>
-                <li>Player SDK : <a href="sdk-1.1.1.html" target="_blank">Player SDK Guide</a></li>
+                <li>Korean : <a href="/openapi/openapi-1.2.4-ko.html" target="_blank">openapi-1.2.4-ko</a></li>
+                <li>Japanese : <a href="/openapi/openapi-1.2.4-jp.html" target="_blank">openapi-1.2.4-jp</a></li>
+                <li>Player SDK : <a href="https://nhnent.dooray.com/wiki/2352868614264470871/2667915592122754712" target="_blank">Player SDK Guide</a></li>
             </ul-->
-            <h2 id="%ED%86%A0%ED%81%B0-%EA%B4%80%EB%A6%AC-%EC%A0%95%EC%B1%85">토큰 관리 정책<span id="tokenPolicy"></span></h2>
+            <h2 id="%E3%83%88%E3%83%BC%E3%82%AF%E3%83%B3%E7%AE%A1%E7%90%86%E3%83%9D%E3%83%AA%E3%82%B7%E3%83%BC">トークン管理ポリシー<span id="tokenPolicyJP"></span></h2>
             <ul>
-                <li>새로 발급 또는 갱신된 토큰의 만료일(expire date)은 처리된 시간으로부터 10일 이후 입니다.</li>
-                <li>기존 토큰의 만료일은 현재 시점으로부터 1분 뒤로 변경이 됩니다. (만료일이 1분 보다 짧은 경우 갱신하지 않습니다.)</li>
+                <li>新規発行または更新されたトークンの満了日(expire date)は処理された時間から10日以降です。</li>
+                <li>既存トークンの満了日は現在時点から1分後更新されます。（満了日が1分より短い場合は更新しません。)</li>
             </ul>
-        </div></div><!-- end ngIf: !$ctrl.readOnly --><!-- end ngSwitchWhen: --><!-- ngSwitchWhen: MARKDOWN --><!-- ngIf: $ctrl.readOnly --><!-- end ngSwitchWhen: --><!-- ngSwitchDefault: --></div></content-view></div><!-- end ngSwitchWhen: --><!-- ngSwitchWhen: true --></section></body-in-view><!-- ngIf: !selectedTask.data.bodyUpdatableFlag --><!-- ngIf: isSimpleViewMode --></div>
+        </div></div>
     </div>
 
     <div id="doc_content" class="content_wrap" style="display:none;">
-        <h2 class="main_tit">Documentation</h2>
+        <h3 class="main_tit">
+            <span class="top_tit">Open API > </span>
+            <span class="main_sub_tit">Documentation</span>
+        </h3>
         <div class="contents doc_cont_wrap" style="margin-top:52px;">
-            <h2>Open API</h2>
+            <h2>REST API</h2>
             <div class="line"></div>
             <ul>
                 <li>
@@ -219,7 +361,10 @@
     </div>
 
     <div id="download_content" class="content_wrap" style="display:none;">
-        <h2 class="main_tit">Download</h2>
+        <h3 class="main_tit">
+            <span class="top_tit">Open API > </span>
+            <span class="main_sub_tit">Download</span>
+        </h3>
         <div class="contents doc_cont_wrap" style="margin-top:52px;">
             <h2>Player SDK</h2>
             <div class="line"></div>
@@ -232,6 +377,8 @@
     </div>
 
     <script>
+        var language = navigator.language.indexOf('ko') != -1 ? 'ko' : 'ja';
+        document.getElementById('langSelect').value = language;
 
         function changePage (pageName) {
             var elStart = document.getElementById('start_menu'),
@@ -239,7 +386,9 @@
                 elDownload = document.getElementById('download_menu'),
                 elStartCon = document.getElementById('start_content'),
                 elDocCon = document.getElementById('doc_content'),
-                elDownloadCon = document.getElementById('download_content');
+                elDownloadCon = document.getElementById('download_content'),
+                elStartConKR = document.getElementById('start_content_kr'),
+                elStartConJP = document.getElementById('start_content_jp');
 
             elStart.className = '';
             elDoc.className = '';
@@ -247,6 +396,8 @@
             elStartCon.style.display = 'none';
             elDocCon.style.display = 'none';
             elDownloadCon.style.display = 'none';
+            elStartConKR.style.display = 'none';
+            elStartConJP.style.display = 'none';
 
             if (pageName.indexOf('documentation') !== -1) {
                 elDoc.className = 'on';
@@ -257,6 +408,13 @@
             } else {
                 elStart.className = 'on';
                 elStartCon.style.display = 'block';
+                if (language === 'ko') {
+                    elStartConKR.style.display = 'block';
+                    elStartConJP.style.display = 'none';
+                } else {
+                    elStartConKR.style.display = 'none';
+                    elStartConJP.style.display = 'block';
+                }
             }
         }
 
@@ -266,10 +424,24 @@
         };
 
         function clickOpenAPI (version) {
-            if (navigator.language.indexOf('ko') != -1) {
+            if (language === 'ko') {
                 window.open('openapi-' + version + '-ko.html', 'openapi');
             } else {
                 window.open('openapi-' + version + '-jp.html', 'openapi');
+            }
+        }
+
+        function changeLanguage () {
+            language = document.getElementById('langSelect').value;
+            var elStartConKR = document.getElementById('start_content_kr'),
+                elStartConJP = document.getElementById('start_content_jp');
+
+            if (language === 'ko') {
+                elStartConKR.style.display = 'block';
+                elStartConJP.style.display = 'none';
+            } else {
+                elStartConKR.style.display = 'none';
+                elStartConJP.style.display = 'block';
             }
         }
 
