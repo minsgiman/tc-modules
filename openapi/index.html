@@ -90,6 +90,7 @@
             <li id="start_menu"><a href="#starter">Getting Started</a></li>
             <li id="doc_menu"><a href="#documentation">Documentation</a></li>
             <li id="download_menu"><a href="#download">Download</a></li>
+            <li id="demo_menu"><a href="https://dev.toastcam.com:8443/playdemo.html" target="_blank">Demo</a></li>
             <li class="no_line">
                 <select id="langSelect" onchange="changeLanguage()" style="height:26px;width:100px;font-size:14px;">
                     <option value="ko">Korean</option>
@@ -376,6 +377,16 @@
         </div>
     </div>
 
+    <!--div id="demo_content" class="content_wrap" style="display:none;">
+        <h3 class="main_tit">
+            <span class="top_tit">Open API > </span>
+            <span class="main_sub_tit">Demo</span>
+        </h3>
+        <div class="contents doc_cont_wrap" style="margin-top:52px;">
+            <iframe width="100%" height="100%" src="./demo/index.html"></iframe>
+        </div>
+    </div-->
+
     <script>
         var language = navigator.language.indexOf('ko') != -1 ? 'ko' : 'ja';
         document.getElementById('langSelect').value = language;
@@ -384,17 +395,21 @@
             var elStart = document.getElementById('start_menu'),
                 elDoc = document.getElementById('doc_menu'),
                 elDownload = document.getElementById('download_menu'),
+                //elDemo = document.getElementById('demo_menu'),
                 elStartCon = document.getElementById('start_content'),
                 elDocCon = document.getElementById('doc_content'),
                 elDownloadCon = document.getElementById('download_content'),
+                //elDemoCon = document.getElementById('demo_content'),
                 elStartConKR = document.getElementById('start_content_kr'),
                 elStartConJP = document.getElementById('start_content_jp');
 
             elStart.className = '';
             elDoc.className = '';
             elDownload.className = '';
+            //elDemo.className = '';
             elStartCon.style.display = 'none';
             elDocCon.style.display = 'none';
+            //elDemoCon.style.display = 'none';
             elDownloadCon.style.display = 'none';
             elStartConKR.style.display = 'none';
             elStartConJP.style.display = 'none';
