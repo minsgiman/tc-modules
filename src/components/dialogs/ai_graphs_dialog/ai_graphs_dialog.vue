@@ -6,12 +6,12 @@
                     <h4>{{txtMap.title}}</h4>
                     <div class="ai_total_wrap">
                         <span>{{txtMap.manTotal}} </span>
-                        <span class="count_ai emphasis">20</span>
+                        <span class="count_ai emphasis">{{aiCountSummary.totalInPeopleZone > 0 ? aiCountSummary.totalInPeopleZone : '-'}}</span>
                         <span>{{txtMap.manCount}}, </span>
                         <span>{{txtMap.tableTotal}} </span>
-                        <span class="count_ai emphasis">3</span>
-                        <span class="count_ai">/6 </span>
-                        <span>(02.06. 09:41:10)</span>
+                        <span class="count_ai emphasis">{{aiCountSummary.useTableCount > 0 ? aiCountSummary.useTableCount : '-'}}</span>
+                        <span class="count_ai">/{{aiCountSummary.allTableCount > 0 ? aiCountSummary.allTableCount : '-'}} </span>
+                        <span v-show="aiCountSummary.updateDateStr">({{aiCountSummary.updateDateStr}})</span>
                     </div>
                     <div class="ai_date_area">
                         <div class="ai_date_select_wrap">
@@ -69,6 +69,7 @@
         @Prop() pRequestShopChart!: any;
 
         chartData: any = null;
+        aiCountSummary: any = {};
         startDate: Date = new Date();
         endDate: Date = new Date();
         mode: string = 'hourly';
@@ -99,6 +100,10 @@
             if (this.$el.parentNode) {
                 this.$el.parentNode.removeChild(this.$el);
             }
+        }
+
+        updateAiCountSummary(aiCountSummary: any) {
+            this.aiCountSummary = aiCountSummary ? aiCountSummary : {};
         }
 
         checkIsToday(): boolean {
