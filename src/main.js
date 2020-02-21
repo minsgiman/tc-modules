@@ -3,8 +3,8 @@ import player from './components/player/light_webrtc_main';
 let playerObj = new player({
     serialNo: 'BC8AA30000B1',
     elementId : 'playerwrap',
-    startTime : 1580792700000,
-    endTime : 1580799313422,
+    startTime : 1581925202062,
+    endTime : 1581925402062,
     cvrJumpInterval : 5000,
     useControl : true, //default: false
     showTime : true,  //default : false
