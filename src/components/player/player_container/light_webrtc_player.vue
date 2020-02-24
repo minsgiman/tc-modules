@@ -100,6 +100,9 @@
                 timeoutId : null,
                 httpCredRequest : null,
                 remoteVideoContainer : null,
+                gatherCheckInterval : null,
+                localSdp : null,
+                candidateList : [],
                 webRTCStatusEnum : {
                     EVENT_STREAM_CONNECTING : 'stream_connecting',
                     EVENT_STREAM_CONNECTED : 'stream_connected',
@@ -236,6 +239,67 @@
                 this.httpCredRequest.send();
             },
 
+            gatheringStatusChecker : function () {
+                if (!this.currentWebRTCPeerId) {
+                    return;
+                }
+                const peer = this.peerDatabase[this.currentWebRTCPeerId];
+                if (peer) {
+                    if (peer.pc.iceGatheringState === 'complete') {
+                        clearInterval(this.gatherCheckInterval);
+                        const requests = [];
+                        this.candidateList.forEach((candidate) => {
+                            requests.push(fetch(this.candidateUrl, {
+                                method: 'POST',
+                                mode: 'cors',
+                                body: JSON.stringify({
+                                    "id": this.sessionId,
+                                    "candidate": encodeURIComponent(candidate)
+                                }),
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                    //'Content-Type': 'application/x-www-form-urlencoded',
+                                },
+                            }));
+                        });
+                        this.candidateList = [];
+                        Promise.all(requests).then(allResponses => {
+                            var sendData = {
+                                "id": this.sessionId,
+                                "url": encodeURIComponent(this.url),
+                                "relay": {
+                                    "username": this.webRTCConfig.peerConnectionConfig.iceServers[0].username,
+                                    "credential": this.webRTCConfig.peerConnectionConfig.iceServers[0].credential,
+                                    "url": encodeURIComponent(this.webRTCConfig.peerConnectionConfig.iceServers[0].urls)
+                                },
+                                "sdp": encodeURIComponent(this.localSdp)
+                            };
+                            fetch(this.offerUrl, {
+                                method: 'POST',
+                                mode: 'cors',
+                                body: JSON.stringify(sendData),
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                    //'Content-Type': 'application/x-www-form-urlencoded',
+                                },
+                            })
+                            .then(response => response.json())
+                            .catch(error => {
+                                this.webRTCStatus = this.webRTCStatusEnum.EVENT_ERROR_WEBRTC_SERVER;
+                                this.$emit('playerStatusChanged', this.webRTCStatus);
+                            })
+                            .then(response => {
+                                const answerObj = new RTCSessionDescription({
+                                    type: 'answer',
+                                    sdp: response.sdp
+                                });
+                                peer.pc.setRemoteDescription(answerObj, () => {}, error);
+                            });
+                        });
+                    }
+                }
+            },
+
             addPeer : function (remoteId) {
                 const that = this;
                 const peer = new Peer(this.webRTCConfig.peerConnectionConfig, this.webRTCConfig.peerConnectionConstraints);
@@ -299,35 +363,16 @@
                 };
                 peer.pc.onicecandidate = (event) => {
                     if (event.candidate) {
-                        var bodyStr = jsonArrayToUrl({
-                            "id":this.sessionId,
-                            "candidate": encodeURIComponent(event.candidate.candidate)
-                        });
-                        if (bodyStr[bodyStr.length - 1] === '&') {
-                            bodyStr = bodyStr.substring(0, bodyStr.length - 1);
+                        if (that.candidateList.length < 2) {
+                            that.candidateList.push(event.candidate.candidate);
+                            if (that.candidateList.length === 1) { // first candidate push
+                                clearInterval(that.gatherCheckInterval);
+                                that.gatherCheckInterval = setInterval(that.gatheringStatusChecker.bind(that), 500);
+                            }
                         }
-                        fetch(this.candidateUrl, {
-                            method: 'POST',
-                            mode: 'cors',
-                            body: JSON.stringify({
-                                "id":this.sessionId,
-                                "candidate": encodeURIComponent(event.candidate.candidate)
-                            }),
-                            headers: {
-                                'Content-Type': 'application/json'
-                                //'Content-Type': 'application/x-www-form-urlencoded',
-                            },
-                        })
-                        .then(response => response.json())
-                        .catch(error => {
-                            that.webRTCStatus = that.webRTCStatusEnum.EVENT_ERROR_WEBRTC_SERVER;
-                            that.$emit('playerStatusChanged', that.webRTCStatus);
-                        })
-                        .then(response => {});
                     }
                 };
                 this.peerDatabase[remoteId] = peer;
-
                 return peer;
             },
 
@@ -354,41 +399,7 @@
 
                 pc.createOffer((sessionDescription) => {
                         pc.setLocalDescription(sessionDescription);
-                        var sendData = {
-                            "id": that.sessionId,
-                            "url": encodeURIComponent(that.url),
-                            "relay": {
-                                "username": that.webRTCConfig.peerConnectionConfig.iceServers[0].username,
-                                "credential": that.webRTCConfig.peerConnectionConfig.iceServers[0].credential,
-                                "url": encodeURIComponent(that.webRTCConfig.peerConnectionConfig.iceServers[0].urls)
-                            },
-                            "sdp": encodeURIComponent(sessionDescription.sdp)
-                        };
-                        var bodyStr = jsonArrayToUrl(sendData);
-                        if (bodyStr[bodyStr.length - 1] === '&') {
-                            bodyStr = bodyStr.substring(0, bodyStr.length - 1);
-                        }
-                        fetch(this.offerUrl, {
-                            method: 'POST',
-                            mode: 'cors',
-                            body: JSON.stringify(sendData),
-                            headers: {
-                                'Content-Type': 'application/json'
-                                //'Content-Type': 'application/x-www-form-urlencoded',
-                            },
-                        })
-                        .then(response => response.json())
-                        .catch(error => {
-                            that.webRTCStatus = that.webRTCStatusEnum.EVENT_ERROR_WEBRTC_SERVER;
-                            that.$emit('playerStatusChanged', that.webRTCStatus);
-                        })
-                        .then(response => {
-                            var answerObj = new RTCSessionDescription({
-                                type: 'answer',
-                                sdp: response.sdp
-                            });
-                            pc.setRemoteDescription(answerObj, () => {}, error);
-                        });
+                        that.localSdp = sessionDescription.sdp;
                     },
                     error,
                     constraints
