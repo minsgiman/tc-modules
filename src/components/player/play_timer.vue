@@ -36,7 +36,7 @@
             clearInterval(this.timer);
             this.timer = setInterval(() => {
 
-                if(this.playBtnStatus == false){
+                if(this.isPlaying == false){
                     return;
                 }
 
@@ -160,7 +160,7 @@
                         break;
                 }
 
-                if(this.playBtnStatus == false){
+                if(this.isPlaying == false){
                     return;
                 }
                 store.dispatch('CURRENT_TIME_CHANGE', currentTime);
