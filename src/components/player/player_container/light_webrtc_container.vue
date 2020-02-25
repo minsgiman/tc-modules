@@ -1,7 +1,7 @@
 <template>
     <div class="light_container">
         <div class="player_cam" :id="varPlayerId"></div>
-        <div v-show="useControl && isShowControl" class="controller_wrap" @click="hideControl()">
+        <div v-show="useControl && isShowControl && playStatus !== E_PLAY_STATUS.not_connected" class="controller_wrap" @click="hideControl()">
             <div class="dimmed"></div>
             <div class="btns_wrap">
                 <div class="btn_cont back_cont">
@@ -17,7 +17,7 @@
                 </div>
             </div>
         </div>
-        <div v-show="showTime" id="time_wrap" class="time_wrap">
+        <div v-show="showTime && playStatus !== E_PLAY_STATUS.not_connected" id="time_wrap" class="time_wrap">
             <div class="time_dim"></div>
             <div class="time_str_wrap">
                 <div class="time_str">
@@ -26,12 +26,13 @@
                 </div>
             </div>
         </div>
-        <div class="error_status_wrap" v-show="(playStatus === E_PLAY_STATUS.no_cvr) || (playStatus === E_PLAY_STATUS.not_support)">
+        <div class="error_status_wrap" v-show="(playStatus === E_PLAY_STATUS.no_cvr) || (playStatus === E_PLAY_STATUS.not_support) || (playStatus === E_PLAY_STATUS.not_connected)">
             <div class="error_mid_wrap">
                 <div class="player_off_black">
                     <div></div>
                     <p class="tcam_light_play_error_desc" v-show="(playStatus === E_PLAY_STATUS.no_cvr)">{{language === 'ja' ? '保存された映像がありません。' :  '저장된 영상이 없습니다.'}}</p>
                     <p class="tcam_light_play_error_desc" v-show="(playStatus === E_PLAY_STATUS.not_support)">{{language === 'ja' ? '対応していないブラウザー' : '지원하지 않는 브라우저 입니다.'}}</p>
+                    <p class="tcam_light_play_error_desc" v-show="(playStatus === E_PLAY_STATUS.not_connected)">{{language === 'ja' ? 'カメラの接続が途切れました。' : '카메라의 접속이 끊겼습니다.'}}</p>
                 </div>
             </div>
         </div>
@@ -138,7 +139,7 @@
     export default {
         name: 'playerContainer',
         props: ['serialNo', 'elementId', 'startTime', 'endTime', 'cvrJumpInterval', 'useControl', 'showTime', 'getTokenUrl',
-            'credentialUrl', 'candidateUrl', 'getTimelineUrl', 'offerUrl', 'playEventHandler'],
+            'credentialUrl', 'candidateUrl', 'getTimelineUrl', 'offerUrl', 'getCameraUrl', 'playEventHandler'],
         computed: {
         },
         data: function () {
@@ -150,14 +151,16 @@
                     server_error : 3,
                     pause : 4,
                     no_cvr : 5,
-                    not_support : 6
+                    not_support : 6,
+                    not_connected : 7
                 },
                 E_PLAY_EVENT : {
                     start : 'start',
                     finish : 'finish',
                     error : 'error',
                     webrtc_not_support_browser : 'webrtc_not_support_browser',
-                    no_cvr : 'no_cvr'
+                    no_cvr : 'no_cvr',
+                    not_connected : 'not_connected'
                 },
                 player : null,
                 playTimeoutId : null,
@@ -176,6 +179,7 @@
                 defCredentialUrl : '/rtc/credential',
                 defCandidateUrl : '/rtc/candidate',
                 defOfferUrl : '/rtc/offer',
+                defGetCameraUrl : '/biz/cameras/:serialNo',
                 isCvrLoading : false,
                 cvrData: {
                     startTime: 0,
@@ -318,13 +322,31 @@
             },
 
             playStart : function (cameraId, cvrHostPort, token) {
-                if (this.playTime) {
+                if (this.playTime) { // cvr play
                     this.player.play(cameraId, cvrHostPort + '/flvplayback/' + cameraId + '?token=' + token + '&time=' + this.playTime);
                     this.startPlayTimer();
-                } else {
-                    this.player.play(cameraId, cvrHostPort + '/flvplayback/' + cameraId + '?token=' + token);
-                    this.playTime = new Date().valueOf();
-                    this.startLiveTimer();
+                } else { // live play
+                    this.requestCamera((resObj) => {
+                        if (resObj && resObj.code === 0) {
+                            if (((resObj.result.recordType === 'live' || resObj.result.recordType === 'event') && (resObj.result.controlStatus !== 'on')) ||
+                                ((resObj.result.recordType !== 'live' && resObj.result.recordType !== 'event') && (resObj.result.controlStatus !== 'on' || resObj.result.streamStatus !== 'on'))) {
+                                this.playStatus = this.E_PLAY_STATUS.not_connected;
+                                if (this.playEventHandler) {
+                                    this.playEventHandler({status: this.E_PLAY_EVENT.not_connected});
+                                }
+                                return;
+                            }
+                            this.player.play(cameraId, cvrHostPort + '/flvplayback/' + cameraId + '?token=' + token);
+                            this.playTime = new Date().valueOf();
+                            this.startLiveTimer();
+                        } else {
+                            this.playStatus = this.E_PLAY_STATUS.not_connected;
+                            if (this.playEventHandler) {
+                                this.playEventHandler({status: this.E_PLAY_EVENT.not_connected});
+                            }
+                            return;
+                        }
+                    });
                 }
             },
 
@@ -357,6 +379,22 @@
                 }
                 event.preventDefault();
                 event.stopPropagation();
+            },
+
+            requestCamera : function (callback) {
+                const httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = () => {
+                    if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                        if (httpRequest.status === 200) {
+                            const resObj = JSON.parse(httpRequest.responseText);
+                            callback(resObj);
+                        } else {
+                            callback(null);
+                        }
+                    }
+                };
+                httpRequest.open('GET', setPathParams((this.getCameraUrl ? this.getCameraUrl : this.defGetCameraUrl), {serialNo : this.serialNo}));
+                httpRequest.send();
             },
 
             requestTimeline : function (callback) {

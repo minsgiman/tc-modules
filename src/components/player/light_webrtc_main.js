@@ -24,6 +24,7 @@ class lightPlayer {
                 credentialUrl: param.credentialUrl,
                 candidateUrl: param.candidateUrl,
                 getTimelineUrl: param.getTimelineUrl,
+                getCameraUrl: param.getCameraUrl,
                 offerUrl: param.offerUrl,
                 playEventHandler: param.playEventHandler
             }
