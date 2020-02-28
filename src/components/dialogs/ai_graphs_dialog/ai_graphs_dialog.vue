@@ -20,7 +20,7 @@
                             </div>
                             <div id="calendarContainer" class="calendar_open_area"></div>
                             <span class="date_control_wrap">
-                                <a @click="goPrev" class="prev_btn"></a>
+                                <a @click="goPrev" class="prev_btn" :class="{disabled: isPrevDisable}"></a>
                                 <span class="select_day">{{periodStr}} {{mode === 'hourly' && isToday ? txtMap.today : ''}}</span>
                                 <a @click="goNext" class="next_btn" :class="{disabled: isToday}"></a>
                             </span>
@@ -64,6 +64,7 @@
     export default class AiGraphsDialog extends Vue {
         @Prop() dlgStyle!: any;
         @Prop() txtMap!: any;
+        @Prop() shopRegdate!: number;
         //@Prop() aiCameraList!: ICameraInfo[];
         //@Prop() pRequestCamCharts!: any;
         @Prop() pRequestShopChart!: any;
@@ -75,6 +76,7 @@
         mode: string = 'hourly';
         //camChartPromiseMap: any = {};
         isToday: boolean = true;
+        isPrevDisable: boolean = false;
         periodStr: string = '';
         isLoading: boolean = false;
         datePicker: any = null;
@@ -109,6 +111,11 @@
         checkIsToday(): boolean {
             const today = new Date();
 
+            if (this.mode === 'daily') {
+                this.isPrevDisable = (this.shopRegdate > (this.endDate.valueOf() - ((24 * 60 * 60 * 1000) * 6)));
+            } else {
+                this.isPrevDisable = (this.shopRegdate > this.startDate.valueOf());
+            }
             if (today <= this.endDate || (today.getFullYear() === this.endDate.getFullYear() && today.getMonth() === this.endDate.getMonth() && today.getDate() === this.endDate.getDate())) {
                 return true;
             } else {
@@ -134,6 +141,7 @@
                 field: document.getElementById('calendarBtn'),
                 container: document.getElementById('calendarContainer'),
                 format: format,
+                minDate: new Date(this.shopRegdate),
                 maxDate: new Date(),
                 defaultDate: that.endDate ? that.endDate : new Date(),
                 position: 'bottom right',
@@ -179,10 +187,16 @@
 
         goPrev() {
             if (this.mode === 'daily') {
+                if (this.shopRegdate > (this.endDate.valueOf() - ((24 * 60 * 60 * 1000) * 6))) {
+                    return;
+                }
                 this.startDate.setDate(this.startDate.getDate() - 7);
                 this.endDate.setDate(this.endDate.getDate() - 7);
                 this.periodStr = this.weeklyFormat(this.startDate, this.endDate);
             } else {
+                if (this.shopRegdate > this.startDate.valueOf()) {
+                    return;
+                }
                 this.startDate.setDate(this.startDate.getDate() - 1);
                 this.endDate.setDate(this.endDate.getDate() - 1);
                 this.periodStr = this.dateFormat(this.endDate, "YYYY.MM.DD (ddd)");
@@ -425,6 +439,9 @@
             }
             .prev_btn {
                 display:inline-block; background: url(/resources/img/btn-arrow-gay-prev.png) no-repeat; width:30px; height:30px; float:left;
+                &.disabled {
+                    background-image: url(/resources/img/btn-arrow-gray-prev-disabled.png)
+                }
             }
             .next_btn {
                 display:inline-block; background: url(/resources/img/btn-arrow-gay-next.png) no-repeat; width:30px; height:30px; float:right;

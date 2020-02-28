@@ -28,6 +28,7 @@ export interface IVideoDlgParam {
 export interface IAiGraphsDlgParam {
     elId: string,
     dlgStyle?: any,
+    shopRegdate: number,
     txtMap: any,
     pRequestShopChart: any,
     eventHandler?: (event: any) => void

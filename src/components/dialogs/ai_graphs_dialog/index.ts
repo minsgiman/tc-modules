@@ -6,6 +6,7 @@ function createDlg(param: IAiGraphsDlgParam) {
     return creator(param.elId, aiGraphsDialog, {
         dlgStyle: param.dlgStyle,
         txtMap: param.txtMap,
+        shopRegdate: param.shopRegdate,
         pRequestShopChart: param.pRequestShopChart
     }, param.eventHandler);
 }
