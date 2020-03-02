@@ -60,7 +60,7 @@
 
     export default {
         name : 'webrtcPlayer',
-        props : ['credentialUrl', 'candidateUrl', 'offerUrl', 'varPlayerId'],
+        props : ['credentialUrl', 'candidateUrl', 'offerUrl', 'varPlayerId', 'requestHeaders'],
         computed : {
         },
         data : function() {
@@ -220,6 +220,15 @@
                 }
             },
 
+            setHeaders : function (request) {
+                if (request && this.requestHeaders) {
+                    let key;
+                    for (key in this.requestHeaders) {
+                        request.setRequestHeader(key, this.requestHeaders[key]);
+                    }
+                }
+            },
+
             requestCredential : function (callback) {
                 if (this.httpCredRequest) {
                     this.httpCredRequest.abort();
@@ -236,6 +245,7 @@
                     }
                 };
                 this.httpCredRequest.open('GET', this.credentialUrl);
+                this.setHeaders(this.httpCredRequest);
                 this.httpCredRequest.send();
             },
 
@@ -245,6 +255,15 @@
                 }
                 const peer = this.peerDatabase[this.currentWebRTCPeerId];
                 if (peer) {
+                    const headers = {
+                        'Content-Type': 'application/json'
+                    };
+                    if (this.requestHeaders) {
+                        let key;
+                        for (key in this.requestHeaders) {
+                            headers[key] = this.requestHeaders[key];
+                        }
+                    }
                     if (peer.pc.iceGatheringState === 'complete') {
                         clearInterval(this.gatherCheckInterval);
                         const requests = [];
@@ -256,10 +275,7 @@
                                     "id": this.sessionId,
                                     "candidate": encodeURIComponent(candidate)
                                 }),
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                    //'Content-Type': 'application/x-www-form-urlencoded',
-                                },
+                                headers
                             }));
                         });
                         this.candidateList = [];
@@ -278,10 +294,7 @@
                                 method: 'POST',
                                 mode: 'cors',
                                 body: JSON.stringify(sendData),
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                    //'Content-Type': 'application/x-www-form-urlencoded',
-                                },
+                                headers
                             })
                             .then(response => response.json())
                             .catch(error => {

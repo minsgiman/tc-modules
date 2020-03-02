@@ -139,7 +139,7 @@
     export default {
         name: 'playerContainer',
         props: ['serialNo', 'elementId', 'startTime', 'endTime', 'cvrJumpInterval', 'useControl', 'showTime', 'getTokenUrl',
-            'credentialUrl', 'candidateUrl', 'getTimelineUrl', 'offerUrl', 'getCameraUrl', 'playEventHandler'],
+            'credentialUrl', 'candidateUrl', 'getTimelineUrl', 'offerUrl', 'getCameraUrl', 'requestHeaders', 'playEventHandler'],
         computed: {
         },
         data: function () {
@@ -267,7 +267,8 @@
                         credentialUrl : this.credentialUrl ? this.credentialUrl : this.defCredentialUrl,
                         candidateUrl : this.candidateUrl ? this.candidateUrl : this.defCandidateUrl,
                         offerUrl : this.offerUrl ? this.offerUrl : this.defOfferUrl,
-                        varPlayerId : this.varPlayerId
+                        varPlayerId : this.varPlayerId,
+                        requestHeaders : this.requestHeaders
                     }
                 }).$mount('#' + this.varPlayerId);
                 this.isLive = !this.startTime;
@@ -365,6 +366,15 @@
                 this.isShowControl = false;
             },
 
+            setHeaders : function (request) {
+                if (request && this.requestHeaders) {
+                    let key;
+                    for (key in this.requestHeaders) {
+                        request.setRequestHeader(key, this.requestHeaders[key]);
+                    }
+                }
+            },
+
             cvrMoveByInterval : function (direction, event) {
                 this.showControl();
                 if (direction === 'b') {
@@ -394,6 +404,7 @@
                     }
                 };
                 httpRequest.open('GET', setPathParams((this.getCameraUrl ? this.getCameraUrl : this.defGetCameraUrl), {serialNo : this.serialNo}));
+                this.setHeaders(httpRequest);
                 httpRequest.send();
             },
 
@@ -424,6 +435,7 @@
                 this.cvrData.endTime = endDate.valueOf();
                 const timelineUrl = this.getTimelineUrl ? this.getTimelineUrl : this.defGetTimelineUrl;
                 httpRequest.open('GET', setPathParams(timelineUrl + '?startTime=' + this.cvrData.startTime + '&endTime=' + this.cvrData.endTime , {serialNo : this.serialNo}));
+                this.setHeaders(httpRequest);
                 httpRequest.send();
             },
 
@@ -443,6 +455,7 @@
                     }
                 };
                 httpRequest.open('GET', setPathParams((this.getTokenUrl ? this.getTokenUrl : this.defGetTokenUrl), {serialNo : this.serialNo}));
+                this.setHeaders(httpRequest);
                 httpRequest.send();
             },
 

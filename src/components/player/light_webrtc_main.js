@@ -26,6 +26,7 @@ class lightPlayer {
                 getTimelineUrl: param.getTimelineUrl,
                 getCameraUrl: param.getCameraUrl,
                 offerUrl: param.offerUrl,
+                requestHeaders: param.requestHeaders,
                 playEventHandler: param.playEventHandler
             }
         }).$mount();
