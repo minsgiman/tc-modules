@@ -1,116 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Title</title>
-  <style>
-    body {
-      margin: 0;
-    }
-    .play_value {
-      color: dimgray;
-    }
-    .description {
-      display:inline-block;
-      color: gray;
-      margin-left: 10px;
-    }
-    input[type="checkbox"] {
-      width: 15px;
-      height: 15px;
-    }
-  </style>
+  <meta charset="utf-8">
+  <title>vue-tests</title>
 </head>
 <body>
-<div id="playerwrap" style="margin:0 auto;"></div>
+<div id="app"></div>
+<!-- built files will be auto injected -->
+<div id="dlgId"></div>
+<div id="toggleId"></div>
 <br>
-<div id="set_wrap" style="margin:0 auto;">
-  <h2>settable values</h2>
-  <div>
-    <span class="tit">Camera Serial : </span>
-    <select name="cam_serial" id="cam_serial">
-      <option value="TESTSERIAL01">TESTSERIAL01</option>
-      <option value="TESTSERIAL02">TESTSERIAL02</option>
-      <option value="TESTSERIAL03">TESTSERIAL03</option>
-      <option value="TESTSERIAL04">TESTSERIAL04</option>
-    </select>
-    <span class="description" id="cam_info">//recordType : 24h, &nbsp;controlStatus : on, &nbsp;streamStatus : on</span>
-  </div>
-  <br>
-  <div>
-    <div>
-      <span>Current CVR Range : </span>
-      <span style="color:#4a96e6;" id="cvr_range"></span>
-    </div>
-    <span>CVR Range Setting : </span>
-    <input type="text" id="startTime">
-    ~
-    <input type="text" id="endTime">
-    <button id="cvr_apply">Apply</button>
-  </div>
-  <br>
-  <div>
-    <label>
-      <span>CVR Mode : </span>
-      <input type="checkbox" id="playTime" name="playTime" value="playTime">
-      <span class="description">//if not set, play live</span>
-    </label>
-  </div>
-  <br>
-  <div>
-    <span class="tit">cvrJumpInterval : </span>
-    <input type="text" id="cvrInterval" value="">
-    <button id="cvrIntervalBtn">Apply</button>
-    <span class="description">//CVR Forward & Backward Interval</span>
-  </div>
-  <br>
-  <div>
-    <span class="tit">useControl : </span>
-    <input type="checkbox" id="useControl" name="useControl" value="useControl">
-    <span class="description">//if set, can use control UI</span>
-  </div>
-  <br>
-  <div>
-    <span class="tit">showTime : </span>
-    <input type="checkbox" id="showTime" name="showTime" value="showTime">
-    <span class="description">//if set, show play time</span>
-  </div>
-  <br>
-  <div>
-    <span class="tit">loop : </span>
-    <input type="checkbox" id="loop" name="loop" value="loop">
-    <span class="description">//if set, play cvr range repeatedly</span>
-  </div>
-  <br>
-  <h2>Static Values</h2>
-  <div>
-    <span class="tit">credentialUrl : </span>
-    <span class="play_value">(https://devmedia010.toastcam.com:10090/rtc/credential)</span>
-  </div>
-  <div>
-    <span class="tit">candidateUrl : </span>
-    <span class="play_value">(https://devmedia010.toastcam.com:10090/rtc/candidate)</span>
-  </div>
-  <div>
-    <span class="tit">offerUrl : </span>
-    <span class="play_value">(https://devmedia010.toastcam.com:10090/rtc/offer)</span>
-  </div>
-  <div>
-    <span class="tit">getTokenUrl : </span>
-    <span class="play_value">(/biz/cameras/token/:serialNo)</span>
-  </div>
-  <div>
-    <span class="tit">getTimelineUrl : </span>
-    <span class="play_value">(/biz/cameras/:serialNo/video)</span>
-  </div>
-  <div>
-    <span class="tit">serialNo : </span>
-    <span class="play_value">(BC8AA30000B1)</span>
-  </div>
-</div>
-
-
-<!--script src="./webrtcdemo/tc.player.min.js"></script-->
-<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+<div id="timeselectId"></div>
+<br>
+<div id="playerwrap" style="width:640px; height:360px;"></div>
+<div id="playerwrap2" style="width:640px; height:360px;"></div>
 </body>
 </html>

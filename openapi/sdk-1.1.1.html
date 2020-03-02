@@ -45,7 +45,8 @@
             11). <span style="color:#0052cc; ">getTokenUrl</span> : Get video play token GET API url (default: '/biz/cameras/token/:serialNo')<br>
             12). <span style="color:#0052cc; ">getTimelineUrl</span> : Get video timeline GET API url (default: '/biz/cameras/:serialNo/video')<br>
             13). <span style="color:#0052cc; ">getCameraUrl</span> : Get camera status GET API url (default: '/biz/cameras/:serialNo')<br>
-            14). <span style="color:#0052cc; ">playEventHandler</span>: Player event handler. there are the following event status - 'stream_connected', 'webrtc_server_error', 'finish', 'webrtc_not_support_browser', 'no_cvr' (not mandatory)</p>
+            14). <span style="color:#0052cc; ">requestHeaders</span> : Set Request Headers (not mandatory)<br>
+            15). <span style="color:#0052cc; ">playEventHandler</span>: Player event handler. there are the following event status - 'stream_connected', 'webrtc_server_error', 'finish', 'webrtc_not_support_browser', 'no_cvr' (not mandatory)</p>
         <ul>
             <li><em><strong>number 8 ~ 12 parameters is customer's tunneling server API path</strong></em></li>
         </ul>
@@ -69,6 +70,7 @@
     <span class="hljs-attr">getTokenUrl</span> : <span class="hljs-string">'/biz/cameras/token/:serialNo'</span>,
     <span class="hljs-attr">getCameraUrl</span> : <span class="hljs-string">'/biz/cameras/:serialNo'</span>,
     <span class="hljs-attr">getTimelineUrl</span> : <span class="hljs-string">'/biz/cameras/:serialNo/video'</span>,
+    <span class="hljs-attr">requestHeaders</span> : <span class="hljs-string">{"testheader": "123", "testheader2": "1234"}</span>,
     <span class="hljs-attr">playEventHandler</span> : <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) </span>{
         <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'playEventHandler - event.status : '</span> + event.status);
     }
