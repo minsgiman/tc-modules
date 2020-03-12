@@ -90,12 +90,15 @@
         sessionId: string = '';
         timeoutId: any = null;
         remoteVideoContainer: any = null;
+        gatherCheckInterval: any = null;
         webRTCStatusEnum: any = {
             EVENT_STREAM_CONNECTING : 'v2_event_stream_connecting',
             EVENT_STREAM_CONNECTED : 'v2_event_stream_connected',
             EVENT_STREAM_DISCONNECTED : 'v2_event_stream_disconnected',
             EVENT_STREAM_STOPPED : 'v2_event_stream_stopped'
         };
+        localSdp: any = null;
+        candidateList: any[] = [];
         url: string = '';
         webrtcServer: string = 'https://mediajp003.toastcam.com:10090';
 
@@ -103,6 +106,9 @@
             $('#player').hide();
             $('#remote_stream').show();
             this.videoStreamObj.preview = document.getElementById('localVideo');
+        }
+        private beforeDestroy() {
+            clearInterval(this.gatherCheckInterval);
         }
 
         play(cameraIdValue: string, url: string) {
@@ -114,8 +120,13 @@
             $.ajax({
                 type: "GET",
                 url: that.webrtcServer + "/rtc/credential",
-                success:function(dataStr: string){
-                    var resObj = JSON.parse(dataStr);
+                success:function(dataStr: any){
+                    var resObj;
+                    if (typeof dataStr === 'string') {
+                        resObj = JSON.parse(dataStr);
+                    } else {
+                        resObj = dataStr;
+                    }
                     that.webRTCConfig.peerConnectionConfig.iceServers.push({url: resObj.urls, username: resObj.username, credential: resObj.credential});
                     that.addPeer(that.currentWebRTCPeerId); //new RTCPeerConnection with Turn Server
                     that.offer(cameraIdValue);
@@ -175,6 +186,68 @@
             $('#webrtc_loading').hide();
         }
 
+        gatheringStatusChecker() {
+            if (!this.currentWebRTCPeerId) {
+                return;
+            }
+            const that: any = this;
+            const peer = this.peerDatabase[this.currentWebRTCPeerId];
+            if (peer) {
+                if (peer.pc.iceGatheringState === 'complete') {
+                    clearInterval(this.gatherCheckInterval);
+                    const requests: any[] = [];
+                    this.candidateList.forEach((candidate) => {
+                        requests.push(fetch(this.webrtcServer + '/rtc/candidate', {
+                            method: 'POST',
+                            mode: 'cors',
+                            body: JSON.stringify({
+                                "id": this.sessionId,
+                                "candidate": encodeURIComponent(candidate)
+                            }),
+                            headers: {
+                                'Content-Type': 'application/json'
+                                //'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                        }));
+                    });
+                    this.candidateList = [];
+                    Promise.all(requests).then(allResponses => {
+                        var sendData = {
+                            "id": that.sessionId,
+                            "url": encodeURIComponent(that.url),
+                            "relay": {
+                                "username": that.webRTCConfig.peerConnectionConfig.iceServers[0].username,
+                                "credential": that.webRTCConfig.peerConnectionConfig.iceServers[0].credential,
+                                "url": encodeURIComponent(that.webRTCConfig.peerConnectionConfig.iceServers[0].url || that.webRTCConfig.peerConnectionConfig.iceServers[0].urls)
+                            },
+                            "sdp": encodeURIComponent(that.localSdp)
+                        };
+                        fetch(that.webrtcServer + '/rtc/offer', {
+                            method: 'POST',
+                            mode: 'cors',
+                            body: JSON.stringify(sendData),
+                            headers: {
+                                'Content-Type': 'application/json'
+                                //'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                        })
+                        .then(response => response.json())
+                        .catch(error => {
+                            that.webRTCStatus = that.webRTCStatusEnum.EVENT_STREAM_DISCONNECTED;
+                            that.$emit('playerStatusChanged', {status : that.webRTCStatus, code : ''});
+                        })
+                        .then(response => {
+                            const answerObj = new RTCSessionDescription({
+                                type: 'answer',
+                                sdp: response.sdp
+                            });
+                            peer.pc.setRemoteDescription(answerObj, () => {}, error);
+                        });
+                    });
+                }
+            }
+        }
+
         addPeer(remoteId: string) {
             const peer: any = new (Peer as any)(this.webRTCConfig.peerConnectionConfig, this.webRTCConfig.peerConnectionConstraints);
             if (this.browserInfo.name === 'Firefox') {
@@ -225,21 +298,13 @@
             };
             peer.pc.onicecandidate = (event: any) => {
                 if (event.candidate) {
-                    console.log('onicecandidate candidate : ' + event.candidate.candidate);
-                    $.ajax({
-                        type: "POST",
-                        url: this.webrtcServer + "/rtc/candidate",
-                        data: {
-                            "id":this.sessionId,
-                            "candidate":encodeURIComponent(event.candidate.candidate)
-                        },
-                        success:function(){
-                            console.log('send candidate : ' + event.candidate.candidate);
-                        },
-                        error:function(e: Error){
-                            console.log('send candidate error!');
+                    if (this.candidateList.length < 2) {
+                        this.candidateList.push(event.candidate.candidate);
+                        if (this.candidateList.length === 1) { // first candidate push
+                            clearInterval(this.gatherCheckInterval);
+                            this.gatherCheckInterval = setInterval(this.gatheringStatusChecker.bind(this), 500);
                         }
-                    });
+                    }
                 }
             };
             this.peerDatabase[remoteId] = peer;
@@ -267,35 +332,7 @@
             }
             pc.createOffer((sessionDescription: any) => {
                     pc.setLocalDescription(sessionDescription);
-                    var sendData = {
-                        "offer": {
-                            "id": that.sessionId,
-                            "url": encodeURIComponent(that.url),
-                            "relay": {
-                                "username": that.webRTCConfig.peerConnectionConfig.iceServers[0].username,
-                                "credential": that.webRTCConfig.peerConnectionConfig.iceServers[0].credential,
-                                "url": encodeURIComponent(that.webRTCConfig.peerConnectionConfig.iceServers[0].url)
-                            },
-                            "sdp": encodeURIComponent(sessionDescription.sdp)
-                        }
-                    };
-                    $.ajax({
-                        type: "POST",
-                        url: that.webrtcServer + "/rtc/offer",
-                        data: sendData,
-                        success:function(dataStr: string){
-                            var resObj = JSON.parse(dataStr);
-                            var answerObj = new RTCSessionDescription({
-                                type: 'answer',
-                                sdp: resObj.sdp
-                            });
-                            pc.setRemoteDescription(answerObj, () => {}, error);
-                        },
-                        error:function(e: Error){
-                            that.webRTCStatus = that.webRTCStatusEnum.EVENT_STREAM_DISCONNECTED;
-                            that.$emit('playerStatusChanged', {status : that.webRTCStatus, code : ''});
-                        }
-                    });
+                    that.localSdp = sessionDescription.sdp;
                 },
                 error,
                 constraints
