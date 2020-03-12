@@ -15,6 +15,7 @@
         player: any = null;
         currentZoom: any = 1.0;
         zoomZoneBottom: any = 149;
+        type: string = 'flash';
 
         private created() {
             const vExtendConstructor = Vue.extend(flashPlayer);

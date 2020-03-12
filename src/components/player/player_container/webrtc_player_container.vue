@@ -5,29 +5,17 @@
 
     const $: any = (window as any).$ as any;
 
-    function getBrowserType() {
-        if((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) {
-            return 'opera';
-        } else if(navigator.userAgent.indexOf("Chrome") != -1) {
-            return 'chrome';
-        } else if(navigator.userAgent.indexOf("Safari") != -1) {
-            return 'safari';
-        } else if(navigator.userAgent.indexOf("Firefox") != -1) {
-            return 'firefox';
-        } else if((navigator.userAgent.indexOf("MSIE") != -1 ) || (!!(document as any).documentMode == true)) {
-            return 'ie';
-        } else {
-            return 'unknown';
-        }
-    }
-
     @Component
     export default class WebrtcPlayerContainer extends Vue {
         get cameraData() {
             return store.state.cameraData;
         }
+        get browserInfo() {
+            return store.state.browserInfo;
+        }
 
         player: any = null;
+        type: string = 'webrtc';
 
         private created() {
             const vExtendConstructor = Vue.extend(webRTCPlayer);
@@ -43,16 +31,9 @@
         }
 
         play(time: any) {
-            var isBrowserSupport = true, browserType = getBrowserType();
             this.player.dvrConnectFail = false;
-            if (browserType === 'ie') {
-                isBrowserSupport = false;
-            }
-            // if (browserType === 'safari' && navigator.userAgent.indexOf('Version/11') == -1) {
-            //     isBrowserSupport = false;
-            // }
 
-            if (isBrowserSupport) {
+            if (this.browserInfo.supportWebRTC) {
                 this.player.webRTCStatus = this.player.webRTCStatusEnum.EVENT_STREAM_CONNECTING;
                 if (this.player.currentWebRTCPeerId) {
                     this.stop();

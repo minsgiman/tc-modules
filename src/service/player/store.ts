@@ -27,7 +27,8 @@ const store = new Vuex.Store({
         motionZones: [],
         currentDomain: null,
         isShowTimelineCalendar: false,
-        ptzControlMode: false
+        ptzControlMode: false,
+        browserInfo: {}
     } as IStoreState,
     getters: {
         isExpiredCloud: (state) => {
@@ -146,6 +147,21 @@ const store = new Vuex.Store({
         PTZ_CONTROL_CHANGE: (context, state) => {
             context.commit('UPDATE_PTZ_CONTROL', state);
         },
+        BROWSER_INFO: (context, state) => {
+            const checkSupportWebRTC = (browserInfo: any) => {
+                if (!browserInfo || !browserInfo.name) {
+                    return false;
+                }
+                if (browserInfo.name === 'Internet Explorer' || browserInfo.name === 'Edge') {
+                    return false;
+                }
+                if (browserInfo.name === 'Safari' && browserInfo.version < 11) {
+                    return false;
+                }
+                return true;
+            };
+            context.commit('UPDATE_BROWSER_INFO', {name: state.name, version: state.version, supportWebRTC: checkSupportWebRTC(state)});
+        },
         INIT_ALL_DATA: (context, state) => {
             context.commit('UPDATE_CAMERA_DATA', {});
             context.commit('UPDATE_CAMERA_CONFIG', {});
@@ -240,6 +256,9 @@ const store = new Vuex.Store({
         },
         UPDATE_PTZ_CONTROL: (state, value) => {
             state.ptzControlMode = value;
+        },
+        UPDATE_BROWSER_INFO: (state, value) => {
+            state.browserInfo = value;
         }
     }
 });

@@ -21,5 +21,6 @@ export interface IStoreState {
     motionZones: any[],
     currentDomain: any,
     isShowTimelineCalendar: boolean,
-    ptzControlMode: boolean
+    ptzControlMode: boolean,
+    browserInfo: any
 }

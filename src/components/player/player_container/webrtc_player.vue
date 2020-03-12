@@ -64,33 +64,6 @@
         return text;
     }
 
-    function getBrowserType() {
-        if((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1 )
-        {
-            return 'opera';
-        }
-        else if(navigator.userAgent.indexOf("Chrome") != -1 )
-        {
-            return 'chrome';
-        }
-        else if(navigator.userAgent.indexOf("Safari") != -1)
-        {
-            return 'safari';
-        }
-        else if(navigator.userAgent.indexOf("Firefox") != -1 )
-        {
-            return 'firefox';
-        }
-        else if((navigator.userAgent.indexOf("MSIE") != -1 ) || (!!(document as any).documentMode == true )) //IF IE > 10
-        {
-            return 'ie';
-        }
-        else
-        {
-            return 'unknown';
-        }
-    }
-
     function Peer (pcConfig: any, pcConstraints: any) {
         const peerConnection: any = RTCPeerConnection;
 
@@ -108,6 +81,9 @@
     export default class WebrtcPlayer extends Vue {
         get cameraData() {
             return store.state.cameraData;
+        }
+        get browserInfo() {
+            return store.state.browserInfo;
         }
 
         videoStreamObj: any = {};
@@ -351,7 +327,7 @@
                     }
                 }
             };
-            if (getBrowserType() === 'firefox') {
+            if (this.browserInfo.name === 'Firefox') {
                 peer.pc.ontrack = (event: any) => {
                     const remoteVideosContainer: any = document.getElementById('remoteVideosContainer');
 
@@ -416,8 +392,8 @@
 
         offer(remoteId: any) {
             var pc = this.peerDatabase[remoteId].pc;
-            var constraints, browserType = getBrowserType();
-            if (browserType === 'firefox') {
+            var constraints;
+            if (this.browserInfo.name === 'Firefox') {
                 constraints = { offerToReceiveVideo: 1, offerToReceiveAudio: 1 }
             } else {
                 constraints = {
@@ -429,7 +405,7 @@
                 };
             }
 
-            if (browserType === 'safari') {
+            if (this.browserInfo.name === 'Safari') {
                 pc.addTransceiver('audio');
                 pc.addTransceiver('video');
             }
@@ -464,7 +440,7 @@
                     // }
                 }
                 if (message.turnserver) {
-                    if (getBrowserType() === 'firefox') {
+                    if (this.browserInfo.name === 'Firefox') {
                         for (i = 0, len = message.turnserver.length; i < len; i+=1) {
                             if (i === 0) {
                                 this.webRTCConfig.peerConnectionConfig.iceServers.push(message.turnserver[i]);

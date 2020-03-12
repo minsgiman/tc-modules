@@ -3,6 +3,7 @@
     import store from '../../../service/player/store';
     import flashPlayerContainer from './flash_player_container.vue';
     import webRTCPlayerContainer from './webrtc_player_container.vue';
+    import webRTCV2PlayerContainer from './webrtcv2_player_container.vue';
     import toastcamAPIs from './../../../service/toastcamAPIs';
 
     var getNvrServerUrl = function(data: any){
@@ -83,6 +84,9 @@
         get isShared() {
             return store.state.isShared;
         }
+        get browserInfo() {
+            return store.state.browserInfo;
+        }
 
         player: any = null;
         playTimeoutId: any = null;
@@ -93,8 +97,13 @@
                 vExtendConstructor = Vue.extend(webRTCPlayerContainer);
                 this.player = new vExtendConstructor();
             } else {
-                vExtendConstructor = Vue.extend(flashPlayerContainer);
-                this.player = new vExtendConstructor();
+                if (this.browserInfo.supportWebRTC) {
+                    vExtendConstructor = Vue.extend(webRTCV2PlayerContainer);
+                    this.player = new vExtendConstructor();
+                } else {
+                    vExtendConstructor = Vue.extend(flashPlayerContainer);
+                    this.player = new vExtendConstructor();
+                }
             }
             this.player.$on('playerStatusChanged', this.playerStatusChangedHandler.bind(this));
         }
@@ -117,10 +126,18 @@
                     this.player.play(time ? time.getTime() : 0);
                 } else {
                     toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAM_TOKEN : toastcamAPIs.camera.GET_TOKEN, {cameraId: this.cameraData.id}, (res: any) => {
-                        if (time) {
-                            this.player.play({url: getCvrServerUrl(res.cvrHostPort), path: '/token=' + res.token + '&time=' + time.getTime()});
+                        if (this.browserInfo.supportWebRTC) {
+                            if (time) {
+                                this.player.play(this.cameraData.mediaStreamURL + '?token=' + res.token + '&time=' + time.getTime());
+                            } else {
+                                this.player.play(this.cameraData.mediaStreamURL + '?token=' + res.token);
+                            }
                         } else {
-                            this.player.play({url: getLiveServerUrl(this.cameraData.mediaStreamURL), path: this.cameraData.id + '?token=' + res.token});
+                            if (time) {
+                                this.player.play({url: getCvrServerUrl(res.cvrHostPort), path: '/token=' + res.token + '&time=' + time.getTime()});
+                            } else {
+                                this.player.play({url: getLiveServerUrl(this.cameraData.mediaStreamURL), path: this.cameraData.id + '?token=' + res.token});
+                            }
                         }
                     });
                 }
