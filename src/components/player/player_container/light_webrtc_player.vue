@@ -244,7 +244,7 @@
                         }
                     }
                 };
-                this.httpCredRequest.open('GET', this.credentialUrl);
+                this.httpCredRequest.open('GET', this.credentialUrl + '?id=' + this.sessionId);
                 this.setHeaders(this.httpCredRequest);
                 this.httpCredRequest.send();
             },
