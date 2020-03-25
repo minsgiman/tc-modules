@@ -22,5 +22,6 @@ export interface IStoreState {
     currentDomain: any,
     isShowTimelineCalendar: boolean,
     ptzControlMode: boolean,
-    browserInfo: any
+    browserInfo: any,
+    playerType: string
 }

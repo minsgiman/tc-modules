@@ -77,6 +77,7 @@ class Player {
         this.setData('shopId', param.shopId ? param.shopId : '');
         this.setData('isShared', param.isShared);
         this.setData('browserInfo', browserCheck());
+        this.setData('playerType', param.playerType);
 
         const vExtendConstructor: any = Vue.extend(playContainer);
         this.control = new vExtendConstructor({
@@ -166,6 +167,9 @@ class Player {
                 break;
             case 'browserInfo':
                 store.dispatch('BROWSER_INFO', value);
+                break;
+            case 'playerType':
+                store.dispatch('PLAYER_TYPE_CHANGE', value);
                 break;
             default:
                 break;

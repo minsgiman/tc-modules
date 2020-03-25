@@ -28,7 +28,8 @@ const store = new Vuex.Store({
         currentDomain: null,
         isShowTimelineCalendar: false,
         ptzControlMode: false,
-        browserInfo: {}
+        browserInfo: {},
+        playerType: ''
     } as IStoreState,
     getters: {
         isExpiredCloud: (state) => {
@@ -147,6 +148,9 @@ const store = new Vuex.Store({
         PTZ_CONTROL_CHANGE: (context, state) => {
             context.commit('UPDATE_PTZ_CONTROL', state);
         },
+        PLAYER_TYPE_CHANGE: (context, state) => {
+            context.commit('UPDATE_PLAYER_TYPE', state);
+        },
         BROWSER_INFO: (context, state) => {
             const checkSupportWebRTC = (browserInfo: any) => {
                 if (!browserInfo || !browserInfo.name) {
@@ -185,6 +189,7 @@ const store = new Vuex.Store({
             context.commit('UPDATE_TIME_RANGE', 60);
             context.commit('UPDATE_IS_SHOW_CALENDAR', false);
             context.commit('UPDATE_PTZ_CONTROL', false);
+            context.commit('UPDATE_PLAYER_TYPE', '');
         }
     },
     mutations: {
@@ -259,6 +264,9 @@ const store = new Vuex.Store({
         },
         UPDATE_BROWSER_INFO: (state, value) => {
             state.browserInfo = value;
+        },
+        UPDATE_PLAYER_TYPE: (state, value) => {
+            state.playerType = value;
         }
     }
 });

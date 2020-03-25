@@ -87,6 +87,9 @@
         get browserInfo() {
             return store.state.browserInfo;
         }
+        get playerType() {
+            return store.state.playerType;
+        }
 
         player: any = null;
         playTimeoutId: any = null;
@@ -97,7 +100,7 @@
                 vExtendConstructor = Vue.extend(webRTCPlayerContainer);
                 this.player = new vExtendConstructor();
             } else {
-                if (this.browserInfo.supportWebRTC) {
+                if (this.playerType === 'webrtc') {
                     vExtendConstructor = Vue.extend(webRTCV2PlayerContainer);
                     this.player = new vExtendConstructor();
                 } else {
@@ -126,7 +129,7 @@
                     this.player.play(time ? time.getTime() : 0);
                 } else {
                     toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAM_TOKEN : toastcamAPIs.camera.GET_TOKEN, {cameraId: this.cameraData.id}, (res: any) => {
-                        if (this.browserInfo.supportWebRTC) {
+                        if (this.playerType === 'webrtc') {
                             if (time) {
                                 this.player.play(this.cameraData.mediaStreamURL + '?token=' + res.token + '&time=' + time.getTime());
                             } else {
