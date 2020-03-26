@@ -393,6 +393,9 @@
                     }
                     this.playInfoBar.camInfoBarChange();
                     this.playIndicator.updateIndicatorSize();
+                    if (this.player) {
+                        this.player.updatePlayerSize();
+                    }
                     break;
                 case 'stopPlayTimer':
                     this.playTimer.stopTimer();

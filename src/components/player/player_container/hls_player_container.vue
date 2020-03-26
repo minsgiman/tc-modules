@@ -1,12 +1,12 @@
 <script lang="ts">
     import store from '../../../service/player/store';
-    import webRTCV2Player from './webrtcv2_player.vue';
+    import hlsPlayer from './hls_player.vue';
     import Vue from 'vue';
 
     const $: any = (window as any).$ as any;
 
     export default {
-        name: 'webrtcV2PlayerContainer',
+        name: 'hlsPlayerContainer',
         props: [],
         computed: {
             cameraData: function () {
@@ -16,13 +16,13 @@
         data: function () {
             return {
                 player : null,
-                type : 'webrtcv2'
+                type : 'hls'
             }
         },
         created : function() {
-            const vExtendConstructor = Vue.extend(webRTCV2Player);
-            this.player = new vExtendConstructor().$mount('#webrtc_player_wrap');
-            this.player.$on('playerStatusChanged', this.webRTCEventCallback.bind(this));
+            const vExtendConstructor = Vue.extend(hlsPlayer);
+            this.player = new vExtendConstructor().$mount('#hls_player_wrap');
+            this.player.$on('playerStatusChanged', this.hlsEventCallback.bind(this));
         },
         mounted : function() {
         },
@@ -35,14 +35,14 @@
         methods : {
             play : function (url: string) {
                 this.player.dvrConnectFail = false;
-                this.player.webRTCStatus = this.player.webRTCStatusEnum.EVENT_STREAM_CONNECTING;
-                if (this.player.currentWebRTCPeerId) {
-                    this.stop(this.player.currentWebRTCPeerId);
+                this.player.hlsStatus = this.player.hlsStatusEnum.EVENT_STREAM_CONNECTING;
+                if (this.player.currentHlsPeerId) {
+                    this.stop(this.player.currentHlsPeerId);
                 }
-                this.player.currentWebRTCPeerId = this.cameraData.id;
+                this.player.currentHlsPeerId = this.cameraData.id;
                 this.player.play(this.cameraData.id, url);
-                $('#webrtc_logo').show();
-                $('#webrtc_loading').show();
+                $('#hls_logo').show();
+                $('#hls_loading').show();
             },
             resume : function () {
                 this.player.resume();
@@ -56,8 +56,8 @@
             stop : function () {
                 $('#remoteVideosContainer').empty();
                 this.player.stop();
-                $('#webrtc_logo').hide();
-                $('#webrtc_loading').hide();
+                $('#hls_logo').hide();
+                $('#hls_loading').hide();
             },
             close : function () {
                 this.player.close();
@@ -86,11 +86,11 @@
             positionZoomable : function(zoom: any) {
                 return;
             },
-            updatePlayerSize : function() {
-                return;
-            },
-            webRTCEventCallback : function (status: any) {
+            hlsEventCallback : function (status: any) {
                 this.$emit('playerStatusChanged', status);
+            },
+            updatePlayerSize: function () {
+                this.player.updatePlayerSize();
             },
             setData(key: any, value: any) {
                 (this as any)[key] = value;

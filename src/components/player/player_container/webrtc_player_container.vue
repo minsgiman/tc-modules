@@ -104,6 +104,10 @@
             return;
         }
 
+        updatePlayerSize() {
+            return;
+        }
+
         webRTCEventCallback(status: any) {
             this.$emit('playerStatusChanged', status);
         }

@@ -27,6 +27,9 @@
         get dataLoadingStatus () {
             return store.state.dataLoadingStatus;
         }
+        get playerType() {
+            return store.state.playerType;
+        }
 
         fullscreenTimer: any = null;
 
@@ -66,7 +69,7 @@
             }
 
             if (this.dataLoadingStatus == true){
-                if (this.cameraData.recorderType !== "recorder") {
+                if (this.cameraData.recorderType !== "recorder" && this.playerType !== 'webrtc' && this.playerType !== 'hls') {
                     this.$emit('event', {event: 'dataLoading'});
                     return;
                 }

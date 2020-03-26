@@ -190,6 +190,10 @@
             this.$emit('playerStatusChanged', status);
         }
 
+        updatePlayerSize() {
+            return;
+        }
+
         setData(key: any, value: any) {
             (this as any)[key] = value;
         }

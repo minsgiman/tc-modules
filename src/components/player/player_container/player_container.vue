@@ -4,6 +4,7 @@
     import flashPlayerContainer from './flash_player_container.vue';
     import webRTCPlayerContainer from './webrtc_player_container.vue';
     import webRTCV2PlayerContainer from './webrtcv2_player_container.vue';
+    import hlsPlayerContainer from './hls_player_container.vue';
     import toastcamAPIs from './../../../service/toastcamAPIs';
 
     var getNvrServerUrl = function(data: any){
@@ -98,16 +99,16 @@
             let vExtendConstructor;
             if (this.cameraData.recorderType == "recorder") {
                 vExtendConstructor = Vue.extend(webRTCPlayerContainer);
-                this.player = new vExtendConstructor();
             } else {
                 if (this.playerType === 'webrtc') {
                     vExtendConstructor = Vue.extend(webRTCV2PlayerContainer);
-                    this.player = new vExtendConstructor();
+                } else if (this.playerType === 'hls') {
+                    vExtendConstructor = Vue.extend(hlsPlayerContainer);
                 } else {
                     vExtendConstructor = Vue.extend(flashPlayerContainer);
-                    this.player = new vExtendConstructor();
                 }
             }
+            this.player = new vExtendConstructor();
             this.player.$on('playerStatusChanged', this.playerStatusChangedHandler.bind(this));
         }
 
@@ -130,6 +131,12 @@
                 } else {
                     toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAM_TOKEN : toastcamAPIs.camera.GET_TOKEN, {cameraId: this.cameraData.id}, (res: any) => {
                         if (this.playerType === 'webrtc') {
+                            if (time) {
+                                this.player.play(this.cameraData.mediaStreamURL + '?token=' + res.token + '&time=' + time.getTime());
+                            } else {
+                                this.player.play(this.cameraData.mediaStreamURL + '?token=' + res.token);
+                            }
+                        } else if (this.playerType === 'hls') {
                             if (time) {
                                 this.player.play(this.cameraData.mediaStreamURL + '?token=' + res.token + '&time=' + time.getTime());
                             } else {
@@ -197,6 +204,10 @@
 
         positionZoomable(zoom: any) {
             this.player.positionZoomable(zoom);
+        }
+
+        updatePlayerSize() {
+            this.player.updatePlayerSize();
         }
 
         playerStatusChangedHandler(status: any) {
