@@ -6,8 +6,8 @@
 
         <div id="remote_stream" style="display:none; height:100%;" class="player_cam remoteStreams">
             <h2>Remote Streams</h2>
-            <img id="hls_logo" src="/resources/img/toast_cam_logo.png" style="position:absolute; left:12%; top:5%; width:75%;">
-            <img id="hls_loading" src="/resources/images/loading_2.gif" style="position:absolute; left:48%; top:43%;">
+            <img id="hls_logo" src="/resources/img/toast_cam_logo.png" style="position:absolute; left:12%; top:5%; width:75%; z-index:1;">
+            <img id="hls_loading" src="/resources/img/progress_rolling_white.svg" style="position:absolute; left:48%; top:43%; z-index:1; width:55px;">
             <div id="remoteVideosContainer" style="width:100%;height:100%;"></div>
         </div>
     </div>
@@ -64,6 +64,8 @@
         }
 
         play(cameraIdValue: string, url: string) {
+            $('#hls_logo').show();
+            $('#hls_loading').show();
             this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTING;
             if (!this.hlsPlayer) {
                 const $video = $('<video/>', {
@@ -83,6 +85,8 @@
                 { type: "video/webm", src: "//vjs.zencdn.net/v/oceans.webm" }
             ]);
             this.hlsPlayer.on('ready', () => {
+                $('#hls_logo').hide();
+                $('#hls_loading').hide();
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTED;
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
                 this.hlsPlayer.play();

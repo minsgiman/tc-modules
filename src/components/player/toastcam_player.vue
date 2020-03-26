@@ -553,7 +553,6 @@
                 this.player.pause();
                 store.dispatch('PLAY_BTN_STATUS_CHANGE', false);
             } else if (param.event === 'play') {
-                this.player.resume();
                 store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
                 this.errorStatusLayer.cameraStatusAllOff();
                 if(this.isLive == false){
