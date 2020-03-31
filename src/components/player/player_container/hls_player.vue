@@ -43,6 +43,7 @@
             return store.state.browserInfo;
         }
 
+        hlsServer: string = 'https://devmedia010.toastcam.com:10099';
         hlsPlayer: any = null;
         hlsStatus: string = '';
         hlsStatusEnum: any = {
@@ -76,13 +77,13 @@
                 $('#remoteVideosContainer').append($video);
                 this.hlsPlayer = videojs('my-player', {
                     controls: false,
+                    errorDisplay: false,
                     preload: 'auto'
                 });
                 this.updatePlayerSize();
             }
             this.hlsPlayer.src([
-                { type: "video/mp4", src: "//vjs.zencdn.net/v/oceans.mp4" },
-                { type: "video/webm", src: "//vjs.zencdn.net/v/oceans.webm" }
+                { type: "video/mp4", src: this.hlsServer + '/mp4play?url=' + encodeURIComponent(url) }
             ]);
             this.hlsPlayer.on('ready', () => {
                 $('#hls_logo').hide();
@@ -92,6 +93,8 @@
                 this.hlsPlayer.play();
             });
             this.hlsPlayer.on('error', () => {
+                $('#hls_logo').show();
+                $('#hls_loading').show();
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_DISCONNECTED;
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
             });
@@ -137,3 +140,8 @@
         }
     }
 </script>
+<style lang="less">
+    .vjs-loading-spinner {
+        display:none!important;
+    }
+</style>
