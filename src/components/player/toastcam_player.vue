@@ -192,6 +192,7 @@
         playStatusChangedHandler(status: any) {
             if (status.status) {
                 if (status.status === 'event_stream_connected') {
+                    store.dispatch('IS_PLAYING_CHANGE', true);
                     this.player.setData('dvrConnectFail', false);
                     this.errorStatusLayer.setData('dvrConnectFail', false);
                     this.playTimer.playerCheck = true;

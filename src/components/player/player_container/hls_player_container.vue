@@ -41,7 +41,7 @@
                 }
                 this.player.currentHlsPeerId = this.cameraData.id;
                 this.player.play(this.cameraData.id, url);
-                $('#hls_logo').show();
+                //$('#hls_logo').show();
                 $('#hls_loading').show();
             },
             resume : function () {
@@ -56,7 +56,7 @@
             stop : function () {
                 $('#remoteVideosContainer').empty();
                 this.player.stop();
-                $('#hls_logo').hide();
+                //$('#hls_logo').hide();
                 $('#hls_loading').hide();
             },
             close : function () {
