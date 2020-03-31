@@ -1,8 +1,8 @@
 <template>
     <div class="tc_search">
-        <span class="search_box" :class="{focusable: design === 'search'}">
+        <span class="search_box" :class="{focusable: design === 'search'}" :style="boxStyle">
             <img v-if="design === 'search'" class="search_img" src="/resources/img/btn-title-shop-search-small.svg">
-            <input ref="searchInput" type="search" autocomplete="new-password" :placeholder="placeholder" @input="searchStrUpdate" :style="{width: design === 'search' ? '152px' : '176px'}">
+            <input ref="searchInput" type="search" autocomplete="new-password" :placeholder="placeholder" @input="searchStrUpdate" :style="{width: 'calc(100% - 70px)'}">
             <img v-if="isShowDeleteBtn" class="delete_img" @click="deleteSearchStr()" src="/resources/img/btn-input-text-delete.svg">
         </span>
     </div>
@@ -15,6 +15,7 @@
     export default class Search extends Base {
         placeholder: string = '';
         design: string = '';
+        boxStyle: any = {};
         isShowDeleteBtn: boolean = false;
 
         get value(): string {
@@ -91,6 +92,7 @@
                 cursor:pointer;
                 &.search_img {
                     float:left;
+                    margin-left:5px;
                 }
                 &.delete_img {
                     margin-top:11px;

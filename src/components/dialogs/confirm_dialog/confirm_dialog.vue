@@ -110,7 +110,7 @@
             }
             .btn_wrap {
                 text-align:center;
-                margin-top:24px;
+                margin-top:40px;
                 button {
                     height: 50px;
                     width: 150px;
@@ -141,7 +141,6 @@
                         font-size:16px;
                         text-align:center;
                         margin-top:32px;
-                        height:49px;
                     }
                 }
             }
