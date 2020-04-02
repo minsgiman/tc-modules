@@ -100,7 +100,7 @@
         localSdp: any = null;
         candidateList: any[] = [];
         url: string = '';
-        webrtcServer: string = 'https://mediajp003.toastcam.com:10090';
+        //webrtcServer: string = 'https://mediajp003.toastcam.com:10090';
 
         private mounted() {
             $('#player').hide();
@@ -119,7 +119,7 @@
             this.url = url;
             $.ajax({
                 type: "GET",
-                url: that.webrtcServer + "/rtc/credential",
+                url: "/json/biz/rtc/credential?id=" + that.sessionId,
                 success:function(dataStr: any){
                     var resObj;
                     if (typeof dataStr === 'string') {
@@ -197,7 +197,7 @@
                     clearInterval(this.gatherCheckInterval);
                     const requests: any[] = [];
                     this.candidateList.forEach((candidate) => {
-                        requests.push(fetch(this.webrtcServer + '/rtc/candidate', {
+                        requests.push(fetch('/json/biz/rtc/candidate', {
                             method: 'POST',
                             mode: 'cors',
                             body: JSON.stringify({
@@ -222,7 +222,7 @@
                             },
                             "sdp": encodeURIComponent(that.localSdp)
                         };
-                        fetch(that.webrtcServer + '/rtc/offer', {
+                        fetch('/json/biz/rtc/offer', {
                             method: 'POST',
                             mode: 'cors',
                             body: JSON.stringify(sendData),
