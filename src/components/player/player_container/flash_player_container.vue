@@ -81,6 +81,10 @@
             return this.player.getVideoStatus();
         }
 
+        transformChange(value: string) {
+            return;
+        }
+
         zoomZone(top: any, left: any) {
             this.player.zoomZone(top, left);
         }

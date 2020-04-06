@@ -22,6 +22,9 @@
         get ptzControlMode() {
             return store.state.ptzControlMode;
         }
+        get hlsZoomLevel() {
+            return store.state.hlsZoomLevel;
+        }
 
         indicatorTimeout: any = null;
 
@@ -77,6 +80,11 @@
             if (this.ptzControlMode) {
                 return;
             }
+            if (this.hlsZoomLevel > 1) {
+                this.$emit('event', {event: 'zoomInit'});
+                return;
+            }
+
             if (this.isPlaying) {
                 this.showIndicator('pause');
             } else {

@@ -68,6 +68,9 @@
             getStatus : function () {
                 return this.player.getStatus();
             },
+            transformChange : function(value: string) {
+                return;
+            },
             zoomZone: function () {
                 return;
             },

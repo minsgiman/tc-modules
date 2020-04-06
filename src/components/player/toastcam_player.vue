@@ -8,6 +8,7 @@
     import timeline from './timeline.vue';
     import fullscreenBtn from './fullscreen_btn.vue';
     import zoomBtn from './zoom_btn.vue';
+    import zoomArea from './zoom_area.vue';
     import playInfoBar from './play_info_bar.vue';
     import playTimer from './play_timer.vue';
     import errorStatusLayer from './error_status_layer.vue';
@@ -37,6 +38,7 @@
         timeline: 'view_timeline_area',
         fullscreenBtn: 'fullscreen_btn_wrap',
         zoomBtn: 'zoom_btn_wrap',
+        zoomArea: 'zoom_area_wrap',
         errorStatusLayer: 'error_status_wrap',
         playInfoBar: 'cam_info',
         cvrPlaySecureLayer: 'cvr_play_manager_wrap',
@@ -99,11 +101,15 @@
         get timeRange() {
             return store.state.timeRange;
         }
+        get playerType() {
+            return store.state.playerType;
+        }
 
         timeline: any = null;
         playTimer: any = null;
         player: any = null;
         zoomBtn: any = null;
+        zoomArea: any = null;
         playInfoBar: any = null;
         playIndicator: any = null;
         errorStatusLayer: any = null;
@@ -145,6 +151,9 @@
             that.timelineTimeSelector = that.createComponent(timelineTimeSelector, getElementId('timelineTimeSelector'), that.timelineTimeSelectorEventHandler.bind(that));
             that.playIndicator = that.createComponent(playIndicator, getElementId('playIndicator'), that.playIndicatorEventHandler.bind(that));
             that.calendarBtn = that.createComponent(calendarBtn, getElementId('calendarBtn'), that.calendarBtnEventHandler.bind(that));
+            if (that.playerType === 'hls') {
+                that.zoomArea = that.createComponent(zoomArea, getElementId('zoomArea'), that.zoomAreaHandler.bind(that));
+            }
             setTimeout(() => {
                 that.timeline.requestPlay(that.playTime);
             },100);
@@ -170,6 +179,9 @@
             that.timelineTimeSelector.$destroy();
             that.playIndicator.$destroy();
             that.calendarBtn.$destroy();
+            if (that.zoomArea) {
+                that.zoomArea.$destroy();
+            }
         }
 
         createComponent(constructor: any, elementId: any, eventHandler?: any, prop?: any) {
@@ -187,6 +199,9 @@
         reloadPlayer() {
             this.player.$destroy();
             this.player = this.createComponent(playContainer, null, this.playStatusChangedHandler.bind(this));
+            if (this.playerType === 'hls') {
+                this.zoomArea.changeZoom(1);
+            }
         }
 
         playStatusChangedHandler(status: any) {
@@ -693,6 +708,8 @@
                 this.playEventCb('indicatorHoverIn');
             } else if (param.event === 'indicatorHoverOut') {
                 this.playEventCb('indicatorHoverOut');
+            } else if (param.event === 'zoomInit') {
+                this.zoomArea.changeZoom(1);
             }
         }
 
@@ -713,15 +730,29 @@
         }
 
         zoomEventHandler(zoom: any) {
-            this.playEventCb('zoomDragValChanged', 0);
-            this.player.zoomUp(zoom);
+            if (this.playerType === 'hls') {
+                this.zoomArea.zoomUpHandler(zoom);
+            } else {
+                this.playEventCb('zoomDragValChanged', 0);
+                this.player.zoomUp(zoom);
+            }
+        }
+
+        zoomAreaHandler(param: any) {
+            if (param.event === 'transformChange') {
+                this.player.transformChange(param.value);
+            }
         }
 
         fullscreenEventHandler(param: any) {
             if (param.event === 'changed') {
                 this.onFullscreenChanged(param.state);
             } else if (param.event === 'beforeChange') {
-                this.player.zoomUp(-5);
+                if (this.playerType === 'hls') {
+                    this.zoomArea.changeZoom(1);
+                } else {
+                    this.player.zoomUp(-5);
+                }
                 this.onBeforeFullscreenChange(param.state);
             } else if (param.event === 'dataLoading') {
                 this.playEventCb('loadingAlert');
@@ -801,10 +832,14 @@
                 }
                 this.playEventCb('timelineVisibleChanged', true);
 
-                if (this.player.getData('currentZoom') > 1) {
-                    this.player.setData('currentZoom', 1);	// 줌 상태일 경우 줌해제 처리
-                    this.playEventCb('zoomDragValChanged', 0);
-                    this.player.zoomUp(0);
+                if (this.playerType === 'hls') {
+                    this.zoomArea.changeZoom(1);
+                } else {
+                    if (this.player.getData('currentZoom') > 1) {
+                        this.player.setData('currentZoom', 1);	// 줌 상태일 경우 줌해제 처리
+                        this.playEventCb('zoomDragValChanged', 0);
+                        this.player.zoomUp(0);
+                    }
                 }
 
                 this.playEventCb('isClickTimelineShowChanged', false);
@@ -848,6 +883,9 @@
                 $("#cursorRightBtn").css("top","");
                 $(".fs_time").hide();
                 $(".cam_info_area").css("top","");
+                setTimeout(() => {
+                    this.player.updatePlayerSize();
+                }, 500);
             }
         }
 

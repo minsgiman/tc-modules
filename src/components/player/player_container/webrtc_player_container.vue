@@ -80,6 +80,10 @@
             return this.player.getStatus();
         }
 
+        transformChange(value: string) {
+            return;
+        }
+
         zoomZone() {
             return;
         }

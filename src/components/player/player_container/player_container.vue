@@ -182,6 +182,10 @@
             return this.player.getStatus();
         }
 
+        transformChange(value: string) {
+            return this.player.transformChange(value);
+        }
+
         zoomZone(top: any, left: any) {
             this.player.zoomZone(top, left);
         }

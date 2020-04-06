@@ -1,5 +1,5 @@
 <template>
-    <div class="zoom" v-show="cameraData.recorderType !== 'recorder' && !browserInfo.supportWebRTC">
+    <div class="zoom" v-show="cameraData.recorderType !== 'recorder'">
         <button type="button" class="sp zoomout" @click="zoomUp(-1)"></button>
         <button type="button" class="sp zoomin" @click="zoomUp(1)"></button>
         <span class="zoom_bg">

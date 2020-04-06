@@ -23,5 +23,8 @@ export interface IStoreState {
     isShowTimelineCalendar: boolean,
     ptzControlMode: boolean,
     browserInfo: any,
-    playerType: string
+    playerType: string,
+    playerSize: any,
+    hlsPlayUrl: string,
+    hlsZoomLevel: number
 }

@@ -29,7 +29,10 @@ const store = new Vuex.Store({
         isShowTimelineCalendar: false,
         ptzControlMode: false,
         browserInfo: {},
-        playerType: ''
+        playerType: '',
+        playerSize: {width: 0, height: 0},
+        hlsPlayUrl: '',
+        hlsZoomLevel: 1
     } as IStoreState,
     getters: {
         isExpiredCloud: (state) => {
@@ -151,6 +154,15 @@ const store = new Vuex.Store({
         PLAYER_TYPE_CHANGE: (context, state) => {
             context.commit('UPDATE_PLAYER_TYPE', state);
         },
+        PLAYER_SIZE_CHANGE: (context, state) => {
+            context.commit('UPDATE_PLAYER_SIZE', state);
+        },
+        HLS_PLAY_URL_CHANGE: (context, state) => {
+            context.commit('UPDATE_HLS_PLAY_URL', state);
+        },
+        HLS_ZOOM_LEVEL_CHANGE: (context, state) => {
+            context.commit('UPDATE_HLS_ZOOM_LEVEL', state);
+        },
         BROWSER_INFO: (context, state) => {
             const checkSupportWebRTC = (browserInfo: any) => {
                 if (!browserInfo || !browserInfo.name) {
@@ -190,6 +202,9 @@ const store = new Vuex.Store({
             context.commit('UPDATE_IS_SHOW_CALENDAR', false);
             context.commit('UPDATE_PTZ_CONTROL', false);
             context.commit('UPDATE_PLAYER_TYPE', '');
+            context.commit('UPDATE_PLAYER_SIZE', {width: 0, height: 0});
+            context.commit('UPDATE_HLS_PLAY_URL', '');
+            context.commit('UPDATE_HLS_ZOOM_LEVEL', 1);
         }
     },
     mutations: {
@@ -267,6 +282,15 @@ const store = new Vuex.Store({
         },
         UPDATE_PLAYER_TYPE: (state, value) => {
             state.playerType = value;
+        },
+        UPDATE_PLAYER_SIZE: (state, value) => {
+            state.playerSize = value;
+        },
+        UPDATE_HLS_PLAY_URL: (state, value) => {
+            state.hlsPlayUrl = value;
+        },
+        UPDATE_HLS_ZOOM_LEVEL: (state, value) => {
+            state.hlsZoomLevel = value;
         }
     }
 });
