@@ -192,6 +192,7 @@
         playStatusChangedHandler(status: any) {
             if (status.status) {
                 if (status.status === 'event_stream_connected') {
+                    store.dispatch('IS_PLAYING_CHANGE', true);
                     this.player.setData('dvrConnectFail', false);
                     this.errorStatusLayer.setData('dvrConnectFail', false);
                     this.playTimer.playerCheck = true;
@@ -199,6 +200,14 @@
                         this.playTimer.startLiveTimer(this.timeline);
                     } else {
                         this.playTimer.startRecTimer(this.timeline.clickTime, this.player, this.timeline);
+                    }
+                } else if (status.status === 'event_stream_retry') {
+                    this.playTimer.stopTimer();
+                    this.player.stop(this.cameraData.id);
+                    if (this.isLive) {
+                        this.timeline.requestPlay();
+                    } else {
+                        this.timeline.requestPlay(this.currentTime.valueOf());
                     }
                 } else if (status.status === 'event_stream_disconnected') {
                     //$('#remote_stream').hide();

@@ -43,9 +43,6 @@
         this.remoteVideoEl.controls = false;
         this.remoteVideoEl.autoplay = true;
     }
-    function error(err: any){
-        console.log(err);
-    }
 
     @Component
     export default class WebrtcV2Player extends Vue {
@@ -92,10 +89,11 @@
         remoteVideoContainer: any = null;
         gatherCheckInterval: any = null;
         webRTCStatusEnum: any = {
-            EVENT_STREAM_CONNECTING : 'v2_event_stream_connecting',
-            EVENT_STREAM_CONNECTED : 'v2_event_stream_connected',
-            EVENT_STREAM_DISCONNECTED : 'v2_event_stream_disconnected',
-            EVENT_STREAM_STOPPED : 'v2_event_stream_stopped'
+            EVENT_STREAM_CONNECTING : 'event_stream_connecting',
+            EVENT_STREAM_CONNECTED : 'event_stream_connected',
+            EVENT_STREAM_DISCONNECTED : 'event_stream_disconnected',
+            EVENT_STREAM_RETRY : 'event_stream_retry',
+            EVENT_STREAM_STOPPED : 'event_stream_stopped'
         };
         localSdp: any = null;
         candidateList: any[] = [];
@@ -127,7 +125,7 @@
                     } else {
                         resObj = dataStr;
                     }
-                    that.webRTCConfig.peerConnectionConfig.iceServers.push({url: resObj.urls, username: resObj.username, credential: resObj.credential});
+                    that.webRTCConfig.peerConnectionConfig.iceServers.push({urls: resObj.urls, username: resObj.username, credential: resObj.credential});
                     that.addPeer(that.currentWebRTCPeerId); //new RTCPeerConnection with Turn Server
                     that.offer(cameraIdValue);
                     console.log('Get TurnServer - webRTC Media url : ' + url);
@@ -233,7 +231,7 @@
                         })
                         .then(response => response.json())
                         .catch(error => {
-                            that.webRTCStatus = that.webRTCStatusEnum.EVENT_STREAM_DISCONNECTED;
+                            that.webRTCStatus = that.webRTCStatusEnum.EVENT_STREAM_RETRY;
                             that.$emit('playerStatusChanged', {status : that.webRTCStatus, code : ''});
                         })
                         .then(response => {
@@ -241,7 +239,9 @@
                                 type: 'answer',
                                 sdp: response.sdp
                             });
-                            peer.pc.setRemoteDescription(answerObj, () => {}, error);
+                            peer.pc.setRemoteDescription(answerObj, () => {}, (err: any) => {
+                                console.log('setRemoteDescription : ' + err);
+                            });
                         });
                     });
                 }
@@ -291,7 +291,7 @@
                     case 'disconnected':
                         //case 'closed':
                         $('#remoteVideosContainer').empty();
-                        this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_DISCONNECTED;
+                        this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_RETRY;
                         this.$emit('playerStatusChanged', {status : this.webRTCStatus, code : ''});
                         break;
                 }
@@ -334,7 +334,9 @@
                     pc.setLocalDescription(sessionDescription);
                     that.localSdp = sessionDescription.sdp;
                 },
-                error,
+                (err: any) => {
+                    console.log('createOffer : ' + err);
+                },
                 constraints
             );
         }
