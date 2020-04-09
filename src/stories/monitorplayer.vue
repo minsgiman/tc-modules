@@ -26,29 +26,63 @@
                 elId: 'mgridId',
                 width: $("#mgrid_test").width(),
                 height: $("#mgrid_test").height(),
+                streamType: 'main',
+                serverUrls: ['https://devmedia010.toastcam.com:10099'],
+                commonToken: 'b6e503e4-f47c-4238-baca-51cbdfc10024',
                 cameras: [
-                    { //rtmpURL : serverUrl, videoPath : videoPath,
-                        id: 'cam1',
-                        url: this.serverUrl + '/mp4play?url=' +
-                            encodeURIComponent('rtmps://devmedia011.toastcam.com:10082' + '/flvplayback/' + 'AAAAAACDVD?token=b6e503e4-f47c-4238-baca-51cbdfc10024')
-                    },
-                    // {
-                    //     id: 'cam2',
-                    //     url: this.serverUrl + '/mp4play?url=' +
-                    //         encodeURIComponent('rtmps://devmedia011.toastcam.com:10082' + '/flvplayback/' + 'AAAAAADIDS?token=b6e503e4-f47c-4238-baca-51cbdfc10025')
-                    // },
                     {
-                        id: 'cam3',
-                        url: this.serverUrl + '/mp4play?url=' +
-                            encodeURIComponent('rtmps://devmedia011.toastcam.com:10082' + '/flvplayback/' + 'AAAAAACALM?token=b6e503e4-f47c-4238-baca-51cbdfc10026')
+                        cameraId: 'AAAAAACDVD', labelName: 'AAAAAACDVD', cameraModelId: '', recordType: '24h', categoryList: ['myCamera'],
+                        controlStatus: 'on', streamStatus: 'on', streamStatusConfig: 'on',
+                        streamServer: 'rtmps://devmedia011.toastcam.com:10082',
+                        subStreamServer: '', motionStatus: 'on', motionTimestamp: 1234567890123
+                    },
+                    {
+                        cameraId: 'AAAAAACALM', labelName: 'AAAAAACALM', cameraModelId: '', recordType: '24h', categoryList: ['myCamera'],
+                        controlStatus: 'on', streamStatus: 'on', streamStatusConfig: 'on',
+                        streamServer: 'rtmps://devmedia011.toastcam.com:10082',
+                        subStreamServer: '', motionStatus: 'on', motionTimestamp: 0
+                    },
+                    {
+                        cameraId: 'AAAAAADFJS', labelName: 'AAAAAADFJS', cameraModelId: '', recordType: '24h', categoryList: ['sharedShopCamera'], // myCamera
+                        controlStatus: 'on', streamStatus: 'on', streamStatusConfig: 'on',
+                        streamServer: 'rtmps://devmedia011.toastcam.com:10082',
+                        subStreamServer: '', motionStatus: 'on', motionTimestamp: 0
+                    },
+                    {
+                        cameraId: 'AAAAAABWNZ', labelName: 'AAAAAABWNZ', cameraModelId: '', recordType: '24h', categoryList: ['sharedShopCamera'], // myCamera
+                        controlStatus: 'on', streamStatus: 'on', streamStatusConfig: 'on',
+                        streamServer: 'rtmps://devmedia011.toastcam.com:10082',
+                        subStreamServer: '', motionStatus: 'on', motionTimestamp: 0
+                    },
+                    {
+                        cameraId: 'AAAAAADIQF', labelName: 'AAAAAADIQF', cameraModelId: '', recordType: '24h', categoryList: ['sharedShopCamera'], // myCamera
+                        controlStatus: 'on', streamStatus: 'on', streamStatusConfig: 'on',
+                        streamServer: 'rtmps://devmedia011.toastcam.com:10082',
+                        subStreamServer: '', motionStatus: 'on', motionTimestamp: 0
+                    },
+                    {
+                        cameraId: 'AAAAAACQLV', labelName: 'AAAAAACQLV', cameraModelId: '', recordType: '24h', categoryList: ['sharedShopCamera'], // myCamera
+                        controlStatus: 'on', streamStatus: 'on', streamStatusConfig: 'on',
+                        streamServer: 'rtmps://devmedia011.toastcam.com:10082',
+                        subStreamServer: '', motionStatus: 'on', motionTimestamp: 1234567890123
                     }
                 ],
-                dimension: 2,
+                dimension: 3,
                 eventHandler: (event: any) => {
                     console.log('event : ' + JSON.stringify(event));
                 }
             });
 
+            setTimeout(() => {
+                this.player.updateCameraStatus({
+                    cameraId: 'AAAAAACDVD', labelName: 'AAAAAACDVD', cameraModelId: '', recordType: '24h', categoryList: ['sharedShopCamera'],
+                    controlStatus: 'on', streamStatus: 'on', streamStatusConfig: 'on',
+                    streamServer: 'rtmps://devmedia011.toastcam.com:10082',
+                    subStreamServer: '', motionStatus: 'on', motionTimestamp: 0
+                })
+            }, 5000);
+
+            /*
             setTimeout(() => {
                 this.player.unshiftCamera({
                     id: 'cam6',
@@ -59,7 +93,7 @@
 
             setTimeout(() => {
                 this.player.changeCameras([
-                    { //rtmpURL : serverUrl, videoPath : videoPath,
+                    {
                         id: 'cam1',
                         url: this.serverUrl + '/mp4play?url=' +
                             encodeURIComponent('rtmps://devmedia011.toastcam.com:10082' + '/flvplayback/' + 'AAAAAACDVD?token=b6e503e4-f47c-4238-baca-51cbdfc10024')
@@ -69,7 +103,7 @@
                         url: this.serverUrl + '/mp4play?url=' +
                             encodeURIComponent('rtmps://devmedia011.toastcam.com:10082' + '/flvplayback/' + 'AAAAAACALM?token=b6e503e4-f47c-4238-baca-51cbdfc10026')
                     },
-                    { //rtmpURL : serverUrl, videoPath : videoPath,
+                    {
                         id: 'cam3',
                         url: this.serverUrl + '/mp4play?url=' +
                             encodeURIComponent('rtmps://devmedia011.toastcam.com:10082' + '/flvplayback/' + 'AAAAAACDVD?token=b6e503e4-f47c-4238-baca-51cbdfc10024')
@@ -81,6 +115,7 @@
                     }
                 ])
             }, 10000);
+             */
         }
     }
 </script>

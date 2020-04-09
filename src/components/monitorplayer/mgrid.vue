@@ -1,13 +1,14 @@
 <template>
     <div class="tc_mgrid" :style="{gridTemplateColumns: gridColumns, gridTemplateRows: gridRows}">
-        <div class="gitem" v-for="(gItem, index) in gridItems" :key="gItem.camera ? gItem.camera.id : index">
-            <mplayer v-if="gItem.camera" :camera="gItem.camera"></mplayer>
+        <div class="gitem" v-for="(gItem, index) in gridItems" :key="gItem.camera ? gItem.camera.cameraId : index">
+            <mplayer v-if="gItem.camera" :camera="gItem.camera" :ref="gItem.camera.cameraId" :serverUrl="getPlayServerUrl()" :commonToken="commonToken"></mplayer>
         </div>
     </div>
 </template>
 <script lang="ts">
     import { Component, Prop, Vue } from 'vue-property-decorator';
     import mplayer from './mplayer.vue';
+    import { ICameraInfo } from './interface';
 
     //const $: any = (window as any).$ as any;
     //const d3: any = (window as any).d3 as any;
@@ -23,6 +24,9 @@
         @Prop() height!: number;
         @Prop() cameras!: any[];
         @Prop() dimension!: number;
+        @Prop() commonToken!: string;
+        @Prop() streamType!: string;
+        @Prop() serverUrls!: string[];
 
         gridItems: any[] = [];
         gWidth: number = 0;
@@ -52,10 +56,19 @@
 
             this.gridItems = [];
             for (i = 0; i < len; i+=1) {
-                this.gridItems.push({
-                    camera: this.gridCameras[i] ? this.gridCameras[i] : null
-                });
+                this.gridItems.push({});
             }
+            setTimeout(() => {
+                for (i = 0; i < len; i+=1) {
+                    this.gridItems[i].camera = this.gridCameras[i] ? this.gridCameras[i] : null;
+                }
+                this.$forceUpdate();
+            }, 0);
+        }
+
+        getPlayServerUrl() {
+            //TODO:
+            return this.serverUrls[0];
         }
 
         unshiftCamera(camera: any) {
@@ -68,6 +81,13 @@
         changeCameras(cameras: any[]) {
             this.gridCameras = cameras ? cameras : [];
             this.buildGridItems();
+        }
+
+        updateCameraStatus(camera: ICameraInfo) {
+            const playerRef: any = this.$refs[camera.cameraId];
+            if (playerRef && playerRef[0]) {
+                playerRef[0].updateCameraConfig(camera);
+            }
         }
 
         gridSizeChange(width: number, height: number) {

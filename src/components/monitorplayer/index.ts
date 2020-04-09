@@ -11,6 +11,8 @@ function createComponent(param: IMonitorPlayInfo) {
     const vComponent: any = new vConstructor({propsData: {
             width: param.width,
             height: param.height,
+            commonToken: param.commonToken,
+            serverUrls: param.serverUrls,
             cameras: param.cameras,
             dimension: param.dimension
         }}).$mount();

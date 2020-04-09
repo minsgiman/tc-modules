@@ -14,10 +14,11 @@ import timeselect from './components/uikit/timeselect';
 import toggle from './components/uikit/toggle';
 import dropdown from './components/uikit/dropdown';
 import search from './components/uikit/search';
+import monitorplayer from './components/monitorplayer';
 
 (function (window) {
     const tCam = { player, toggle, timeselect, daycheck, radiobtn, checkbox, search, dropdown, clipplayer, camlist,
-        playerTipDialog, videoPlayDialog, confirmDialog, aiStatsDialog, aiGraphsDialog, aizoneGuideDialog };
+        playerTipDialog, videoPlayDialog, confirmDialog, aiStatsDialog, aiGraphsDialog, aizoneGuideDialog, monitorplayer };
     if ( typeof window === "object" ) {
         window.tCam = tCam;
     }
