@@ -1,5 +1,8 @@
 <template>
-    <div class="monitor_player" style="position:relative; width:100%;height:100%;">
+    <div class="monitor_player" :class="{
+        dimension1: dimension === 1, dimension2: dimension === 2, dimension3: dimension === 3,
+        dimension4: dimension === 4, dimension5: dimension === 5, dimension6: dimension === 6
+    }">
         <div :id="'remote_stream_' + cameraId" style="height:100%;" class="player_cam remoteStreams">
             <div :id="'remoteVideosContainer_' + cameraId" style="width:100%;height:100%;"></div>
         </div>
@@ -29,6 +32,7 @@
         @Prop() camera!: ICameraInfo;
         @Prop() serverUrl!: string;
         @Prop() commonToken!: string;
+        @Prop() dimension!: number;
 
         cameraConfig: ICameraInfo | null = null;
         hlsPlayer: any = null;
@@ -95,7 +99,7 @@
         }
 
         play() {
-            if (!this.cameraConfig || !this.cameraId || !this.serverUrl || !this.commonToken) {
+            if (!this.cameraConfig || !this.cameraId || !this.serverUrl || !this.commonToken || this.cameraErrorStatus === 'status_off' || this.cameraErrorStatus === 'status_disconnect') {
                 return;
             }
             const playUrl: string = this.serverUrl + '/mp4play?url=' + encodeURIComponent(this.cameraConfig.streamServer + '/flvplayback/' + this.cameraId + '?token=' + this.commonToken);
@@ -157,6 +161,9 @@
 </script>
 <style lang="less">
     .monitor_player {
+        position:relative;
+        width:100%;
+        height:100%;
         .video-js {
             position: absolute;
             width: 100%;
@@ -172,29 +179,184 @@
         }
         .label_wrap {
             position: absolute;
-            bottom: 10px;
-            left: 10px;
-            img {
-                width: 27px;
-                height: 28px;
+            .cam_label {
+                text-shadow: 0.7px 0.7px 7px rgba(0, 0, 0, 0.77);
+                font-weight: bold;
+            }
+            .share_icon {
+                margin-left: 5px;
+                margin-bottom: -3px;
             }
         }
         .event_marker {
             position: absolute;
-            bottom: 50px;
-            left: 10px;
-            img {
-                width: 42px;
-                height: 42px;
-            }
         }
         .error_wrap {
             position: absolute;
             left: 47%;
-            top: 45%;
-            img {
-                width: 60px;
-                height: 53px;
+            top: 40%;
+            text-align: center;
+            .error_text {
+                color: #b4b4b4;
+                font-weight: 300;
+                margin-top: 20px;
+            }
+        }
+        &.dimension1 {
+            .label_wrap {
+                bottom: 27px; left: 25px;
+                .cam_label {
+                    font-size: 21px;
+                }
+                .share_icon {
+                    width: 30px; height: 31px;
+                }
+            }
+            .event_marker {
+                bottom: 58px; left: 20px;
+                img {
+                    width: 44px; height: 44px;
+                }
+            }
+            .error_wrap {
+                img {
+                    width: 64px; height: 58px;
+                }
+                .error_text {
+                    font-size: 22px;
+                }
+            }
+        }
+        &.dimension2 {
+            .label_wrap {
+                bottom: 25px; left: 22px;
+                .cam_label {
+                    font-size: 19px;
+                }
+                .share_icon {
+                    width: 27px; height: 28px;
+                }
+            }
+            .event_marker {
+                bottom: 52px; left: 16px;
+                img {
+                    width: 42px; height: 42px;
+                }
+            }
+            .error_wrap {
+                img {
+                    width: 60px; height: 53px;
+                }
+                .error_text {
+                    font-size: 20px;
+                }
+            }
+        }
+        &.dimension3 {
+            .label_wrap {
+                bottom: 22px; left: 22px;
+                .cam_label {
+                    font-size: 17px;
+                }
+                .share_icon {
+                    width: 25px; height: 26px;
+                }
+            }
+            .event_marker {
+                bottom: 46px; left: 20px;
+                img {
+                    width: 40px; height: 40px;
+                }
+            }
+            .error_wrap {
+                left: 45%; top: 36%;
+                img {
+                    width: 54px; height: 48px;
+                }
+                .error_text {
+                    font-size: 18px;
+                }
+            }
+        }
+        &.dimension4 {
+            .label_wrap {
+                bottom: 18px; left: 20px;
+                .cam_label {
+                    font-size: 16px;
+                }
+                .share_icon {
+                    width: 22px; height: 23px;
+                }
+            }
+            .event_marker {
+                bottom: 42px; left: 19px;
+                img {
+                    width: 34px; height: 34px;
+                }
+            }
+            .error_wrap {
+                left: 43%; top: 32%;
+                img {
+                    width: 42px; height: 39px;
+                }
+                .error_text {
+                    font-size: 16px;
+                    margin-top: 11px;
+                }
+            }
+        }
+        &.dimension5 {
+            .label_wrap {
+                bottom: 16px; left: 18px;
+                .cam_label {
+                    font-size: 15px;
+                }
+                .share_icon {
+                    width: 21px; height: 22px;
+                }
+            }
+            .event_marker {
+                bottom: 36px; left: 16px;
+                img {
+                    width: 30px; height: 30px;
+                }
+            }
+            .error_wrap {
+                left: 42%; top: 29%;
+                img {
+                    width: 34px; height: 32px;
+                }
+                .error_text {
+                    font-size: 15px;
+                    margin-top: 10px;
+                }
+            }
+        }
+        &.dimension6 {
+            .label_wrap {
+                bottom: 14px; left: 17px;
+                .cam_label {
+                    font-size: 14px;
+                }
+                .share_icon {
+                    width: 20px; height: 21px;
+                }
+            }
+            .event_marker {
+                bottom: 35px; left: 14px;
+                img {
+                    width: 28px; height: 28px;
+                }
+            }
+            .error_wrap {
+                left: 42%; top: 29%;
+                img {
+                    width: 30px; height: 28px;
+                }
+                .error_text {
+                    font-size: 14px;
+                    margin-top: 5px;
+                }
             }
         }
     }

@@ -1,7 +1,8 @@
 <template>
     <div class="tc_mgrid" :style="{gridTemplateColumns: gridColumns, gridTemplateRows: gridRows}">
         <div class="gitem" v-for="(gItem, index) in gridItems" :key="gItem.camera ? gItem.camera.cameraId : index">
-            <mplayer v-if="gItem.camera" :camera="gItem.camera" :ref="gItem.camera.cameraId" :serverUrl="getPlayServerUrl()" :commonToken="commonToken"></mplayer>
+            <mplayer v-if="gItem.camera" :camera="gItem.camera" :ref="gItem.camera.cameraId" :serverUrl="getPlayServerUrl()"
+                     :dimension="dimension" :commonToken="commonToken"></mplayer>
         </div>
     </div>
 </template>
@@ -91,8 +92,8 @@
         }
 
         gridSizeChange(width: number, height: number) {
-            this.gWidth = width ? width : 0;
-            this.gHeight = height ? height : 0;
+            this.gWidth = width ? width - 1 : 0;
+            this.gHeight = height ? height - 1 : 0;
             this.gridColumns = 'repeat(' + this.dimension + ', ' + ((this.gWidth / this.dimension) - this.dimension) + 'px)';
             this.gridRows = 'repeat(' + this.dimension + ', ' + ((this.gHeight / this.dimension) - this.dimension) + 'px)';
         }
@@ -105,12 +106,12 @@
 <style lang="less">
     .tc_mgrid {
         display: grid;
-        grid-gap: 1px;
+        grid-gap: 1.2px;
         background-color: #fff;
         color: #444;
         .gitem {
             position: relative;
-            background-color: #444;
+            background-color: black;
             color: #fff;
         }
     }
