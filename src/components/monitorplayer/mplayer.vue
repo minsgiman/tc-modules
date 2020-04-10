@@ -103,21 +103,19 @@
                 return;
             }
             const playUrl: string = this.serverUrl + '/mp4play?url=' + encodeURIComponent(this.cameraConfig.streamServer + '/flvplayback/' + this.cameraId + '?token=' + this.commonToken);
-
+            this.stop();
             this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTING;
-            if (!this.hlsPlayer) {
-                const $video = $('<video/>', {
-                    class: 'video-js',
-                    id: 'my-player-' + this.cameraId,
-                    muted: true
-                });
-                $('#remoteVideosContainer_' + this.cameraId).append($video);
-                this.hlsPlayer = videojs('my-player-' + this.cameraId, {
-                    controls: false,
-                    errorDisplay: false,
-                    preload: 'auto'
-                });
-            }
+            const $video = $('<video/>', {
+                class: 'video-js',
+                id: 'my-player-' + this.cameraId,
+                muted: true
+            });
+            $('#remoteVideosContainer_' + this.cameraId).append($video);
+            this.hlsPlayer = videojs('my-player-' + this.cameraId, {
+                controls: false,
+                errorDisplay: false,
+                preload: 'auto'
+            });
             this.hlsPlayer.src([
                 { type: "video/mp4", src: playUrl }
             ]);

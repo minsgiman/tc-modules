@@ -70,17 +70,19 @@
                 dimension: 4,
                 eventHandler: (event: any) => {
                     console.log('event : ' + JSON.stringify(event));
+                    //this.$emit('event', {type: 'click', id: cameraId});
                 }
             });
 
-            // setTimeout(() => {
-            //     this.player.updateCameraStatus({
-            //         cameraId: 'AAAAAACDVD', labelName: 'AAAAAACDVD', cameraModelId: '', recordType: '24h', categoryList: ['sharedShopCamera'],
-            //         controlStatus: 'on', streamStatus: 'on', streamStatusConfig: 'on',
-            //         streamServer: 'rtmps://devmedia011.toastcam.com:10082',
-            //         subStreamServer: '', motionStatus: 'on', motionTimestamp: 0
-            //     })
-            // }, 5000);
+            setTimeout(() => {
+                this.player.updateCameraStatus({
+                    cameraId: 'AAAAAACDVD', labelName: 'AAAAAACDVD', cameraModelId: '', recordType: '24h', categoryList: ['sharedShopCamera'],
+                    controlStatus: 'on', streamStatus: 'on', streamStatusConfig: 'on',
+                    streamServer: 'rtmps://devmedia011.toastcam.com:10082',
+                    subStreamServer: '', motionStatus: 'on', motionTimestamp: 0
+                });
+                this.player.playCamera('AAAAAACDVD');
+            }, 5000);
 
             /*
             setTimeout(() => {
