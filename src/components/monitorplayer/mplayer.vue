@@ -7,7 +7,7 @@
             <div :id="'remoteVideosContainer_' + cameraId" style="width:100%;height:100%;"></div>
         </div>
         <div class="label_wrap">
-            <span class="cam_label">{{cameraConfig ? cameraConfig.labelName : ''}}</span>
+            <span class="cam_name_label">{{cameraConfig ? cameraConfig.labelName : ''}}</span>
             <img class="share_icon" v-if="shareStatus" src="/resources/img/ic-cctv-share.png">
         </div>
         <div class="event_marker" v-if="cameraConfig && cameraConfig.motionTimestamp">
@@ -75,7 +75,7 @@
         }
 
         get shareStatus(): boolean {
-            if (this.cameraConfig) {
+            if (this.cameraConfig && this.cameraConfig.categoryList) {
                 return this.cameraConfig.categoryList.some((category: string) => {
                     return category.indexOf('share') !== -1;
                 });
@@ -177,7 +177,7 @@
         }
         .label_wrap {
             position: absolute;
-            .cam_label {
+            .cam_name_label {
                 text-shadow: 0.7px 0.7px 7px rgba(0, 0, 0, 0.77);
                 font-weight: bold;
             }
@@ -203,7 +203,7 @@
         &.dimension1 {
             .label_wrap {
                 bottom: 27px; left: 25px;
-                .cam_label {
+                .cam_name_label {
                     font-size: 21px;
                 }
                 .share_icon {
@@ -228,7 +228,7 @@
         &.dimension2 {
             .label_wrap {
                 bottom: 25px; left: 22px;
-                .cam_label {
+                .cam_name_label {
                     font-size: 19px;
                 }
                 .share_icon {
@@ -253,7 +253,7 @@
         &.dimension3 {
             .label_wrap {
                 bottom: 22px; left: 22px;
-                .cam_label {
+                .cam_name_label {
                     font-size: 17px;
                 }
                 .share_icon {
@@ -279,7 +279,7 @@
         &.dimension4 {
             .label_wrap {
                 bottom: 18px; left: 20px;
-                .cam_label {
+                .cam_name_label {
                     font-size: 16px;
                 }
                 .share_icon {
@@ -306,7 +306,7 @@
         &.dimension5 {
             .label_wrap {
                 bottom: 16px; left: 18px;
-                .cam_label {
+                .cam_name_label {
                     font-size: 15px;
                 }
                 .share_icon {
@@ -333,7 +333,7 @@
         &.dimension6 {
             .label_wrap {
                 bottom: 14px; left: 17px;
-                .cam_label {
+                .cam_name_label {
                     font-size: 14px;
                 }
                 .share_icon {

@@ -66,6 +66,10 @@ class Player {
             toastcamAPIs.setConfig({
                 prefix: '/json/demo/'
             });
+        } else if (param.category === 'b2bdemo') {
+            toastcamAPIs.setConfig({
+                prefix: '/json/biz/demo/'
+            });
         } else {
             toastcamAPIs.setConfig({
                 prefix: '/json/'
