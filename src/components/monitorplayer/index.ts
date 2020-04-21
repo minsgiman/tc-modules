@@ -13,6 +13,7 @@ function createComponent(param: IMonitorPlayInfo) {
             height: param.height,
             commonToken: param.commonToken,
             serverUrls: param.serverUrls,
+            streamType: param.streamType,
             cameras: param.cameras,
             dimension: param.dimension
         }}).$mount();

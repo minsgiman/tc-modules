@@ -1,8 +1,8 @@
 <template>
     <div class="tc_mgrid" :style="{gridTemplateColumns: gridColumns, gridTemplateRows: gridRows}">
         <div class="gitem" @click="onClickCamera(gItem.camera ? gItem.camera.cameraId : '')" v-for="(gItem, index) in gridItems" :key="gItem.camera ? gItem.camera.cameraId : index">
-            <mplayer v-if="gItem.camera" :camera="gItem.camera" :ref="gItem.camera.cameraId" :serverUrl="getPlayServerUrl()"
-                     :dimension="dimension" :commonToken="commonToken"></mplayer>
+            <mplayer v-if="gItem.camera" :camera="gItem.camera" :ref="gItem.camera.cameraId" :serverUrl="serverUrlMap[gItem.camera.cameraId]"
+                     :streamType="streamType" :dimension="dimension" :commonToken="commonToken"></mplayer>
         </div>
     </div>
 </template>
@@ -35,12 +35,19 @@
         gridColumns: string = '';
         gridRows: string = '';
         gridCameras: any[] = [];
+        serverIdx: number = 0;
+        serverUrlMap: any = {};
 
         private created() {
+            this.gridCameras = this.cameras ? this.cameras : [];
+            this.serverIdx = 0;
+            this.serverUrlMap = {};
+            this.gridCameras.forEach((camera) => {
+                this.serverUrlMap[camera.cameraId] = this.getPlayServerUrl();
+            });
         }
 
         private mounted() {
-            this.gridCameras = this.cameras ? this.cameras : [];
             this.gridSizeChange(this.width, this.height);
             this.buildGridItems();
         }
@@ -67,20 +74,28 @@
             }, 0);
         }
 
-        getPlayServerUrl() {
-            //TODO:
-            return this.serverUrls[0];
+        getPlayServerUrl(): string {
+            const idx: number = this.serverIdx % this.serverUrls.length;
+            const url: string = this.serverUrls[idx];
+            this.serverIdx += 1;
+            return url;
         }
 
         unshiftCamera(camera: any) {
             this.gridItems.pop();
             this.gridItems.unshift({
                 camera: camera
-            })
+            });
+            this.serverUrlMap[camera.cameraId] = this.getPlayServerUrl();
         }
 
         changeCameras(cameras: any[]) {
             this.gridCameras = cameras ? cameras : [];
+            this.serverIdx = 0;
+            this.serverUrlMap = {};
+            this.gridCameras.forEach((camera) => {
+                this.serverUrlMap[camera.cameraId] = this.getPlayServerUrl();
+            });
             this.buildGridItems();
         }
 

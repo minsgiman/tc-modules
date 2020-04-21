@@ -34,13 +34,13 @@
                         cameraId: 'AAAAAACDVD', labelName: 'AAAAAACDVD', cameraModelId: '', recordType: '24h', categoryList: ['myCamera'],
                         controlStatus: 'off', streamStatus: 'on', streamStatusConfig: 'on',
                         streamServer: 'rtmps://devmedia011.toastcam.com:10082',
-                        subStreamServer: '', motionStatus: 'on', motionTimestamp: 1234567890123
+                        subStreamServer: 'rtmps://devmedia011.toastcam.com:10082', motionStatus: 'on', motionTimestamp: 1234567890123
                     },
                     {
                         cameraId: 'AAAAAACALM', labelName: 'AAAAAACALM', cameraModelId: '', recordType: '24h', categoryList: ['myCamera'],
                         controlStatus: 'on', streamStatus: 'on', streamStatusConfig: 'on',
                         streamServer: 'rtmps://devmedia011.toastcam.com:10082',
-                        subStreamServer: '', motionStatus: 'on', motionTimestamp: 0
+                        subStreamServer: 'rtmps://devmedia011.toastcam.com:10082', motionStatus: 'on', motionTimestamp: 0
                     },
                     {
                         cameraId: 'AAAAAADFJS', labelName: 'AAAAAADFJS', cameraModelId: '', recordType: '24h', categoryList: ['sharedShopCamera'], // myCamera

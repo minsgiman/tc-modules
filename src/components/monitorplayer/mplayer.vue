@@ -32,6 +32,7 @@
         @Prop() camera!: ICameraInfo;
         @Prop() serverUrl!: string;
         @Prop() commonToken!: string;
+        @Prop() streamType!: string;
         @Prop() dimension!: number;
 
         cameraConfig: ICameraInfo | null = null;
@@ -98,11 +99,35 @@
             }
         }
 
+        isSupportSubstream(): boolean {
+            if (!this.cameraConfig) {
+                return false;
+            }
+            const modelId = this.cameraConfig.cameraModelId;
+            if (modelId === 'KTNC-BULLET-100N' || modelId === 'XC-IL521FL' || modelId === 'NHNGATEWAY' ||
+                modelId === 'KTNC-DOME-100N' || modelId === 'IP-XC-ID521FL' || modelId === 'IP-XC-IL521FL' || modelId === 'XC-ID521FL' ||
+                modelId === 'FND-101N' || modelId === 'FNB-101N' || modelId === 'toastcam_v1' || modelId === 'gateway') {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
         play() {
             if (!this.cameraConfig || !this.cameraId || !this.serverUrl || !this.commonToken || this.cameraErrorStatus === 'status_off' || this.cameraErrorStatus === 'status_disconnect') {
                 return;
             }
-            const playUrl: string = this.serverUrl + '/mp4play?url=' + encodeURIComponent(this.cameraConfig.streamServer + '/flvplayback/' + this.cameraId + '?token=' + this.commonToken);
+
+            let mediaUrl, cameraId;
+            if (this.streamType === 'sub' && this.isSupportSubstream()) {
+                mediaUrl = this.cameraConfig.subStreamServer;
+                cameraId = this.cameraId + '_SUB';
+            } else {
+                mediaUrl = this.cameraConfig.streamServer;
+                cameraId = this.cameraId;
+            }
+            const rtmpUrl = encodeURIComponent(mediaUrl + '/flvplayback/' + cameraId + '?token=' + this.commonToken);
+            const playUrl: string = this.serverUrl + '/mp4play?url=' + rtmpUrl;
             this.stop();
             this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTING;
             const $video = $('<video/>', {
