@@ -1,6 +1,5 @@
 <template>
     <div id="zoom_wrapper" class="zoom_wrap" v-show="showZoomArea" :style="{width: zoomAreaInfo.width + 'px', height: zoomAreaInfo.height + 'px'}">
-        <video id="zoom_player" muted class="video-js zoom_video"></video>
         <div id="zoom_area"></div>
     </div>
 </template>
@@ -9,6 +8,7 @@
     import { Component, Vue, Watch } from 'vue-property-decorator';
     import videojs from 'video.js';
     import store from '../../service/player/store';
+    import toastcamAPIs from './../../service/toastcamAPIs';
 
     const d3: any = (window as any).d3 as any;
     const $: any = (window as any).$ as any;
@@ -20,15 +20,20 @@
         showZoomArea: boolean = false;
         zoomAreaInfo: any = {width: 160, height: 90};
         hlsPlayer: any = null;
+        hlsServer: string = 'https://devmedia010.toastcam.com:10099';
+        isPlay: boolean = false;
         zoomMoverInfo: any = {x: 0, y: 0, width: 0, height: 0};
 
         @Watch('hlsPlayUrl')
         onPlayUrlChanged(value: string, oldValue: string) {
-            this.setVideoSource(value);
+            this.changeZoom(1);
         }
 
         get hlsPlayUrl() {
             return store.state.hlsPlayUrl;
+        }
+        get thumbnail() {
+            return store.getters.thumbnail;
         }
         get playerSize() {
             return store.state.playerSize;
@@ -36,28 +41,63 @@
         get hlsZoomLevel() {
             return store.state.hlsZoomLevel;
         }
+        get isShared() {
+            return store.state.isShared;
+        }
+        get cameraData() {
+            return store.state.cameraData;
+        }
+        get isLive() {
+            return store.state.isLive;
+        }
+        get currentTime() {
+            return store.state.currentTime;
+        }
 
         private mounted() {
+            this.makeZoomArea('zoom_area');
+        }
+
+        private beforeDestroy() {
+            this.stop();
+        }
+
+        stop() {
+            if (this.hlsPlayer) {
+                this.hlsPlayer.dispose();
+                this.hlsPlayer = null;
+                this.isPlay = false;
+            }
+        }
+        play() {
+            this.stop();
+            const $video = $('<video/>', {
+                class: 'video-js zoom_video',
+                id: 'zoom_player',
+                muted: true,
+                poster: this.thumbnail
+            });
+            $('#zoom_wrapper').append($video);
             this.hlsPlayer = videojs('zoom_player', {
                 controls: false,
                 errorDisplay: false,
                 preload: 'auto'
             });
-            if (this.hlsPlayUrl) {
-                this.setVideoSource(this.hlsPlayUrl);
-            }
-            this.hlsPlayer.on('ready', () => {
-                this.hlsPlayer.play();
+            toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAM_TOKEN : toastcamAPIs.camera.GET_TOKEN, {cameraId: this.cameraData.id}, (res: any) => {
+                let playUrl: string = '';
+                if (this.isLive) {
+                    playUrl = this.cameraData.mediaStreamURL + '?token=' + res.token;
+                } else {
+                    playUrl = this.cameraData.mediaStreamURL + '?token=' + res.token + '&time=' + this.currentTime.getTime();
+                }
+                this.hlsPlayer.src([
+                    { type: "video/mp4", src: this.hlsServer + '/mp4play?url=' + encodeURIComponent(playUrl) }
+                ]);
+                //this.hlsPlayer.on('ready', () => {
+                    this.hlsPlayer.play();
+                //});
+                this.isPlay = true;
             });
-            this.hlsPlayer.on('error', () => {
-            });
-            this.makeZoomArea('zoom_area');
-        }
-
-        private beforeDestroy() {
-            if (this.hlsPlayer) {
-                this.hlsPlayer.dispose();
-            }
         }
 
         makeZoomArea(id: string) {
@@ -133,16 +173,6 @@
             console.log('handlePolyDragEnd : ' + JSON.stringify(this.zoomMoverInfo));
         }
 
-        setVideoSource(src: string) {
-            if (this.hlsPlayer) {
-                this.changeZoom(1);
-                this.hlsPlayer.src([
-                    { type: "video/mp4", src: src }
-                ]);
-                this.hlsPlayer.play();
-            }
-        }
-
         updateVideoTransform() {
             const moverCenter = {
                 x: this.zoomMoverInfo.x + (this.zoomMoverInfo.width / 2),
@@ -168,6 +198,9 @@
             $("#zoom_cursor_length").css("width", ((this.hlsZoomLevel - 1) * 25) + "%");
             this.updateMoverPosition();
             this.updateVideoTransform();
+            if (!this.showZoomArea) {
+                this.stop();
+            }
         }
 
         zoomUpHandler(value: number) {
@@ -186,6 +219,13 @@
             $("#zoom_cursor_length").css("width", ((this.hlsZoomLevel - 1) * 25) + "%");
             this.updateMoverPosition();
             this.updateVideoTransform();
+            if (!this.showZoomArea) {
+                this.stop();
+            } else {
+                if (!this.isPlay) {
+                    this.play();
+                }
+            }
         }
 
         updateMoverPosition() {
@@ -239,6 +279,7 @@
         }
         #zoom_area {
             position: absolute;
+            z-index: 1;
             width: 100%;
             height: 100%;
             left: 0px;

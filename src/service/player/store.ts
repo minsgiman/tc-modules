@@ -35,6 +35,9 @@ const store = new Vuex.Store({
         hlsZoomLevel: 1
     } as IStoreState,
     getters: {
+        thumbnail: (state) => {
+            return state.cameraData ? 'https://' + state.cameraData.thumbnailPath : '';
+        },
         isExpiredCloud: (state) => {
             if ((state.cameraData.serviceType === 'n/a' || state.cameraData.serviceType === '0d' || state.cameraData.saveEndDate < Date.now()) && state.cameraData.recorderType !== 'nvr') {
                 return true;
