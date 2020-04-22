@@ -5,7 +5,6 @@
         </div>
 
         <div id="remote_stream" style="display:none; height:100%;" class="player_cam remoteStreams">
-            <h2>Remote Streams</h2>
             <!--img id="hls_logo" src="/resources/img/toast_cam_logo.png" style="position:absolute; left:12%; top:5%; width:75%; z-index:1;"-->
             <img id="hls_loading" src="/resources/img/progress_rolling_white.svg" style="position:absolute; left:47%; top:33%; z-index:1; width:55px;">
             <div id="remoteVideosContainer" style="width:100%;height:100%;"></div>

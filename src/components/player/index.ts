@@ -58,7 +58,7 @@ class Player {
     control: any;
 
     constructor(param: any) {
-        if (param.category === 'b2b') {
+        if (param.category === 'b2b' || param.category === 'b2bmonitor') {
             toastcamAPIs.setConfig({
                 prefix: '/json/biz/'
             });

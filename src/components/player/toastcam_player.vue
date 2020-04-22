@@ -104,6 +104,9 @@
         get playerType() {
             return store.state.playerType;
         }
+        get category() {
+            return store.state.category;
+        }
 
         timeline: any = null;
         playTimer: any = null;
@@ -145,9 +148,9 @@
             that.cvrPlaySecureManagerFull = that.createComponent(cvrPlaySecureManager, getElementId('cvrPlaySecureLayerFull'), that.cvrPlaySecureEventFullHandler.bind(that));
             that.timelineDateSelector = that.createComponent(timelineDateSelector, getElementId('timelineDateSelector'), that.timlineDateSelectorEventHandler.bind(that));
             that.eventMoveBtn = that.createComponent(eventMoveBtn, getElementId('eventMoveBtn'), that.eventMoveBtnEventHandler.bind(that), {timeline: that.timeline});
-            that.eventMoveFullBtn = that.createComponent(eventMoveBtn, getElementId('eventMoveFullBtn'), that.eventMoveBtnEventHandler.bind(that), {timeline: that.timeline, fullMode: true});
-            that.timelineTimeController = that.createComponent(timelineTimeController, getElementId('timelineTimeController'), that.timelineTimeControllerEventHandler.bind(that), {timeline: that.timeline, fullMode: false});
-            that.timelineTimeFullController = that.createComponent(timelineTimeController, getElementId('timelineTimeFullController'), that.timelineTimeControllerEventHandler.bind(that), {timeline: that.timeline, fullMode: true});
+            that.eventMoveFullBtn = that.createComponent(eventMoveBtn, getElementId('eventMoveFullBtn'), that.eventMoveBtnEventHandler.bind(that), {timeline: that.timeline, fullMode: that.category === 'b2bmonitor' ? false : true});
+            that.timelineTimeController = that.createComponent(timelineTimeController, getElementId('timelineTimeController'), that.timelineTimeControllerEventHandler.bind(that), {timeline: that.timeline, fullMode: that.category === 'b2bmonitor' ? true : false});
+            that.timelineTimeFullController = that.createComponent(timelineTimeController, getElementId('timelineTimeFullController'), that.timelineTimeControllerEventHandler.bind(that), {timeline: that.timeline, fullMode: that.category === 'b2bmonitor' ? false : true});
             that.timelineTimeSelector = that.createComponent(timelineTimeSelector, getElementId('timelineTimeSelector'), that.timelineTimeSelectorEventHandler.bind(that));
             that.playIndicator = that.createComponent(playIndicator, getElementId('playIndicator'), that.playIndicatorEventHandler.bind(that));
             that.calendarBtn = that.createComponent(calendarBtn, getElementId('calendarBtn'), that.calendarBtnEventHandler.bind(that));
