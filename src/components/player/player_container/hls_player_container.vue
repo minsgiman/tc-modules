@@ -54,7 +54,7 @@
                 this.player.pause();
             },
             stop : function () {
-                $('#remoteVideosContainer').empty();
+                $('#remoteHLSContainer').empty();
                 this.player.stop();
                 //$('#hls_logo').hide();
                 $('#hls_loading').hide();

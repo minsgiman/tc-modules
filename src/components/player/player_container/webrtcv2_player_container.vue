@@ -54,7 +54,7 @@
                 this.player.pause();
             },
             stop : function () {
-                $('#remoteVideosContainer').empty();
+                $('#remoteWebRTCContainer').empty();
                 this.player.stop();
                 $('#webrtc_logo').hide();
                 $('#webrtc_loading').hide();

@@ -4,10 +4,10 @@
             <video id="localVideo" muted="muted" autoplay="true"></video>
         </div>
 
-        <div id="remote_stream" style="display:none; height:100%;" class="player_cam remoteStreams">
+        <div id="hls_remote_stream" style="display:none; height:100%;" class="player_cam remoteStreams">
             <!--img id="hls_logo" src="/resources/img/toast_cam_logo.png" style="position:absolute; left:12%; top:5%; width:75%; z-index:1;"-->
             <img id="hls_loading" src="/resources/img/progress_rolling_white.svg" style="position:absolute; left:47%; top:33%; z-index:1; width:55px;">
-            <div id="remoteVideosContainer" style="width:100%;height:100%;"></div>
+            <div id="remoteHLSContainer" style="width:100%;height:100%;"></div>
         </div>
     </div>
 </template>
@@ -41,7 +41,6 @@
         get browserInfo() {
             return store.state.browserInfo;
         }
-
         hlsServer: string = 'https://devmedia010.toastcam.com:10099';
         hlsPlayer: any = null;
         hlsStatus: string = '';
@@ -54,13 +53,14 @@
 
         private mounted() {
             $('#player').hide();
-            $('#remote_stream').show();
+            $('#hls_remote_stream').show();
         }
         private beforeDestroy() {
             if (this.hlsPlayer) {
                 this.hlsPlayer.dispose();
                 this.hlsPlayer = null;
             }
+            $('#hls_player_wrap').hide();
         }
 
         play(cameraIdValue: string, url: string) {
@@ -73,7 +73,7 @@
                     id: 'my-player',
                     muted: true
                 });
-                $('#remoteVideosContainer').append($video);
+                $('#remoteHLSContainer').append($video);
                 this.hlsPlayer = videojs('my-player', {
                     controls: false,
                     errorDisplay: false,
