@@ -23,9 +23,9 @@
 <script lang="ts">
     import { Component, Prop, Vue } from 'vue-property-decorator';
     import videojs from 'video.js';
-    import $ from 'jquery';
+    //import $ from 'jquery';
     import { ICameraInfo } from './interface';
-    //const $: any = (window as any).$ as any;
+    const $: any = (window as any).$ as any;
 
     @Component
     export default class MonitorHlsPlayer extends Vue {

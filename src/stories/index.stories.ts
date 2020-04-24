@@ -4,6 +4,7 @@ import components from './components.vue';
 import dialogs from './dialogs.vue';
 import camlist from './camlist.vue';
 import monitorplayer from './monitorplayer.vue';
+import simpleplayer from './html_simple_player.vue';
 
 storiesOf('components', module)
     .add('components', () => ({
@@ -21,4 +22,8 @@ storiesOf('components', module)
     .add('monitorplayer', () => ({
         components: { monitorplayer },
         template: '<monitorplayer/>'
+    }))
+    .add('simpleplayer', () => ({
+        components: { simpleplayer },
+        template: '<simpleplayer/>'
     }));
