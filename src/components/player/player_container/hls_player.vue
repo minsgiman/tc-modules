@@ -41,6 +41,13 @@
         get browserInfo() {
             return store.state.browserInfo;
         }
+        get currentTime() {
+            return store.state.currentTime;
+        }
+        get isLive() {
+            return store.state.isLive;
+        }
+        pausedTime: number = 0;
         loadCheckInterval: any = null;
         showLoading: boolean = false;
         hlsServer: string = 'https://devmedia010.toastcam.com:10099';
@@ -67,6 +74,8 @@
         }
 
         play(cameraIdValue: string, url: string) {
+            let isResume: boolean = false;
+
             this.showLoading = true;
             this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTING;
             if (!this.hlsPlayer) {
@@ -82,12 +91,18 @@
                 });
                 this.updatePlayerSize();
             }
-            //TODO: if url is same, just call play
-            const playUrl = this.hlsServer + '/mp4play?url=' + encodeURIComponent(url);
-            store.dispatch('HLS_PLAY_URL_CHANGE', playUrl);
-            this.hlsPlayer.src([
-                { type: "video/mp4", src: playUrl }
-            ]);
+
+            if (!this.isLive && this.hlsPlayer.paused() && this.pausedTime === this.currentTime.valueOf()) {
+                isResume = true;
+            }
+
+            if (!isResume) {
+                const playUrl = this.hlsServer + '/mp4play?url=' + encodeURIComponent(url);
+                store.dispatch('HLS_PLAY_URL_CHANGE', playUrl);
+                this.hlsPlayer.src([
+                    { type: "video/mp4", src: playUrl }
+                ]);
+            }
 
             clearInterval(this.loadCheckInterval);
             this.loadCheckInterval = setInterval(() => {
@@ -168,6 +183,7 @@
 
         pause() {
             if (this.hlsPlayer) {
+                this.pausedTime = this.currentTime.valueOf();
                 this.hlsPlayer.pause();
             }
         }
