@@ -70,8 +70,6 @@
 
         getIsPlaying(): boolean {
             if (this.hlsPlayer) {
-                console.log('duration : ' + this.hlsPlayer.duration());
-                console.log('paused : ' + this.hlsPlayer.paused());
                 return (this.hlsPlayer.duration() && !this.hlsPlayer.paused());
             } else {
                 return false;

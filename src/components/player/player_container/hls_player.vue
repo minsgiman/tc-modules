@@ -6,7 +6,7 @@
 
         <div id="hls_remote_stream" style="display:none; height:100%;" class="player_cam remoteStreams">
             <!--img id="hls_logo" src="/resources/img/toast_cam_logo.png" style="position:absolute; left:12%; top:5%; width:75%; z-index:1;"-->
-            <img id="hls_loading" src="/resources/img/progress_rolling_white.svg" style="position:absolute; left:47%; top:33%; z-index:1; width:55px;">
+            <img v-show="showLoading" id="hls_loading" src="/resources/img/progress_rolling_white.svg" style="position:absolute; left:47%; top:33%; z-index:1; width:55px;">
             <div id="remoteHLSContainer" style="width:100%;height:100%;"></div>
         </div>
     </div>
@@ -41,6 +41,8 @@
         get browserInfo() {
             return store.state.browserInfo;
         }
+        loadCheckInterval: any = null;
+        showLoading: boolean = false;
         hlsServer: string = 'https://devmedia010.toastcam.com:10099';
         hlsPlayer: any = null;
         hlsStatus: string = '';
@@ -60,18 +62,17 @@
                 this.hlsPlayer.dispose();
                 this.hlsPlayer = null;
             }
+            clearInterval(this.loadCheckInterval);
             $('#hls_player_wrap').hide();
         }
 
         play(cameraIdValue: string, url: string) {
-            //$('#hls_logo').show();
-            $('#hls_loading').show();
+            this.showLoading = true;
             this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTING;
             if (!this.hlsPlayer) {
                 const $video = $('<video/>', {
                     class: 'video-js',
-                    id: 'my-player',
-                    muted: true
+                    id: 'my-player'
                 });
                 $('#remoteHLSContainer').append($video);
                 this.hlsPlayer = videojs('my-player', {
@@ -81,22 +82,56 @@
                 });
                 this.updatePlayerSize();
             }
-
+            //TODO: if url is same, just call play
             const playUrl = this.hlsServer + '/mp4play?url=' + encodeURIComponent(url);
             store.dispatch('HLS_PLAY_URL_CHANGE', playUrl);
             this.hlsPlayer.src([
                 { type: "video/mp4", src: playUrl }
             ]);
-            this.hlsPlayer.on('ready', () => {
-               // $('#hls_logo').hide();
-                $('#hls_loading').hide();
-                this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTED;
-                this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
-                this.hlsPlayer.play();
+
+            clearInterval(this.loadCheckInterval);
+            this.loadCheckInterval = setInterval(() => {
+                if (this.hlsPlayer.duration()) {
+                    clearInterval(this.loadCheckInterval);
+                    this.showLoading = false;
+                    this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTED;
+                    this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+                    this.hlsPlayer.play();
+                }
+            }, 200);
+
+            this.hlsPlayer.on('canplay', () => {
+                console.log('canplay');
+            });
+            this.hlsPlayer.on('ended', () => {
+                console.log('ended');
+            });
+            this.hlsPlayer.on('playing', () => {
+                console.log('playing');
+            });
+            this.hlsPlayer.on('loadeddata', () => {
+                console.log('loadeddata');
+            });
+            this.hlsPlayer.on('progress', () => {
+                console.log('progress');
+            });
+            this.hlsPlayer.on('stalled', () => {
+                console.log('stalled');
+            });
+            this.hlsPlayer.on('suspend', () => {
+                console.log('suspend');
+            });
+            this.hlsPlayer.on('abort', () => {
+                console.log('abort');
+            });
+            this.hlsPlayer.on('progress', () => {
+                console.log('progress');
             });
             this.hlsPlayer.on('error', () => {
+                console.log('error');
                 //$('#hls_logo').show();
-                $('#hls_loading').show();
+                clearInterval(this.loadCheckInterval);
+                this.showLoading = true;
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_DISCONNECTED;
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
             });
@@ -118,6 +153,13 @@
             this.hlsPlayer.children()[0].style['transform'] = value;
         }
 
+        mute() {
+            const videoEl: HTMLVideoElement | null = document.querySelector('#my-player video');
+            if (videoEl) {
+                videoEl.muted = !videoEl.muted;
+            }
+        }
+
         resume() {
             if (this.hlsPlayer) {
                 this.hlsPlayer.play();
@@ -131,9 +173,9 @@
         }
 
         stop() {
+            clearInterval(this.loadCheckInterval);
             this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_STOPPED;
-            $('#webrtc_logo').hide();
-            $('#webrtc_loading').hide();
+            this.showLoading = false;
             if (this.hlsPlayer) {
                 this.hlsPlayer.dispose();
                 this.hlsPlayer = null;

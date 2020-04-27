@@ -36,19 +36,17 @@
             play : function (url: string) {
                 this.player.dvrConnectFail = false;
                 this.player.hlsStatus = this.player.hlsStatusEnum.EVENT_STREAM_CONNECTING;
-                if (this.player.currentHlsPeerId) {
-                    this.stop(this.player.currentHlsPeerId);
-                }
+                // if (this.player.currentHlsPeerId) {
+                //     this.stop(this.player.currentHlsPeerId);
+                // }
                 this.player.currentHlsPeerId = this.cameraData.id;
                 this.player.play(this.cameraData.id, url);
-                //$('#hls_logo').show();
-                $('#hls_loading').show();
             },
             resume : function () {
                 this.player.resume();
             },
             mute : function () {
-                return;
+                this.player.mute();
             },
             pause : function () {
                 this.player.pause();
@@ -56,8 +54,6 @@
             stop : function () {
                 $('#remoteHLSContainer').empty();
                 this.player.stop();
-                //$('#hls_logo').hide();
-                $('#hls_loading').hide();
             },
             close : function () {
                 this.player.close();
