@@ -55,16 +55,21 @@
 
             toastcamAPIs.call(toastcamAPIs.camera.GET_STREAMING_SERVER, {}, (res: any) => {
                 const playUrl = 'https://' + res.servers[0] + '/mp4play?url=' + encodeURIComponent(url);
-                this.hlsPlayer.src([
-                    { type: "video/mp4", src: playUrl }
-                ]);
-                this.hlsPlayer.on('ready', () => {
+                this.hlsPlayer.on('canplay', () => {
+                    console.log('canplay');
                     $('#splay_loading').hide();
                     this.hlsPlayer.play();
                 });
                 this.hlsPlayer.on('error', () => {
-                    $('#splay_loading').show();
+                    $('#splay_loading').hide();
+                    this.$emit('event', {type: 'error'});
                 });
+                this.hlsPlayer.src([
+                    { type: "video/mp4", src: playUrl }
+                ]);
+            }, () => {
+                $('#splay_loading').hide();
+                this.$emit('event', {type: 'error'});
             });
         }
 
