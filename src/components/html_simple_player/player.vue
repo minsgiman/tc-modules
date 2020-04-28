@@ -7,6 +7,7 @@
 <script lang="ts">
     import { Component, Prop, Vue } from 'vue-property-decorator';
     import videojs from 'video.js';
+    import toastcamAPIs from './../../service/toastcamAPIs';
     //import $ from 'jquery';
 
     const $: any = (window as any).$ as any;
@@ -18,6 +19,9 @@
         hlsPlayer: any = null;
 
         private created() {
+            toastcamAPIs.setConfig({
+                prefix: '/json/biz/'
+            });
         }
 
         private beforeDestroy() {
@@ -49,16 +53,18 @@
                 preload: 'auto'
             });
 
-            const playUrl = this.hlsServer + '/mp4play?url=' + encodeURIComponent(url);
-            this.hlsPlayer.src([
-                { type: "video/mp4", src: playUrl }
-            ]);
-            this.hlsPlayer.on('ready', () => {
-                $('#splay_loading').hide();
-                this.hlsPlayer.play();
-            });
-            this.hlsPlayer.on('error', () => {
-                $('#splay_loading').show();
+            toastcamAPIs.call(toastcamAPIs.camera.GET_STREAMING_SERVER, {}, (res: any) => {
+                const playUrl = 'https://' + res.servers[0] + '/mp4play?url=' + encodeURIComponent(url);
+                this.hlsPlayer.src([
+                    { type: "video/mp4", src: playUrl }
+                ]);
+                this.hlsPlayer.on('ready', () => {
+                    $('#splay_loading').hide();
+                    this.hlsPlayer.play();
+                });
+                this.hlsPlayer.on('error', () => {
+                    $('#splay_loading').show();
+                });
             });
         }
 

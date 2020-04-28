@@ -127,7 +127,7 @@
                 cameraId = this.cameraId;
             }
             const rtmpUrl = encodeURIComponent(mediaUrl + '/flvplayback/' + cameraId + '?token=' + this.commonToken);
-            const playUrl: string = this.serverUrl + '/mp4play?url=' + rtmpUrl;
+            const playUrl: string = 'https://' + this.serverUrl + '/mp4play?url=' + rtmpUrl;
             this.stop();
             this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTING;
             const $video = $('<video/>', {

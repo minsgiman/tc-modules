@@ -50,7 +50,6 @@
         pausedTime: number = 0;
         loadCheckInterval: any = null;
         showLoading: boolean = false;
-        hlsServer: string = 'https://devmedia010.toastcam.com:10099';
         hlsPlayer: any = null;
         hlsStatus: string = '';
         hlsStatusEnum: any = {
@@ -73,7 +72,7 @@
             $('#hls_player_wrap').hide();
         }
 
-        play(cameraIdValue: string, url: string) {
+        play(cameraIdValue: string, url: string, serverUrls: string[]) {
             let isResume: boolean = false;
 
             this.showLoading = true;
@@ -96,15 +95,22 @@
                 isResume = true;
             }
 
+            clearInterval(this.loadCheckInterval);
             if (!isResume) {
-                const playUrl = this.hlsServer + '/mp4play?url=' + encodeURIComponent(url);
-                store.dispatch('HLS_PLAY_URL_CHANGE', playUrl);
-                this.hlsPlayer.src([
-                    { type: "video/mp4", src: playUrl }
-                ]);
+                if (serverUrls && serverUrls.length) {
+                    const playUrl = 'https://' + serverUrls[0] + '/mp4play?url=' + encodeURIComponent(url);
+                    store.dispatch('HLS_PLAY_URL_CHANGE', playUrl);
+                    this.hlsPlayer.src([
+                        { type: "video/mp4", src: playUrl }
+                    ]);
+                } else {
+                    this.showLoading = true;
+                    this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_DISCONNECTED;
+                    this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+                    return;
+                }
             }
 
-            clearInterval(this.loadCheckInterval);
             this.loadCheckInterval = setInterval(() => {
                 if (this.hlsPlayer.duration()) {
                     clearInterval(this.loadCheckInterval);

@@ -1,6 +1,7 @@
 <script lang="ts">
     import store from '../../../service/player/store';
     import hlsPlayer from './hls_player.vue';
+    import toastcamAPIs from './../../../service/toastcamAPIs';
     import Vue from 'vue';
 
     const $: any = (window as any).$ as any;
@@ -40,7 +41,9 @@
                 //     this.stop(this.player.currentHlsPeerId);
                 // }
                 this.player.currentHlsPeerId = this.cameraData.id;
-                this.player.play(this.cameraData.id, url);
+                toastcamAPIs.call(toastcamAPIs.camera.GET_STREAMING_SERVER, {}, (res: any) => {
+                    this.player.play(this.cameraData.id, url, res.servers ? res.servers : []);
+                });
             },
             resume : function () {
                 this.player.resume();
