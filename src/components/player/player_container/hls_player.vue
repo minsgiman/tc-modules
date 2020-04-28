@@ -187,6 +187,10 @@
             }
         }
 
+        close() {
+            return;
+        }
+
         pause() {
             if (this.hlsPlayer) {
                 this.pausedTime = this.currentTime.valueOf();
