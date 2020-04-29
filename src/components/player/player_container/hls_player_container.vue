@@ -12,6 +12,9 @@
         computed: {
             cameraData: function () {
                 return store.state.cameraData;
+            },
+            country: function () {
+                return store.state.country;
             }
         },
         data: function () {
@@ -41,7 +44,7 @@
                 //     this.stop(this.player.currentHlsPeerId);
                 // }
                 this.player.currentHlsPeerId = this.cameraData.id;
-                toastcamAPIs.call(toastcamAPIs.camera.GET_STREAMING_SERVER, {}, (res: any) => {
+                toastcamAPIs.call(toastcamAPIs.camera.GET_STREAMING_SERVER, {country: this.country}, (res: any) => {
                     this.player.play(this.cameraData.id, url, res.servers ? res.servers : []);
                 });
             },

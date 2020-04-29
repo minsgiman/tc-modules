@@ -26,5 +26,6 @@ export interface IStoreState {
     playerType: string,
     playerSize: any,
     hlsPlayUrl: string,
-    hlsZoomLevel: number
+    hlsZoomLevel: number,
+    country: string
 }

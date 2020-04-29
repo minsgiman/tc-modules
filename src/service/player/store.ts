@@ -32,7 +32,8 @@ const store = new Vuex.Store({
         playerType: '',
         playerSize: {width: 0, height: 0},
         hlsPlayUrl: '',
-        hlsZoomLevel: 1
+        hlsZoomLevel: 1,
+        country: 'KR'
     } as IStoreState,
     getters: {
         thumbnail: (state) => {
@@ -166,6 +167,9 @@ const store = new Vuex.Store({
         HLS_ZOOM_LEVEL_CHANGE: (context, state) => {
             context.commit('UPDATE_HLS_ZOOM_LEVEL', state);
         },
+        COUNTRY_CHANGE: (context, state) => {
+            context.commit('UPDATE_COUNTRY', state);
+        },
         BROWSER_INFO: (context, state) => {
             const checkSupportWebRTC = (browserInfo: any) => {
                 if (!browserInfo || !browserInfo.name) {
@@ -294,6 +298,9 @@ const store = new Vuex.Store({
         },
         UPDATE_HLS_ZOOM_LEVEL: (state, value) => {
             state.hlsZoomLevel = value;
+        },
+        UPDATE_COUNTRY: (state, value) => {
+            state.country = value;
         }
     }
 });

@@ -82,6 +82,9 @@ class Player {
         this.setData('isShared', param.isShared);
         this.setData('browserInfo', browserCheck());
         this.setData('playerType', param.playerType);
+        if (param.country) {
+            this.setData('country', param.country);
+        }
 
         const vExtendConstructor: any = Vue.extend(playContainer);
         this.control = new vExtendConstructor({
@@ -174,6 +177,9 @@ class Player {
                 break;
             case 'playerType':
                 store.dispatch('PLAYER_TYPE_CHANGE', value);
+                break;
+            case 'country':
+                store.dispatch('COUNTRY_CHANGE', value);
                 break;
             default:
                 break;
