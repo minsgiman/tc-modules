@@ -85,6 +85,9 @@ class Player {
         if (param.country) {
             this.setData('country', param.country);
         }
+        if (param.mute) {
+            this.setData('mute', param.mute);
+        }
 
         const vExtendConstructor: any = Vue.extend(playContainer);
         this.control = new vExtendConstructor({
@@ -180,6 +183,9 @@ class Player {
                 break;
             case 'country':
                 store.dispatch('COUNTRY_CHANGE', value);
+                break;
+            case 'mute':
+                store.dispatch('MUTE_CHANGE', value);
                 break;
             default:
                 break;

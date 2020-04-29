@@ -226,6 +226,13 @@
                     this.playTimer.stopTimer();
                     this.player.stop(this.cameraData.id);
                     this.errorStatusLayer.cameraStatusChange(3);
+                } else if (status.status === 'event_stream_suspend') {
+                    this.player.stop();
+                    if (this.isLive) {
+                        this.player.play();
+                    } else {
+                        this.player.play(this.currentTime.getTime());
+                    }
                 } else if (status.status === 'v2_event_stream_connected') {
                     store.dispatch('IS_PLAYING_CHANGE', true);
                     this.playEventCb('isShowMikeChanged', true);

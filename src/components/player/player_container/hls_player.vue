@@ -47,6 +47,9 @@
         get isLive() {
             return store.state.isLive;
         }
+        get isMute() {
+            return store.state.mute;
+        }
         pausedTime: number = 0;
         loadCheckInterval: any = null;
         showLoading: boolean = false;
@@ -56,7 +59,8 @@
             EVENT_STREAM_CONNECTING : 'event_stream_connecting',
             EVENT_STREAM_CONNECTED : 'event_stream_connected',
             EVENT_STREAM_DISCONNECTED : 'event_stream_disconnected',
-            EVENT_STREAM_STOPPED : 'event_stream_stopped'
+            EVENT_STREAM_STOPPED : 'event_stream_stopped',
+            EVENT_STREAM_SUSPEND : 'event_stream_suspend'
         };
 
         private mounted() {
@@ -78,10 +82,14 @@
             this.showLoading = true;
             this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTING;
             if (!this.hlsPlayer) {
-                const $video = $('<video/>', {
+                const options: any = {
                     class: 'video-js',
                     id: 'my-player'
-                });
+                };
+                if (this.isMute) {
+                    options.muted = true;
+                }
+                const $video = $('<video/>', options);
                 $('#remoteHLSContainer').append($video);
                 this.hlsPlayer = videojs('my-player', {
                     controls: false,
@@ -140,6 +148,9 @@
                 console.log('stalled');
             });
             this.hlsPlayer.on('suspend', () => {
+                clearInterval(this.loadCheckInterval);
+                this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
+                this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
                 console.log('suspend');
             });
             this.hlsPlayer.on('abort', () => {
