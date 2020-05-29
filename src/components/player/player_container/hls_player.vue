@@ -106,10 +106,10 @@
             clearInterval(this.loadCheckInterval);
             if (!isResume) {
                 if (serverUrls && serverUrls.length) {
-                    const playUrl = 'https://' + serverUrls[0] + '/mp4play?url=' + encodeURIComponent(url);
+                    const playUrl = 'https://' + serverUrls[0] + '/hlsplay?url=' + encodeURIComponent(url);
                     store.dispatch('HLS_PLAY_URL_CHANGE', playUrl);
                     this.hlsPlayer.src([
-                        { type: "video/mp4", src: playUrl }
+                        { type: "application/x-mpegURL", src: playUrl }
                     ]);
                 } else {
                     this.showLoading = true;
