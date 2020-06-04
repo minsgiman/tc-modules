@@ -20,7 +20,6 @@
         showZoomArea: boolean = false;
         zoomAreaInfo: any = {width: 160, height: 90};
         hlsPlayer: any = null;
-        hlsServer: string = 'https://devmedia010.toastcam.com:10099';
         isPlay: boolean = false;
         zoomMoverInfo: any = {x: 0, y: 0, width: 0, height: 0};
 
