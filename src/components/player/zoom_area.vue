@@ -53,6 +53,9 @@
         get currentTime() {
             return store.state.currentTime;
         }
+        get country() {
+            return store.state.country;
+        }
 
         private mounted() {
             this.makeZoomArea('zoom_area');
@@ -90,13 +93,16 @@
                 } else {
                     playUrl = this.cameraData.mediaStreamURL + '?token=' + res.token + '&time=' + this.currentTime.getTime();
                 }
-                this.hlsPlayer.src([
-                    { type: "video/mp4", src: this.hlsServer + '/mp4play?url=' + encodeURIComponent(playUrl) }
-                ]);
-                //this.hlsPlayer.on('ready', () => {
+                toastcamAPIs.call(toastcamAPIs.camera.GET_STREAMING_SERVER, {country: this.country}, (serverRes: any) => {
+                    const server = serverRes.servers ? serverRes.servers[0] : '';
+                    this.hlsPlayer.src([
+                        { type: "application/x-mpegURL", src: 'https://' + server + '/hlsplay?url=' + encodeURIComponent(playUrl) }
+                    ]);
+                    //this.hlsPlayer.on('ready', () => {
                     this.hlsPlayer.play();
-                //});
-                this.isPlay = true;
+                    //});
+                    this.isPlay = true;
+                });
             });
         }
 
