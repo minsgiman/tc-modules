@@ -1,6 +1,6 @@
 <template>
     <div class="modal_dialog_cont">
-        <div class="dlg_wrap">
+        <div class="mod_dlg_wrap" @click="dimClickHandler($event)">
             <div class="content" :style="dlgStyle">
                 <slot name="content"></slot>
                 <button v-show="!noCloseBtn" class="btn_close" @click="closeDialog"></button>
@@ -61,6 +61,12 @@
             }
         }
 
+        dimClickHandler(event: any) {
+            if (event.target.className === 'mod_dlg_wrap') {
+                this.closeDialog();
+            }
+        }
+
         closeDialog() {
             this.$emit('close');
         }
@@ -77,12 +83,13 @@
         height: 100%;
         background-color: rgba(0,0,0,0.6);
         z-index: 999;
-        .dlg_wrap {
+        .mod_dlg_wrap {
             display:table-cell;
             text-align:center;
             vertical-align:middle;
             width:100%;
             height:100%;
+            cursor: pointer;
             .content {
                 max-height:100vh;
                 position:relative;

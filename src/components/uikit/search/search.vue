@@ -1,9 +1,16 @@
 <template>
     <div class="tc_search">
-        <span class="search_box" :class="{focusable: design === 'search'}" :style="boxStyle">
-            <img v-if="design === 'search'" class="search_img" src="/resources/img/btn-title-shop-search-small.svg">
-            <input ref="searchInput" type="search" autocomplete="new-password" :placeholder="placeholder" @input="searchStrUpdate" :style="{width: 'calc(100% - 70px)'}">
-            <img v-if="isShowDeleteBtn" class="delete_img" @click="deleteSearchStr()" src="/resources/img/btn-input-text-delete.svg">
+        <span class="search_box" :class="{focusable: design === 'search', focused: focused}" :style="boxStyle">
+            <span class="search_img">
+                <img v-if="design === 'search'" src="/resources/img/btn-title-shop-search-icon.svg">
+                <span class="dummy_full"></span>
+            </span>
+            <input ref="searchInput" type="search" autocomplete="new-password" :placeholder="placeholder"
+                   @focus="onFocus" @blur="onBlur" @input="searchStrUpdate" :style="{width: 'calc(100% - 70px)'}">
+            <span class="delete_img">
+                <img v-if="isShowDeleteBtn" @click="deleteSearchStr()" src="/resources/img/btn-input-text-delete.svg">
+                <span class="dummy_full"></span>
+            </span>
         </span>
     </div>
 </template>
@@ -17,6 +24,7 @@
         design: string = '';
         boxStyle: any = {};
         isShowDeleteBtn: boolean = false;
+        focused: boolean = false;
 
         get value(): string {
             const sInput = this.$refs.searchInput as HTMLInputElement;
@@ -30,6 +38,14 @@
 
         setFocus() {
             (this.$refs.searchInput as HTMLInputElement).focus();
+        }
+
+        onFocus() {
+            this.focused = true;
+        }
+
+        onBlur() {
+            this.focused = false;
         }
 
         searchStrUpdate() {
@@ -85,18 +101,31 @@
             input {
                 width: 154px;
                 height: 100%;
+                line-height: 100%;
                 margin-right:7px;
+                vertical-align: middle;
                 cursor:pointer;
+            }
+            .search_img {
+                display: inline-block;
+                float: left;
+                height: 100%;
+                margin-left: 5px;
+            }
+            .delete_img {
+                display: inline-block;
+                float: right;
+                height: 100%;
+            }
+            .dummy_full {
+                display: inline-block;
+                height: 100%;
+                width: 1px;
+                vertical-align: middle;
             }
             img {
                 cursor:pointer;
-                &.search_img {
-                    float:left;
-                    margin-left:5px;
-                }
-                &.delete_img {
-                    margin-top:11px;
-                }
+                vertical-align: middle;
             }
         }
     }
