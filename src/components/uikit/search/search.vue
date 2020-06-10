@@ -1,11 +1,11 @@
 <template>
     <div class="tc_search">
-        <span class="search_box" :class="{focusable: design === 'search', focused: focused}" :style="boxStyle">
+        <span class="search_box" :class="{focusable: design === 'search', focused: focused, disabled: !isActive}" :style="boxStyle">
             <span class="search_img">
-                <img v-if="design === 'search'" src="/resources/img/btn-title-shop-search-icon.svg">
+                <img v-if="design === 'search'" :src="isActive ? '/resources/img/btn-title-shop-search-icon.svg' : '/resources/img/btn-title-shop-search-disabled.svg'">
                 <span class="dummy_full"></span>
             </span>
-            <input ref="searchInput" type="search" autocomplete="new-password" :placeholder="placeholder"
+            <input ref="searchInput" type="search" autocomplete="new-password" :placeholder="placeholder" :disabled="!isActive"
                    @focus="onFocus" @blur="onBlur" @input="searchStrUpdate" :style="{width: 'calc(100% - 70px)'}">
             <span class="delete_img">
                 <img v-if="isShowDeleteBtn" @click="deleteSearchStr()" src="/resources/img/btn-input-text-delete.svg">
@@ -25,6 +25,7 @@
         boxStyle: any = {};
         isShowDeleteBtn: boolean = false;
         focused: boolean = false;
+        isActive: boolean = true;
 
         get value(): string {
             const sInput = this.$refs.searchInput as HTMLInputElement;
@@ -34,6 +35,14 @@
             const sInput: any = this.$refs.searchInput as HTMLInputElement;
             sInput.value = newValue;
             this.showDeleteBtn();
+        }
+
+        get active(): boolean {
+            return this.isActive;
+        }
+
+        set active(newValue: boolean) {
+            this.isActive = newValue;
         }
 
         setFocus() {
@@ -87,6 +96,11 @@
                 &:focus-within {
                     border-color: #444444;
                 }
+            }
+            &.disabled {
+                border: 1px solid #e0e0e0 !important;
+                background: #ffffff !important;
+                color: #b2b2b2 !important;
             }
 
             input[type=search]::-ms-clear {  display: none; width : 0; height: 0; }

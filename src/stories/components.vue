@@ -136,6 +136,7 @@
             });
             searchObj.placeholder = '검색어를 입력하세요.';
             searchObj.design = 'search';
+            searchObj.active = true;
         }
 
         createRadiogroup () {
