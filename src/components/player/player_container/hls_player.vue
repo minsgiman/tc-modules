@@ -133,6 +133,9 @@
                 console.log('canplay');
             });
             this.hlsPlayer.on('ended', () => {
+                clearInterval(this.loadCheckInterval);
+                this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
+                this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
                 console.log('ended');
             });
             this.hlsPlayer.on('playing', () => {
