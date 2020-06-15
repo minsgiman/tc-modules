@@ -259,7 +259,10 @@
                 return;
             }
 
-            if (status === 'NetStream.Play.Start') {
+            if (status === 'recordNone') {
+                this.errorStatusLayer.cameraStatusChange(1);
+                this.playInfoBar.pauseBtn();
+            } else if (status === 'NetStream.Play.Start') {
                 this.cvrReplay=0;
                 this.liveReloadCnt =0;
                 this.flashStatusFlush = false;

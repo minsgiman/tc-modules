@@ -123,6 +123,12 @@
                 this.playTimeoutId = null;
             }
             this.playTimeoutId = setTimeout(() => {
+                if (this.cameraData.recordType === "none") {
+                    this.player.stop();
+                    this.playerStatusChangedHandler('recordNone');
+                    return;
+                }
+
                 if (this.cameraData.recorderType == "nvr") {
                     this.player.play({url: getNvrServerUrl(this.cameraData.mediaStreamURL), path: this.cameraData.channel + (time ? "?time=" + time.getTime() : '')});
                 } else if (this.cameraData.recorderType == "recorder") {
