@@ -141,9 +141,6 @@
             this.hlsPlayer.on('loadeddata', () => {
                 console.log('loadeddata');
             });
-            this.hlsPlayer.on('progress', () => {
-                console.log('progress');
-            });
             this.hlsPlayer.on('stalled', () => {
                 console.log('stalled');
             });
@@ -155,9 +152,6 @@
             });
             this.hlsPlayer.on('abort', () => {
                 console.log('abort');
-            });
-            this.hlsPlayer.on('progress', () => {
-                console.log('progress');
             });
             this.hlsPlayer.on('error', () => {
                 console.log('error');

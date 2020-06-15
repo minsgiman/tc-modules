@@ -127,7 +127,7 @@
                 cameraId = this.cameraId;
             }
             const rtmpUrl = encodeURIComponent(mediaUrl + '/flvplayback/' + cameraId + '?token=' + this.commonToken);
-            const playUrl: string = 'https://' + this.serverUrl + '/mp4play?url=' + rtmpUrl;
+            const playUrl: string = 'https://' + this.serverUrl + '/hlsplay?url=' + rtmpUrl;
             this.stop();
             this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTING;
             const $video = $('<video/>', {
@@ -142,7 +142,7 @@
                 preload: 'auto'
             });
             this.hlsPlayer.src([
-                { type: "video/mp4", src: playUrl }
+                { type: "application/x-mpegURL", src: playUrl }
             ]);
             this.hlsPlayer.on('ready', () => {
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTED;
