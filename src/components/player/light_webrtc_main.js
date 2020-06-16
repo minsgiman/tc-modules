@@ -23,8 +23,6 @@ class lightPlayer {
                 getTokenUrl: param.getTokenUrl,
                 credentialUrl: param.credentialUrl,
                 candidateUrl: param.candidateUrl,
-                getTimelineUrl: param.getTimelineUrl,
-                getCameraUrl: param.getCameraUrl,
                 offerUrl: param.offerUrl,
                 requestHeaders: param.requestHeaders,
                 playEventHandler: param.playEventHandler

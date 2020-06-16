@@ -4,17 +4,12 @@
         <div v-show="useControl && isShowControl && playStatus !== E_PLAY_STATUS.not_connected" class="controller_wrap" @click="hideControl()">
             <div class="dimmed"></div>
             <div class="btns_wrap">
-                <div class="btn_cont back_cont">
-                    <button v-if="!isLive" class="backward_btn" @click="cvrMoveByInterval('b', $event)"></button>
-                </div>
+                <div class="btn_cont back_cont"></div>
                 <div class="btn_cont play_cont">
                     <button type="button" class="sp pause" v-show="playStatus === E_PLAY_STATUS.play || playStatus === E_PLAY_STATUS.none" @click="clickPause" id="pause_btn"></button>
-                    <button type="button" class="sp play" v-show="playStatus !== E_PLAY_STATUS.play && playStatus !== E_PLAY_STATUS.none && playStatus !== E_PLAY_STATUS.finish" @click="clickPlay" id="play_btn"></button>
-                    <button type="button" class="sp replay" v-show="playStatus === E_PLAY_STATUS.finish" @click="clickReplay" id="replay_btn"></button>
+                    <button type="button" class="sp play" v-show="playStatus !== E_PLAY_STATUS.play && playStatus !== E_PLAY_STATUS.none" @click="clickPlay" id="play_btn"></button>
                 </div>
-                <div class="btn_cont forward_cont">
-                    <button v-if="!isLive" class="forward_btn" :class="{disabled: playStatus === E_PLAY_STATUS.finish}"  @click="cvrMoveByInterval('f', $event)"></button>
-                </div>
+                <div class="btn_cont forward_cont"></div>
             </div>
         </div>
         <div v-show="showTime && playStatus !== E_PLAY_STATUS.not_connected" id="time_wrap" class="time_wrap">
@@ -26,11 +21,10 @@
                 </div>
             </div>
         </div>
-        <div class="error_status_wrap" v-show="(playStatus === E_PLAY_STATUS.no_cvr) || (playStatus === E_PLAY_STATUS.not_support) || (playStatus === E_PLAY_STATUS.not_connected)">
+        <div class="error_status_wrap" v-show="(playStatus === E_PLAY_STATUS.not_support) || (playStatus === E_PLAY_STATUS.not_connected)">
             <div class="error_mid_wrap">
                 <div class="player_off_black">
                     <div></div>
-                    <p class="tcam_light_play_error_desc" v-show="(playStatus === E_PLAY_STATUS.no_cvr)">{{language === 'ja' ? '保存された映像がありません。' :  '저장된 영상이 없습니다.'}}</p>
                     <p class="tcam_light_play_error_desc" v-show="(playStatus === E_PLAY_STATUS.not_support)">{{language === 'ja' ? '対応していないブラウザー' : '지원하지 않는 브라우저 입니다.'}}</p>
                     <p class="tcam_light_play_error_desc" v-show="(playStatus === E_PLAY_STATUS.not_connected)">{{language === 'ja' ? 'カメラの接続が途切れました。' : '카메라의 접속이 끊겼습니다.'}}</p>
                 </div>
@@ -138,8 +132,8 @@
 
     export default {
         name: 'playerContainer',
-        props: ['serialNo', 'elementId', 'startTime', 'endTime', 'cvrJumpInterval', 'useControl', 'showTime', 'getTokenUrl',
-            'credentialUrl', 'candidateUrl', 'getTimelineUrl', 'offerUrl', 'getCameraUrl', 'requestHeaders', 'playEventHandler'],
+        props: ['serialNo', 'elementId', 'useControl', 'showTime', 'getTokenUrl',
+            'credentialUrl', 'candidateUrl', 'offerUrl', 'requestHeaders', 'playEventHandler'],
         computed: {
         },
         data: function () {
@@ -147,25 +141,21 @@
                 E_PLAY_STATUS : {
                     none : 0,
                     play : 1,
-                    finish : 2,
                     server_error : 3,
                     pause : 4,
-                    no_cvr : 5,
                     not_support : 6,
                     not_connected : 7
                 },
                 E_PLAY_EVENT : {
                     start : 'start',
-                    finish : 'finish',
                     error : 'error',
                     webrtc_not_support_browser : 'webrtc_not_support_browser',
-                    no_cvr : 'no_cvr',
                     not_connected : 'not_connected'
                 },
                 player : null,
                 playTimeoutId : null,
                 playIntervalId : null,
-                isLive : false,
+                isLive : true,
                 isShowControl : false,
                 varPlayerId : this.elementId,
                 playTime : 0,
@@ -173,19 +163,10 @@
                 playStatus : 0,
                 retryTimeout : null,
                 showControlTimeout : null,
-                defCvrJumpInterval : 5000,
                 defGetTokenUrl : '/biz/cameras/token/:serialNo',
-                defGetTimelineUrl : '/biz/cameras/:serialNo/video',
                 defCredentialUrl : '/rtc/credential',
                 defCandidateUrl : '/rtc/candidate',
                 defOfferUrl : '/rtc/offer',
-                defGetCameraUrl : '/biz/cameras/:serialNo',
-                isCvrLoading : false,
-                cvrData: {
-                    startTime: 0,
-                    endTime: 0,
-                    recordList: []
-                },
                 language: 'ko',
                 platform: 'pc'
             }
@@ -271,10 +252,9 @@
                         requestHeaders : this.requestHeaders
                     }
                 }).$mount('#' + this.varPlayerId);
-                this.isLive = !this.startTime;
                 //this.showControl();
                 this.player.$on('playerStatusChanged', this.playerStatusChangedHandler.bind(this));
-                this.play(this.startTime);
+                this.play();
             },
             play : function (time) {
                 const that = this;
@@ -288,77 +268,17 @@
                 this.stopPlayTimer();
                 this.stopRetryTimeout();
                 this.stopPlayTimeout();
-
-                if (this.playTime) {
-                    this.requestTimeline(function(resObj) {
-                        if (resObj && resObj.code === 0) {
-                            that.cvrData.recordList = resObj.result.recordList;
-                            if (that.checkHasCvr(time, resObj.result.recordList)) {
-                                that.playTimeoutId = setTimeout(that.requestToken.bind(that)(function(resObj) {
-                                    if (resObj) {
-                                        that.playStart(resObj.cameraId, resObj.cvrHostPort, resObj.token);
-                                    }
-                                }), 200);
-                            } else {
-                                that.playStatus = that.E_PLAY_STATUS.no_cvr;
-                                if (that.playEventHandler) {
-                                    that.playEventHandler({status: that.E_PLAY_EVENT.no_cvr});
-                                }
-                                //that.hideControl();
-                            }
-                        } else {
-                            that.playStatus = that.E_PLAY_STATUS.no_cvr;
-                            if (that.playEventHandler) {
-                                that.playEventHandler({status: that.E_PLAY_EVENT.no_cvr});
-                            }
-                        }
-                    });
-                } else {
-                    this.playTimeoutId = setTimeout(that.requestToken.bind(that)(function(resObj) {
-                        if (resObj) {
-                            that.playStart(resObj.cameraId, resObj.cvrHostPort, resObj.token);
-                        }
-                    }), 200);
-                }
+                this.playTimeoutId = setTimeout(that.requestToken.bind(that)(function(resObj) {
+                    if (resObj) {
+                        that.playStart(resObj.cameraId, resObj.cvrHostPort, resObj.token);
+                    }
+                }), 200);
             },
 
             playStart : function (cameraId, cvrHostPort, token) {
-                if (this.playTime) { // cvr play
-                    this.player.play(cameraId, cvrHostPort + '/flvplayback/' + cameraId + '?token=' + token + '&time=' + this.playTime);
-                    this.startPlayTimer();
-                } else { // live play
-                    this.requestCamera((resObj) => {
-                        if (resObj && resObj.code === 0) {
-                            if (((resObj.result.recordType === 'live' || resObj.result.recordType === 'event') && (resObj.result.controlStatus !== 'on')) ||
-                                ((resObj.result.recordType !== 'live' && resObj.result.recordType !== 'event') && (resObj.result.controlStatus !== 'on' || resObj.result.streamStatus !== 'on'))) {
-                                this.playStatus = this.E_PLAY_STATUS.not_connected;
-                                if (this.playEventHandler) {
-                                    this.playEventHandler({status: this.E_PLAY_EVENT.not_connected});
-                                }
-                                return;
-                            }
-                            this.player.play(cameraId, cvrHostPort + '/flvplayback/' + cameraId + '?token=' + token);
-                            this.playTime = new Date().valueOf();
-                            this.startLiveTimer();
-                        } else {
-                            this.playStatus = this.E_PLAY_STATUS.not_connected;
-                            if (this.playEventHandler) {
-                                this.playEventHandler({status: this.E_PLAY_EVENT.not_connected});
-                            }
-                            return;
-                        }
-                    });
-                }
-            },
-
-            checkHasCvr : function (time, recTimes) {
-                if (!recTimes || !recTimes.length) {
-                    return false;
-                }
-
-                return recTimes.some((recTime) => {
-                    return (parseInt(recTime.startTime) <= time) && (parseInt(recTime.endTime) >= time);
-                });
+                this.player.play(cameraId, cvrHostPort + '/flvplayback/' + cameraId + '?token=' + token);
+                this.playTime = new Date().valueOf();
+                this.startLiveTimer();
             },
 
             hideControl : function () {
@@ -373,70 +293,6 @@
                         request.setRequestHeader(key, this.requestHeaders[key]);
                     }
                 }
-            },
-
-            cvrMoveByInterval : function (direction, event) {
-                this.showControl();
-                if (direction === 'b') {
-                    const backTime = this.playTime - (this.cvrJumpInterval ? this.cvrJumpInterval : this.defCvrJumpInterval);
-                    this.stop();
-                    this.play(this.startTime < backTime ? backTime : this.startTime);
-                } else if (direction === 'f' && this.playStatus !== this.E_PLAY_STATUS.finish) {
-                    const fTime = this.playTime + (this.cvrJumpInterval ? this.cvrJumpInterval : this.defCvrJumpInterval);
-                    const curDate = new Date();
-                    this.stop();
-                    this.play(fTime >= curDate.valueOf() ? 0 : fTime);
-                }
-                event.preventDefault();
-                event.stopPropagation();
-            },
-
-            requestCamera : function (callback) {
-                const httpRequest = new XMLHttpRequest();
-                httpRequest.onreadystatechange = () => {
-                    if (httpRequest.readyState === XMLHttpRequest.DONE) {
-                        if (httpRequest.status === 200) {
-                            const resObj = JSON.parse(httpRequest.responseText);
-                            callback(resObj);
-                        } else {
-                            callback(null);
-                        }
-                    }
-                };
-                httpRequest.open('GET', setPathParams((this.getCameraUrl ? this.getCameraUrl : this.defGetCameraUrl), {serialNo : this.serialNo}));
-                this.setHeaders(httpRequest);
-                httpRequest.send();
-            },
-
-            requestTimeline : function (callback) {
-                const httpRequest = new XMLHttpRequest();
-                this.isCvrLoading = true;
-                httpRequest.onreadystatechange = () => {
-                    if (httpRequest.readyState === XMLHttpRequest.DONE) {
-                        if (httpRequest.status === 200) {
-                            const resObj = JSON.parse(httpRequest.responseText);
-                            callback(resObj);
-                        } else {
-                            callback(null);
-                        }
-                        this.isCvrLoading = false;
-                    }
-                };
-
-                const startDate = new Date(this.playTime);
-                const endDate = new Date(this.playTime);
-                startDate.setMinutes(0);
-                startDate.setSeconds(0);
-                startDate.setMilliseconds(0);
-                endDate.setMinutes(0);
-                endDate.setSeconds(1);
-                endDate.setHours(startDate.getHours() + 1);
-                this.cvrData.startTime = startDate.valueOf();
-                this.cvrData.endTime = endDate.valueOf();
-                const timelineUrl = this.getTimelineUrl ? this.getTimelineUrl : this.defGetTimelineUrl;
-                httpRequest.open('GET', setPathParams(timelineUrl + '?startTime=' + this.cvrData.startTime + '&endTime=' + this.cvrData.endTime , {serialNo : this.serialNo}));
-                this.setHeaders(httpRequest);
-                httpRequest.send();
             },
 
             requestToken : function (callback) {
@@ -463,7 +319,7 @@
                 this.isShowControl = true;
                 this.stopShowControlTimeout();
                 this.showControlTimeout = setTimeout(() => {
-                    if ((this.playStatus !== this.E_PLAY_STATUS.finish) && (this.playStatus !== this.E_PLAY_STATUS.pause)) {
+                    if (this.playStatus !== this.E_PLAY_STATUS.pause) {
                         this.isShowControl = false;
                     }
                 }, 3000);
@@ -483,35 +339,9 @@
                 event.preventDefault();
             },
 
-            clickReplay : function(event) {
-                this.replay();
-                event.stopPropagation();
-                event.preventDefault();
-            },
-
             resume : function () {
-                if (this.playStatus === this.E_PLAY_STATUS.pause || this.playStatus === this.E_PLAY_STATUS.server_error || this.playStatus === this.E_PLAY_STATUS.no_cvr) {
+                if (this.playStatus === this.E_PLAY_STATUS.pause || this.playStatus === this.E_PLAY_STATUS.server_error) {
                     this.stop();
-                    if (this.startTime) { //CVR
-                        this.playStatus = this.E_PLAY_STATUS.play;
-                        this.play(this.playTime ? this.playTime : this.startTime);
-                    } else { //Live
-                        this.play();
-                    }
-                } else if (this.playStatus === this.E_PLAY_STATUS.finish) {
-                    this.replay();
-                }
-            },
-            replay : function (startTime, endTime) {
-                if (startTime && endTime) {
-                    this.startTime = startTime;
-                    this.endTime = endTime;
-                }
-                this.stop();
-                if (this.startTime) { //CVR
-                    this.playStatus = this.E_PLAY_STATUS.play;
-                    this.play(this.startTime);
-                } else { //Live
                     this.play();
                 }
             },
@@ -557,42 +387,6 @@
                     }
                 }, this.timeInterval);
             },
-            startPlayTimer : function () {
-                const that = this;
-
-                this.stopPlayTimer();
-                this.playIntervalId = setInterval(function() {
-                    if (that.playStatus === that.E_PLAY_STATUS.play) {
-                        that.playTime += that.timeInterval;
-                        if (that.playTime >= that.endTime) {
-                            that.stop();
-                            that.playStatus = that.E_PLAY_STATUS.finish;
-                            if (that.playEventHandler) {
-                                that.playEventHandler({status: that.E_PLAY_EVENT.finish});
-                            }
-                            that.showControl();
-                        } else if (!that.isCvrLoading) {
-                            const curDate = new Date(that.playTime);
-                            if (curDate.getMilliseconds() >= 900) {
-                                if (!that.checkHasCvr(that.playTime, that.cvrData.recordList)) {
-                                    that.stop();
-                                    that.playStatus = that.E_PLAY_STATUS.no_cvr;
-                                    if (that.playEventHandler) {
-                                        that.playEventHandler({status: that.E_PLAY_EVENT.no_cvr});
-                                    }
-                                    that.hideControl();
-                                } else if (curDate.getMinutes() === 59 && curDate.getSeconds() === 59) {
-                                    that.requestTimeline(function(resObj) {
-                                        if (resObj) {
-                                            that.cvrData.recordList = resObj.recordList;
-                                        }
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }, this.timeInterval);
-            },
 
             stopPlayTimer : function () {
                 if (this.playIntervalId) {
@@ -628,9 +422,6 @@
                         this.playEventHandler({status: status});
                     }
                 } else if (status === statusEnum.EVENT_ERROR_WEBRTC_SERVER || status === statusEnum.EVENT_STREAM_DISCONNECTED) {
-                    if (this.playStatus === this.E_PLAY_STATUS.no_cvr) {
-                        return;
-                    }
                     this.playStatus = this.E_PLAY_STATUS.server_error;
                     if (this.playEventHandler) {
                         this.playEventHandler({status: status});
