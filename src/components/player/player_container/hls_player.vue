@@ -120,7 +120,7 @@
             }
 
             this.loadCheckInterval = setInterval(() => {
-                if (this.hlsPlayer.duration()) {
+                if (this.hlsPlayer && this.hlsPlayer.duration()) {
                     clearInterval(this.loadCheckInterval);
                     this.showLoading = false;
                     this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTED;
