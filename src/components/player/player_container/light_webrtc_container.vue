@@ -13,7 +13,7 @@
             </div>
         </div>
         <div v-show="showTime && playStatus !== E_PLAY_STATUS.not_connected" id="time_wrap" class="time_wrap">
-            <div class="time_dim"></div>
+            <!--div class="time_dim"></div-->
             <div class="time_str_wrap">
                 <div class="time_str">
                     <span class="date">{{getDateStr(playTime)}}</span>
@@ -178,12 +178,6 @@
             setTimeout(() => {
                 getMaxFontSizeApprox(document.querySelector('.time_str'));
                 if (getPlatform() !== 'pc') {
-                    const timeEl = document.getElementById('time_wrap');
-                    if (timeEl) {
-                        timeEl.style.width = '28vw';
-                        timeEl.style.height = '5.6vw';
-                        timeEl.querySelector('.time_dim').style.borderRadius = '0.8vw';
-                    }
                     const errorTxtEl = document.querySelectorAll('.tcam_light_play_error_desc');
                     if (errorTxtEl) {
                         let i, len = errorTxtEl.length;
@@ -368,10 +362,7 @@
             },
             getDateStr : function (timestamp) {
                 const date = new Date(timestamp);
-                const week = this.language === 'ja' ? ['日', '月', '火', '水', '木', '金', '土'] : ['일', '월', '화', '수', '목', '금', '토'];
-                const dayOfWeek = week[date.getDay()];
-
-                return addZero(date.getMonth()+1) + '.' + addZero(date.getDate().toString()) + ' (' + dayOfWeek + ') ';
+                return date.getFullYear() + '-' + addZero(date.getMonth() + 1) + '-' +  addZero(date.getDate());
             },
             getTimeStr : function (timestamp) {
                 const date = new Date(timestamp);
@@ -538,15 +529,8 @@
             }
         }
         .time_wrap {
-            position: absolute;
-            left: 12px;
-            top: 12px;
-            width: 18%;
-            height: 6%;
-            max-width: 230px;
-            max-height: 43px;
-            min-width: 115px;
-            min-height: 22px;
+            margin: 0 auto;
+            padding-top: 3.2vw;
             z-index: 20;
             .time_dim {
                 position: absolute;
@@ -560,10 +544,17 @@
             .time_str_wrap {
                 position: relative;
                 display: table;
+                text-align: center;
                 .full_sized;
             }
             .time_str {
-                display: table-cell;
+                display: inline-block;
+                width: 31.4vw;
+                box-sizing: border-box;
+                line-height: 2;
+                border-radius: 0.8vw;
+                box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.16);
+                background-color: rgba(38, 38, 38, 0.7);
                 position: relative;
                 font-size: 0;
                 color: white;
