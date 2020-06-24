@@ -12,7 +12,7 @@
                 <div class="btn_cont forward_cont"></div>
             </div>
         </div>
-        <div v-show="showTime && playStatus !== E_PLAY_STATUS.not_connected" id="time_wrap" class="time_wrap">
+        <div v-show="showTime && playStatus !== E_PLAY_STATUS.not_connected && playStatus !== E_PLAY_STATUS.not_support" id="time_wrap" class="time_wrap">
             <!--div class="time_dim"></div-->
             <div class="time_str_wrap">
                 <div class="time_str">
@@ -30,7 +30,6 @@
                 </div>
             </div>
         </div>
-        <div class="click_layer" @click="showControl()"></div>
     </div>
 </template>
 <script>
@@ -176,7 +175,7 @@
         mounted : function() {
             this.language = getLanguage();
             setTimeout(() => {
-                getMaxFontSizeApprox(document.querySelector('.time_str'));
+                //getMaxFontSizeApprox(document.querySelector('.time_str'));
                 if (getPlatform() !== 'pc') {
                     const errorTxtEl = document.querySelectorAll('.tcam_light_play_error_desc');
                     if (errorTxtEl) {
