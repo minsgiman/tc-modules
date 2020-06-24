@@ -3,7 +3,7 @@ declare module '*.vue' {
     export default Vue;
 }
 
-declare module 'video.js'
+declare module 'hls.js'
 
 declare module 'toastcam-apis'
 

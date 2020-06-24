@@ -15,7 +15,7 @@
 <script lang="ts">
     import { Component, Vue } from 'vue-property-decorator';
     import store from '../../../service/player/store';
-    import videojs from 'video.js';
+    import Hls from 'hls.js';
 
     const $: any = (window as any).$ as any;
 
@@ -54,6 +54,7 @@
         loadCheckInterval: any = null;
         showLoading: boolean = false;
         hlsPlayer: any = null;
+        videoObj: any = null;
         hlsStatus: string = '';
         hlsStatusEnum: any = {
             EVENT_STREAM_CONNECTING : 'event_stream_connecting',
@@ -69,7 +70,7 @@
         }
         private beforeDestroy() {
             if (this.hlsPlayer) {
-                this.hlsPlayer.dispose();
+                this.hlsPlayer.destroy();
                 this.hlsPlayer = null;
             }
             clearInterval(this.loadCheckInterval);
@@ -91,26 +92,40 @@
                 }
                 const $video = $('<video/>', options);
                 $('#remoteHLSContainer').append($video);
+                this.videoObj = $video[0];
+                this.hlsPlayer = new Hls();
+                this.hlsPlayer.attachMedia(this.videoObj);
+                /*
                 this.hlsPlayer = videojs('my-player', {
                     controls: false,
                     errorDisplay: false,
                     preload: 'auto'
                 });
+                 */
                 this.updatePlayerSize();
             }
 
-            if (!this.isLive && this.hlsPlayer.paused() && this.pausedTime === this.currentTime.valueOf()) {
+            if (!this.isLive && this.videoObj.paused() && this.pausedTime === this.currentTime.valueOf()) {
                 isResume = true;
             }
 
-            clearInterval(this.loadCheckInterval);
+            this.hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
+                this.showLoading = false;
+                this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTED;
+                this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+                console.log('Hls.Events.MANIFEST_PARSED');
+                this.videoObj.play();
+            });
+
+            //clearInterval(this.loadCheckInterval);
             if (!isResume) {
                 if (serverUrls && serverUrls.length) {
                     const playUrl = 'https://' + serverUrls[0] + '/hlsplay?url=' + encodeURIComponent(url);
                     store.dispatch('HLS_PLAY_URL_CHANGE', playUrl);
-                    this.hlsPlayer.src([
-                        { type: "application/x-mpegURL", src: playUrl }
-                    ]);
+                    this.hlsPlayer.loadSource(playUrl);
+                    // this.hlsPlayer.src([
+                    //     { type: "application/x-mpegURL", src: playUrl }
+                    // ]);
                 } else {
                     this.showLoading = true;
                     this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_DISCONNECTED;
@@ -119,8 +134,9 @@
                 }
             }
 
+            /*
             this.loadCheckInterval = setInterval(() => {
-                if (this.hlsPlayer && this.hlsPlayer.duration()) {
+                if (this.videoObj && this.videoObj.duration()) {
                     clearInterval(this.loadCheckInterval);
                     this.showLoading = false;
                     this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTED;
@@ -128,35 +144,36 @@
                     this.hlsPlayer.play();
                 }
             }, 200);
+             */
 
-            this.hlsPlayer.on('canplay', () => {
+            this.videoObj.on('canplay', () => {
                 console.log('canplay');
             });
-            this.hlsPlayer.on('ended', () => {
+            this.videoObj.on('ended', () => {
                 clearInterval(this.loadCheckInterval);
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
                 console.log('ended');
             });
-            this.hlsPlayer.on('playing', () => {
+            this.videoObj.on('playing', () => {
                 console.log('playing');
             });
-            this.hlsPlayer.on('loadeddata', () => {
+            this.videoObj.on('loadeddata', () => {
                 console.log('loadeddata');
             });
-            this.hlsPlayer.on('stalled', () => {
+            this.videoObj.on('stalled', () => {
                 console.log('stalled');
             });
-            this.hlsPlayer.on('suspend', () => {
+            this.videoObj.on('suspend', () => {
                 clearInterval(this.loadCheckInterval);
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
                 console.log('suspend');
             });
-            this.hlsPlayer.on('abort', () => {
+            this.videoObj.on('abort', () => {
                 console.log('abort');
             });
-            this.hlsPlayer.on('error', () => {
+            this.videoObj.on('error', () => {
                 console.log('error');
                 //$('#hls_logo').show();
                 clearInterval(this.loadCheckInterval);
@@ -176,10 +193,10 @@
         }
 
         transformChange(value: string) {
-            if (!this.hlsPlayer) {
+            if (!this.videoObj) {
                 return;
             }
-            this.hlsPlayer.children()[0].style['transform'] = value;
+            //this.videoObj.children()[0].style['transform'] = value;
         }
 
         mute() {
@@ -190,8 +207,8 @@
         }
 
         resume() {
-            if (this.hlsPlayer) {
-                this.hlsPlayer.play();
+            if (this.videoObj) {
+                this.videoObj.play();
             }
         }
 
@@ -200,9 +217,9 @@
         }
 
         pause() {
-            if (this.hlsPlayer) {
+            if (this.videoObj) {
                 this.pausedTime = this.currentTime.valueOf();
-                this.hlsPlayer.pause();
+                this.videoObj.pause();
             }
         }
 
@@ -211,7 +228,7 @@
             this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_STOPPED;
             this.showLoading = false;
             if (this.hlsPlayer) {
-                this.hlsPlayer.dispose();
+                this.hlsPlayer.destroy();
                 this.hlsPlayer = null;
             }
         }
