@@ -177,6 +177,7 @@
             setTimeout(() => {
                 //getMaxFontSizeApprox(document.querySelector('.time_str'));
                 if (getPlatform() !== 'pc') {
+                    /*
                     const errorTxtEl = document.querySelectorAll('.tcam_light_play_error_desc');
                     if (errorTxtEl) {
                         let i, len = errorTxtEl.length;
@@ -184,6 +185,7 @@
                             errorTxtEl[i].style.fontSize = '2.9vw';
                         }
                     }
+                     */
                 } else {
                     const btnWrap = document.querySelector('.btns_wrap');
                     const pauseBtn = document.getElementById('pause_btn');
