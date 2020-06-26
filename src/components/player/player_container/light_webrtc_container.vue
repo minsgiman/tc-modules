@@ -14,6 +14,7 @@
         </div>
         <div v-show="showTime && playStatus !== E_PLAY_STATUS.not_connected && playStatus !== E_PLAY_STATUS.not_support" id="time_wrap" class="time_wrap">
             <!--div class="time_dim"></div-->
+            <div class="upper_dim"></div>
             <div class="time_str_wrap">
                 <div class="time_str">
                     <span class="date">{{getDateStr(playTime)}}</span>
