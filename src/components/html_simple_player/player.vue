@@ -53,7 +53,7 @@
             this.hlsPlayer.attachMedia(this.videoObj);
 
             toastcamAPIs.call(toastcamAPIs.camera.GET_STREAMING_SERVER, {}, (res: any) => {
-                const playUrl = 'https://' + res.servers[0] + '/mp4play?url=' + encodeURIComponent(url);
+                const playUrl = 'https://' + res.servers[0] + '/hlsplay?url=' + encodeURIComponent(url);
                 this.hlsPlayer.loadSource(playUrl);
                 this.hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
                     console.log('Hls.Events.MANIFEST_PARSED');
