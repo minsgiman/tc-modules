@@ -6,7 +6,7 @@
 </template>
 <script lang="ts">
     import { Component, Prop, Vue } from 'vue-property-decorator';
-    import videojs from 'video.js';
+    import Hls from 'hls.js';
     import toastcamAPIs from './../../service/toastcamAPIs';
     //import $ from 'jquery';
 
@@ -15,8 +15,8 @@
     @Component({
     })
     export default class player extends Vue {
-        hlsServer: string = 'https://devmedia010.toastcam.com:10099';
         hlsPlayer: any = null;
+        videoObj: any = null;
 
         private created() {
             toastcamAPIs.setConfig({
@@ -33,9 +33,10 @@
 
         stop() {
             if (this.hlsPlayer) {
-                this.hlsPlayer.dispose();
+                this.hlsPlayer.destroy();
                 this.hlsPlayer = null;
             }
+            $('#simpleHLSContainer').empty();
         }
 
         play(url: string) {
@@ -47,26 +48,22 @@
                 muted: true
             });
             $('#simpleHLSContainer').append($video);
-            this.hlsPlayer = videojs('s-player', {
-                controls: false,
-                errorDisplay: false,
-                preload: 'auto'
-            });
+            this.videoObj = $video[0];
+            this.hlsPlayer = new Hls();
+            this.hlsPlayer.attachMedia(this.videoObj);
 
             toastcamAPIs.call(toastcamAPIs.camera.GET_STREAMING_SERVER, {}, (res: any) => {
                 const playUrl = 'https://' + res.servers[0] + '/mp4play?url=' + encodeURIComponent(url);
-                this.hlsPlayer.on('canplay', () => {
-                    console.log('canplay');
+                this.hlsPlayer.loadSource(playUrl);
+                this.hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
+                    console.log('Hls.Events.MANIFEST_PARSED');
                     $('#splay_loading').hide();
-                    this.hlsPlayer.play();
+                    this.videoObj.play();
                 });
-                this.hlsPlayer.on('error', () => {
+                this.videoObj.addEventListener('error', () => {
                     $('#splay_loading').hide();
                     this.$emit('event', {type: 'error'});
                 });
-                this.hlsPlayer.src([
-                    { type: "video/mp4", src: playUrl }
-                ]);
             }, () => {
                 $('#splay_loading').hide();
                 this.$emit('event', {type: 'error'});
@@ -74,14 +71,14 @@
         }
 
         pause() {
-            if (this.hlsPlayer) {
-                this.hlsPlayer.pause();
+            if (this.videoObj) {
+                this.videoObj.pause();
             }
         }
 
         getIsPlaying(): boolean {
-            if (this.hlsPlayer) {
-                return (this.hlsPlayer.duration() && !this.hlsPlayer.paused());
+            if (this.videoObj) {
+                return (this.videoObj.duration && !this.videoObj.paused);
             } else {
                 return false;
             }

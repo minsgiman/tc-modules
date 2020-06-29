@@ -6,7 +6,7 @@
 
 <script lang="ts">
     import { Component, Vue, Watch } from 'vue-property-decorator';
-    import videojs from 'video.js';
+    import Hls from 'hls.js';
     import store from '../../service/player/store';
     import toastcamAPIs from './../../service/toastcamAPIs';
 
@@ -20,6 +20,7 @@
         showZoomArea: boolean = false;
         zoomAreaInfo: any = {width: 160, height: 90};
         hlsPlayer: any = null;
+        videoObj: any = null;
         isPlay: boolean = false;
         zoomMoverInfo: any = {x: 0, y: 0, width: 0, height: 0};
 
@@ -66,10 +67,11 @@
 
         stop() {
             if (this.hlsPlayer) {
-                this.hlsPlayer.dispose();
+                this.hlsPlayer.destroy();
                 this.hlsPlayer = null;
                 this.isPlay = false;
             }
+            $('#zoom_wrapper video').remove();
         }
         play() {
             this.stop();
@@ -80,11 +82,10 @@
                 poster: this.thumbnail
             });
             $('#zoom_wrapper').append($video);
-            this.hlsPlayer = videojs('zoom_player', {
-                controls: false,
-                errorDisplay: false,
-                preload: 'auto'
-            });
+            this.videoObj = $video[0];
+            this.hlsPlayer = new Hls();
+            this.hlsPlayer.attachMedia(this.videoObj);
+
             toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAM_TOKEN : toastcamAPIs.camera.GET_TOKEN, {cameraId: this.cameraData.id}, (res: any) => {
                 let playUrl: string = '';
                 if (this.isLive) {
@@ -94,13 +95,11 @@
                 }
                 toastcamAPIs.call(toastcamAPIs.camera.GET_STREAMING_SERVER, {country: this.country}, (serverRes: any) => {
                     const server = serverRes.servers ? serverRes.servers[0] : '';
-                    this.hlsPlayer.src([
-                        { type: "application/x-mpegURL", src: 'https://' + server + '/hlsplay?url=' + encodeURIComponent(playUrl) }
-                    ]);
-                    //this.hlsPlayer.on('ready', () => {
-                    this.hlsPlayer.play();
-                    //});
-                    this.isPlay = true;
+                    this.hlsPlayer.loadSource('https://' + server + '/hlsplay?url=' + encodeURIComponent(playUrl));
+                    this.hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
+                        this.videoObj.play();
+                        this.isPlay = true;
+                    });
                 });
             });
         }

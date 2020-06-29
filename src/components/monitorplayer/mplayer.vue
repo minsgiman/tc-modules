@@ -22,7 +22,7 @@
 
 <script lang="ts">
     import { Component, Prop, Vue } from 'vue-property-decorator';
-    import videojs from 'video.js';
+    import Hls from 'hls.js';
     //import $ from 'jquery';
     import { ICameraInfo } from './interface';
     const $: any = (window as any).$ as any;
@@ -37,6 +37,7 @@
 
         cameraConfig: ICameraInfo | null = null;
         hlsPlayer: any = null;
+        videoObj: any = null;
         hlsStatus: string = '';
         hlsStatusEnum: any = {
             EVENT_STREAM_CONNECTING : 'event_stream_connecting',
@@ -93,10 +94,7 @@
             this.play();
         }
         private beforeDestroy() {
-            if (this.hlsPlayer) {
-                this.hlsPlayer.dispose();
-                this.hlsPlayer = null;
-            }
+            this.stop();
         }
 
         isSupportSubstream(): boolean {
@@ -136,20 +134,17 @@
                 muted: true
             });
             $('#remoteVideosContainer_' + this.cameraId).append($video);
-            this.hlsPlayer = videojs('my-player-' + this.cameraId, {
-                controls: false,
-                errorDisplay: false,
-                preload: 'auto'
-            });
-            this.hlsPlayer.src([
-                { type: "application/x-mpegURL", src: playUrl }
-            ]);
-            this.hlsPlayer.on('ready', () => {
+            this.videoObj = $video[0];
+            this.hlsPlayer = new Hls();
+            this.hlsPlayer.attachMedia(this.videoObj);
+
+            this.hlsPlayer.loadSource(playUrl);
+            this.hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTED;
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
-                this.hlsPlayer.play();
+                this.videoObj.play();
             });
-            this.hlsPlayer.on('error', () => {
+            this.videoObj.addEventListener('error', () => {
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_DISCONNECTED;
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
             });
@@ -164,9 +159,10 @@
         stop() {
             this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_STOPPED;
             if (this.hlsPlayer) {
-                this.hlsPlayer.dispose();
+                this.hlsPlayer.destroy();
                 this.hlsPlayer = null;
             }
+            $('#remoteVideosContainer_' + this.cameraId).empty();
         }
 
         getStatus() {
