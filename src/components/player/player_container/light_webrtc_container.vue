@@ -19,13 +19,15 @@
                 <div class="time_str">
                     <span class="date">{{getDateStr(playTime)}}</span>
                     <span class="time">{{getTimeStr(playTime)}}</span>
+                    <span v-show="!isLive" class="golive" @click="requestDestroy">Go Live</span>
                 </div>
             </div>
         </div>
-        <div class="error_status_wrap" v-show="(playStatus === E_PLAY_STATUS.not_support) || (playStatus === E_PLAY_STATUS.not_connected)">
+        <div class="error_status_wrap" v-show="(playStatus === E_PLAY_STATUS.no_cvr) || (playStatus === E_PLAY_STATUS.not_support) || (playStatus === E_PLAY_STATUS.not_connected)">
             <div class="error_mid_wrap">
                 <div class="player_off_black">
                     <div></div>
+                    <p class="tcam_light_play_error_desc" v-show="(playStatus === E_PLAY_STATUS.no_cvr)">{{language === 'ja' ? '保存された映像がありません。' :  '저장된 영상이 없습니다.'}}</p>
                     <p class="tcam_light_play_error_desc" v-show="(playStatus === E_PLAY_STATUS.not_support)">{{language === 'ja' ? '対応していないブラウザー' : '지원하지 않는 브라우저 입니다.'}}</p>
                     <p class="tcam_light_play_error_desc" v-show="(playStatus === E_PLAY_STATUS.not_connected)">{{language === 'ja' ? 'カメラの接続が途切れました。' : '카메라의 접속이 끊겼습니다.'}}</p>
                 </div>
@@ -79,61 +81,14 @@
         return locale;
     }
 
-    function getMaxFontSizeApprox(el) {
-        var fontSize = 14;
-        var p = el.parentNode.parentNode;
-
-        var parent_h = p.offsetHeight ? p.offsetHeight : p.style.pixelHeight;
-        if(!parent_h)
-            parent_h = 0;
-
-        var parent_w = p.offsetHeight ? p.offsetWidth : p.style.pixelWidth;
-        if(!parent_w)
-            parent_w = 0;
-
-        el.style.fontSize = fontSize + "px";
-
-        var el_h = el.offsetHeight ? el.offsetHeight : el.style.pixelHeight;
-        if(!el_h)
-            el_h = 0;
-
-        var el_w = el.offsetHeight ? el.offsetWidth : el.style.pixelWidth;
-        if(!el_w)
-            el_w = 0;
-
-        // 0.5 is the error on the measure that JavaScript does
-        // if the real measure had been 12.49 px => JavaScript would have said 12px
-        // so we think about the worst case when could have, we add 0.5 to
-        // compensate the round error
-        var fs1 = (fontSize*(parent_w + 0.5))/(el_w + 0.5);
-        var fs2 = (fontSize*(parent_h) + 0.5)/(el_h + 0.5);
-
-        if (getPlatform() === 'pc') {
-            if (parent_w > 220) {
-                fontSize = 24;
-            } else if (parent_w > 150) {
-                fontSize = 18;
-            } else {
-                fontSize = Math.floor(Math.min(fs1,fs2));
-            }
-            if (fontSize < 11) {
-                fontSize = 11;
-            }
-            el.style.fontSize = fontSize + "px";
-        } else {
-            el.style.fontSize = '2.63vw';
-        }
-        return fontSize;
-    }
-
     function addZero(data){
         return (data<10) ? "0"+data : data;
     }
 
     export default {
         name: 'playerContainer',
-        props: ['serialNo', 'elementId', 'useControl', 'showTime', 'getTokenUrl',
-            'credentialUrl', 'candidateUrl', 'offerUrl', 'requestHeaders', 'playEventHandler'],
+        props: ['serialNo', 'cameraId', 'elementId', 'startTime', 'endTime', 'useControl', 'showTime', 'getTokenUrl',
+            'credentialUrl', 'candidateUrl', 'getTimelineUrl', 'offerUrl', 'requestHeaders', 'playEventHandler'],
         computed: {
         },
         data: function () {
@@ -141,16 +96,21 @@
                 E_PLAY_STATUS : {
                     none : 0,
                     play : 1,
+                    finish : 2,
                     server_error : 3,
                     pause : 4,
+                    no_cvr : 5,
                     not_support : 6,
                     not_connected : 7
                 },
                 E_PLAY_EVENT : {
                     start : 'start',
+                    finish : 'finish',
                     error : 'error',
                     webrtc_not_support_browser : 'webrtc_not_support_browser',
-                    not_connected : 'not_connected'
+                    no_cvr : 'no_cvr',
+                    not_connected : 'not_connected',
+                    request_destroy : 'request_destroy'
                 },
                 player : null,
                 playTimeoutId : null,
@@ -164,9 +124,15 @@
                 retryTimeout : null,
                 showControlTimeout : null,
                 defGetTokenUrl : '/biz/cameras/token/:serialNo',
+                defGetTimelineUrl : '/biz/cameras/:serialNo/video',
                 defCredentialUrl : '/rtc/credential',
                 defCandidateUrl : '/rtc/candidate',
                 defOfferUrl : '/rtc/offer',
+                cvrData: {
+                    startTime: 0,
+                    endTime: 0,
+                    recordList: []
+                },
                 language: 'ko',
                 platform: 'pc'
             }
@@ -176,17 +142,7 @@
         mounted : function() {
             this.language = getLanguage();
             setTimeout(() => {
-                //getMaxFontSizeApprox(document.querySelector('.time_str'));
                 if (getPlatform() !== 'pc') {
-                    /*
-                    const errorTxtEl = document.querySelectorAll('.tcam_light_play_error_desc');
-                    if (errorTxtEl) {
-                        let i, len = errorTxtEl.length;
-                        for (i = 0; i < len; i+=1) {
-                            errorTxtEl[i].style.fontSize = '2.9vw';
-                        }
-                    }
-                     */
                 } else {
                     const btnWrap = document.querySelector('.btns_wrap');
                     const pauseBtn = document.getElementById('pause_btn');
@@ -248,9 +204,10 @@
                         requestHeaders : this.requestHeaders
                     }
                 }).$mount('#' + this.varPlayerId);
+                this.isLive = !this.startTime;
                 //this.showControl();
                 this.player.$on('playerStatusChanged', this.playerStatusChangedHandler.bind(this));
-                this.play();
+                this.play(this.startTime);
             },
             play : function (time) {
                 const that = this;
@@ -264,17 +221,64 @@
                 this.stopPlayTimer();
                 this.stopRetryTimeout();
                 this.stopPlayTimeout();
-                this.playTimeoutId = setTimeout(that.requestToken.bind(that)(function(resObj) {
-                    if (resObj) {
-                        that.playStart(resObj.cameraId, resObj.cvrHostPort, resObj.token);
-                    }
-                }), 200);
+
+                if (this.playTime) {
+                    this.requestTimeline(function(resObj) {
+                        if (resObj && resObj.recTimes) {
+                            that.cvrData.recordList = resObj.recTimes;
+                            if (that.checkHasCvr(time, resObj.recTimes)) {
+                                that.playTimeoutId = setTimeout(that.requestToken.bind(that)(function(resObj) {
+                                    if (resObj) {
+                                        that.playStart(resObj.cameraId, resObj.cvrHostPort, resObj.token);
+                                    }
+                                }), 200);
+                            } else {
+                                that.playStatus = that.E_PLAY_STATUS.no_cvr;
+                                if (that.playEventHandler) {
+                                    that.playEventHandler({status: that.E_PLAY_EVENT.no_cvr});
+                                }
+                                //that.hideControl();
+                            }
+                        } else {
+                            that.playStatus = that.E_PLAY_STATUS.no_cvr;
+                            if (that.playEventHandler) {
+                                that.playEventHandler({status: that.E_PLAY_EVENT.no_cvr});
+                            }
+                        }
+                    });
+                } else {
+                    this.playTimeoutId = setTimeout(that.requestToken.bind(that)(function(resObj) {
+                        if (resObj) {
+                            that.playStart(resObj.cameraId, resObj.cvrHostPort, resObj.token);
+                        }
+                    }), 200);
+                }
             },
 
             playStart : function (cameraId, cvrHostPort, token) {
-                this.player.play(cameraId, cvrHostPort + '/flvplayback/' + cameraId + '?token=' + token);
-                this.playTime = new Date().valueOf();
-                this.startLiveTimer();
+                if (this.playTime) { // cvr play
+                    this.player.play(cameraId, cvrHostPort + '/flvplayback/' + cameraId + '?token=' + token + '&time=' + this.playTime);
+                    this.startPlayTimer();
+                } else { // live play
+                    this.player.play(cameraId, cvrHostPort + '/flvplayback/' + cameraId + '?token=' + token);
+                    this.playTime = new Date().valueOf();
+                    this.startLiveTimer();
+                }
+            },
+
+            requestDestroy: function() {
+                if (this.playEventHandler) {
+                    this.playEventHandler({status: this.E_PLAY_EVENT.request_destroy});
+                }
+            },
+
+            checkHasCvr : function (time, recTimes) {
+                if (!recTimes || !recTimes.length) {
+                    return false;
+                }
+                return recTimes.some((recTime) => {
+                    return (parseInt(recTime.startTime) <= time) && (parseInt(recTime.endTime) >= time);
+                });
             },
 
             hideControl : function () {
@@ -289,6 +293,36 @@
                         request.setRequestHeader(key, this.requestHeaders[key]);
                     }
                 }
+            },
+
+            requestTimeline : function (callback) {
+                const httpRequest = new XMLHttpRequest();
+                this.isCvrLoading = true;
+                httpRequest.onreadystatechange = () => {
+                    if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                        if (httpRequest.status === 200) {
+                            const resObj = JSON.parse(httpRequest.responseText);
+                            callback(resObj);
+                        } else {
+                            callback(null);
+                        }
+                        this.isCvrLoading = false;
+                    }
+                };
+                const startDate = new Date(this.playTime);
+                const endDate = new Date(this.playTime);
+                startDate.setMinutes(0);
+                startDate.setSeconds(0);
+                startDate.setMilliseconds(0);
+                endDate.setMinutes(0);
+                endDate.setSeconds(1);
+                endDate.setHours(startDate.getHours() + 1);
+                this.cvrData.startTime = startDate.valueOf();
+                this.cvrData.endTime = endDate.valueOf();
+                const timelineUrl = this.getTimelineUrl ? this.getTimelineUrl : this.defGetTimelineUrl;
+                httpRequest.open('GET', setPathParams(timelineUrl + '?start=' + this.cvrData.startTime + '&end=' + this.cvrData.endTime , {cameraId : this.cameraId}));
+                this.setHeaders(httpRequest);
+                httpRequest.send();
             },
 
             requestToken : function (callback) {
@@ -315,7 +349,7 @@
                 this.isShowControl = true;
                 this.stopShowControlTimeout();
                 this.showControlTimeout = setTimeout(() => {
-                    if (this.playStatus !== this.E_PLAY_STATUS.pause) {
+                    if ((this.playStatus !== this.E_PLAY_STATUS.finish) && (this.playStatus !== this.E_PLAY_STATUS.pause)) {
                         this.isShowControl = false;
                     }
                 }, 3000);
@@ -336,11 +370,32 @@
             },
 
             resume : function () {
-                if (this.playStatus === this.E_PLAY_STATUS.pause || this.playStatus === this.E_PLAY_STATUS.server_error) {
+                if (this.playStatus === this.E_PLAY_STATUS.pause || this.playStatus === this.E_PLAY_STATUS.server_error || this.playStatus === this.E_PLAY_STATUS.no_cvr) {
                     this.stop();
+                    if (this.startTime) { //CVR
+                        this.playStatus = this.E_PLAY_STATUS.play;
+                        this.play(this.playTime ? this.playTime : this.startTime);
+                    } else { //Live
+                        this.play();
+                    }
+                } else if (this.playStatus === this.E_PLAY_STATUS.finish) {
+                    this.replay();
+                }
+            },
+            replay : function (startTime, endTime) {
+                if (startTime && endTime) {
+                    this.startTime = startTime;
+                    this.endTime = endTime;
+                }
+                this.stop();
+                if (this.startTime) { //CVR
+                    this.playStatus = this.E_PLAY_STATUS.play;
+                    this.play(this.startTime);
+                } else { //Live
                     this.play();
                 }
             },
+
             mute : function () {
                 this.player.mute();
             },
@@ -381,6 +436,35 @@
                 }, this.timeInterval);
             },
 
+            startPlayTimer : function () {
+                const that = this;
+                this.stopPlayTimer();
+                this.playIntervalId = setInterval(function() {
+                    if (that.playStatus === that.E_PLAY_STATUS.play) {
+                        that.playTime += that.timeInterval;
+                        if (!that.isCvrLoading) {
+                            const curDate = new Date(that.playTime);
+                            if (curDate.getMilliseconds() >= 900) {
+                                if (!that.checkHasCvr(that.playTime, that.cvrData.recordList)) {
+                                    that.stop();
+                                    that.playStatus = that.E_PLAY_STATUS.no_cvr;
+                                    if (that.playEventHandler) {
+                                        that.playEventHandler({status: that.E_PLAY_EVENT.no_cvr});
+                                    }
+                                    that.hideControl();
+                                } else if (curDate.getMinutes() === 59 && curDate.getSeconds() === 59) {
+                                    that.requestTimeline(function(resObj) {
+                                        if (resObj) {
+                                            that.cvrData.recordList = resObj.recordList;
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }, this.timeInterval);
+            },
+
             stopPlayTimer : function () {
                 if (this.playIntervalId) {
                     clearInterval(this.playIntervalId);
@@ -415,6 +499,9 @@
                         this.playEventHandler({status: status});
                     }
                 } else if (status === statusEnum.EVENT_ERROR_WEBRTC_SERVER || status === statusEnum.EVENT_STREAM_DISCONNECTED) {
+                    if (this.playStatus === this.E_PLAY_STATUS.no_cvr) {
+                        return;
+                    }
                     this.playStatus = this.E_PLAY_STATUS.server_error;
                     if (this.playEventHandler) {
                         this.playEventHandler({status: status});
