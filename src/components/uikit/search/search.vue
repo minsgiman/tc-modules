@@ -6,7 +6,7 @@
                 <span class="dummy_full"></span>
             </span>
             <input ref="searchInput" type="search" autocomplete="new-password" :placeholder="placeholder" :disabled="!isActive"
-                   @focus="onFocus" @blur="onBlur" @input="searchStrUpdate" :style="{width: 'calc(100% - 70px)'}">
+                   @focus="onFocus" @blur="onBlur" @input="searchStrUpdate" :style="{width: 'calc(100% - 77px)'}">
             <span class="delete_img">
                 <img v-if="isShowDeleteBtn" @click="deleteSearchStr()" src="/resources/img/btn-input-text-delete.svg">
                 <span class="dummy_full"></span>
@@ -51,10 +51,12 @@
 
         onFocus() {
             this.focused = true;
+            (this as any).emitEvent('focused', true);
         }
 
         onBlur() {
             this.focused = false;
+            (this as any).emitEvent('unfocused', true);
         }
 
         searchStrUpdate() {
@@ -124,7 +126,8 @@
                 display: inline-block;
                 float: left;
                 height: 100%;
-                margin-left: 5px;
+                margin-left: 12px;
+                margin-right: 8px;
             }
             .delete_img {
                 display: inline-block;
