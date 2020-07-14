@@ -76,7 +76,7 @@
         play(cameraIdValue: string, url: string, serverUrls: string[]) {
             let isResume: boolean = false;
 
-            if (!this.isLive && this.videoObj.paused && this.pausedTime === this.currentTime.valueOf()) {
+            if (!this.isLive && this.hlsPlayer && this.videoObj && this.videoObj.paused && this.pausedTime === this.currentTime.valueOf()) {
                 isResume = true;
             }
             //clearInterval(this.loadCheckInterval);
