@@ -132,6 +132,7 @@
         RecTime: any = null;
         fixRange: any = 0;
         range: any = 0;
+        cvrSecureTimeoutId: any = null;
 
         private created() {
             const that: any = this;
@@ -512,11 +513,17 @@
                     clearTimeout(this.playserStop);
                     break;
                 case 'checkCVRSeucre':
-                    if (this.isFullScreen) {
-                        this.cvrPlaySecureManagerFull.checkCVRSeucre(param.data);
-                    } else {
-                        this.cvrPlaySecureManager.checkCVRSeucre(param.data);
+                    if (this.cvrSecureTimeoutId) {
+                        clearTimeout(this.cvrSecureTimeoutId);
+                        this.cvrSecureTimeoutId = null;
                     }
+                    this.cvrSecureTimeoutId = setTimeout(() => {
+                        if (this.isFullScreen) {
+                            this.cvrPlaySecureManagerFull.checkCVRSeucre(param.data);
+                        } else {
+                            this.cvrPlaySecureManager.checkCVRSeucre(param.data);
+                        }
+                    }, 400);
                     break;
                 case 'updateCVRSecureStatus':
                     if (this.isFullScreen) {

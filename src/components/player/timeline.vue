@@ -79,6 +79,16 @@
         return { top: top, left: left };
     };
 
+    function makeMsgId() {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        for (var i = 0; i < 30; i++)
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+        return text;
+    }
+
     @Component
     export default class Timeline extends Vue {
         @Prop() elementId!: any;
@@ -139,6 +149,9 @@
             return store.state.timeRange;
         }
 
+        checkingSecure: boolean = false;
+        checkingSecureId: string = '';
+        cvrTimeoutId: any = null;
         width: any = 0;
         height: any = 0;
         cursorInterval: any = 1000;
@@ -289,9 +302,9 @@
             }
 
             this.playEventCallback('clickedCVRArea', time);
-            setTimeout(() => {
+            this.cvrTimeoutId = setTimeout(() => {
                 this.$emit('event', {event: 'cvrPlayRequest', data: {time, status}});
-            },800);
+            }, 400);
         }
 
         cvrDrawCheck(time: any) {
@@ -1277,24 +1290,33 @@
                     store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
                     timelineClick = true;
                     if ((new Date().getTime()) - that.previousDblClickTime < 500) return; // animating caused by dbl click.
+                    that.updateCursor(selectedTime);
 
+                    var checkingSecureId = makeMsgId();
                     var callbackFunc = function() {
                         that.forceDomain = true;
                         that.clickedCVRArea(selectedTime);
-                        that.updateCursor(selectedTime);
                         if (that.currentTime.getTime() - Date.now() >= 0) { // 미래를 선택한 경우
                             that.goLive();
                             return;
                         }
-
                     };
+                    that.checkingSecureId = checkingSecureId;
+                    that.checkingSecure = true;
+                    if (that.cvrTimeoutId) {
+                        clearTimeout(that.cvrTimeoutId);
+                        that.cvrTimeoutId = null;
+                    }
                     that.$emit('event', {event: 'checkCVRSeucre', data: (isSecureMode: any) => {
-                            if(isSecureMode){
+                        if (checkingSecureId === that.checkingSecureId) {
+                            if (isSecureMode) {
                                 that.$emit('event', {event: 'updateCVRSecureStatus', data: callbackFunc});
-                            }else{
+                            } else {
                                 callbackFunc();
                             }
-                        }});
+                            that.checkingSecure = false;
+                        }
+                    }});
                 }
             }).on('mousemove', function () {
                 var mouseLocation = d3.mouse(this);
@@ -1337,13 +1359,23 @@
                     store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
                     that.cursorDragStatus = false;
                     that.$emit('event', {event: 'liveReloadCntUpdate', data: 0});
+                    var checkingSecureId = makeMsgId();
+                    that.checkingSecureId = checkingSecureId;
+                    that.checkingSecure = true;
+                    if (that.cvrTimeoutId) {
+                        clearTimeout(that.cvrTimeoutId);
+                        that.cvrTimeoutId = null;
+                    }
                     that.$emit('event', {event: 'checkCVRSeucre', data: function(isSecureMode: any){
-                            if(isSecureMode){
+                        if (checkingSecureId === that.checkingSecureId) {
+                            if (isSecureMode) {
                                 that.$emit('event', {event: 'updateCVRSecureStatus', data: function() {that.cursorDragEnd();}});
-                            }else{
+                            } else {
                                 that.cursorDragEnd();
                             }
-                        }});
+                            that.checkingSecure = false;
+                        }
+                    }});
                 });
 
             that.cursor = that.mainContainer.append('g').attr('class', 'cursor').attr({'transform': 'translate(-7, 0)'}).call(drag);
@@ -2213,13 +2245,23 @@
                     that.$emit('event', {event: 'cvrPlayRequest', data: {time : new Date(findTime)}});
                 };
                 this.$emit('event', {event: 'clearPlayerStop'});
+                var checkingSecureId = makeMsgId();
+                that.checkingSecureId = checkingSecureId;
+                that.checkingSecure = true;
+                if (that.cvrTimeoutId) {
+                    clearTimeout(that.cvrTimeoutId);
+                    that.cvrTimeoutId = null;
+                }
                 this.$emit('event', {event: 'checkCVRSeucre', data: (isSecureMode: any) => {
-                        if(isSecureMode){
+                    if (checkingSecureId === that.checkingSecureId) {
+                        if (isSecureMode) {
                             that.$emit('event', {event: 'updateCVRSecureStatus', data: callbackFunc});
-                        }else{
+                        } else {
                             callbackFunc();
                         }
-                    }});
+                        that.checkingSecure = false;
+                    }
+                }});
             }
         }
 
@@ -2264,13 +2306,23 @@
                 }
             };
             this.$emit('event', {event: 'clearPlayerStop'});
+            var checkingSecureId = makeMsgId();
+            this.checkingSecureId = checkingSecureId;
+            this.checkingSecure = true;
+            if (this.cvrTimeoutId) {
+                clearTimeout(this.cvrTimeoutId);
+                this.cvrTimeoutId = null;
+            }
             this.$emit('event', {event: 'checkCVRSeucre', data: (isSecureMode: any) => {
-                    if(isSecureMode){
+                if (this.checkingSecureId === checkingSecureId) {
+                    if (isSecureMode) {
                         this.$emit('event', {event: 'updateCVRSecureStatus', data: callbackFunc.bind(this)});
-                    }else{
+                    } else {
                         callbackFunc.call(this);
                     }
-                }});
+                    this.checkingSecure = false;
+                }
+            }});
         }
 
         cursorDragEnd () {
