@@ -113,8 +113,8 @@
         .btn_wrap {
             display:table-cell; text-align:center; vertical-align:middle; width:100%; height:100%; padding-right:200px;
             button {
-                width:52px;
-                height:52px;
+                width:55px;
+                height:55px;
                 margin: 0 auto;
                 -webkit-transition: opacity 0.7s ease-in-out;
                 -moz-transition: opacity 0.7s ease-in-out;

@@ -7,7 +7,7 @@
                 <span class="date">{{formattedDateNotYo(currentTime)}}</span>
                 <span class="time">{{formattedTime(currentTime)}}</span>
                 <button type="button" class="golive" v-show="!isLive" @click="goLive()" id="golive_btn">
-                    <span>GO LIVE</span>
+                    <span>Go live</span>
                 </button>
             </div>
         </div>
@@ -74,13 +74,13 @@
         camInfoBarChange() {
             if(this.isLive == false){
                 if(parseInt(window.innerWidth as any) < 1900){
-                    $(".cam_info_bg").css("width","280px");
+                    $(".cam_info_bg").css("width","270px");
                     $(".cam_info_bg").css("margin-left"," -140px");
 
                     $(".cam_info_bg_en").css("width","290px");
                     $(".cam_info_bg_en").css("margin-left"," -145px");
                 }else{
-                    $(".cam_info_bg").css("width","280px");
+                    $(".cam_info_bg").css("width","270px");
                     $(".cam_info_bg").css("margin-left"," -140px");
 
                     $(".cam_info_bg_en").css("width","290px");

@@ -151,15 +151,15 @@
                         }
                     });
                 }
-            }, 200);
+            }, 500);
         }
 
         resume() {
             this.player.resume();
         }
 
-        mute() {
-            this.player.mute();
+        mute(val: boolean) {
+            this.player.mute(val);
         }
 
         pause() {

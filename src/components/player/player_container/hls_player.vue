@@ -1,12 +1,8 @@
 <template>
     <div id="hls_player_wrap" style="width:100%;height:100%;">
-        <div style="display:none;" class="localStream">
-            <video id="localVideo" muted="muted" autoplay="true"></video>
-        </div>
-
         <div id="hls_remote_stream" style="display:none; height:100%;" class="player_cam remoteStreams">
             <!--img id="hls_logo" src="/resources/img/toast_cam_logo.png" style="position:absolute; left:12%; top:5%; width:75%; z-index:1;"-->
-            <img v-show="showLoading" id="hls_loading" src="/resources/img/progress_rolling_white.svg" style="position:absolute; left:47%; top:33%; z-index:1; width:55px;">
+            <img v-show="showLoading" id="hls_loading" src="/resources/img/progress_rolling_white.svg" style="position:absolute; left:48%; top:37%; z-index:1; width:50px;">
             <div id="remoteHLSContainer" style="width:100%;height:100%;"></div>
         </div>
     </div>
@@ -93,15 +89,17 @@
                         class: 'video-js',
                         id: 'my-player'
                     };
-                    if (this.isMute) {
-                        options.muted = true;
-                    }
                     const $video = $('<video/>', options);
                     $('#remoteHLSContainer').append($video);
                     this.videoObj = $video[0];
                     this.hlsPlayer = new Hls();
                     this.hlsPlayer.attachMedia(this.videoObj);
                     this.updatePlayerSize();
+                    setTimeout(() => {
+                        if (this.isMute) {
+                            this.mute(true);
+                        }
+                    }, 500);
                 }
 
                 if (serverUrls && serverUrls.length) {
@@ -140,12 +138,24 @@
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTED;
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
                 console.log('Hls.Events.MANIFEST_PARSED');
+                if (this.isMute) {
+                    this.mute(true);
+                }
                 this.videoObj.play();
             });
 
 
             this.videoObj.addEventListener('canplay', () => {
                 console.log('canplay');
+                if (this.hlsStatus !== this.hlsStatusEnum.EVENT_STREAM_CONNECTED) {
+                    this.showLoading = false;
+                    this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTED;
+                    this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+                    if (this.isMute) {
+                        this.mute(true);
+                    }
+                    this.videoObj.play();
+                }
             });
             this.videoObj.addEventListener('ended', () => {
                 //clearInterval(this.loadCheckInterval);
@@ -197,10 +207,17 @@
             this.videoObj.style['transform'] = value;
         }
 
-        mute() {
-            const videoEl: HTMLVideoElement | null = document.querySelector('#my-player video');
+        mute(val: boolean) {
+            const videoEl: HTMLVideoElement | null = document.querySelector('#remoteHLSContainer video');
             if (videoEl) {
-                videoEl.muted = !videoEl.muted;
+                videoEl.muted = val;
+                if (videoEl.muted) {
+                    $(videoEl).attr('muted', 'true');
+                } else {
+                    $(videoEl).removeAttr('muted');
+                }
+                store.dispatch('MUTE_CHANGE', videoEl.muted);
+                console.log('videoEl.muted : ' + videoEl.muted);
             }
         }
 

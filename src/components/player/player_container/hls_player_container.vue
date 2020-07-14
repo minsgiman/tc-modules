@@ -51,8 +51,8 @@
             resume : function () {
                 this.player.resume();
             },
-            mute : function () {
-                this.player.mute();
+            mute : function (val: boolean) {
+                this.player.mute(val);
             },
             pause : function () {
                 this.player.pause();
