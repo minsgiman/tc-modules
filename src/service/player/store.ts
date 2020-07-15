@@ -29,9 +29,17 @@ const store = new Vuex.Store({
         isShowTimelineCalendar: false,
         ptzControlMode: false,
         browserInfo: {},
-        playerType: ''
+        playerType: '',
+        playerSize: {width: 0, height: 0},
+        hlsPlayUrl: '',
+        hlsZoomLevel: 1,
+        country: 'KR',
+        mute: false
     } as IStoreState,
     getters: {
+        thumbnail: (state) => {
+            return state.cameraData ? 'https://' + state.cameraData.thumbnailPath : '';
+        },
         isExpiredCloud: (state) => {
             if ((state.cameraData.serviceType === 'n/a' || state.cameraData.serviceType === '0d' || state.cameraData.saveEndDate < Date.now()) && state.cameraData.recorderType !== 'nvr') {
                 return true;
@@ -151,6 +159,21 @@ const store = new Vuex.Store({
         PLAYER_TYPE_CHANGE: (context, state) => {
             context.commit('UPDATE_PLAYER_TYPE', state);
         },
+        PLAYER_SIZE_CHANGE: (context, state) => {
+            context.commit('UPDATE_PLAYER_SIZE', state);
+        },
+        HLS_PLAY_URL_CHANGE: (context, state) => {
+            context.commit('UPDATE_HLS_PLAY_URL', state);
+        },
+        HLS_ZOOM_LEVEL_CHANGE: (context, state) => {
+            context.commit('UPDATE_HLS_ZOOM_LEVEL', state);
+        },
+        COUNTRY_CHANGE: (context, state) => {
+            context.commit('UPDATE_COUNTRY', state);
+        },
+        MUTE_CHANGE: (context, state) => {
+            context.commit('UPDATE_MUTE', state);
+        },
         BROWSER_INFO: (context, state) => {
             const checkSupportWebRTC = (browserInfo: any) => {
                 if (!browserInfo || !browserInfo.name) {
@@ -190,6 +213,10 @@ const store = new Vuex.Store({
             context.commit('UPDATE_IS_SHOW_CALENDAR', false);
             context.commit('UPDATE_PTZ_CONTROL', false);
             context.commit('UPDATE_PLAYER_TYPE', '');
+            context.commit('UPDATE_PLAYER_SIZE', {width: 0, height: 0});
+            context.commit('UPDATE_HLS_PLAY_URL', '');
+            context.commit('UPDATE_HLS_ZOOM_LEVEL', 1);
+            context.commit('UPDATE_MUTE', false);
         }
     },
     mutations: {
@@ -267,6 +294,21 @@ const store = new Vuex.Store({
         },
         UPDATE_PLAYER_TYPE: (state, value) => {
             state.playerType = value;
+        },
+        UPDATE_PLAYER_SIZE: (state, value) => {
+            state.playerSize = value;
+        },
+        UPDATE_HLS_PLAY_URL: (state, value) => {
+            state.hlsPlayUrl = value;
+        },
+        UPDATE_HLS_ZOOM_LEVEL: (state, value) => {
+            state.hlsZoomLevel = value;
+        },
+        UPDATE_COUNTRY: (state, value) => {
+            state.country = value;
+        },
+        UPDATE_MUTE: (state, value) => {
+            state.mute = value;
         }
     }
 });

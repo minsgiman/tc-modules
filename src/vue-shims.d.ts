@@ -3,6 +3,8 @@ declare module '*.vue' {
     export default Vue;
 }
 
+declare module 'hls.js'
+
 declare module 'toastcam-apis'
 
 declare module 'jquery'

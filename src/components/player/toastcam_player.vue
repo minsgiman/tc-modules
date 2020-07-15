@@ -8,6 +8,7 @@
     import timeline from './timeline.vue';
     import fullscreenBtn from './fullscreen_btn.vue';
     import zoomBtn from './zoom_btn.vue';
+    import zoomArea from './zoom_area.vue';
     import playInfoBar from './play_info_bar.vue';
     import playTimer from './play_timer.vue';
     import errorStatusLayer from './error_status_layer.vue';
@@ -37,6 +38,7 @@
         timeline: 'view_timeline_area',
         fullscreenBtn: 'fullscreen_btn_wrap',
         zoomBtn: 'zoom_btn_wrap',
+        zoomArea: 'zoom_area_wrap',
         errorStatusLayer: 'error_status_wrap',
         playInfoBar: 'cam_info',
         cvrPlaySecureLayer: 'cvr_play_manager_wrap',
@@ -99,11 +101,18 @@
         get timeRange() {
             return store.state.timeRange;
         }
+        get playerType() {
+            return store.state.playerType;
+        }
+        get category() {
+            return store.state.category;
+        }
 
         timeline: any = null;
         playTimer: any = null;
         player: any = null;
         zoomBtn: any = null;
+        zoomArea: any = null;
         playInfoBar: any = null;
         playIndicator: any = null;
         errorStatusLayer: any = null;
@@ -123,6 +132,7 @@
         RecTime: any = null;
         fixRange: any = 0;
         range: any = 0;
+        cvrSecureTimeoutId: any = null;
 
         private created() {
             const that: any = this;
@@ -139,12 +149,15 @@
             that.cvrPlaySecureManagerFull = that.createComponent(cvrPlaySecureManager, getElementId('cvrPlaySecureLayerFull'), that.cvrPlaySecureEventFullHandler.bind(that));
             that.timelineDateSelector = that.createComponent(timelineDateSelector, getElementId('timelineDateSelector'), that.timlineDateSelectorEventHandler.bind(that));
             that.eventMoveBtn = that.createComponent(eventMoveBtn, getElementId('eventMoveBtn'), that.eventMoveBtnEventHandler.bind(that), {timeline: that.timeline});
-            that.eventMoveFullBtn = that.createComponent(eventMoveBtn, getElementId('eventMoveFullBtn'), that.eventMoveBtnEventHandler.bind(that), {timeline: that.timeline, fullMode: true});
-            that.timelineTimeController = that.createComponent(timelineTimeController, getElementId('timelineTimeController'), that.timelineTimeControllerEventHandler.bind(that), {timeline: that.timeline, fullMode: false});
-            that.timelineTimeFullController = that.createComponent(timelineTimeController, getElementId('timelineTimeFullController'), that.timelineTimeControllerEventHandler.bind(that), {timeline: that.timeline, fullMode: true});
+            that.eventMoveFullBtn = that.createComponent(eventMoveBtn, getElementId('eventMoveFullBtn'), that.eventMoveBtnEventHandler.bind(that), {timeline: that.timeline, fullMode: that.category === 'b2bmonitor' ? false : true});
+            that.timelineTimeController = that.createComponent(timelineTimeController, getElementId('timelineTimeController'), that.timelineTimeControllerEventHandler.bind(that), {timeline: that.timeline, fullMode: that.category === 'b2bmonitor' ? true : false});
+            that.timelineTimeFullController = that.createComponent(timelineTimeController, getElementId('timelineTimeFullController'), that.timelineTimeControllerEventHandler.bind(that), {timeline: that.timeline, fullMode: that.category === 'b2bmonitor' ? false : true});
             that.timelineTimeSelector = that.createComponent(timelineTimeSelector, getElementId('timelineTimeSelector'), that.timelineTimeSelectorEventHandler.bind(that));
             that.playIndicator = that.createComponent(playIndicator, getElementId('playIndicator'), that.playIndicatorEventHandler.bind(that));
             that.calendarBtn = that.createComponent(calendarBtn, getElementId('calendarBtn'), that.calendarBtnEventHandler.bind(that));
+            if (that.playerType === 'hls') {
+                that.zoomArea = that.createComponent(zoomArea, getElementId('zoomArea'), that.zoomAreaHandler.bind(that));
+            }
             setTimeout(() => {
                 that.timeline.requestPlay(that.playTime);
             },100);
@@ -170,6 +183,9 @@
             that.timelineTimeSelector.$destroy();
             that.playIndicator.$destroy();
             that.calendarBtn.$destroy();
+            if (that.zoomArea) {
+                that.zoomArea.$destroy();
+            }
         }
 
         createComponent(constructor: any, elementId: any, eventHandler?: any, prop?: any) {
@@ -187,6 +203,9 @@
         reloadPlayer() {
             this.player.$destroy();
             this.player = this.createComponent(playContainer, null, this.playStatusChangedHandler.bind(this));
+            if (this.playerType === 'hls') {
+                this.zoomArea.changeZoom(1);
+            }
         }
 
         playStatusChangedHandler(status: any) {
@@ -216,6 +235,13 @@
                     this.playTimer.stopTimer();
                     this.player.stop(this.cameraData.id);
                     this.errorStatusLayer.cameraStatusChange(3);
+                } else if (status.status === 'event_stream_suspend') {
+                    this.player.stop();
+                    if (this.isLive) {
+                        this.player.play();
+                    } else {
+                        this.player.play(this.currentTime.getTime());
+                    }
                 } else if (status.status === 'v2_event_stream_connected') {
                     store.dispatch('IS_PLAYING_CHANGE', true);
                     this.playEventCb('isShowMikeChanged', true);
@@ -405,6 +431,9 @@
                     }
                     this.playInfoBar.camInfoBarChange();
                     this.playIndicator.updateIndicatorSize();
+                    if (this.player) {
+                        this.player.updatePlayerSize();
+                    }
                     break;
                 case 'stopPlayTimer':
                     this.playTimer.stopTimer();
@@ -495,11 +524,17 @@
                     clearTimeout(this.playserStop);
                     break;
                 case 'checkCVRSeucre':
-                    if (this.isFullScreen) {
-                        this.cvrPlaySecureManagerFull.checkCVRSeucre(param.data);
-                    } else {
-                        this.cvrPlaySecureManager.checkCVRSeucre(param.data);
+                    if (this.cvrSecureTimeoutId) {
+                        clearTimeout(this.cvrSecureTimeoutId);
+                        this.cvrSecureTimeoutId = null;
                     }
+                    this.cvrSecureTimeoutId = setTimeout(() => {
+                        if (this.isFullScreen) {
+                            this.cvrPlaySecureManagerFull.checkCVRSeucre(param.data);
+                        } else {
+                            this.cvrPlaySecureManager.checkCVRSeucre(param.data);
+                        }
+                    }, 400);
                     break;
                 case 'updateCVRSecureStatus':
                     if (this.isFullScreen) {
@@ -562,7 +597,6 @@
                 this.player.pause();
                 store.dispatch('PLAY_BTN_STATUS_CHANGE', false);
             } else if (param.event === 'play') {
-                this.player.resume();
                 store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
                 this.errorStatusLayer.cameraStatusAllOff();
                 if(this.isLive == false){
@@ -702,6 +736,8 @@
                 this.playEventCb('indicatorHoverIn');
             } else if (param.event === 'indicatorHoverOut') {
                 this.playEventCb('indicatorHoverOut');
+            } else if (param.event === 'zoomInit') {
+                this.zoomArea.changeZoom(1);
             }
         }
 
@@ -722,15 +758,29 @@
         }
 
         zoomEventHandler(zoom: any) {
-            this.playEventCb('zoomDragValChanged', 0);
-            this.player.zoomUp(zoom);
+            if (this.playerType === 'hls') {
+                this.zoomArea.zoomUpHandler(zoom);
+            } else {
+                this.playEventCb('zoomDragValChanged', 0);
+                this.player.zoomUp(zoom);
+            }
+        }
+
+        zoomAreaHandler(param: any) {
+            if (param.event === 'transformChange') {
+                this.player.transformChange(param.value);
+            }
         }
 
         fullscreenEventHandler(param: any) {
             if (param.event === 'changed') {
                 this.onFullscreenChanged(param.state);
             } else if (param.event === 'beforeChange') {
-                this.player.zoomUp(-5);
+                if (this.playerType === 'hls') {
+                    this.zoomArea.changeZoom(1);
+                } else {
+                    this.player.zoomUp(-5);
+                }
                 this.onBeforeFullscreenChange(param.state);
             } else if (param.event === 'dataLoading') {
                 this.playEventCb('loadingAlert');
@@ -810,10 +860,14 @@
                 }
                 this.playEventCb('timelineVisibleChanged', true);
 
-                if (this.player.getData('currentZoom') > 1) {
-                    this.player.setData('currentZoom', 1);	// 줌 상태일 경우 줌해제 처리
-                    this.playEventCb('zoomDragValChanged', 0);
-                    this.player.zoomUp(0);
+                if (this.playerType === 'hls') {
+                    this.zoomArea.changeZoom(1);
+                } else {
+                    if (this.player.getData('currentZoom') > 1) {
+                        this.player.setData('currentZoom', 1);	// 줌 상태일 경우 줌해제 처리
+                        this.playEventCb('zoomDragValChanged', 0);
+                        this.player.zoomUp(0);
+                    }
                 }
 
                 this.playEventCb('isClickTimelineShowChanged', false);
@@ -857,6 +911,9 @@
                 $("#cursorRightBtn").css("top","");
                 $(".fs_time").hide();
                 $(".cam_info_area").css("top","");
+                setTimeout(() => {
+                    this.player.updatePlayerSize();
+                }, 500);
             }
         }
 
