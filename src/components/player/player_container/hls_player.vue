@@ -144,6 +144,17 @@
                 this.videoObj.play();
             });
 
+            this.hlsPlayer.on(Hls.Events.ERROR, (event: any, data: any) => {
+                const errorType = data.type,
+                    errorDetails = data.details;
+
+                if ((errorType === 'networkError' && errorDetails === 'levelLoadError') ||
+                    (errorType === 'mediaError' && errorDetails === 'bufferNudgeOnStall')) {
+                    this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
+                    this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+                }
+                console.log('hlsPlayer Error occued! errorType : ' + errorType + ', errorDetails : ' + errorDetails);
+            });
 
             this.videoObj.addEventListener('canplay', () => {
                 console.log('canplay');
