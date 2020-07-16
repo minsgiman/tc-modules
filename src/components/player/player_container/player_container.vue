@@ -144,9 +144,9 @@
                             }
                         } else if (this.playerType === 'hls') {
                             if (time) {
-                                this.player.play(this.cameraData.mediaStreamURL + '?token=' + res.token + '&time=' + time.getTime());
+                                this.player.play(res.cvrHostPort + '/flvplayback/' + this.cameraData.id + '?token=' + res.token + '&time=' + time.getTime());
                             } else {
-                                this.player.play(this.cameraData.mediaStreamURL + '?token=' + res.token);
+                                this.player.play(res.cvrHostPort + '/flvplayback/' + this.cameraData.id + '?token=' + res.token);
                             }
                         } else {
                             if (time) {
