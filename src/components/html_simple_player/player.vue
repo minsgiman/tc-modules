@@ -76,6 +76,12 @@
             }
         }
 
+        resume() {
+            if (this.videoObj) {
+                this.videoObj.play();
+            }
+        }
+
         getIsPlaying(): boolean {
             if (this.videoObj) {
                 return (this.videoObj.duration && !this.videoObj.paused);
