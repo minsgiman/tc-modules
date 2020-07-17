@@ -149,6 +149,7 @@
                     errorDetails = data.details;
 
                 if ((errorType === 'networkError' && errorDetails === 'levelLoadError') ||
+                    (errorType === 'networkError' && errorDetails === 'levelEmptyError') ||
                     (errorType === 'mediaError' && errorDetails === 'bufferNudgeOnStall')) {
                     this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
                     this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
