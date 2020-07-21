@@ -132,6 +132,15 @@
                 }
             }, 200);
              */
+            this.hlsPlayer.on(Hls.Events.LEVEL_LOADED, (event: any, data: any) => {
+                var level_duration = data.details.totalduration;
+
+                if (level_duration === 0) {
+                    this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
+                    this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+                }
+                console.log('level_duration : ' + level_duration);
+            });
 
             this.hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
                 this.showLoading = false;
@@ -141,15 +150,16 @@
                 if (this.isMute) {
                     this.mute(true);
                 }
-                this.videoObj.play();
+                setTimeout(() => {
+                    this.videoObj.play();
+                }, 200);
             });
 
             this.hlsPlayer.on(Hls.Events.ERROR, (event: any, data: any) => {
                 const errorType = data.type,
                     errorDetails = data.details;
 
-                if ((errorType === 'networkError' && errorDetails === 'levelLoadError') ||
-                    (errorType === 'networkError' && errorDetails === 'levelEmptyError') ||
+                if ((errorType === 'networkError') ||
                     (errorType === 'mediaError' && errorDetails === 'bufferNudgeOnStall')) {
                     this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
                     this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
@@ -166,7 +176,9 @@
                     if (this.isMute) {
                         this.mute(true);
                     }
-                    this.videoObj.play();
+                    setTimeout(() => {
+                        this.videoObj.play();
+                    }, 200);
                 }
             });
             this.videoObj.addEventListener('ended', () => {
