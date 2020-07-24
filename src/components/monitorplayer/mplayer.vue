@@ -135,7 +135,7 @@
             });
             $('#remoteVideosContainer_' + this.cameraId).append($video);
             this.videoObj = $video[0];
-            this.hlsPlayer = new Hls({liveBackBufferLength: 900});
+            this.hlsPlayer = new Hls({liveBackBufferLength: 10});
             this.hlsPlayer.attachMedia(this.videoObj);
 
             this.hlsPlayer.loadSource(playUrl);

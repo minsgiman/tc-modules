@@ -83,7 +83,7 @@
             });
             $('#zoom_wrapper').append($video);
             this.videoObj = $video[0];
-            this.hlsPlayer = new Hls({liveBackBufferLength: 900});
+            this.hlsPlayer = new Hls({liveBackBufferLength: 10});
             this.hlsPlayer.attachMedia(this.videoObj);
 
             toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAM_TOKEN : toastcamAPIs.camera.GET_TOKEN, {cameraId: this.cameraData.id}, (res: any) => {
