@@ -49,7 +49,7 @@
             });
             $('#simpleHLSContainer').append($video);
             this.videoObj = $video[0];
-            this.hlsPlayer = new Hls();
+            this.hlsPlayer = new Hls({liveBackBufferLength: 900});
             this.hlsPlayer.attachMedia(this.videoObj);
 
             toastcamAPIs.call(toastcamAPIs.camera.GET_STREAMING_SERVER, {}, (res: any) => {

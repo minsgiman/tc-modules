@@ -92,7 +92,7 @@
                     const $video = $('<video/>', options);
                     $('#remoteHLSContainer').append($video);
                     this.videoObj = $video[0];
-                    this.hlsPlayer = new Hls();
+                    this.hlsPlayer = new Hls({liveBackBufferLength: 900});
                     this.hlsPlayer.attachMedia(this.videoObj);
                     this.updatePlayerSize();
                     setTimeout(() => {
