@@ -81,19 +81,16 @@
 
         play(cameraIdValue: string, url: string, serverUrls: string[]) {
             let isResume: boolean = false;
-            console.log('play 11');
+
             if (!this.isLive && this.hlsPlayer && this.videoObj && this.videoObj.paused && this.pausedTime === this.currentTime.valueOf()) {
                 isResume = true;
-              console.log('play 12');
             }
             //clearInterval(this.loadCheckInterval);
             if (!isResume) {
-                console.log('play 13');
                 this.stop();
                 this.showLoading = true;
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTING;
                 if (!this.hlsPlayer) {
-                  console.log('play 14');
                     const options: any = {
                         class: 'video-js',
                         id: 'my-player'
@@ -105,7 +102,6 @@
                     this.hlsPlayer.attachMedia(this.videoObj);
                     this.updatePlayerSize();
                     setTimeout(() => {
-                      console.log('play 15');
                         if (this.isMute) {
                             this.mute(true);
                         }
@@ -113,7 +109,6 @@
                 }
 
                 if (serverUrls && serverUrls.length) {
-                  console.log('play 16');
                     const playUrl = 'https://' + serverUrls[0] + '/hlsplay?url=' + encodeURIComponent(url);
                     store.dispatch('HLS_PLAY_URL_CHANGE', playUrl);
                     this.hlsPlayer.loadSource(playUrl);
@@ -121,7 +116,6 @@
                     //     { type: "application/x-mpegURL", src: playUrl }
                     // ]);
                 } else {
-                    console.log('play 17');
                     this.showLoading = true;
                     this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_DISCONNECTED;
                     this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
@@ -129,7 +123,6 @@
                     return;
                 }
             } else {
-                console.log('play 18');
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTED;
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
                 if (this.videoObj) {
