@@ -238,9 +238,11 @@
                 } else if (status.status === 'event_stream_suspend') {
                     this.player.stop();
                     if (this.isLive) {
+                        console.log('event_stream_suspend live');
                         this.player.play();
                     } else {
-                        this.player.play(this.currentTime.getTime());
+                        console.log('event_stream_suspend cvr : ' + this.currentTime.getTime());
+                        this.player.play(this.currentTime);
                     }
                 } else if (status.status === 'v2_event_stream_connected') {
                     store.dispatch('IS_PLAYING_CHANGE', true);

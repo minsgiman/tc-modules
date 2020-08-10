@@ -52,6 +52,7 @@
         hlsPlayer: any = null;
         videoObj: any = null;
         hlsStatus: string = '';
+        retryTimeout: any = null;
         hlsStatusEnum: any = {
             EVENT_STREAM_CONNECTING : 'event_stream_connecting',
             EVENT_STREAM_CONNECTED : 'event_stream_connected',
@@ -65,26 +66,34 @@
             $('#hls_remote_stream').show();
         }
         private beforeDestroy() {
+            //this.clearRetryTimeout();
             if (this.hlsPlayer) {
+                this.hlsPlayer.off(Hls.Events.LEVEL_LOADED);
+                this.hlsPlayer.off(Hls.Events.MANIFEST_PARSED);
+                this.hlsPlayer.off(Hls.Events.ERROR);
                 this.hlsPlayer.destroy();
                 this.hlsPlayer = null;
             }
+            this.videoObj = null;
             // clearInterval(this.loadCheckInterval);
             $('#hls_player_wrap').hide();
         }
 
         play(cameraIdValue: string, url: string, serverUrls: string[]) {
             let isResume: boolean = false;
-
+            console.log('play 11');
             if (!this.isLive && this.hlsPlayer && this.videoObj && this.videoObj.paused && this.pausedTime === this.currentTime.valueOf()) {
                 isResume = true;
+              console.log('play 12');
             }
             //clearInterval(this.loadCheckInterval);
             if (!isResume) {
+                console.log('play 13');
                 this.stop();
                 this.showLoading = true;
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTING;
                 if (!this.hlsPlayer) {
+                  console.log('play 14');
                     const options: any = {
                         class: 'video-js',
                         id: 'my-player'
@@ -96,6 +105,7 @@
                     this.hlsPlayer.attachMedia(this.videoObj);
                     this.updatePlayerSize();
                     setTimeout(() => {
+                      console.log('play 15');
                         if (this.isMute) {
                             this.mute(true);
                         }
@@ -103,6 +113,7 @@
                 }
 
                 if (serverUrls && serverUrls.length) {
+                  console.log('play 16');
                     const playUrl = 'https://' + serverUrls[0] + '/hlsplay?url=' + encodeURIComponent(url);
                     store.dispatch('HLS_PLAY_URL_CHANGE', playUrl);
                     this.hlsPlayer.loadSource(playUrl);
@@ -110,35 +121,26 @@
                     //     { type: "application/x-mpegURL", src: playUrl }
                     // ]);
                 } else {
+                    console.log('play 17');
                     this.showLoading = true;
                     this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_DISCONNECTED;
                     this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+                    //this.clearRetryTimeout();
                     return;
                 }
             } else {
+                console.log('play 18');
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTED;
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
-                this.videoObj.play();
+                if (this.videoObj) {
+                  this.videoObj.play();
+                }
+                //this.buildRetryTimeout();
             }
 
-            /*
-            this.loadCheckInterval = setInterval(() => {
-                if (this.videoObj && this.videoObj.duration) {
-                    clearInterval(this.loadCheckInterval);
-                    this.showLoading = false;
-                    this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTED;
-                    this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
-                    this.videoObj.play();
-                }
-            }, 200);
-             */
             this.hlsPlayer.on(Hls.Events.LEVEL_LOADED, (event: any, data: any) => {
                 var level_duration = data.details.totalduration;
-
-                if (level_duration === 0) {
-                    this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
-                    this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
-                }
+                //this.buildRetryTimeout();
                 console.log('level_duration : ' + level_duration);
             });
 
@@ -151,7 +153,10 @@
                     this.mute(true);
                 }
                 setTimeout(() => {
-                    this.videoObj.play();
+                    if (this.videoObj) {
+                      this.videoObj.play();
+                    }
+                    //this.buildRetryTimeout();
                 }, 200);
             });
 
@@ -161,6 +166,7 @@
 
                 if ((errorType === 'networkError') ||
                     (errorType === 'mediaError' && errorDetails === 'bufferNudgeOnStall')) {
+                    //this.clearRetryTimeout();
                     this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
                     this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
                 }
@@ -177,14 +183,20 @@
                         this.mute(true);
                     }
                     setTimeout(() => {
-                        this.videoObj.play();
+                        if (this.videoObj) {
+                          this.videoObj.play();
+                        }
+                        //this.buildRetryTimeout();
                     }, 200);
                 }
             });
             this.videoObj.addEventListener('ended', () => {
                 //clearInterval(this.loadCheckInterval);
-                this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
-                this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+                //this.clearRetryTimeout();
+                if (this.cameraData.recordType !== 'event') {
+                  this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
+                  this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+                }
                 console.log('ended');
             });
             this.videoObj.addEventListener('playing', () => {
@@ -198,6 +210,7 @@
             });
             this.videoObj.addEventListener('suspend', () => {
                 //clearInterval(this.loadCheckInterval);
+                //this.clearRetryTimeout();
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
                 console.log('suspend');
@@ -210,9 +223,26 @@
                 //$('#hls_logo').show();
                 //clearInterval(this.loadCheckInterval);
                 this.showLoading = true;
+                //this.clearRetryTimeout();
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_DISCONNECTED;
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
             });
+        }
+
+        buildRetryTimeout() {
+            this.clearRetryTimeout();
+            this.retryTimeout = setTimeout(() => {
+              console.log('retry timeout');
+              this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
+              this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+            }, 10 * 1000);
+        }
+
+        clearRetryTimeout() {
+            if (this.retryTimeout) {
+                clearTimeout(this.retryTimeout);
+                this.retryTimeout = null;
+            }
         }
 
         updatePlayerSize() {
@@ -264,13 +294,18 @@
 
         stop() {
             //clearInterval(this.loadCheckInterval);
+            //this.clearRetryTimeout();
             this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_STOPPED;
             this.showLoading = false;
             if (this.hlsPlayer) {
+                this.hlsPlayer.off(Hls.Events.LEVEL_LOADED);
+                this.hlsPlayer.off(Hls.Events.MANIFEST_PARSED);
+                this.hlsPlayer.off(Hls.Events.ERROR);
                 this.hlsPlayer.destroy();
                 this.hlsPlayer = null;
             }
             $('#remoteHLSContainer').empty();
+            this.videoObj = null;
         }
 
         getStatus() {
