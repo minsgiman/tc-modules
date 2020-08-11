@@ -1,28 +1,32 @@
 <script lang="ts">
     import store from '../../../service/player/store';
-    import webRTCV2Player from './webrtcv2_player.vue';
+    import hlsPlayer from './hls_player.vue';
+    import toastcamAPIs from './../../../service/toastcamAPIs';
     import Vue from 'vue';
 
     const $: any = (window as any).$ as any;
 
     export default {
-        name: 'webrtcV2PlayerContainer',
+        name: 'hlsPlayerContainer',
         props: [],
         computed: {
             cameraData: function () {
                 return store.state.cameraData;
+            },
+            country: function () {
+                return store.state.country;
             }
         },
         data: function () {
             return {
                 player : null,
-                type : 'webrtcv2'
+                type : 'hls'
             }
         },
         created : function() {
-            const vExtendConstructor = Vue.extend(webRTCV2Player);
-            this.player = new vExtendConstructor().$mount('#webrtc_player_wrap');
-            this.player.$on('playerStatusChanged', this.webRTCEventCallback.bind(this));
+            const vExtendConstructor = Vue.extend(hlsPlayer);
+            this.player = new vExtendConstructor().$mount('#hls_player_wrap');
+            this.player.$on('playerStatusChanged', this.hlsEventCallback.bind(this));
         },
         mounted : function() {
         },
@@ -35,29 +39,27 @@
         methods : {
             play : function (url: string) {
                 this.player.dvrConnectFail = false;
-                this.player.webRTCStatus = this.player.webRTCStatusEnum.EVENT_STREAM_CONNECTING;
-                if (this.player.currentWebRTCPeerId) {
-                    this.stop(this.player.currentWebRTCPeerId);
-                }
-                this.player.currentWebRTCPeerId = this.cameraData.id;
-                this.player.play(this.cameraData.id, url);
-                $('#webrtc_logo').show();
-                $('#webrtc_loading').show();
+                this.player.hlsStatus = this.player.hlsStatusEnum.EVENT_STREAM_CONNECTING;
+                // if (this.player.currentHlsPeerId) {
+                //     this.stop(this.player.currentHlsPeerId);
+                // }
+                this.player.currentHlsPeerId = this.cameraData.id;
+                toastcamAPIs.call(toastcamAPIs.camera.GET_STREAMING_SERVER, {country: this.country}, (res: any) => {
+                    this.player.play(this.cameraData.id, url, res.servers ? res.servers : []);
+                });
             },
             resume : function () {
                 this.player.resume();
             },
-            mute : function () {
-                return;
+            mute : function (val: boolean) {
+                this.player.mute(val);
             },
             pause : function () {
                 this.player.pause();
             },
             stop : function () {
-                $('#remoteWebRTCContainer').empty();
+                $('#remoteHLSContainer').empty();
                 this.player.stop();
-                $('#webrtc_logo').hide();
-                $('#webrtc_loading').hide();
             },
             close : function () {
                 this.player.close();
@@ -68,8 +70,8 @@
             getStatus : function () {
                 return this.player.getStatus();
             },
-            transformChange : function(value: string) {
-                return;
+            transformChange(value: string) {
+                return this.player.transformChange(value);
             },
             zoomZone: function () {
                 return;
@@ -89,11 +91,11 @@
             positionZoomable : function(zoom: any) {
                 return;
             },
-            updatePlayerSize : function() {
-                return;
-            },
-            webRTCEventCallback : function (status: any) {
+            hlsEventCallback : function (status: any) {
                 this.$emit('playerStatusChanged', status);
+            },
+            updatePlayerSize: function () {
+                this.player.updatePlayerSize();
             },
             setData(key: any, value: any) {
                 (this as any)[key] = value;

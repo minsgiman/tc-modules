@@ -58,13 +58,17 @@ class Player {
     control: any;
 
     constructor(param: any) {
-        if (param.category === 'b2b') {
+        if (param.category === 'b2b' || param.category === 'b2bmonitor') {
             toastcamAPIs.setConfig({
                 prefix: '/json/biz/'
             });
         } else if (param.category === 'demo') {
             toastcamAPIs.setConfig({
                 prefix: '/json/demo/'
+            });
+        } else if (param.category === 'b2bdemo') {
+            toastcamAPIs.setConfig({
+                prefix: '/json/biz/demo/'
             });
         } else {
             toastcamAPIs.setConfig({
@@ -78,6 +82,12 @@ class Player {
         this.setData('isShared', param.isShared);
         this.setData('browserInfo', browserCheck());
         this.setData('playerType', param.playerType);
+        if (param.country) {
+            this.setData('country', param.country);
+        }
+        if (param.mute) {
+            this.setData('mute', param.mute);
+        }
 
         const vExtendConstructor: any = Vue.extend(playContainer);
         this.control = new vExtendConstructor({
@@ -170,6 +180,12 @@ class Player {
                 break;
             case 'playerType':
                 store.dispatch('PLAYER_TYPE_CHANGE', value);
+                break;
+            case 'country':
+                store.dispatch('COUNTRY_CHANGE', value);
+                break;
+            case 'mute':
+                store.dispatch('MUTE_CHANGE', value);
                 break;
             default:
                 break;

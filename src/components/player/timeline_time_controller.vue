@@ -1,6 +1,6 @@
 <template>
     <div>
-        <ul v-show="!fullMode" class="time_unit" id="time_units">
+        <ul v-show="!fullMode && category !== 'b2bmonitor'" class="time_unit" id="time_units">
             <li :class="{on: timeRange === 10}">
                 <button type="button" @click="changeTimeRange(10)">
                     <span>{{$t('TIMELINE_10MIN')}}</span>
@@ -20,7 +20,7 @@
             </li>
         </ul>
 
-        <div class="fs_time" v-show="isFullScreen && fullMode">
+        <div class="fs_time" v-show="(isFullScreen && fullMode) || category === 'b2bmonitor'">
             <div class="range_select_wrap">
                 <spanly_flash_player class="left_icon"></spanly_flash_player>
                 <button type="button" @click="changeTimeRange(60)" v-show="timeRange == 10">
@@ -60,6 +60,9 @@
         @Prop() timeline!: any;
         @Prop() fullMode!: any;
 
+        get category() {
+            return store.state.category;
+        }
         get timeRange() {
             return store.state.timeRange;
         }

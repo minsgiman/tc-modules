@@ -4,11 +4,11 @@
             <video id="localVideo" muted="muted" autoplay="true"></video>
         </div>
 
-        <div id="remote_stream" style="display:none; height:100%;" class="player_cam remoteStreams">
+        <div id="webrtcv2_remote_stream" style="display:none; height:100%;" class="player_cam remoteStreams">
             <h2>Remote Streams</h2>
             <img id="webrtc_logo" src="/resources/img/toast_cam_logo.png" style="position:absolute; left:12%; top:5%; width:75%;">
             <img id="webrtc_loading" src="/resources/images/loading_2.gif" style="position:absolute; left:48%; top:43%;">
-            <div id="remoteVideosContainer" style="height:100%;"></div>
+            <div id="remoteWebRTCContainer" style="height:100%;"></div>
         </div>
     </div>
 </template>
@@ -102,11 +102,12 @@
 
         private mounted() {
             $('#player').hide();
-            $('#remote_stream').show();
+            $('#webrtcv2_remote_stream').show();
             this.videoStreamObj.preview = document.getElementById('localVideo');
         }
         private beforeDestroy() {
             clearInterval(this.gatherCheckInterval);
+            $('#webrtc_player_wrap').hide();
         }
 
         play(cameraIdValue: string, url: string) {
@@ -144,17 +145,17 @@
         }
 
         resume() {
-            if ($('#remoteVideosContainer').length) {
-                if ($('#remoteVideosContainer').children('video').length) {
-                    $('#remoteVideosContainer').children('video')[0].play();
+            if ($('#remoteWebRTCContainer').length) {
+                if ($('#remoteWebRTCContainer').children('video').length) {
+                    $('#remoteWebRTCContainer').children('video')[0].play();
                 }
             }
         }
 
         pause() {
-            if ($('#remoteVideosContainer').length) {
-                if ($('#remoteVideosContainer').children('video').length) {
-                    $('#remoteVideosContainer').children('video')[0].pause();
+            if ($('#remoteWebRTCContainer').length) {
+                if ($('#remoteWebRTCContainer').children('video').length) {
+                    $('#remoteWebRTCContainer').children('video')[0].pause();
                 }
             }
         }
@@ -254,10 +255,10 @@
                 peer.pc.ontrack = (event: any) => {
                     console.log('peer.pc.ontrack!');
                     attachMediaStream(peer.remoteVideoEl, event.streams[0]);
-                    $('#remoteVideosContainer')[0].appendChild(peer.remoteVideoEl);
+                    $('#remoteWebRTCContainer')[0].appendChild(peer.remoteVideoEl);
                     this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_CONNECTED;
-                    if ($('#remoteVideosContainer').children('video').length) {
-                        $('#remoteVideosContainer').children('video').css('height', $('#remoteVideosContainer').height() - $('#timeline_table').height());
+                    if ($('#remoteWebRTCContainer').children('video').length) {
+                        $('#remoteWebRTCContainer').children('video').css('height', $('#remoteWebRTCContainer').height() - $('#timeline_table').height());
                     }
                     $('#webrtc_logo').hide();
                     $('#webrtc_loading').hide();
@@ -267,10 +268,10 @@
                 peer.pc.onaddstream = (event: any) => {
                     console.log('peer.pc.onaddstream!');
                     attachMediaStream(peer.remoteVideoEl, event.stream);
-                    $('#remoteVideosContainer')[0].appendChild(peer.remoteVideoEl);
+                    $('#remoteWebRTCContainer')[0].appendChild(peer.remoteVideoEl);
                     this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_CONNECTED;
-                    if ($('#remoteVideosContainer').children('video').length) {
-                        $('#remoteVideosContainer').children('video').css('height', $('#remoteVideosContainer').height() - $('#timeline_table').height());
+                    if ($('#remoteWebRTCContainer').children('video').length) {
+                        $('#remoteWebRTCContainer').children('video').css('height', $('#remoteWebRTCContainer').height() - $('#timeline_table').height());
                     }
                     $('#webrtc_logo').hide();
                     $('#webrtc_loading').hide();
@@ -280,7 +281,7 @@
             peer.pc.onremovestream = (event: any) => {
                 console.log('peer.pc.onremovestream!');
                 peer.remoteVideoEl.src = '';
-                $('#remoteVideosContainer').empty();
+                $('#remoteWebRTCContainer').empty();
             };
             peer.pc.oniceconnectionstatechange = (event: any) => {
                 console.log('oniceconnectionstatechange - ' + (event.srcElement || event.target).iceConnectionState);
@@ -290,7 +291,7 @@
                         .iceConnectionState) {
                     case 'disconnected':
                         //case 'closed':
-                        $('#remoteVideosContainer').empty();
+                        $('#remoteWebRTCContainer').empty();
                         this.webRTCStatus = this.webRTCStatusEnum.EVENT_STREAM_RETRY;
                         this.$emit('playerStatusChanged', {status : this.webRTCStatus, code : ''});
                         break;

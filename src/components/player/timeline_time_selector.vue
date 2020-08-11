@@ -1,5 +1,5 @@
 <template>
-    <div id="timeline_time_selector_wrap" class="calendar_select" :class="{calendar_select_full: isFullScreen}" v-show="isShowTimelineCalendar">
+    <div id="timeline_time_selector_wrap" class="calendar_select" :class="{calendar_select_full: isFullScreen || category === 'b2bmonitor'}" v-show="isShowTimelineCalendar">
         <button type="button" class="sp btn_close" @click="hideSelector()"></button>
         <h3>{{$t('CAMERA_DAY_DIRECT')}}</h3>
         <ul>
@@ -118,6 +118,9 @@
         }
         get isShowTimelineCalendar() {
             return store.state.isShowTimelineCalendar;
+        }
+        get category() {
+            return store.state.category;
         }
 
         timelineDate: any = {

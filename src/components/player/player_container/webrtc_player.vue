@@ -4,7 +4,7 @@
             <video id="localVideo" muted="muted" autoplay="true"></video>
         </div>
 
-        <div id="remote_stream" style="display:none; height:100%;" class="player_cam remoteStreams">
+        <div id="webrtc_remote_stream" style="display:none; height:100%;" class="player_cam remoteStreams">
             <h2>Remote Streams</h2>
             <img id="webrtc_logo" src="/resources/img/toast_cam_logo.png" style="position:absolute; left:12%; top:5%; width:75%;">
             <img id="webrtc_loading" src="/resources/images/loading_2.gif" style="position:absolute; left:48%; top:43%;">
@@ -135,8 +135,13 @@
 
         private mounted() {
             $('#player').hide();
-            $('#remote_stream').show();
+            $('#webrtc_remote_stream').show();
             this.videoStreamObj.preview = document.getElementById('localVideo');
+        }
+
+        private beforeDestroy() {
+            this.stop();
+            $('#webrtc_player_wrap').hide();
         }
 
         play(cameraIdValue: any, timestamp: any) {

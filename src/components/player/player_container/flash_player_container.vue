@@ -81,6 +81,10 @@
             return this.player.getVideoStatus();
         }
 
+        transformChange(value: string) {
+            return;
+        }
+
         zoomZone(top: any, left: any) {
             this.player.zoomZone(top, left);
         }
@@ -188,6 +192,10 @@
 
         flashEventCallback(status: any) {
             this.$emit('playerStatusChanged', status);
+        }
+
+        updatePlayerSize() {
+            return;
         }
 
         setData(key: any, value: any) {

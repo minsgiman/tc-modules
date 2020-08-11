@@ -124,7 +124,9 @@
 
                 if(timeline.lineMoveFlag == false){
                     if (domain[0] < this.cursorNowTime && domain[1] > this.cursorNowTime) {
-                        timeline.updateCursor(new Date(this.cursorNowTime));
+                        if (!timeline.getData('checkingSecure')) {
+                            timeline.updateCursor(new Date(this.cursorNowTime));
+                        }
                     }else{
                         timeline.setData('changeTimeRangeClick', true);
                         timeline.nextDomain();
@@ -172,7 +174,9 @@
                 var domain = currentDomain;
 
                 if (domain[0] + range < currentTime.getTime() && domain[1]- range - fixRange > currentTime.getTime()) {
-                    timeline.updateCursor();
+                    if (!timeline.getData('checkingSecure')) {
+                        timeline.updateCursor();
+                    }
                     timeline.lineMoveFlag = false;
                 }else{
                     if(timeline.lineMoveFlag == false){

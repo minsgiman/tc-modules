@@ -80,6 +80,10 @@
             return this.player.getStatus();
         }
 
+        transformChange(value: string) {
+            return;
+        }
+
         zoomZone() {
             return;
         }
@@ -101,6 +105,10 @@
         }
 
         positionZoomable(zoom: any) {
+            return;
+        }
+
+        updatePlayerSize() {
             return;
         }
 

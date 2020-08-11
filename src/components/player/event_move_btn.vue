@@ -1,5 +1,5 @@
 <template>
-    <div id="event_move_btn_wrap" class="event_move" v-show="(!fullMode || (fullMode && isFullScreen && !isExpiredCloud)) && cameraData.recorderType != 'nvr'">
+    <div id="event_move_btn_wrap" class="event_move" v-show="(!fullMode || (fullMode && isFullScreen && !isExpiredCloud) || category === 'b2bmonitor') && cameraData.recorderType != 'nvr'">
         <div class="event_move_box">
             <li class="ar_L" @click="goPrevEvent()"><button></button></li>
             <li class="txt">{{$t('CAMERA_EVENT_MOVE')}}</li>
@@ -18,6 +18,9 @@
         @Prop() timeline!: any;
         @Prop() fullMode!: any;
 
+        get category() {
+            return store.state.category;
+        }
         get cameraData() {
             return store.state.cameraData;
         }

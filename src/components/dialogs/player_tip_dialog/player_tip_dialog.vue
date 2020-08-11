@@ -13,7 +13,6 @@
                         <img src="/resources/img/img-guide-key-space.png">
                         <span>{{txtMap.guideKeySpace}}</span>
                     </div>
-                    <button @click="destroy" class="confirm_btn">{{txtMap.confirm}}</button>
                 </div>
             </template>
         </modal_dialog>
