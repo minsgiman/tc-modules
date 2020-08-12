@@ -133,12 +133,14 @@
 
             this.hlsPlayer.on(Hls.Events.LEVEL_LOADED, (event: any, data: any) => {
                 var level_duration = data.details.totalduration;
+                if (level_duration) {
+                  this.showLoading = false;
+                }
                 //this.buildRetryTimeout();
                 console.log('level_duration : ' + level_duration);
             });
 
             this.hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
-                this.showLoading = false;
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTED;
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
                 console.log('Hls.Events.MANIFEST_PARSED');
@@ -169,7 +171,6 @@
             this.videoObj.addEventListener('canplay', () => {
                 console.log('canplay');
                 if (this.hlsStatus !== this.hlsStatusEnum.EVENT_STREAM_CONNECTED) {
-                    this.showLoading = false;
                     this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTED;
                     this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
                     if (this.isMute) {

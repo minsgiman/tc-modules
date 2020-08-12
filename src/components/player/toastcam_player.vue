@@ -20,6 +20,7 @@
     import eventMoveBtn from './event_move_btn.vue';
     import playIndicator from './play_indicator.vue';
     import store from '../../service/player/store';
+    import toastcamAPIs from '../../service/toastcamAPIs';
     // import moment from 'moment';
     // import 'moment-timezone';
 
@@ -237,6 +238,10 @@
                     this.errorStatusLayer.cameraStatusChange(3);
                 } else if (status.status === 'event_stream_suspend') {
                     this.player.stop();
+                    toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAMERA_DETAIL : toastcamAPIs.camera.GET_CAMERA_DETAIL,
+                        {cameraId: this.cameraData.id},
+                        (cameraData: any) => {}
+                    );
                     if (this.isLive) {
                         this.player.play();
                     } else {
