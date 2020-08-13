@@ -227,9 +227,11 @@
                     if (this.isLive) {
                         toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAMERA_DETAIL : toastcamAPIs.camera.GET_CAMERA_DETAIL,
                             {cameraId: this.cameraData.id},
-                            (cameraData: any) => {}
+                            (cameraData: any) => {
+                              store.dispatch('CAMERA_DATA_CHANGE', cameraData);
+                              this.timeline.requestPlay();
+                            }
                         );
-                        this.timeline.requestPlay();
                     } else {
                         this.timeline.requestPlay(this.currentTime.valueOf());
                     }
@@ -244,13 +246,15 @@
                     this.player.stop();
                     toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAMERA_DETAIL : toastcamAPIs.camera.GET_CAMERA_DETAIL,
                         {cameraId: this.cameraData.id},
-                        (cameraData: any) => {}
+                        (cameraData: any) => {
+                          store.dispatch('CAMERA_DATA_CHANGE', cameraData);
+                          if (this.isLive) {
+                            this.player.play();
+                          } else {
+                            this.player.play(this.currentTime);
+                          }
+                        }
                     );
-                    if (this.isLive) {
-                        this.player.play();
-                    } else {
-                        this.player.play(this.currentTime);
-                    }
                 } else if (status.status === 'v2_event_stream_connected') {
                     store.dispatch('IS_PLAYING_CHANGE', true);
                     this.playEventCb('isShowMikeChanged', true);
@@ -616,9 +620,11 @@
             } else if (param.event === 'goLive') {
                 toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAMERA_DETAIL : toastcamAPIs.camera.GET_CAMERA_DETAIL,
                     {cameraId: this.cameraData.id},
-                    (cameraData: any) => {}
+                    (cameraData: any) => {
+                        store.dispatch('CAMERA_DATA_CHANGE', cameraData);
+                        this.timeline.requestPlay();
+                    }
                 );
-                this.timeline.requestPlay();
             }
         }
 

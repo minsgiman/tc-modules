@@ -135,6 +135,9 @@
                 } else if (this.cameraData.recorderType == "recorder") {
                     this.player.play(time ? time.getTime() : 0);
                 } else {
+                    if (!time && this.cameraData.controlStatus !== "on") {
+                      return;
+                    }
                     toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAM_TOKEN : toastcamAPIs.camera.GET_TOKEN, {cameraId: this.cameraData.id}, (res: any) => {
                         if (this.playerType === 'webrtc') {
                             if (time) {
@@ -144,9 +147,9 @@
                             }
                         } else if (this.playerType === 'hls') {
                             if (time) {
-                                this.player.play(res.cvrHostPort + '/flvplayback/' + this.cameraData.id + '?token=' + res.token + '&time=' + time.getTime());
+                                this.player.play(this.cameraData.mediaStreamURL + '?token=' + res.token + '&time=' + time.getTime());
                             } else {
-                                this.player.play(res.cvrHostPort + '/flvplayback/' + this.cameraData.id + '?token=' + res.token);
+                                this.player.play(this.cameraData.mediaStreamURL + '?token=' + res.token);
                             }
                         } else {
                             if (time) {

@@ -136,14 +136,18 @@
                 if (level_duration) {
                   this.showLoading = false;
                 }
+                if (this.isLive && !level_duration) {
+                  this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
+                  this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+                }
                 //this.buildRetryTimeout();
-                console.log('level_duration : ' + level_duration);
+                //console.log('level_duration : ' + level_duration);
             });
 
             this.hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTED;
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
-                console.log('Hls.Events.MANIFEST_PARSED');
+                //console.log('Hls.Events.MANIFEST_PARSED');
                 if (this.isMute) {
                     this.mute(true);
                 }
@@ -165,11 +169,11 @@
                     this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
                     this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
                 }
-                console.log('hlsPlayer Error occued! errorType : ' + errorType + ', errorDetails : ' + errorDetails);
+                //console.log('hlsPlayer Error occued! errorType : ' + errorType + ', errorDetails : ' + errorDetails);
             });
 
             this.videoObj.addEventListener('canplay', () => {
-                console.log('canplay');
+                //console.log('canplay');
                 if (this.hlsStatus !== this.hlsStatusEnum.EVENT_STREAM_CONNECTED) {
                     this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTED;
                     this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
@@ -191,29 +195,29 @@
                   this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
                   this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
                 }
-                console.log('ended');
+                //console.log('ended');
             });
             this.videoObj.addEventListener('playing', () => {
-                console.log('playing');
+                //console.log('playing');
             });
             this.videoObj.addEventListener('loadeddata', () => {
-                console.log('loadeddata');
+                //console.log('loadeddata');
             });
             this.videoObj.addEventListener('stalled', () => {
-                console.log('stalled');
+                //console.log('stalled');
             });
             this.videoObj.addEventListener('suspend', () => {
                 //clearInterval(this.loadCheckInterval);
                 //this.clearRetryTimeout();
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
-                console.log('suspend');
+                //console.log('suspend');
             });
             this.videoObj.addEventListener('abort', () => {
-                console.log('abort');
+                //console.log('abort');
             });
             this.videoObj.addEventListener('error', () => {
-                console.log('error');
+                //console.log('error');
                 //$('#hls_logo').show();
                 //clearInterval(this.loadCheckInterval);
                 this.showLoading = true;
@@ -226,7 +230,7 @@
         buildRetryTimeout() {
             this.clearRetryTimeout();
             this.retryTimeout = setTimeout(() => {
-              console.log('retry timeout');
+              //console.log('retry timeout');
               this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
               this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
             }, 10 * 1000);
@@ -265,7 +269,7 @@
                     $(videoEl).removeAttr('muted');
                 }
                 store.dispatch('MUTE_CHANGE', videoEl.muted);
-                console.log('videoEl.muted : ' + videoEl.muted);
+                //console.log('videoEl.muted : ' + videoEl.muted);
             }
         }
 
