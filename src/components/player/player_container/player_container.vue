@@ -135,7 +135,7 @@
                 } else if (this.cameraData.recorderType == "recorder") {
                     this.player.play(time ? time.getTime() : 0);
                 } else {
-                    if (!time && this.cameraData.controlStatus !== "on") {
+                    if (!time && this.cameraData.controlStatus === "off") {
                       return;
                     }
                     toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAM_TOKEN : toastcamAPIs.camera.GET_TOKEN, {cameraId: this.cameraData.id}, (res: any) => {
