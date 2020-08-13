@@ -2177,12 +2177,13 @@
         livePlayDataSet(check?: any) {
             this.$emit('event', {event: 'cameraStatusAllOff'});
             store.dispatch('PLAY_BTN_STATUS_CHANGE', true);
-
-            toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAMERA_DETAIL : toastcamAPIs.camera.GET_CAMERA_DETAIL, {cameraId: this.cameraData.id}, (cameraData: any) => {
-                store.dispatch('CAMERA_DATA_CHANGE', cameraData);
-                this.$emit('event', {event: 'livePlayRequest'});
-                this.livePlayConfigDataSet(check);
-            });
+            this.$emit('event', {event: 'livePlayRequest'});
+            this.livePlayConfigDataSet(check);
+            // toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAMERA_DETAIL : toastcamAPIs.camera.GET_CAMERA_DETAIL, {cameraId: this.cameraData.id}, (cameraData: any) => {
+            //     store.dispatch('CAMERA_DATA_CHANGE', cameraData);
+            //     this.$emit('event', {event: 'livePlayRequest'});
+            //     this.livePlayConfigDataSet(check);
+            // });
         }
 
         livePlayConfigDataSet(check: any) {

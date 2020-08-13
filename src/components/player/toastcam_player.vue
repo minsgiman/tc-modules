@@ -225,6 +225,10 @@
                     this.playTimer.stopTimer();
                     this.player.stop(this.cameraData.id);
                     if (this.isLive) {
+                        toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAMERA_DETAIL : toastcamAPIs.camera.GET_CAMERA_DETAIL,
+                            {cameraId: this.cameraData.id},
+                            (cameraData: any) => {}
+                        );
                         this.timeline.requestPlay();
                     } else {
                         this.timeline.requestPlay(this.currentTime.valueOf());
@@ -610,6 +614,10 @@
                     this.timeline.livePlayDataSet();
                 }
             } else if (param.event === 'goLive') {
+                toastcamAPIs.call(this.isShared ? toastcamAPIs.camera.GET_SHARE_CAMERA_DETAIL : toastcamAPIs.camera.GET_CAMERA_DETAIL,
+                    {cameraId: this.cameraData.id},
+                    (cameraData: any) => {}
+                );
                 this.timeline.requestPlay();
             }
         }
