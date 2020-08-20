@@ -97,6 +97,7 @@
                 padding:0px;
                 margin: 0 auto;
                 overflow-y: auto;
+                cursor: auto;
             }
             .btn_close {
                 position:absolute;

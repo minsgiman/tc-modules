@@ -111,10 +111,10 @@
                 }
             }
             .ai_cam_name {
-                font-size:14px; font-weight:bold; color:#333333; margin-right:12px;
+                display: inline-block; width: 136px; font-size:14px; font-weight:bold; color:#333333; margin-right:12px; text-overflow:ellipsis; white-space:nowrap; overflow:hidden; vertical-align: middle;
             }
             .ai_date {
-                font-size:14px; color:#333333;
+                font-size:14px; color:#333333; vertical-align: middle;
             }
             .ai_count_wrap {
                 font-size:14px; color:#333333; float:right;

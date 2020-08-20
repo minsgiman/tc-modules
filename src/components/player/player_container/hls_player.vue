@@ -191,7 +191,7 @@
             this.videoObj.addEventListener('ended', () => {
                 //clearInterval(this.loadCheckInterval);
                 //this.clearRetryTimeout();
-                if (this.cameraData.recordType !== 'event') {
+                if (this.cameraData.recordType !== 'event' && !this.isLive) {
                   this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
                   this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
                 }
