@@ -28,5 +28,6 @@ export interface IStoreState {
     hlsPlayUrl: string,
     hlsZoomLevel: number,
     country: string,
-    mute: boolean
+    mute: boolean,
+    notShowDay: boolean
 }

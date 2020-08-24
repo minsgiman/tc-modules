@@ -34,7 +34,8 @@ const store = new Vuex.Store({
         hlsPlayUrl: '',
         hlsZoomLevel: 1,
         country: 'KR',
-        mute: false
+        mute: false,
+        notShowDay: false
     } as IStoreState,
     getters: {
         thumbnail: (state) => {
@@ -174,6 +175,9 @@ const store = new Vuex.Store({
         MUTE_CHANGE: (context, state) => {
             context.commit('UPDATE_MUTE', state);
         },
+        NSHOWDAY_CHANGE: (context, state) => {
+            context.commit('UPDATE_NSHOWDAY', state)
+        },
         BROWSER_INFO: (context, state) => {
             const checkSupportWebRTC = (browserInfo: any) => {
                 if (!browserInfo || !browserInfo.name) {
@@ -217,6 +221,8 @@ const store = new Vuex.Store({
             context.commit('UPDATE_HLS_PLAY_URL', '');
             context.commit('UPDATE_HLS_ZOOM_LEVEL', 1);
             context.commit('UPDATE_MUTE', false);
+            context.commit('UPDATE_MUTE', false);
+            context.commit('UPDATE_NSHOWDAY', false);
         }
     },
     mutations: {
@@ -309,6 +315,9 @@ const store = new Vuex.Store({
         },
         UPDATE_MUTE: (state, value) => {
             state.mute = value;
+        },
+        UPDATE_NSHOWDAY: (state, value) => {
+            state.notShowDay = value;
         }
     }
 });

@@ -82,6 +82,7 @@ class Player {
         this.setData('isShared', param.isShared);
         this.setData('browserInfo', browserCheck());
         this.setData('playerType', param.playerType);
+        this.setData('notShowDay', param.notShowDay);
         if (param.country) {
             this.setData('country', param.country);
         }
@@ -186,6 +187,9 @@ class Player {
                 break;
             case 'mute':
                 store.dispatch('MUTE_CHANGE', value);
+                break;
+            case 'notShowDay':
+                store.dispatch('NSHOWDAY_CHANGE', value);
                 break;
             default:
                 break;

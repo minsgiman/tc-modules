@@ -94,6 +94,9 @@
         @Prop() elementId!: any;
         @Prop() playEventCallback!: any;
 
+        get notShowDay() {
+            return store.state.notShowDay;
+        }
         get category() {
             return store.state.category;
         }
@@ -1075,6 +1078,11 @@
         getBigTicks() {
             var dayWord = browserLang === 'ja' ? '昼' : '낮';
             var nightWord = browserLang === 'ja' ? '夜' : '밤';
+            if (this.notShowDay) {
+              dayWord = '';
+              nightWord = '';
+            }
+
             var that: any = this;
             var tick = d3.svg.axis().scale((this as any).x).orient("bottom")
                 .tickSize(11, 0)
