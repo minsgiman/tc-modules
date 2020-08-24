@@ -46,6 +46,7 @@
         get isMute() {
             return store.state.mute;
         }
+        paused: boolean = false;
         pausedTime: number = 0;
         loadCheckInterval: any = null;
         showLoading: boolean = false;
@@ -82,6 +83,7 @@
         play(cameraIdValue: string, url: string, serverUrls: string[]) {
             let isResume: boolean = false;
 
+            this.paused = false;
             if (!this.isLive && this.hlsPlayer && this.videoObj && this.videoObj.paused && this.pausedTime === this.currentTime.valueOf()) {
                 isResume = true;
             }
@@ -136,7 +138,7 @@
                 if (level_duration) {
                   this.showLoading = false;
                 }
-                if (this.isLive && !level_duration) {
+                if (this.isLive && !level_duration && !this.paused) {
                   this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
                   this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
                 }
@@ -166,8 +168,10 @@
                 if ((errorType === 'networkError') ||
                     (errorType === 'mediaError' && errorDetails === 'bufferNudgeOnStall')) {
                     //this.clearRetryTimeout();
-                    this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
-                    this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+                    if (!this.paused) {
+                      this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
+                      this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+                    }
                 }
                 //console.log('hlsPlayer Error occued! errorType : ' + errorType + ', errorDetails : ' + errorDetails);
             });
@@ -191,7 +195,7 @@
             this.videoObj.addEventListener('ended', () => {
                 //clearInterval(this.loadCheckInterval);
                 //this.clearRetryTimeout();
-                if (this.cameraData.recordType !== 'event' && !this.isLive) {
+                if (this.cameraData.recordType !== 'event' && !this.isLive && !this.paused) {
                   this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
                   this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
                 }
@@ -209,8 +213,10 @@
             this.videoObj.addEventListener('suspend', () => {
                 //clearInterval(this.loadCheckInterval);
                 //this.clearRetryTimeout();
-                this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
-                this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+                if (!this.paused) {
+                  this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
+                  this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+                }
                 //console.log('suspend');
             });
             this.videoObj.addEventListener('abort', () => {
@@ -231,8 +237,10 @@
             this.clearRetryTimeout();
             this.retryTimeout = setTimeout(() => {
               //console.log('retry timeout');
-              this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
-              this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+              if (!this.paused) {
+                this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
+                this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+              }
             }, 10 * 1000);
         }
 
@@ -276,6 +284,7 @@
         resume() {
             if (this.videoObj) {
                 this.videoObj.play();
+                this.paused = false;
             }
         }
 
@@ -287,6 +296,7 @@
             if (this.videoObj) {
                 this.pausedTime = this.currentTime.valueOf();
                 this.videoObj.pause();
+                this.paused = true;
             }
         }
 
