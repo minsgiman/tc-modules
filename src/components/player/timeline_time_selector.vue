@@ -52,6 +52,7 @@
                                 </div>
                             </div>
                             <div class="layer_btn" style="margin-bottom: 10px;">
+                                <button type="button" class="btn_s btn_ww" @click="toggleTimelineTimePicker()">{{$t('BUTTON_CLOSE')}}</button>
                                 <button type="button" class="btn_s btn_sb" @click="pressedTimelineTimeSelect()">{{$t('BUTTON_SELECT')}}</button>
                             </div>
                         </div>

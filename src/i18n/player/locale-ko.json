@@ -36,5 +36,6 @@
   "CLIP_CREATE_SELECT_CLIP": "시간 선택",
   "BUTTON_SELECT": "선택",
   "CLIP_CREATE_CLIP_DATE_FORMAT": "YYYY년 MM월 DD일",
-  "ENTER_FULLSCREEN": "전체화면"
+  "ENTER_FULLSCREEN": "전체화면",
+  "BUTTON_CLOSE": "닫기"
 }

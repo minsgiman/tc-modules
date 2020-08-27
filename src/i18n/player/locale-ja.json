@@ -3,7 +3,7 @@
   "STR_CONNECT_DVR": "DVRを接続してください。",
   "STR_CONNECT_CAM_TO_DVR": "DVRにカメラを接続してください。",
   "STR_CONNECT_DVR_FAIL": "映像の読み込みに失敗しました。",
-  "CAMERA_DETAIL_LAST_REC": "最新のサーバー保存",
+  "CAMERA_DETAIL_LAST_REC": "最新の映像",
   "CAMERA_DETAIL_LAST_EVENT": "最新のイベント",
   "MY_CAMERA_LAST_NO_REC": "保存された最近の映像がありません。",
   "MY_CAMERA_LAST_NO_EVENT": "保存された最近のイベントがありません。",
@@ -29,12 +29,13 @@
   "EVENT_LIST_DATE_YESTERDAY": "昨日",
   "EVENT_SOUND_AREA": "サウンドイベント",
   "EVENT_ETC_AREA": "削除済みの通知エリア",
-  "CAMERA_DAY_DIRECT": "日付/時間へ",
+  "CAMERA_DAY_DIRECT": "日時指定",
   "CLIP_CREATE_DATE": "日付",
   "CALENDAR": "カレンダー",
   "HOUR": "時間",
   "CLIP_CREATE_SELECT_CLIP": "時間選択",
   "BUTTON_SELECT": "選択",
   "CLIP_CREATE_CLIP_DATE_FORMAT": "YYYY年MM月DD日",
-  "ENTER_FULLSCREEN": "全体画面"
+  "ENTER_FULLSCREEN": "全体画面",
+  "BUTTON_CLOSE": "キャンセル"
 }
