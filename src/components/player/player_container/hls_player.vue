@@ -54,6 +54,7 @@
         videoObj: any = null;
         hlsStatus: string = '';
         retryTimeout: any = null;
+        retryCount: number = 0;
         hlsStatusEnum: any = {
             EVENT_STREAM_CONNECTING : 'event_stream_connecting',
             EVENT_STREAM_CONNECTED : 'event_stream_connected',
@@ -67,7 +68,6 @@
             $('#hls_remote_stream').show();
         }
         private beforeDestroy() {
-            //this.clearRetryTimeout();
             if (this.hlsPlayer) {
                 this.hlsPlayer.off(Hls.Events.LEVEL_LOADED);
                 this.hlsPlayer.off(Hls.Events.MANIFEST_PARSED);
@@ -76,62 +76,53 @@
                 this.hlsPlayer = null;
             }
             this.videoObj = null;
-            // clearInterval(this.loadCheckInterval);
             $('#hls_player_wrap').hide();
         }
 
         play(cameraIdValue: string, url: string, serverUrls: string[]) {
-            let isResume: boolean = false;
-
             this.paused = false;
-            if (!this.isLive && this.hlsPlayer && this.videoObj && this.videoObj.paused && this.pausedTime === this.currentTime.valueOf()) {
-                isResume = true;
+            // if (!this.isLive && this.hlsPlayer && this.videoObj && this.videoObj.paused && this.pausedTime === this.currentTime.valueOf()) {
+            //     isResume = true;
+            // }
+            this.stop();
+            this.showLoading = true;
+            this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTING;
+            if (!this.hlsPlayer) {
+                const options: any = {
+                    class: 'video-js',
+                    id: 'my-player'
+                };
+                const $video = $('<video/>', options);
+                $('#remoteHLSContainer').append($video);
+                this.videoObj = $video[0];
+                this.hlsPlayer = new Hls({liveBackBufferLength: 10});
+                this.hlsPlayer.attachMedia(this.videoObj);
+                this.updatePlayerSize();
+                setTimeout(() => {
+                    if (this.isMute) {
+                        this.mute(true);
+                    }
+                }, 500);
             }
-            //clearInterval(this.loadCheckInterval);
-            if (!isResume) {
-                this.stop();
-                this.showLoading = true;
-                this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTING;
-                if (!this.hlsPlayer) {
-                    const options: any = {
-                        class: 'video-js',
-                        id: 'my-player'
-                    };
-                    const $video = $('<video/>', options);
-                    $('#remoteHLSContainer').append($video);
-                    this.videoObj = $video[0];
-                    this.hlsPlayer = new Hls({liveBackBufferLength: 10});
-                    this.hlsPlayer.attachMedia(this.videoObj);
-                    this.updatePlayerSize();
-                    setTimeout(() => {
-                        if (this.isMute) {
-                            this.mute(true);
-                        }
-                    }, 500);
-                }
 
-                if (serverUrls && serverUrls.length) {
-                    const playUrl = 'https://' + serverUrls[0] + '/hlsplay?url=' + encodeURIComponent(url);
-                    store.dispatch('HLS_PLAY_URL_CHANGE', playUrl);
-                    this.hlsPlayer.loadSource(playUrl);
-                    // this.hlsPlayer.src([
-                    //     { type: "application/x-mpegURL", src: playUrl }
-                    // ]);
-                } else {
-                    this.showLoading = true;
-                    this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_DISCONNECTED;
-                    this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
-                    //this.clearRetryTimeout();
-                    return;
-                }
+            if (serverUrls && serverUrls.length) {
+                const playUrl = 'https://' + serverUrls[0] + '/hlsplay?url=' + encodeURIComponent(url);
+                store.dispatch('HLS_PLAY_URL_CHANGE', playUrl);
+                this.hlsPlayer.loadSource(playUrl);
             } else {
-                this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTED;
+                this.showLoading = true;
+                this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_DISCONNECTED;
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
-                if (this.videoObj) {
-                  this.videoObj.play();
-                }
-                //this.buildRetryTimeout();
+                return;
             }
+            //{  // pause resume
+            //     this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTED;
+            //     this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+            //     if (this.videoObj && this.hlsPlayer) {
+            //       this.videoObj.play();
+            //       this.hlsPlayer.startLoad();
+            //     }
+            // }
 
             this.hlsPlayer.on(Hls.Events.LEVEL_LOADED, (event: any, data: any) => {
                 var level_duration = data.details.totalduration;
@@ -139,10 +130,8 @@
                   this.showLoading = false;
                 }
                 if (this.isLive && !level_duration && !this.paused) {
-                  this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
-                  this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+                  this.playRetry();
                 }
-                //this.buildRetryTimeout();
                 //console.log('level_duration : ' + level_duration);
             });
 
@@ -153,11 +142,11 @@
                 if (this.isMute) {
                     this.mute(true);
                 }
+                this.retryCount = 0;
                 setTimeout(() => {
                     if (this.videoObj) {
                       this.videoObj.play();
                     }
-                    //this.buildRetryTimeout();
                 }, 200);
             });
 
@@ -167,10 +156,8 @@
 
                 if ((errorType === 'networkError') ||
                     (errorType === 'mediaError' && errorDetails === 'bufferNudgeOnStall')) {
-                    //this.clearRetryTimeout();
                     if (!this.paused) {
-                      this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
-                      this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+                      this.playRetry();
                     }
                 }
                 //console.log('hlsPlayer Error occued! errorType : ' + errorType + ', errorDetails : ' + errorDetails);
@@ -184,20 +171,17 @@
                     if (this.isMute) {
                         this.mute(true);
                     }
+                    this.retryCount = 0;
                     setTimeout(() => {
                         if (this.videoObj) {
                           this.videoObj.play();
                         }
-                        //this.buildRetryTimeout();
                     }, 200);
                 }
             });
             this.videoObj.addEventListener('ended', () => {
-                //clearInterval(this.loadCheckInterval);
-                //this.clearRetryTimeout();
                 if (this.cameraData.recordType !== 'event' && !this.isLive && !this.paused) {
-                  this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
-                  this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+                  this.playRetry();
                 }
                 //console.log('ended');
             });
@@ -211,11 +195,8 @@
                 //console.log('stalled');
             });
             this.videoObj.addEventListener('suspend', () => {
-                //clearInterval(this.loadCheckInterval);
-                //this.clearRetryTimeout();
                 if (!this.paused) {
-                  this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
-                  this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+                  this.playRetry();
                 }
                 //console.log('suspend');
             });
@@ -224,10 +205,7 @@
             });
             this.videoObj.addEventListener('error', () => {
                 //console.log('error');
-                //$('#hls_logo').show();
-                //clearInterval(this.loadCheckInterval);
                 this.showLoading = true;
-                //this.clearRetryTimeout();
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_DISCONNECTED;
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
             });
@@ -238,10 +216,17 @@
             this.retryTimeout = setTimeout(() => {
               //console.log('retry timeout');
               if (!this.paused) {
-                this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
-                this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+                this.playRetry();
               }
             }, 10 * 1000);
+        }
+
+        playRetry() {
+          if (this.retryCount < 5) {
+            this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_SUSPEND;
+            this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
+            this.retryCount += 1;
+          }
         }
 
         clearRetryTimeout() {
@@ -293,16 +278,15 @@
         }
 
         pause() {
-            if (this.videoObj) {
+            if (this.videoObj && this.hlsPlayer) {
                 this.pausedTime = this.currentTime.valueOf();
                 this.videoObj.pause();
+                this.hlsPlayer.stopLoad();
                 this.paused = true;
             }
         }
 
         stop() {
-            //clearInterval(this.loadCheckInterval);
-            //this.clearRetryTimeout();
             this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_STOPPED;
             this.showLoading = false;
             if (this.hlsPlayer) {
