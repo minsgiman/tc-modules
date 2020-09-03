@@ -68,6 +68,7 @@
         //@Prop() aiCameraList!: ICameraInfo[];
         //@Prop() pRequestCamCharts!: any;
         @Prop() pRequestShopChart!: any;
+        @Prop() sundayFirst!: boolean;
 
         chartData: any = null;
         aiCountSummary: any = {};
@@ -152,7 +153,7 @@
                         that.periodStr = that.dateFormat(that.endDate, "YYYY.MM.DD (ddd)");
                     } else {
                         that.startDate = new Date(date.valueOf());
-                        while (that.startDate.getDay() != 1) {
+                        while (that.sundayFirst ? that.startDate.getDay() !== 0 : that.startDate.getDay() !== 1) {
                             that.startDate.setDate(that.startDate.getDate() - 1);
                         }
                         that.endDate = new Date(that.startDate.valueOf());
@@ -295,7 +296,7 @@
                 } else {
                     this.startDate = new Date();
                 }
-                while (this.startDate.getDay() != 1) {
+                while (this.sundayFirst ? this.startDate.getDay() !== 0 : this.startDate.getDay() !== 1) {
                     this.startDate.setDate(this.startDate.getDate() - 1);
                 }
                 this.endDate = new Date(this.startDate.valueOf());

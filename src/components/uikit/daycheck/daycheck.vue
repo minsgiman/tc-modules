@@ -46,13 +46,13 @@
         private created() {
             const lang = document.documentElement.getAttribute('lang');
             this.dayList = [
+                {id: 'SUN', str: lang === 'ja' ? '日' : '일', check: false},
                 {id: 'MON', str: lang === 'ja' ? '月' : '월', check: false},
                 {id: 'TUE', str: lang === 'ja' ? '火' : '화', check: false},
                 {id: 'WED', str: lang === 'ja' ? '水' : '수', check: false},
                 {id: 'THU', str: lang === 'ja' ? '木' : '목', check: false},
                 {id: 'FRI', str: lang === 'ja' ? '金' : '금', check: false},
-                {id: 'SAT', str: lang === 'ja' ? '土' : '토', check: false},
-                {id: 'SUN', str: lang === 'ja' ? '日' : '일', check: false}
+                {id: 'SAT', str: lang === 'ja' ? '土' : '토', check: false}
             ];
         }
 

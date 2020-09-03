@@ -7,7 +7,8 @@ function createDlg(param: IAiGraphsDlgParam) {
         dlgStyle: param.dlgStyle,
         txtMap: param.txtMap,
         shopRegdate: param.shopRegdate,
-        pRequestShopChart: param.pRequestShopChart
+        pRequestShopChart: param.pRequestShopChart,
+        sundayFirst: param.sundayFirst
     }, param.eventHandler);
 }
 

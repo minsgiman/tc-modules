@@ -31,6 +31,7 @@ export interface IAiGraphsDlgParam {
     shopRegdate: number,
     txtMap: any,
     pRequestShopChart: any,
+    sundayFirst?: boolean,
     eventHandler?: (event: any) => void
 }
 
