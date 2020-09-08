@@ -1,6 +1,9 @@
 <template>
-    <div class="tc_mgrid" :style="{gridTemplateColumns: gridColumns, gridTemplateRows: gridRows}">
-        <div class="gitem" @click="onClickCamera(gItem.camera ? gItem.camera.cameraId : '')" v-for="(gItem, index) in gridItems" :key="gItem.camera ? gItem.camera.cameraId : index">
+    <div class="tc_mgrid">
+        <div class="gitem" @click="onClickCamera(gItem.camera ? gItem.camera.cameraId : '')"
+             :style="{width: itemWidth + 'px', height: itemHeight + 'px'}"
+             v-for="(gItem, index) in gridItems"
+             :key="gItem.camera ? gItem.camera.cameraId : index">
             <mplayer v-if="gItem.camera" :camera="gItem.camera" :ref="gItem.camera.cameraId" :serverUrl="serverUrlMap[gItem.camera.cameraId]"
                      :streamType="streamType" :dimension="dimension" :commonToken="commonToken"></mplayer>
         </div>
@@ -37,6 +40,8 @@
         gridCameras: any[] = [];
         serverIdx: number = 0;
         serverUrlMap: any = {};
+        itemWidth: number = 0;
+        itemHeight: number = 0;
 
         private created() {
             this.gridCameras = this.cameras ? this.cameras : [];
@@ -114,10 +119,12 @@
         }
 
         gridSizeChange(width: number, height: number) {
-            this.gWidth = width ? width - 1 : 0;
-            this.gHeight = height ? height - 1 : 0;
-            this.gridColumns = 'repeat(' + this.dimension + ', ' + ((this.gWidth / this.dimension) - this.dimension) + 'px)';
-            this.gridRows = 'repeat(' + this.dimension + ', ' + ((this.gHeight / this.dimension) - this.dimension) + 'px)';
+            this.gWidth = width ? width - 2 : 0;
+            this.gHeight = height ? height - 2 : 0;
+            this.itemWidth = Math.floor(this.gWidth / this.dimension) - 1;
+            this.itemHeight = Math.floor(this.gHeight / this.dimension) - 1;
+            //this.gridColumns = 'repeat(' + this.dimension + ', ' + ((this.gWidth / this.dimension) - this.dimension) + 'px)';
+            //this.gridRows = 'repeat(' + this.dimension + ', ' + ((this.gHeight / this.dimension) - this.dimension) + 'px)';
         }
 
         onClickCamera(cameraId: string) {
@@ -133,10 +140,18 @@
 </script>
 <style lang="less">
     .tc_mgrid {
-        display: grid;
-        grid-gap: 1px;
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: space-evenly;
+        align-content: space-evenly;
+        align-items: stretch;
+        gap: 1px;
         background-color: #fff;
         color: #444;
+        width: 100%;
+        height: 100%;
+        border: 1px solid #fff;
+        box-sizing: border-box;
         .gitem {
             position: relative;
             background-color: black;

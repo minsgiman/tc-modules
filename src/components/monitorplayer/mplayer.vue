@@ -125,7 +125,7 @@
                 cameraId = this.cameraId;
             }
             const rtmpUrl = encodeURIComponent(mediaUrl + '/flvplayback/' + cameraId + '?token=' + this.commonToken);
-            const playUrl: string = 'https://' + this.serverUrl + '/hlsplay?url=' + rtmpUrl;
+            const playUrl: string = 'https://' + this.serverUrl + '/monitor/hlsplay?url=' + rtmpUrl;
             this.stop();
             this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_CONNECTING;
             const $video = $('<video/>', {
@@ -148,6 +148,9 @@
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_DISCONNECTED;
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
             });
+            //mute
+            this.videoObj.muted = true;
+            $(this.videoObj).attr('muted', 'true');
         }
 
         updateCameraConfig(camera: ICameraInfo) {
@@ -199,8 +202,12 @@
         .label_wrap {
             position: absolute;
             .cam_name_label {
+                display: inline-block;
                 text-shadow: 0.7px 0.7px 7px rgba(0, 0, 0, 0.77);
                 font-weight: bold;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
             .share_icon {
                 margin-left: 5px;
@@ -226,6 +233,7 @@
                 bottom: 27px; left: 25px;
                 .cam_name_label {
                     font-size: 21px;
+                    max-width: 500px;
                 }
                 .share_icon {
                     width: 30px; height: 31px;
@@ -251,6 +259,7 @@
                 bottom: 25px; left: 22px;
                 .cam_name_label {
                     font-size: 19px;
+                    max-width: 400px;
                 }
                 .share_icon {
                     width: 27px; height: 28px;
@@ -276,6 +285,7 @@
                 bottom: 22px; left: 22px;
                 .cam_name_label {
                     font-size: 17px;
+                    max-width: 300px;
                 }
                 .share_icon {
                     width: 25px; height: 26px;
@@ -302,6 +312,7 @@
                 bottom: 18px; left: 20px;
                 .cam_name_label {
                     font-size: 16px;
+                    max-width: 256px;
                 }
                 .share_icon {
                     width: 22px; height: 23px;
@@ -329,6 +340,7 @@
                 bottom: 16px; left: 18px;
                 .cam_name_label {
                     font-size: 15px;
+                    max-width: 200px;
                 }
                 .share_icon {
                     width: 21px; height: 22px;
@@ -356,6 +368,7 @@
                 bottom: 14px; left: 17px;
                 .cam_name_label {
                     font-size: 14px;
+                    max-width: 178px;
                 }
                 .share_icon {
                     width: 20px; height: 21px;
