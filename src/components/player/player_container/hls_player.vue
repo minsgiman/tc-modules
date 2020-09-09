@@ -106,7 +106,10 @@
             }
 
             if (serverUrls && serverUrls.length) {
-                const playUrl = 'https://' + serverUrls[0] + '/hlsplay?url=' + encodeURIComponent(url);
+                let playUrl = 'https://' + serverUrls[0] + '/hlsplay?url=' + encodeURIComponent(url);
+                if (this.cameraData.isAudioSupport !== 1) {
+                  playUrl += '&use_audio=false';
+                }
                 store.dispatch('HLS_PLAY_URL_CHANGE', playUrl);
                 this.hlsPlayer.loadSource(playUrl);
             } else {

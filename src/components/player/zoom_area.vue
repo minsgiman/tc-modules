@@ -95,7 +95,7 @@
                 }
                 toastcamAPIs.call(toastcamAPIs.camera.GET_STREAMING_SERVER, {country: this.country}, (serverRes: any) => {
                     const server = serverRes.servers ? serverRes.servers[0] : '';
-                    this.hlsPlayer.loadSource('https://' + server + '/hlsplay?url=' + encodeURIComponent(playUrl));
+                    this.hlsPlayer.loadSource('https://' + server + '/hlsplay?url=' + encodeURIComponent(playUrl) + '&use_audio=false');
                     this.hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
                         this.videoObj.play();
                         this.isPlay = true;

@@ -144,6 +144,25 @@
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
                 this.videoObj.play();
             });
+
+            this.hlsPlayer.on(Hls.Events.LEVEL_LOADED, (event: any, data: any) => {
+                const level_duration = data.details.totalduration;
+
+                if (!level_duration) {
+                    this.play();
+                }
+            });
+
+            this.hlsPlayer.on(Hls.Events.ERROR, (event: any, data: any) => {
+                const errorType = data.type,
+                  errorDetails = data.details;
+
+                if ((errorType === 'networkError') ||
+                  (errorType === 'mediaError' && errorDetails === 'bufferNudgeOnStall')) {
+                  this.play();
+                }
+            });
+
             this.videoObj.addEventListener('error', () => {
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_DISCONNECTED;
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
