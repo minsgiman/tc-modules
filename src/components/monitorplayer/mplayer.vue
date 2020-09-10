@@ -124,6 +124,10 @@
                 mediaUrl = this.cameraConfig.streamServer;
                 cameraId = this.cameraId;
             }
+            if (!mediaUrl) {
+              return;
+            }
+
             const rtmpUrl = encodeURIComponent(mediaUrl + '/flvplayback/' + cameraId + '?token=' + this.commonToken);
             const playUrl: string = 'https://' + this.serverUrl + '/monitor/hlsplay?url=' + rtmpUrl;
             this.stop();
