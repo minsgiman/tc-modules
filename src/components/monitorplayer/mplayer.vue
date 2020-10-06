@@ -68,11 +68,11 @@
 
         get cameraErrorText(): string {
             if (this.cameraErrorStatus === 'status_off') {
-                return '카메라 꺼짐'; // '録画OFF'
+                return document.documentElement.getAttribute('lang') === 'ko' ? '카메라 꺼짐' : '録画OFF';
             } else if (this.cameraErrorStatus === 'status_delay') {
-                return '녹화 지연'; // '録画の遅延'
+                return document.documentElement.getAttribute('lang') === 'ko' ? '녹화 지연' : '録画の遅延';
             } else {
-                return '접속 끊김'; // '接続切れ'
+                return document.documentElement.getAttribute('lang') === 'ko' ? '접속 끊김' : '接続切れ';
             }
         }
 
