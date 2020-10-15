@@ -155,6 +155,7 @@
                 if (!level_duration) {
                     this.play();
                 }
+                //console.log(`labelName: ${this.cameraConfig ? this.cameraConfig.labelName : ''}, level_duration : ${level_duration}`);
             });
 
             this.hlsPlayer.on(Hls.Events.ERROR, (event: any, data: any) => {
@@ -165,6 +166,12 @@
                   (errorType === 'mediaError' && errorDetails === 'bufferNudgeOnStall')) {
                   this.play();
                 }
+                //console.log(`labelName: ${this.cameraConfig ? this.cameraConfig.labelName : ''}, errorType : ${errorType}, errorDetails: ${errorDetails}`);
+            });
+
+            this.videoObj.addEventListener('suspend', () => {
+              this.play();
+              //console.log(`labelName: ${this.cameraConfig ? this.cameraConfig.labelName : ''}, videoObj suspend`);
             });
 
             this.videoObj.addEventListener('error', () => {
