@@ -16,10 +16,11 @@ import dropdown from './components/uikit/dropdown';
 import search from './components/uikit/search';
 import monitorplayer from './components/monitorplayer';
 import htmlSimplePlayer from './components/html_simple_player';
+import progressbar from './components/uikit/progressbar';
 
 (function (window) {
     const tCam = { player, toggle, timeselect, daycheck, radiobtn, checkbox, search, dropdown, clipplayer, camlist,
-        playerTipDialog, videoPlayDialog, confirmDialog, aiStatsDialog, aiGraphsDialog, aizoneGuideDialog, monitorplayer, htmlSimplePlayer };
+        playerTipDialog, videoPlayDialog, confirmDialog, aiStatsDialog, aiGraphsDialog, aizoneGuideDialog, monitorplayer, htmlSimplePlayer, progressbar };
     if ( typeof window === "object" ) {
         window.tCam = tCam;
     }

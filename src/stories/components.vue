@@ -47,6 +47,12 @@
                 </ul>
             </div>
         </div>
+
+        <br><br><br><br>
+        <div class="comp_wrap">
+            <p class="comp_tit">9. progressbar</p>
+            <div id="progressbarId" style="width:100px;"></div>
+        </div>
     </div>
 </template>
 <script lang="ts">
@@ -60,6 +66,7 @@
     import timeselect from './../components/uikit/timeselect';
     import toggle from './../components/uikit/toggle';
     import list from './../components/uikit/list';
+    import progressbar from '../components/uikit/progressbar';
 
     @Component
     export default class Checkbox extends Vue {
@@ -72,6 +79,19 @@
             this.createDaycheck();
             this.createCheckbox();
             this.createList();
+            this.createProgressbar();
+        }
+
+        createProgressbar () {
+            const progressBarObj = progressbar('progressbarId');
+            progressBarObj.value = 30;
+            const intervalId = setInterval(() => {
+              if (progressBarObj.value < 100) {
+                progressBarObj.value += 10;
+              } else {
+                clearInterval(intervalId);
+              }
+            }, 1000)
         }
 
         createList () {
