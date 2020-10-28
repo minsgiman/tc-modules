@@ -27,6 +27,23 @@
     import { ICameraInfo } from './interface';
     const $: any = (window as any).$ as any;
 
+    class Debouncing {
+      debounceCheck: any = null;
+
+      cancelCheck() {
+        if (this.debounceCheck) {
+          clearTimeout(this.debounceCheck);
+        }
+      }
+
+      debounce(callback: any, milliseconds: any) {
+        clearTimeout(this.debounceCheck);
+        this.debounceCheck = setTimeout(() => {
+            callback();
+        }, milliseconds);
+      }
+    }
+
     @Component
     export default class MonitorHlsPlayer extends Vue {
         @Prop() camera!: ICameraInfo;
@@ -38,7 +55,9 @@
         cameraConfig: ICameraInfo | null = null;
         hlsPlayer: any = null;
         videoObj: any = null;
+        seekCheckInterval: any = null;
         hlsStatus: string = '';
+        debounceObj: any = null;
         hlsStatusEnum: any = {
             EVENT_STREAM_CONNECTING : 'event_stream_connecting',
             EVENT_STREAM_CONNECTED : 'event_stream_connected',
@@ -91,6 +110,7 @@
         }
 
         private mounted() {
+            this.debounceObj = new Debouncing();
             this.play();
         }
         private beforeDestroy() {
@@ -139,7 +159,15 @@
             });
             $('#remoteVideosContainer_' + this.cameraId).append($video);
             this.videoObj = $video[0];
-            this.hlsPlayer = new Hls({liveBackBufferLength: 10});
+            this.hlsPlayer = new Hls({
+              "liveBackBufferLength": 24,
+              "maxBufferLength": 24,
+              "maxMaxBufferLength": 24,
+              "liveSyncDuration": 0,
+              "liveMaxLatencyDuration": 8,
+              "highBufferWatchdogPeriod": 1,
+              "nudgeMaxRetry" : 10
+            });
             this.hlsPlayer.attachMedia(this.videoObj);
 
             this.hlsPlayer.loadSource(playUrl);
@@ -153,7 +181,9 @@
                 const level_duration = data.details.totalduration;
 
                 if (!level_duration) {
+                  this.debounceObj.debounce(() => {
                     this.play();
+                  }, 5000);
                 }
                 //console.log(`labelName: ${this.cameraConfig ? this.cameraConfig.labelName : ''}, level_duration : ${level_duration}`);
             });
@@ -162,15 +192,18 @@
                 const errorType = data.type,
                   errorDetails = data.details;
 
-                if ((errorType === 'networkError') ||
-                  (errorType === 'mediaError' && errorDetails === 'bufferNudgeOnStall')) {
-                  this.play();
+                if (errorType === 'networkError') {
+                  this.debounceObj.debounce(() => {
+                    this.play();
+                  }, 5000);
                 }
                 //console.log(`labelName: ${this.cameraConfig ? this.cameraConfig.labelName : ''}, errorType : ${errorType}, errorDetails: ${errorDetails}`);
             });
 
             this.videoObj.addEventListener('suspend', () => {
-              this.play();
+              this.debounceObj.debounce(() => {
+                this.play();
+              }, 5000);
               //console.log(`labelName: ${this.cameraConfig ? this.cameraConfig.labelName : ''}, videoObj suspend`);
             });
 
@@ -178,6 +211,19 @@
                 this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_DISCONNECTED;
                 this.$emit('playerStatusChanged', {status : this.hlsStatus, code : ''});
             });
+
+            if (this.seekCheckInterval) {
+                clearInterval(this.seekCheckInterval);
+            }
+            this.seekCheckInterval = setInterval(() => {
+                if (this.videoObj && this.videoObj.duration) {
+                  if (this.videoObj.duration - this.videoObj.currentTime >= 8) {
+                    this.videoObj.currentTime = this.videoObj.duration - 4;
+                    //console.log(`labelName: ${this.cameraConfig ? this.cameraConfig.labelName : ''}, currentTime change: ${this.videoObj.currentTime}`);
+                  }
+                }
+            }, 1000);
+
             //mute
             this.videoObj.muted = true;
             $(this.videoObj).attr('muted', 'true');
@@ -191,6 +237,13 @@
 
         stop() {
             this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_STOPPED;
+            if (this.debounceObj) {
+                this.debounceObj.cancelCheck();
+            }
+            if (this.seekCheckInterval) {
+                clearInterval(this.seekCheckInterval);
+                this.seekCheckInterval = null;
+            }
             if (this.hlsPlayer) {
                 this.hlsPlayer.destroy();
                 this.hlsPlayer = null;
