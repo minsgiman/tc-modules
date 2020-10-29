@@ -4,7 +4,7 @@
         dimension4: dimension === 4, dimension5: dimension === 5, dimension6: dimension === 6
     }">
         <div :id="'remote_stream_' + cameraId" style="height:100%;" class="player_cam remoteStreams">
-            <div :id="'remoteVideosContainer_' + cameraId" style="width:100%;height:100%;"></div>
+            <div :id="'remoteVideosContainer_' + cameraId" v-show="cameraErrorStatus === 'status_normal'" style="width:100%;height:100%;"></div>
         </div>
         <div class="label_wrap">
             <span class="cam_name_label">{{cameraConfig ? cameraConfig.labelName : ''}}</span>
