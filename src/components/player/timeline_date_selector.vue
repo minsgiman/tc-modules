@@ -8,7 +8,7 @@
                 </button>
             </li>
         </ul>
-        <ul v-show="!isExpiredCloud && serviceDay == 60 && cameraData.recorderType != 'nvr'">
+        <ul v-show="!isExpiredCloud && (serviceDay == 60 || serviceDay == 90 || serviceDay == 180) && cameraData.recorderType != 'nvr'">
             <li v-show="fristIndex != 0">
                 <button @click="moveServiceDate('prev')" ><b> < </b></button>
             </li>
@@ -18,7 +18,7 @@
                     <span>{{item.day}}</span>
                 </button>
             </li>
-            <li v-show="lastIndex < 60">
+            <li v-show="(serviceDay === 60 && lastIndex < 60) || (serviceDay === 90 && lastIndex < 90) || (serviceDay === 180 && lastIndex < 180)">
                 <button @click="moveServiceDate('next')" ><b> > </b></button>
             </li>
         </ul>
@@ -39,7 +39,7 @@
     </div>
 </template>
 <script lang="ts">
-    import { Component, Vue } from 'vue-property-decorator';
+    import { Component, Vue, Watch } from 'vue-property-decorator';
     import store from '../../service/player/store';
 
     const $: any = (window as any).$ as any;
@@ -48,6 +48,20 @@
 
     @Component
     export default class TimelineDateSelector extends Vue {
+        @Watch('serviceDay')
+        onServiceDayChanged(value: number, oldValue: number) {
+            if (value === 60) {
+                this.fristIndex = 30;
+                this.lastIndex = 60;
+            } else if (value === 90) {
+                this.fristIndex = 60;
+                this.lastIndex = 90;
+            } else if (value === 180) {
+                this.fristIndex = 150;
+                this.lastIndex = 180;
+            }
+        }
+
         get cameraData() {
             return store.state.cameraData;
         }
