@@ -2,7 +2,7 @@
 </template>
 
 <script lang="ts">
-    import { Component, Prop, Vue } from 'vue-property-decorator';
+    import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
     import { i18n } from '../../i18n/player/i18n';
     import playContainer from './player_container/player_container.vue';
     import timeline from './timeline.vue';
@@ -60,6 +60,11 @@
         @Prop() playTime!: any;
         @Prop() elementIdMap!: any;
 
+        @Watch('hlsZoomLevel')
+        onHlsZoomLevelChanged(value: string, oldValue: string) {
+            this.playEventCb('zoomLevelChanged', value);
+        }
+
         get cameraData() {
             return store.state.cameraData;
         }
@@ -107,6 +112,9 @@
         }
         get category() {
             return store.state.category;
+        }
+        get hlsZoomLevel() {
+            return store.state.hlsZoomLevel;
         }
 
         timeline: any = null;
