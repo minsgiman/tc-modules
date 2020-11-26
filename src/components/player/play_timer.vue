@@ -35,12 +35,13 @@
             store.dispatch('CURRENT_TIME_CHANGE', new Date(time.valueOf()));
             clearInterval(this.timer);
             this.timer = setInterval(() => {
-
                 if(this.isPlaying == false){
                     return;
                 }
-
                 if(this.playerCheck == false){
+                    return;
+                }
+                if (timeline.cvrTimeoutId || timeline.checkingSecure) {
                     return;
                 }
 
@@ -142,6 +143,9 @@
             timeline.setData('forceDomain', true);
             clearInterval(this.timer);
             this.timer = setInterval(() => {
+                if (timeline.cvrTimeoutId || timeline.checkingSecure) {
+                    return;
+                }
                 const currentTime = new Date();
                 switch(timeline.getData('timeRange')){
                     case 10:

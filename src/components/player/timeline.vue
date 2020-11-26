@@ -305,9 +305,14 @@
             }
 
             this.playEventCallback('clickedCVRArea', time);
+            if (this.cvrTimeoutId) {
+                clearTimeout(this.cvrTimeoutId);
+                this.cvrTimeoutId = null;
+            }
             this.cvrTimeoutId = setTimeout(() => {
+                this.cvrTimeoutId = null;
                 this.$emit('event', {event: 'cvrPlayRequest', data: {time, status}});
-            }, 400);
+            }, 100);
         }
 
         cvrDrawCheck(time: any) {
