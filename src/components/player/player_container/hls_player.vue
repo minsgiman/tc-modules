@@ -55,6 +55,7 @@
         hlsStatus: string = '';
         retryTimeout: any = null;
         retryCount: number = 0;
+        seekCheckInterval: any = null;
         hlsStatusEnum: any = {
             EVENT_STREAM_CONNECTING : 'event_stream_connecting',
             EVENT_STREAM_CONNECTED : 'event_stream_connected',
@@ -152,6 +153,21 @@
                     }
                 }, 200);
             });
+
+            if (this.isLive) {
+                  if (this.seekCheckInterval) {
+                    clearInterval(this.seekCheckInterval);
+                  }
+                  this.seekCheckInterval = setInterval(() => {
+                    //console.log(`duration: ${this.videoObj.duration}, currentTime: ${this.videoObj.currentTime}`);
+                    if (this.videoObj && this.videoObj.duration) {
+                      if (this.videoObj.duration - this.videoObj.currentTime >= 8) {
+                        this.videoObj.currentTime = this.videoObj.duration - 4;
+                        //console.log(`labelName: ${this.cameraData ? this.cameraData.labelName : ''}, currentTime change: ${this.videoObj.currentTime}`);
+                      }
+                    }
+                  }, 1000);
+            }
 
             this.hlsPlayer.on(Hls.Events.ERROR, (event: any, data: any) => {
                 const errorType = data.type,
@@ -292,6 +308,9 @@
         stop() {
             this.hlsStatus = this.hlsStatusEnum.EVENT_STREAM_STOPPED;
             this.showLoading = false;
+            if (this.seekCheckInterval) {
+                clearInterval(this.seekCheckInterval);
+            }
             if (this.hlsPlayer) {
                 this.hlsPlayer.off(Hls.Events.LEVEL_LOADED);
                 this.hlsPlayer.off(Hls.Events.MANIFEST_PARSED);
